@@ -70,7 +70,7 @@ Here are the next steps to further enhance the framework:
 ### 7. User Interfaces
 
 - [x] CLI interface
-- [ ] Web dashboard
+- [x] Web dashboard
 - [x] API server
 - [x] WebSocket support for real-time communication
 
