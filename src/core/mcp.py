@@ -1,0 +1,348 @@
+"""
+Modern Control Protocol (MCP) implementation.
+
+This module provides functionality for communicating with LLMs using the
+Modern Control Protocol (MCP) as defined at https://modelcontextprotocol.io/.
+"""
+
+import json
+from typing import Dict, List, Optional, Any, Union, Callable
+
+from loguru import logger
+
+from src.llm.base import BaseLLM
+
+
+class MCPMessage:
+    """
+    Represents a message in the Modern Control Protocol.
+    """
+
+    def __init__(
+        self,
+        role: str,
+        content: Union[str, Dict[str, Any]],
+        name: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None
+    ):
+        """
+        Initialize an MCP message.
+
+        Args:
+            role: The role of the message sender (e.g., "user", "assistant",
+                "system", "tool").
+            content: The content of the message. Can be a string or a
+                structured object.
+            name: Optional name for the sender (used for tools).
+            context: Optional context information for the message.
+        """
+        self.role = role
+        self.content = content
+        self.name = name
+        self.context = context or {}
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert the message to a dictionary representation.
+
+        Returns:
+            A dictionary representation of the message.
+        """
+        message = {
+            "role": self.role,
+            "content": self.content
+        }
+
+        if self.name:
+            message["name"] = self.name
+
+        if self.context:
+            message["context"] = self.context
+
+        return message
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "MCPMessage":
+        """
+        Create a message from a dictionary representation.
+
+        Args:
+            data: The dictionary representation of the message.
+
+        Returns:
+            An MCPMessage instance.
+        """
+        return cls(
+            role=data["role"],
+            content=data["content"],
+            name=data.get("name"),
+            context=data.get("context", {})
+        )
+
+
+class MCPContext:
+    """
+    Represents the context for an MCP interaction.
+    """
+
+    def __init__(
+        self,
+        messages: Optional[List[MCPMessage]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        tools: Optional[List[Dict[str, Any]]] = None
+    ):
+        """
+        Initialize an MCP context.
+
+        Args:
+            messages: The conversation history.
+            metadata: Additional metadata for the context.
+            tools: Available tools for the LLM to use.
+        """
+        self.messages = messages or []
+        self.metadata = metadata or {}
+        self.tools = tools or []
+
+    def add_message(self, message: MCPMessage) -> None:
+        """
+        Add a message to the context.
+
+        Args:
+            message: The message to add.
+        """
+        self.messages.append(message)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert the context to a dictionary representation.
+
+        Returns:
+            A dictionary representation of the context.
+        """
+        return {
+            "messages": [m.to_dict() for m in self.messages],
+            "metadata": self.metadata,
+            "tools": self.tools
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "MCPContext":
+        """
+        Create a context from a dictionary representation.
+
+        Args:
+            data: The dictionary representation of the context.
+
+        Returns:
+            An MCPContext instance.
+        """
+        messages = [
+            MCPMessage.from_dict(m) for m in data.get("messages", [])
+        ]
+
+        return cls(
+            messages=messages,
+            metadata=data.get("metadata", {}),
+            tools=data.get("tools", [])
+        )
+
+
+class MCPHandler:
+    """
+    Handles communication with LLMs using the Modern Control Protocol.
+    """
+
+    def __init__(
+        self,
+        llm: BaseLLM,
+        tool_handlers: Optional[Dict[str, Callable]] = None
+    ):
+        """
+        Initialize an MCP handler.
+
+        Args:
+            llm: The LLM to use for generating responses.
+            tool_handlers: A dictionary mapping tool names to handler
+                functions.
+        """
+        self.llm = llm
+        self.tool_handlers = tool_handlers or {}
+        self.context = MCPContext()
+
+    async def process_message(
+        self,
+        message: MCPMessage,
+        context: Optional[MCPContext] = None
+    ) -> MCPMessage:
+        """
+        Process a message and generate a response.
+
+        Args:
+            message: The message to process.
+            context: Optional context to use. If None, the handler's context
+                will be used.
+
+        Returns:
+            The response message.
+        """
+        # Use provided context or the handler's context
+        ctx = context or self.context
+
+        # Add the message to the context
+        ctx.add_message(message)
+
+        # Convert context to a format suitable for the LLM
+        llm_messages = self._context_to_llm_messages(ctx)
+
+        # Generate a response
+        response_content = await self.llm.chat(llm_messages)
+
+        # Create a response message
+        response = MCPMessage(
+            role="assistant",
+            content=response_content
+        )
+
+        # Add the response to the context
+        ctx.add_message(response)
+
+        return response
+
+    async def process_tool_call(
+        self,
+        tool_name: str,
+        tool_input: Dict[str, Any],
+        context: Optional[MCPContext] = None
+    ) -> MCPMessage:
+        """
+        Process a tool call and generate a response.
+
+        Args:
+            tool_name: The name of the tool to call.
+            tool_input: The input to the tool.
+            context: Optional context to use. If None, the handler's context
+                will be used.
+
+        Returns:
+            The response message.
+        """
+        # Use provided context or the handler's context
+        ctx = context or self.context
+
+        # Create a tool call message
+        tool_call_message = MCPMessage(
+            role="user",
+            content="",
+            name=tool_name,
+            context={"input": tool_input}
+        )
+
+        # Add the tool call message to the context
+        ctx.add_message(tool_call_message)
+
+        # Check if we have a handler for this tool
+        if tool_name not in self.tool_handlers:
+            error_message = f"No handler for tool: {tool_name}"
+            logger.error(error_message)
+
+            # Create an error response
+            response = MCPMessage(
+                role="tool",
+                content={"error": error_message},
+                name=tool_name
+            )
+
+            # Add the response to the context
+            ctx.add_message(response)
+
+            return response
+
+        try:
+            # Call the tool handler
+            handler = self.tool_handlers[tool_name]
+            result = await handler(tool_input)
+
+            # Create a response message
+            response = MCPMessage(
+                role="tool",
+                content=result,
+                name=tool_name
+            )
+
+            # Add the response to the context
+            ctx.add_message(response)
+
+            return response
+        except Exception as e:
+            error_message = f"Error calling tool {tool_name}: {str(e)}"
+            logger.error(error_message)
+
+            # Create an error response
+            response = MCPMessage(
+                role="tool",
+                content={"error": error_message},
+                name=tool_name
+            )
+
+            # Add the response to the context
+            ctx.add_message(response)
+
+            return response
+
+    def _context_to_llm_messages(
+        self, context: MCPContext
+    ) -> List[Dict[str, str]]:
+        """
+        Convert an MCP context to a format suitable for the LLM.
+
+        Args:
+            context: The MCP context to convert.
+
+        Returns:
+            A list of messages in the format expected by the LLM.
+        """
+        llm_messages = []
+
+        for message in context.messages:
+            llm_message = {
+                "role": message.role,
+                "content": (
+                    json.dumps(message.content)
+                    if isinstance(message.content, dict)
+                    else message.content
+                )
+            }
+
+            if message.name:
+                llm_message["name"] = message.name
+
+            llm_messages.append(llm_message)
+
+        return llm_messages
+
+    def register_tool_handler(
+        self, tool_name: str, handler: Callable
+    ) -> None:
+        """
+        Register a handler for a tool.
+
+        Args:
+            tool_name: The name of the tool.
+            handler: The handler function for the tool.
+        """
+        self.tool_handlers[tool_name] = handler
+
+    def clear_context(self) -> None:
+        """
+        Clear the context.
+        """
+        self.context = MCPContext()
+
+    def set_context(self, context: MCPContext) -> None:
+        """
+        Set the context.
+
+        Args:
+            context: The context to set.
+        """
+        self.context = context
