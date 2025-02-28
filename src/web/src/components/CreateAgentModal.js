@@ -25,7 +25,7 @@ function CreateAgentModal({ isOpen, onClose, onAgentCreated }) {
   const [formData, setFormData] = useState({
     agent_id: '',
     llm_model: 'gpt-4o',
-    system_message: '',
+    system_message: 'You are a friendly assistant',
     enable_web_search: true,
     enable_calculator: true,
     use_long_term_memory: false,
@@ -59,7 +59,7 @@ function CreateAgentModal({ isOpen, onClose, onAgentCreated }) {
       setFormData({
         agent_id: '',
         llm_model: 'gpt-4o',
-        system_message: '',
+        system_message: 'You are a friendly assistant',
         enable_web_search: true,
         enable_calculator: true,
         use_long_term_memory: false,
@@ -133,7 +133,7 @@ function CreateAgentModal({ isOpen, onClose, onAgentCreated }) {
                   rows={4}
                 />
                 <FormHelperText>
-                  This message will guide the agent's behavior. Leave empty to use the default.
+                  This message will guide the agent's behavior. Default is "You are a friendly assistant".
                 </FormHelperText>
               </FormControl>
 
