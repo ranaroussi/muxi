@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Flex,
@@ -14,12 +14,19 @@ import {
   Divider,
   Spinner,
   Badge,
-  useToast
+  useToast,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  Collapse,
+  Card,
+  CardHeader,
+  CardBody,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiSend, FiInfo, FiRefreshCw } from 'react-icons/fi';
-import { fetchAgents } from '../services/api';
-import useWebSocket from '../hooks/useWebSocket';
+import { FiSend, FiInfo, FiRefreshCw, FiAlertCircle, FiZap, FiAlertTriangle, FiList, FiCheckCircle } from 'react-icons/fi';
+import { fetchAgents, createAgent } from '../services/api';
 
 function Chat() {
   const { agentId } = useParams();
@@ -31,88 +38,237 @@ function Chat() {
   const [conversation, setConversation] = useState([]);
   const messagesEndRef = useRef(null);
   const toast = useToast();
+  const [error, setError] = useState(null);
+  const [agentError, setAgentError] = useState(null);
+  const [showTroubleshooting, setShowTroubleshooting] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [wsEvents, setWsEvents] = useState([]);
+  const [agentIsThinking, setAgentIsThinking] = useState(false);
 
-  // WebSocket connection
-  const {
-    isConnected,
-    isConnecting,
-    agentIsThinking,
-    sendMessage,
-    subscribeToAgent
-  } = useWebSocket({
-    agentId: selectedAgentId,
-    onMessage: handleWebSocketMessage,
-  });
+  // Simple WebSocket implementation
+  const [isConnected, setIsConnected] = useState(false);
+  const [wsError, setWsError] = useState(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [debugEvents, setDebugEvents] = useState([]);
+  const [showDebug, setShowDebug] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
-  // Handle incoming WebSocket messages
-  function handleWebSocketMessage(data) {
-    if (data.type === 'response') {
-      // Add agent message to conversation
-      setConversation(prev => [
-        ...prev,
-        {
-          role: 'agent',
-          content: data.message,
-          toolsUsed: data.tools_used || []
-        }
-      ]);
-    } else if (data.type === 'error') {
-      // Add error message to conversation
-      setConversation(prev => [
-        ...prev,
-        {
-          role: 'error',
-          content: data.message
-        }
-      ]);
+  // WebSocket ref
+  const socketRef = useRef(null);
 
-      // Show toast notification
-      toast({
-        title: 'Error',
-        description: data.message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  }
-
-  // Fetch agents on mount
-  useEffect(() => {
-    loadAgents();
+  // Function to add a debug event
+  const addDebugEvent = useCallback((event) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugEvents(prev => [...prev, { time: timestamp, event }]);
+    console.log(`[${timestamp}] ${event}`);
   }, []);
 
-  // Scroll to bottom of chat when conversation updates
-  useEffect(() => {
-    scrollToBottom();
-  }, [conversation]);
+  // Handle socket onmessage
+  const onSocketMessage = useCallback((event) => {
+    try {
+      const data = JSON.parse(event.data);
+      console.log('WebSocket message received:', data);
 
-  // Change agent when selectedAgentId changes
-  useEffect(() => {
-    if (selectedAgentId && isConnected) {
-      subscribeToAgent(selectedAgentId);
-      // Update URL
-      navigate(`/chat/${selectedAgentId}`, { replace: true });
-      // Clear conversation
-      setConversation([]);
+      if (data.type === 'connected') {
+        // Server sent a welcome message
+        console.log('Connected with WebSocket ID:', data.connection_id);
+      } else if (data.type === 'subscribed') {
+        // Successfully subscribed to an agent
+        setIsSubscribed(true);
+        console.log('Successfully subscribed to agent:', data.agent_id);
+        setAgentError(null); // Clear any agent errors
+      } else if (data.type === 'error') {
+        // Handle error message
+        console.error('Error from server:', data.error || data.message);
+        setAgentError(data.error || data.message);
+
+        // If this is a subscription error, make sure we're marked as not subscribed
+        if (data.message && data.message.includes('subscribing')) {
+          setIsSubscribed(false);
+        }
+
+        setAgentIsThinking(false);
+      } else if (data.type === 'response') {
+        // Handle agent response
+        console.log('Received agent response:', data);
+        const newMessage = {
+          id: data.id || `msg-${Date.now()}`,
+          content: data.message,
+          role: 'assistant',
+          timestamp: new Date().toISOString(),
+          agentId: data.agent_id,
+          metadata: data.metadata || {}
+        };
+
+        setConversation(prev => [...prev, newMessage]);
+        setAgentIsThinking(false);
+      } else if (data.type === 'agent_thinking' || data.type === 'thinking') {
+        // Agent is thinking
+        setAgentIsThinking(true);
+        console.log('Agent is thinking...');
+      }
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
     }
-  }, [selectedAgentId, isConnected, subscribeToAgent, navigate]);
+  }, []);
+
+  // Connect to WebSocket
+  const connectWs = useCallback(() => {
+    try {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const port = 5050; // API server port
+      const wsUrl = `${protocol}//localhost:${port}/ws`;
+
+      console.log(`Connecting to WebSocket at ${wsUrl}`);
+
+      // Close existing connection if any
+      if (socketRef.current && socketRef.current.readyState !== WebSocket.CLOSED) {
+        console.log('Closing existing WebSocket connection');
+        socketRef.current.close();
+      }
+
+      const socket = new WebSocket(wsUrl);
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        console.log('WebSocket connection established');
+        setIsConnected(true);
+        setWsError(null);
+      };
+
+      socket.onmessage = onSocketMessage;
+
+      socket.onclose = (event) => {
+        console.log(`WebSocket connection closed: Code=${event.code}, Reason=${event.reason || 'None'}`);
+        setIsConnected(false);
+        setIsSubscribed(false);
+      };
+
+      socket.onerror = (error) => {
+        console.error('WebSocket error occurred', error);
+        setWsError('Connection error occurred');
+      };
+
+      return true;
+    } catch (error) {
+      console.error('Error creating WebSocket:', error);
+      setWsError(`Failed to connect: ${error.message}`);
+      return false;
+    }
+  }, [onSocketMessage]);
+
+  // Subscribe to an agent
+  const subscribeToAgent = useCallback((agentId) => {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      console.log('Cannot subscribe: WebSocket not ready');
+      return false;
+    }
+
+    if (!agentId) {
+      console.log('Cannot subscribe: No agent ID provided');
+      return false;
+    }
+
+    console.log(`Subscribing to agent: ${agentId}`);
+
+    try {
+      const subscribeMessage = {
+        type: 'subscribe',
+        agent_id: agentId
+      };
+
+      console.log('Sending subscription message:', subscribeMessage);
+      socketRef.current.send(JSON.stringify(subscribeMessage));
+
+      // Don't set isSubscribed here, wait for the confirmation from server
+      return true;
+    } catch (error) {
+      console.error('Error subscribing to agent:', error);
+      return false;
+    }
+  }, []);
+
+  // Send a chat message
+  const sendChatMessage = useCallback((message, agentId) => {
+    console.log('Attempting to send message:', { message, agentId });
+
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      console.log('Cannot send: WebSocket not open');
+      return false;
+    }
+
+    if (!isSubscribed) {
+      console.log('Cannot send: Not subscribed to agent');
+      return false;
+    }
+
+    try {
+      const messageData = {
+        type: 'chat',
+        message: message,
+        agent_id: agentId
+      };
+
+      console.log('Sending message:', messageData);
+      socketRef.current.send(JSON.stringify(messageData));
+      return true;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      return false;
+    }
+  }, [isSubscribed]);
+
+  // Handle manual reconnection
+  const handleManualReconnect = useCallback(() => {
+    setIsReconnecting(true);
+
+    if (socketRef.current) {
+      socketRef.current.close();
+    }
+
+    setTimeout(() => {
+      connectWs();
+      setIsReconnecting(false);
+    }, 1000);
+  }, [connectWs]);
+
+  // Connect on component mount
+  useEffect(() => {
+    connectWs();
+
+    // Cleanup on unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
+      }
+    };
+  }, [connectWs]);
+
+  // Subscribe when agent changes and connection is established
+  useEffect(() => {
+    if (isConnected && selectedAgentId) {
+      subscribeToAgent(selectedAgentId);
+    }
+  }, [isConnected, selectedAgentId, subscribeToAgent]);
 
   // Load agents from API
-  const loadAgents = async () => {
+  const loadAgents = useCallback(async () => {
     setIsLoadingAgents(true);
     try {
       const data = await fetchAgents();
       const agentsList = data.agents || [];
       setAgents(agentsList);
 
-      // If no agent is selected yet, select the default agent or the first one
+      // If no agent is selected yet, try to select test_agent or fall back to default agent or first one
       if (!selectedAgentId) {
+        // Try to find test_agent first
+        const testAgent = agentsList.find(a => a.agent_id === "test_agent");
         const defaultAgent = agentsList.find(a => a.is_default);
         const firstAgent = agentsList[0];
-        const agentToSelect = defaultAgent?.agent_id || firstAgent?.agent_id;
+        const agentToSelect = testAgent?.agent_id || defaultAgent?.agent_id || firstAgent?.agent_id;
 
         if (agentToSelect) {
+          console.log(`Selected agent: ${agentToSelect}`);
           setSelectedAgentId(agentToSelect);
           navigate(`/chat/${agentToSelect}`, { replace: true });
         }
@@ -128,38 +284,107 @@ function Chat() {
     } finally {
       setIsLoadingAgents(false);
     }
-  };
+  }, [navigate, selectedAgentId, toast]);
 
-  // Scroll to bottom of chat
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // Create a new agent if one doesn't exist
+  const handleCreateAgent = useCallback(async () => {
+    if (!selectedAgentId) return;
 
-  // Handle sending a message
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
-    if (!selectedAgentId) {
+    try {
+      const response = await createAgent({
+        agent_id: selectedAgentId,
+        system_message: "You are a helpful AI assistant."
+      });
+
       toast({
-        title: 'No agent selected',
-        description: 'Please select an agent to chat with',
-        status: 'warning',
+        title: 'Agent created',
+        description: `Agent "${selectedAgentId}" has been created.`,
+        status: 'success',
         duration: 3000,
         isClosable: true,
+      });
+
+      // Refresh the agents list
+      await loadAgents();
+
+      // Reconnect to WebSocket and subscribe to the new agent
+      if (isConnected) {
+        subscribeToAgent(selectedAgentId);
+      } else {
+        connectWs();
+      }
+    } catch (error) {
+      toast({
+        title: 'Error creating agent',
+        description: String(error),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [selectedAgentId, toast, loadAgents, connectWs, isConnected, subscribeToAgent]);
+
+  // Handle sending a chat message
+  const handleSendMessage = useCallback(() => {
+    console.log('handleSendMessage called');
+
+    if (!inputMessage.trim() || !selectedAgentId || !isConnected || !isSubscribed) {
+      console.log('Message send prevented - conditions not met:', {
+        hasMessage: !!inputMessage.trim(),
+        hasAgentId: !!selectedAgentId,
+        isConnected,
+        isSubscribed
       });
       return;
     }
 
-    // Add user message to conversation
-    setConversation(prev => [
-      ...prev,
-      { role: 'user', content: inputMessage }
-    ]);
-
-    // Send message via WebSocket
-    sendMessage(inputMessage);
-
-    // Clear input
+    const message = inputMessage.trim();
     setInputMessage('');
+
+    // Add message to conversation immediately
+    const userMessage = {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content: message,
+      timestamp: new Date().toISOString(),
+      agentId: selectedAgentId
+    };
+
+    console.log('Adding user message to conversation:', userMessage);
+    setConversation(prev => [...prev, userMessage]);
+
+    // Send the message
+    console.log('About to send message via WebSocket');
+    const success = sendChatMessage(message, selectedAgentId);
+
+    console.log('Message send result:', success);
+    if (!success) {
+      toast({
+        title: "Failed to send message",
+        description: "Please check your connection and try again",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } else {
+      // Message sent successfully, show the agent is thinking
+      setAgentIsThinking(true);
+    }
+  }, [inputMessage, selectedAgentId, isConnected, isSubscribed, sendChatMessage, toast]);
+
+  // Fetch agents on initial mount
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
+
+  // Scroll to bottom of chat
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversation]);
+
+  // Scroll to bottom of chat
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Handle input keypress (Enter to send)
@@ -175,6 +400,53 @@ function Chat() {
     setSelectedAgentId(e.target.value);
   };
 
+  // Update the connection status display
+  const renderConnectionStatus = () => {
+    if (isConnected) {
+      return (
+        <div className="text-green-600 text-sm flex items-center space-x-1">
+          <FiCheckCircle />
+          <span>Connected</span>
+        </div>
+      );
+    }
+
+    if (wsError) {
+      return (
+        <div className="bg-red-50 p-4 rounded-md border border-red-200 mb-4">
+          <div className="text-red-700 text-sm font-medium flex items-center">
+            <FiAlertCircle className="mr-2" />
+            <span>Connection Error</span>
+          </div>
+          <p className="text-sm text-red-600 mt-1">{wsError}</p>
+          <button
+            onClick={handleManualReconnect}
+            disabled={isReconnecting}
+            className="mt-2 px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 text-sm rounded-md transition-colors"
+          >
+            {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200 mb-4">
+        <div className="text-amber-700 text-sm font-medium flex items-center">
+          <FiAlertTriangle className="mr-2" />
+          <span>Connecting...</span>
+        </div>
+        <button
+          onClick={handleManualReconnect}
+          disabled={isReconnecting}
+          className="mt-2 px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 text-sm rounded-md transition-colors"
+        >
+          {isReconnecting ? 'Reconnecting...' : 'Try Reconnecting'}
+        </button>
+      </div>
+    );
+  };
+
   return (
     <Box h="calc(100vh - 140px)">
       <Flex direction="column" h="100%">
@@ -188,6 +460,7 @@ function Chat() {
                 variant="ghost"
                 icon={<FiRefreshCw />}
                 onClick={loadAgents}
+                aria-label="Refresh agents"
               />
               <IconButton
                 size="sm"
@@ -195,6 +468,7 @@ function Chat() {
                 icon={<FiInfo />}
                 as="a"
                 href={selectedAgentId ? `/agents/${selectedAgentId}` : '/'}
+                aria-label="Agent info"
               />
             </HStack>
           </HStack>
@@ -210,11 +484,123 @@ function Chat() {
               </option>
             ))}
           </Select>
-          {!isConnected && (
-            <Text color="red.500" fontSize="sm" mt={1}>
-              Not connected to WebSocket. {isConnecting ? 'Connecting...' : 'Reconnecting...'}
-            </Text>
+
+          {/* Connection status */}
+          {renderConnectionStatus()}
+
+          {/* Agent error display */}
+          {agentError && (
+            <Alert status="error" mb={4}>
+              <AlertIcon />
+              <Box flex="1">
+                <AlertTitle>Agent Error</AlertTitle>
+                <AlertDescription display="block">
+                  {agentError}
+                </AlertDescription>
+                {agentError.includes('not exists') && (
+                  <Button
+                    mt={2}
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={handleCreateAgent}
+                  >
+                    Create Agent "{selectedAgentId}"
+                  </Button>
+                )}
+              </Box>
+            </Alert>
           )}
+
+          {/* Empty state with create button */}
+          {agents.length === 0 && !isLoadingAgents && (
+            <Alert status="info" mb={4}>
+              <AlertIcon />
+              <Box flex="1">
+                <AlertTitle>No Agents Found</AlertTitle>
+                <AlertDescription display="block">
+                  Create an agent to start chatting
+                </AlertDescription>
+                <Button
+                  mt={2}
+                  colorScheme="blue"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedAgentId("agent");
+                    handleCreateAgent();
+                  }}
+                >
+                  Create Default Agent
+                </Button>
+              </Box>
+            </Alert>
+          )}
+
+          {/* Connection Debug Panel */}
+          <Box mb={4}>
+            <Button
+              size="sm"
+              onClick={() => setShowDebug(!showDebug)}
+              leftIcon={showDebug ? <FiList /> : <FiAlertTriangle />}
+              colorScheme={showDebug ? "blue" : "gray"}
+            >
+              {showDebug ? "Hide Debug Info" : "Show Debug Info"}
+            </Button>
+
+            <Collapse in={showDebug}>
+              <Card mt={2}>
+                <CardHeader pb={2}>
+                  <Heading size="sm">WebSocket Debug</Heading>
+                  <HStack spacing={2} mt={1}>
+                    <Badge colorScheme={isConnected ? "green" : "red"}>
+                      {isConnected ? "Connected" : "Disconnected"}
+                    </Badge>
+                    <Badge colorScheme={isSubscribed ? "green" : "yellow"}>
+                      {isSubscribed ? "Subscribed" : "Not Subscribed"}
+                    </Badge>
+                  </HStack>
+                </CardHeader>
+                <CardBody pt={2}>
+                  <VStack align="stretch" spacing={1}>
+                    <HStack>
+                      <Button size="xs" onClick={connectWs} leftIcon={<FiRefreshCw />}>
+                        Connect
+                      </Button>
+                      <Button
+                        size="xs"
+                        onClick={() => {
+                          if (socketRef.current) socketRef.current.close();
+                        }}
+                        leftIcon={<FiZap />}
+                        isDisabled={!isConnected}
+                      >
+                        Disconnect
+                      </Button>
+                    </HStack>
+
+                    <Divider my={2} />
+
+                    <Text fontSize="xs" fontWeight="bold">Connection Details:</Text>
+                    <Text fontSize="xs" color="blue.500">WebSocket URL: ws://localhost:5050/ws</Text>
+                    {wsError && <Text fontSize="xs" color="red.500">Error: {wsError}</Text>}
+
+                    <Divider my={2} />
+
+                    <Text fontSize="xs" fontWeight="bold">Event Log:</Text>
+                    <Box maxH="200px" overflowY="auto">
+                      {debugEvents.map((event, idx) => (
+                        <Text key={idx} fontSize="xs" color="gray.600">
+                          [{event.time}] {event.event}
+                        </Text>
+                      ))}
+                      {debugEvents.length === 0 && (
+                        <Text fontSize="xs" color="gray.400">No events logged</Text>
+                      )}
+                    </Box>
+                  </VStack>
+                </CardBody>
+              </Card>
+            </Collapse>
+          </Box>
         </Box>
 
         <Divider mb={4} />
@@ -243,7 +629,10 @@ function Chat() {
           ) : (
             <VStack align="stretch" spacing={4}>
               {conversation.map((msg, index) => (
-                <MessageBubble key={index} message={msg} />
+                <MessageBubble
+                  key={msg.id || index}
+                  message={msg}
+                />
               ))}
               {agentIsThinking && (
                 <Flex align="center">
@@ -266,16 +655,22 @@ function Chat() {
         {/* Message input */}
         <HStack>
           <Input
-            placeholder="Type your message here..."
+            placeholder={
+              !isConnected
+                ? "Waiting for connection..."
+                : agentError && agentError.includes('not found')
+                  ? "Agent not found. Create it first."
+                  : "Type your message here..."
+            }
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            disabled={!isConnected || !selectedAgentId}
+            disabled={!isConnected || !selectedAgentId || (agentError && agentError.includes('not found'))}
           />
           <Button
             colorScheme="brand"
             onClick={handleSendMessage}
-            isDisabled={!isConnected || !selectedAgentId || !inputMessage.trim()}
+            isDisabled={!isConnected || !selectedAgentId || !inputMessage.trim() || (agentError && agentError.includes('not found'))}
             leftIcon={<FiSend />}
           >
             Send
@@ -288,7 +683,7 @@ function Chat() {
 
 // Message bubble component
 function MessageBubble({ message }) {
-  const { role, content, toolsUsed } = message;
+  const { role, content, tools = [] } = message;
 
   // Different styling based on message role
   const isUser = role === 'user';
@@ -301,7 +696,7 @@ function MessageBubble({ message }) {
           size="sm"
           bg={isUser ? 'gray.500' : isError ? 'red.500' : 'brand.500'}
           color="white"
-          name={isUser ? 'User' : isError ? 'Error' : 'AI'}
+          name={isUser ? 'You' : isError ? 'Error' : 'AI'}
         />
         <Text fontWeight="bold" fontSize="sm">
           {isUser ? 'You' : isError ? 'Error' : 'Agent'}
@@ -316,9 +711,9 @@ function MessageBubble({ message }) {
       >
         <Text whiteSpace="pre-wrap">{content}</Text>
 
-        {toolsUsed && toolsUsed.length > 0 && (
+        {tools && tools.length > 0 && (
           <Flex mt={2} wrap="wrap" gap={1}>
-            {toolsUsed.map((tool, idx) => (
+            {tools.map((tool, idx) => (
               <Badge key={idx} colorScheme="purple" fontSize="xs">
                 {tool}
               </Badge>

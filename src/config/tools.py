@@ -12,6 +12,19 @@ from pydantic import BaseModel, Field
 class ToolsConfig(BaseModel):
     """Tools configuration settings."""
 
+    # Tool enablement
+    enable_web_search: bool = Field(
+        default_factory=lambda: os.getenv(
+            "ENABLE_WEB_SEARCH", "true"
+        ).lower() == "true"
+    )
+
+    enable_calculator: bool = Field(
+        default_factory=lambda: os.getenv(
+            "ENABLE_CALCULATOR", "true"
+        ).lower() == "true"
+    )
+
     # Search tools
     serper_api_key: Optional[str] = Field(
         default_factory=lambda: os.getenv("SERPER_API_KEY")

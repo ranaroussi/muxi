@@ -43,6 +43,10 @@ class LLMConfig(BaseModel):
         )
     )
 
+    embedding_dimension: int = Field(
+        default_factory=lambda: int(os.getenv("EMBEDDING_DIMENSION", "1536"))
+    )
+
     provider_settings: Dict[str, Any] = Field(default_factory=dict)
 
 

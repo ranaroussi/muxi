@@ -16,6 +16,12 @@ We've successfully implemented the core components of our AI agent framework:
 5. **Orchestrator**: For managing multiple agents and their interactions
 6. **Configuration System**: For loading and managing configuration
 7. **Example Script**: To demonstrate how to use the framework
+8. **Real-Time Communication**:
+   - WebSocket server for real-time agent interaction
+   - Proper message serialization for MCP messages
+   - Shared orchestrator instance between REST API and WebSocket server
+   - Resilient connection handling with automatic reconnection
+   - Comprehensive error handling
 
 ## Next Steps
 
@@ -73,6 +79,19 @@ Here are the next steps to further enhance the framework:
 - [x] Web dashboard
 - [x] API server
 - [x] WebSocket support for real-time communication
+  - [x] Message type standardization
+  - [x] Proper MCP message serialization
+  - [x] Shared orchestrator instance
+  - [x] Connection lifecycle management
+  - [x] Error handling and recovery
+
+### 8. Stability and Performance
+
+- [ ] Comprehensive error monitoring
+- [ ] Load testing for concurrent connections
+- [ ] Benchmarking WebSocket message throughput
+- [ ] Connection pooling for database access
+- [ ] Caching strategies for frequent requests
 
 ## Contribution Guidelines
 

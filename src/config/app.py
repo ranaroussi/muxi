@@ -52,6 +52,13 @@ class AppConfig(BaseModel):
         default_factory=lambda: int(os.getenv("JWT_EXPIRATION", "86400"))
     )
 
+    system_message: str = Field(
+        default_factory=lambda: os.getenv(
+            "SYSTEM_MESSAGE",
+            "You are a helpful AI assistant. Use the available tools to assist the user with their tasks."
+        )
+    )
 
-# Create a global app config instance
+
+# Create a global instance
 app_config = AppConfig()

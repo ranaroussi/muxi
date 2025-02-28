@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .connected {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .disconnected {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        .connecting {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        #messageForm {
+            display: flex;
+        }
+        #messageInput {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+
+    <div id="status" class="disconnected">Disconnected</div>
+
+    <div>
+        <button id="connectBtn">Connect</button>
+        <button id="disconnectBtn" disabled>Disconnect</button>
+    </div>
+
+    <h2>Agent Subscription</h2>
+    <div>
+        <input type="text" id="agentId" placeholder="Agent ID" value="test_agent1">
+        <button id="subscribeBtn" disabled>Subscribe</button>
+    </div>
+
+    <h2>Send Message</h2>
+    <form id="messageForm">
+        <input type="text" id="messageInput" placeholder="Enter message" disabled>
+        <button type="submit" id="sendBtn" disabled>Send</button>
+    </form>
+
+    <h2>Messages</h2>
+    <div id="messages"></div>
+
+    <script>
+        // Elements
+        const statusEl = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const agentIdInput = document.getElementById('agentId');
+        const subscribeBtn = document.getElementById('subscribeBtn');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const messagesEl = document.getElementById('messages');
+
+        // Variables
+        let socket = null;
+        let subscribedAgent = null;
+
+        // Add a message to the messages div
+        function addMessage(message, type = 'info') {
+            const el = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            el.innerHTML = `<strong>[${timestamp}] [${type}]:</strong> ${message}`;
+            messagesEl.appendChild(el);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        // Update the status display
+        function updateStatus(status) {
+            statusEl.textContent = status;
+            statusEl.className = status.toLowerCase();
+        }
+
+        // Connect to WebSocket
+        function connect() {
+            try {
+                // Use the same WebSocket URL construction logic as the React app
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const port = 5050; // Hardcoded to 5050 for API server
+                const wsUrl = `${protocol}//localhost:${port}/ws`;
+
+                addMessage(`Connecting to ${wsUrl}...`);
+                updateStatus('Connecting');
+
+                socket = new WebSocket(wsUrl);
+
+                socket.onopen = (event) => {
+                    updateStatus('Connected');
+                    addMessage('WebSocket connection established');
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                    subscribeBtn.disabled = false;
+                };
+
+                socket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        addMessage(`Received: ${JSON.stringify(data)}`, 'received');
+
+                        if (data.type === 'subscribed') {
+                            subscribedAgent = data.agent_id;
+                            messageInput.disabled = false;
+                            sendBtn.disabled = false;
+                            addMessage(`Subscribed to agent: ${subscribedAgent}`, 'success');
+                        }
+                    } catch (error) {
+                        addMessage(`Error parsing message: ${error}`, 'error');
+                    }
+                };
+
+                socket.onclose = (event) => {
+                    updateStatus('Disconnected');
+                    addMessage(`WebSocket connection closed: Code=${event.code}, Reason=${event.reason || 'None'}`);
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    subscribeBtn.disabled = true;
+                    messageInput.disabled = true;
+                    sendBtn.disabled = true;
+                    subscribedAgent = null;
+                    socket = null;
+                };
+
+                socket.onerror = (error) => {
+                    addMessage(`WebSocket error: ${error}`, 'error');
+                };
+            } catch (error) {
+                addMessage(`Error creating WebSocket: ${error}`, 'error');
+            }
+        }
+
+        // Disconnect from WebSocket
+        function disconnect() {
+            if (socket) {
+                socket.close();
+                // The onclose handler will update the UI
+            }
+        }
+
+        // Subscribe to an agent
+        function subscribeToAgent() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                addMessage('Cannot subscribe: Not connected to WebSocket', 'error');
+                return;
+            }
+
+            const agentId = agentIdInput.value.trim();
+            if (!agentId) {
+                addMessage('Please enter an agent ID', 'error');
+                return;
+            }
+
+            addMessage(`Subscribing to agent: ${agentId}`);
+            socket.send(JSON.stringify({
+                type: 'subscribe',
+                agent_id: agentId
+            }));
+        }
+
+        // Send a message
+        function sendMessage(message) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                addMessage('Cannot send message: Not connected to WebSocket', 'error');
+                return;
+            }
+
+            if (!subscribedAgent) {
+                addMessage('Cannot send message: Not subscribed to any agent', 'error');
+                return;
+            }
+
+            addMessage(`Sending message: ${message}`, 'sent');
+            socket.send(JSON.stringify({
+                type: 'chat',
+                message: message,
+                agent_id: subscribedAgent
+            }));
+        }
+
+        // Event listeners
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        subscribeBtn.addEventListener('click', subscribeToAgent);
+
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                sendMessage(message);
+                messageInput.value = '';
+            }
+        });
+
+        // Initialize with disconnected state
+        updateStatus('Disconnected');
+    </script>
+</body>
+</html>

@@ -12,6 +12,12 @@ from pydantic import BaseModel, Field
 class MemoryConfig(BaseModel):
     """Memory configuration settings."""
 
+    use_long_term: bool = Field(
+        default_factory=lambda: os.getenv(
+            "USE_LONG_TERM_MEMORY", "true"
+        ).lower() == "true"
+    )
+
     vector_dimension: int = Field(
         default_factory=lambda: int(os.getenv("VECTOR_DIMENSION", "1536"))
     )

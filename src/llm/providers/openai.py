@@ -6,7 +6,7 @@ import json
 from typing import Dict, List, Optional, Any, Union, AsyncGenerator
 
 import openai
-from openai import AsyncOpenAILLM
+from openai import AsyncOpenAI
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -50,7 +50,7 @@ class OpenAILLM(BaseLLM):
                 "variable."
             )
 
-        self.client = AsyncOpenAILLM(api_key=self.api_key)
+        self.client = AsyncOpenAI(api_key=self.api_key)
         self.model = model
         self.embedding_model = embedding_model
         self.temperature = temperature

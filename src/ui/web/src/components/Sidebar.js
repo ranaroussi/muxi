@@ -16,7 +16,7 @@ import {
   FiMessageSquare,
   FiSettings,
   FiPlus,
-  FiBrain
+  FiUser
 } from 'react-icons/fi';
 import CreateAgentModal from './CreateAgentModal';
 import { fetchAgents } from '../services/api';
@@ -107,7 +107,7 @@ function Sidebar() {
               key={agent.agent_id}
               name={agent.agent_id}
               path={`/agents/${agent.agent_id}`}
-              icon={FiBrain}
+              icon={FiUser}
               isActive={location.pathname === `/agents/${agent.agent_id}`}
               secondaryText={agent.is_default ? 'Default' : null}
               colorScheme={agent.is_default ? 'green' : 'gray'}

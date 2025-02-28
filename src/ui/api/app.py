@@ -6,11 +6,14 @@ agents created with the AI Agent Framework.
 """
 
 import logging
+import os
 from typing import Dict, List, Optional, Any
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
@@ -18,8 +21,8 @@ from src.llm import OpenAILLM
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
 from src.core.orchestrator import Orchestrator
-from src.tools.web_search import WebSearchTool
-from src.tools.calculator import CalculatorTool
+from src.tools.web_search import WebSearch
+from src.tools.calculator import Calculator
 from src.config import config
 from src.ui.api.websocket import register_websocket_routes
 
@@ -43,7 +46,7 @@ class AgentRequest(BaseModel):
     """Model for creating an agent."""
     agent_id: str = Field(..., description="Unique identifier for the agent")
     llm_model: str = Field(
-        config.llm.model,
+        config.llm.default_model,
         description="LLM model to use (e.g., gpt-4o)"
     )
     system_message: Optional[str] = Field(
@@ -154,10 +157,47 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Define routes
+    # Set up static file serving for the React app
+    web_build_dir = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "../web/build"))
+
+    if os.path.exists(web_build_dir):
+        # Mount static files
+        app.mount(
+            "/static",
+            StaticFiles(directory=f"{web_build_dir}/static"),
+            name="static"
+        )
+
+        # Also mount any other static assets at the root level
+        if os.path.exists(os.path.join(web_build_dir, "assets")):
+            app.mount(
+                "/assets",
+                StaticFiles(directory=f"{web_build_dir}/assets"),
+                name="assets"
+            )
+    else:
+        logging.warning(
+            f"React build directory not found at {web_build_dir}. "
+            "Web UI will not be served. "
+            "Run 'npm run build' in the web directory."
+        )
+
+    # Define API routes
+    @app.get("/api", tags=["Health"])
+    async def api_root():
+        """Health check endpoint."""
+        return {"status": "healthy", "message": "AI Agent Framework API"}
+
+    # Original root route now at /api
     @app.get("/", tags=["Health"])
     async def root():
-        """Health check endpoint."""
+        """Redirect to the React app or API health check."""
+        # When we have a build directory, serve index.html
+        if os.path.exists(web_build_dir):
+            index_path = os.path.join(web_build_dir, "index.html")
+            return FileResponse(index_path)
+        # Otherwise return API status
         return {"status": "healthy", "message": "AI Agent Framework API"}
 
     @app.post(
@@ -168,47 +208,57 @@ def create_app() -> FastAPI:
     async def create_agent(request: AgentRequest):
         """Create a new agent."""
         try:
-            # Check if agent with this ID already exists
-            if orchestrator.get_agent(request.agent_id):
-                raise HTTPException(
-                    status_code=409,
-                    detail=(
-                        f"Agent with ID '{request.agent_id}' already exists"
+            # Check if agent with this ID already exists, but handle the case
+            # where get_agent throws an error
+            try:
+                if orchestrator.get_agent(request.agent_id):
+                    raise HTTPException(
+                        status_code=409,
+                        detail=(
+                            f"Agent with ID '{request.agent_id}' already "
+                            f"exists"
+                        )
                     )
-                )
+            except ValueError:
+                # Agent doesn't exist, which is what we want for creation
+                pass
 
             # Create LLM
             llm = OpenAILLM(
-                api_key=config.llm.api_key,
+                api_key=config.llm.openai_api_key,
                 model=request.llm_model,
                 temperature=config.llm.temperature,
             )
 
             # Create memory
             buffer_memory = BufferMemory(
-                dimension=config.llm.embedding_dimension,
                 max_size=config.memory.buffer_max_size,
             )
 
-            # Create long-term memory if enabled
+            # Try to create long-term memory, but don't fail if database isn't available
             long_term_memory = None
-            if request.use_long_term_memory:
-                long_term_memory = LongTermMemory(
-                    connection_string=config.database.connection_string,
-                    collection_name=f"{request.agent_id}_memory",
-                )
+            try:
+                if config.memory.use_long_term:
+                    long_term_memory = LongTermMemory(
+                        connection_string=config.database.connection_string,
+                        default_collection=f"{request.agent_id}_memory",
+                    )
+            except Exception as e:
+                logger.warning(f"Could not create long-term memory: {str(e)}")
+                logger.warning("Agent will be created without long-term memory")
 
             # Create tools
             tools = []
 
             if request.enable_calculator:
-                tools.append(CalculatorTool())
+                tools.append(Calculator())
 
             if request.enable_web_search:
-                tools.append(WebSearchTool())
+                tools.append(WebSearch())
 
             # Use provided system message or default
-            system_message = request.system_message or config.app.system_message
+            system_message = (request.system_message
+                              or config.app.system_message)
 
             # Create agent
             orchestrator.create_agent(
@@ -279,7 +329,7 @@ def create_app() -> FastAPI:
                 )
 
             # Delete agent
-            orchestrator.delete_agent(agent_id)
+            orchestrator.remove_agent(agent_id)
 
             return {
                 "status": "success",
@@ -326,7 +376,7 @@ def create_app() -> FastAPI:
             return MessageResponse(
                 message=response,
                 agent_id=agent_id,
-                tools_used=[]  # In the future, we can track which tools were used
+                tools_used=[]  # In future, we'll track which tools were used
             )
 
         except HTTPException:
@@ -407,11 +457,11 @@ def create_app() -> FastAPI:
             # Create a temporary agent to get the tool list
             if not orchestrator.agents:
                 llm = OpenAILLM(
-                    api_key=config.llm.api_key,
-                    model=config.llm.model,
+                    api_key=config.llm.openai_api_key,
+                    model=config.llm.default_model,
                 )
 
-                tools = [CalculatorTool(), WebSearchTool()]
+                tools = [Calculator(), WebSearch()]
 
                 orchestrator.create_agent(
                     agent_id="_temp",
@@ -419,12 +469,14 @@ def create_app() -> FastAPI:
                     tools=tools,
                 )
 
-                tool_list = orchestrator.get_agent("_temp").get_available_tools()
-                orchestrator.delete_agent("_temp")
+                tool_list = (orchestrator.get_agent("_temp")
+                             .get_available_tools())
+                orchestrator.remove_agent("_temp")
             else:
                 # Use existing agent to get tool list
                 agent_id = list(orchestrator.agents.keys())[0]
-                tool_list = orchestrator.get_agent(agent_id).get_available_tools()
+                tool_list = (orchestrator.get_agent(agent_id)
+                             .get_available_tools())
 
             return ToolListResponse(tools=tool_list)
 
@@ -437,6 +489,21 @@ def create_app() -> FastAPI:
 
     # Register WebSocket routes
     register_websocket_routes(app, orchestrator)
+
+    # Serve index.html for all non-API routes (SPA client-side routing)
+    # This must be the last route to catch all unhandled paths
+    if os.path.exists(web_build_dir):
+        @app.get("/{full_path:path}")
+        async def serve_react_app(request: Request, full_path: str):
+            # Skip API routes
+            if full_path.startswith("api/") or \
+               full_path.startswith("agents/") or \
+               full_path.startswith("tools/") or \
+               full_path == "ws":
+                raise HTTPException(status_code=404, detail="Not found")
+
+            index_path = os.path.join(web_build_dir, "index.html")
+            return FileResponse(index_path)
 
     return app
 
