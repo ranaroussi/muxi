@@ -29,7 +29,7 @@ A modern web dashboard for interacting with the AI Agent Framework.
 
 1. Navigate to the web dashboard directory:
    ```bash
-   cd src/ui/web
+   cd src/web
    ```
 
 2. Install dependencies:
@@ -39,7 +39,12 @@ A modern web dashboard for interacting with the AI Agent Framework.
 
 3. Create a `.env` file (optional):
    ```
-   REACT_APP_API_URL=http://localhost:8000
+   # Replace with your API server's address (IP or FQDN) including the port
+   REACT_APP_API_URL=http://localhost:5050
+
+   # Examples:
+   # REACT_APP_API_URL=http://192.168.1.100:5050
+   # REACT_APP_API_URL=http://api.yourdomain.com:8000
    ```
 
 4. Start the development server:
