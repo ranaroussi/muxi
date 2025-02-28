@@ -19,13 +19,13 @@ To start the API server, run:
 
 ```bash
 # Start the API server on the default port (5050)
-python -m src.ui.api.run_api
+python -m src.api.run
 
-# Start on a specific port
-python -m src.ui.api.run_api --port 8080
+# Start the API server on a different port
+python -m src.api.run --port 8080
 
-# Enable auto-reload for development
-python -m src.ui.api.run_api --reload
+# Start the API server with auto-reload for development
+python -m src.api.run --reload
 ```
 
 ### API Documentation
@@ -46,7 +46,7 @@ export API_AUTH_ENABLED=true
 export API_KEY=your_secret_api_key
 
 # Then start the server
-python -m src.ui.api.run_api
+python -m src.api.run
 ```
 
 When authentication is enabled, include the API key in the headers:
@@ -905,7 +905,7 @@ To view detailed logs from the API server:
 export LOG_LEVEL=DEBUG
 
 # Start the server
-python -m src.ui.api.run_api
+python -m src.api.run
 
 # View logs in real-time
 tail -f logs/api.log

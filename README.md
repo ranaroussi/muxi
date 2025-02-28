@@ -57,7 +57,20 @@ print(response)
 Start the API server:
 
 ```bash
-python -m src.ui.api.run_api
+# Default setup (binds to 0.0.0.0, allowing remote connections)
+python -m src.api.run
+
+# Specify custom host and port
+python -m src.api.run --host 0.0.0.0 --port 5050
+```
+
+> **Note:** The WebSocket server runs on the same port as the API server. When you change the API port, the WebSocket port changes too.
+
+When running the frontend on a different server, update the `REACT_APP_API_URL` in `src/web/.env`:
+
+```
+# Replace with your API server's IP or domain name
+REACT_APP_API_URL=http://your-server-ip:5050
 ```
 
 Create a new agent:
@@ -87,6 +100,7 @@ To use the WebSocket feature, run the server and connect using a WebSocket clien
 
 ```javascript
 // Browser WebSocket client example
+// Note: The WebSocket server runs on the same port as the API server
 const socket = new WebSocket('ws://localhost:5050/ws');
 
 socket.onopen = () => {
