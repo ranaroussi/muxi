@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 from src.llm import OpenAILLM
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
+from src.memory.memobase import Memobase
 from src.core.orchestrator import Orchestrator
 from src.tools.web_search import WebSearch
 from src.tools.calculator import Calculator
@@ -66,6 +67,10 @@ class AgentRequest(BaseModel):
         config.memory.use_long_term,
         description="Whether to use long-term memory"
     )
+    multi_user_support: bool = Field(
+        False,
+        description="Whether to enable multi-user support via Memobase"
+    )
 
 
 class MessageRequest(BaseModel):
@@ -75,12 +80,20 @@ class MessageRequest(BaseModel):
         None,
         description="Agent ID to send the message to (uses default if None)"
     )
+    user_id: Optional[int] = Field(
+        0,
+        description="User ID for multi-user support (0 for single-user mode)"
+    )
 
 
 class MessageResponse(BaseModel):
     """Model for agent responses."""
     message: str = Field(..., description="Response from the agent")
     agent_id: str = Field(..., description="ID of the agent that responded")
+    user_id: Optional[int] = Field(
+        0,
+        description="User ID of the requester"
+    )
     tools_used: List[str] = Field(
         default_factory=list,
         description="Tools used in generating the response"
@@ -93,6 +106,10 @@ class MemorySearchRequest(BaseModel):
     agent_id: Optional[str] = Field(
         None,
         description="Agent ID to search memories of (uses default if None)"
+    )
+    user_id: Optional[int] = Field(
+        0,
+        description="User ID for multi-user support (0 for single-user mode)"
     )
     limit: int = Field(5, description="Maximum number of results to return")
     use_long_term: bool = Field(
@@ -119,6 +136,10 @@ class MemorySearchResponse(BaseModel):
     """Model for memory search results."""
     query: str = Field(..., description="Original search query")
     agent_id: str = Field(..., description="ID of the agent searched")
+    user_id: Optional[int] = Field(
+        0,
+        description="User ID of the requester"
+    )
     results: List[MemoryItem] = Field(
         default_factory=list,
         description="Search results"
@@ -212,79 +233,63 @@ def create_app() -> FastAPI:
         tags=["Agents"]
     )
     async def create_agent(request: AgentRequest):
-        """Create a new agent."""
+        """
+        Create a new agent with specified parameters.
+        """
         try:
-            # Check if agent with this ID already exists, but handle the case
-            # where get_agent throws an error
-            try:
-                if orchestrator.get_agent(request.agent_id):
-                    raise HTTPException(
-                        status_code=409,
-                        detail=(
-                            f"Agent with ID '{request.agent_id}' already "
-                            f"exists"
-                        )
-                    )
-            except ValueError:
-                # Agent doesn't exist, which is what we want for creation
-                pass
+            # Check if agent already exists
+            if orchestrator.get_agent(request.agent_id):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Agent with ID '{request.agent_id}' already exists"
+                )
 
             # Create LLM
-            llm = OpenAILLM(
-                api_key=config.llm.openai_api_key,
-                model=request.llm_model,
-                temperature=config.llm.temperature,
-            )
+            llm = OpenAILLM(model=request.llm_model)
 
-            # Create memory
-            buffer_memory = BufferMemory(
-                max_size=config.memory.buffer_max_size,
-            )
-
-            # Try to create long-term memory, but don't fail if database
-            # isn't available
+            # Create memory systems
+            buffer_memory = BufferMemory()
             long_term_memory = None
-            try:
-                if config.memory.use_long_term:
+            memobase = None
+
+            if request.use_long_term_memory:
+                try:
                     long_term_memory = LongTermMemory(
-                        connection_string=config.database.connection_string,
-                        default_collection=f"{request.agent_id}_memory",
+                        default_collection=f"agent_{request.agent_id}"
                     )
-            except Exception as e:
-                logger.warning(f"Could not create long-term memory: {str(e)}")
-                logger.warning(
-                    "Agent will be created without long-term memory"
-                )
+                    # Create a Memobase instance if multi-user support is enabled
+                    if request.multi_user_support:
+                        memobase = Memobase(long_term_memory=long_term_memory)
+                except Exception as e:
+                    logger.error(f"Error creating long-term memory: {str(e)}")
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Error creating long-term memory: {str(e)}"
+                    )
 
             # Create tools
             tools = []
 
-            if request.enable_calculator:
-                tools.append(Calculator())
-
             if request.enable_web_search:
                 tools.append(WebSearch())
 
-            # Use provided system message or default
-            system_message = (request.system_message
-                              or config.app.system_message)
+            if request.enable_calculator:
+                tools.append(Calculator())
 
             # Create agent
-            orchestrator.create_agent(
+            agent = orchestrator.create_agent(
                 agent_id=request.agent_id,
                 llm=llm,
                 buffer_memory=buffer_memory,
                 long_term_memory=long_term_memory,
+                memobase=memobase,
                 tools=tools,
-                system_message=system_message,
-                set_as_default=True,
+                system_message=request.system_message
             )
 
-            return {
-                "status": "success",
-                "message": f"Agent '{request.agent_id}' created successfully"
-            }
-
+            return {"message": f"Agent '{request.agent_id}' created successfully"}
+        except HTTPException:
+            raise
         except Exception as e:
             logger.error(f"Error creating agent: {str(e)}")
             raise HTTPException(
@@ -361,41 +366,35 @@ def create_app() -> FastAPI:
         tags=["Chat"]
     )
     async def chat_with_agent(request: MessageRequest):
-        """Send a message to an agent and get a response."""
+        """
+        Send a message to an agent and get a response.
+        """
         try:
-            # Get agent ID to use
-            agent_id = request.agent_id or orchestrator.default_agent_id
+            agent_id = request.agent_id or config.agent.default_agent_id
+            agent = orchestrator.get_agent(agent_id)
 
-            # Check if agent exists
-            if not agent_id or not orchestrator.get_agent(agent_id):
+            if not agent:
                 raise HTTPException(
                     status_code=404,
-                    detail=(
-                        f"Agent with ID '{agent_id}' not found"
-                    )
+                    detail=f"Agent with ID '{agent_id}' not found"
                 )
 
-            # Process message
-            response = await orchestrator.run(
-                request.message,
-                agent_id=agent_id
-            )
+            # Get a response from the agent
+            response = await agent.chat(message=request.message, user_id=request.user_id)
 
-            # Create response
-            return MessageResponse(
-                message=response,
-                agent_id=agent_id,
-                tools_used=[]  # In future, we'll track which tools were used
-            )
-
+            return {
+                "message": response,
+                "agent_id": agent_id,
+                "user_id": request.user_id,
+                "tools_used": getattr(agent, "last_used_tools", [])
+            }
         except HTTPException:
             raise
-
         except Exception as e:
-            logger.error(f"Error in chat: {str(e)}")
+            logger.error(f"Error getting response from agent: {str(e)}")
             raise HTTPException(
                 status_code=500,
-                detail=f"Error processing message: {str(e)}"
+                detail=f"Error getting response from agent: {str(e)}"
             )
 
     @app.post(
@@ -404,50 +403,62 @@ def create_app() -> FastAPI:
         tags=["Memory"]
     )
     async def search_memory(request: MemorySearchRequest):
-        """Search an agent's memory."""
+        """
+        Search an agent's memory for relevant information.
+        """
         try:
-            # Get agent ID to use
-            agent_id = request.agent_id or orchestrator.default_agent_id
-
-            # Check if agent exists
-            if not agent_id or not orchestrator.get_agent(agent_id):
-                raise HTTPException(
-                    status_code=404,
-                    detail=(
-                        f"Agent with ID '{agent_id}' not found"
-                    )
-                )
-
-            # Get agent
+            agent_id = request.agent_id or config.agent.default_agent_id
             agent = orchestrator.get_agent(agent_id)
 
+            if not agent:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Agent with ID '{agent_id}' not found"
+                )
+
             # Search memory
-            memories = await agent.search_memory(
+            results = await agent.search_memory(
                 query=request.query,
                 k=request.limit,
-                use_long_term=request.use_long_term
+                use_long_term=request.use_long_term,
+                user_id=request.user_id
             )
 
-            # Convert to response format
-            memory_items = [
-                MemoryItem(
-                    text=memory["text"],
-                    source=memory["source"],
-                    distance=memory["distance"],
-                    metadata=memory["metadata"]
-                )
-                for memory in memories
-            ]
+            # Format results
+            formatted_results = []
+            for r in results:
+                # Handle different formats from different memory sources
+                if "content" in r:
+                    text = r["content"]
+                elif "text" in r:
+                    text = r["text"]
+                else:
+                    text = str(r)
 
-            return MemorySearchResponse(
-                query=request.query,
-                agent_id=agent_id,
-                results=memory_items
-            )
+                # Get metadata
+                metadata = r.get("metadata", {})
 
+                # Get distance if available
+                distance = r.get("distance", 0.0)
+
+                # Get source
+                source = r.get("source", "unknown")
+
+                formatted_results.append({
+                    "text": text,
+                    "source": source,
+                    "distance": distance,
+                    "metadata": metadata
+                })
+
+            return {
+                "query": request.query,
+                "agent_id": agent_id,
+                "user_id": request.user_id,
+                "results": formatted_results
+            }
         except HTTPException:
             raise
-
         except Exception as e:
             logger.error(f"Error searching memory: {str(e)}")
             raise HTTPException(

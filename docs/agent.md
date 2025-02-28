@@ -9,6 +9,7 @@ An agent is an autonomous entity that:
 - Processes requests and generates responses using an LLM
 - Stores conversation history in memory
 - Executes tools to perform actions or retrieve information
+- Can maintain separate memory contexts for different users (with Memobase)
 
 ## Creating an Agent
 
@@ -21,6 +22,7 @@ import asyncio
 from src.llm import OpenAILLM
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
+from src.memory.memobase import Memobase
 from src.tools.web_search import WebSearchTool
 from src.tools.calculator import CalculatorTool
 from src.core.orchestrator import Orchestrator
@@ -36,6 +38,9 @@ async def create_agent():
         table_name="agent_memories"
     )
 
+    # For multi-user support, add Memobase
+    memobase = Memobase(long_term_memory=long_term_memory)
+
     # Create tools
     tools = [WebSearchTool(), CalculatorTool()]
 
@@ -43,6 +48,7 @@ async def create_agent():
     orchestrator = Orchestrator()
     agent_id = "my_agent"
 
+    # Create a standard agent
     orchestrator.create_agent(
         agent_id=agent_id,
         llm=llm,
@@ -53,13 +59,33 @@ async def create_agent():
         set_as_default=True
     )
 
+    # Create a multi-user agent
+    orchestrator.create_agent(
+        agent_id="multi_user_agent",
+        llm=llm,
+        buffer_memory=BufferMemory(),
+        memobase=memobase,
+        tools=tools,
+        system_message="You are a helpful assistant that serves multiple users."
+    )
+
     return orchestrator, agent_id
 
 # Usage
 async def main():
     orchestrator, agent_id = await create_agent()
+
+    # Standard agent usage
     response = await orchestrator.run(agent_id, "What's the weather in New York?")
     print(response)
+
+    # Multi-user agent usage (with user_id)
+    response = await orchestrator.run("multi_user_agent", "My name is Alice", user_id=123)
+    print(response)
+
+    # Later, the agent will remember Alice
+    response = await orchestrator.run("multi_user_agent", "What's my name?", user_id=123)
+    print(response)  # Should respond with "Your name is Alice"
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -70,12 +96,24 @@ if __name__ == "__main__":
 You can create an agent by making a POST request to the API:
 
 ```bash
+# Create a standard agent
 curl -X POST http://localhost:5050/agents \
   -H "Content-Type: application/json" \
   -d '{
     "agent_id": "my_agent",
     "system_message": "You are a helpful AI assistant.",
     "tools": ["web_search", "calculator"]
+  }'
+
+# Create a multi-user agent
+curl -X POST http://localhost:5050/agents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "system_message": "You are a helpful assistant that serves multiple users.",
+    "tools": ["web_search", "calculator"],
+    "use_long_term_memory": true,
+    "multi_user_support": true
   }'
 ```
 
@@ -84,7 +122,11 @@ curl -X POST http://localhost:5050/agents \
 The framework provides a CLI command to create agents:
 
 ```bash
+# Create a standard agent
 python -m src.cli.agent create my_agent --system "You are a helpful AI assistant." --tools web_search calculator
+
+# Create a multi-user agent
+python -m src.cli.agent create multi_user_agent --system "You are a helpful assistant that serves multiple users." --tools web_search calculator --multi-user
 ```
 
 ## Agent Parameters
@@ -95,9 +137,11 @@ When creating an agent, you can configure various parameters:
 - **llm** (required): The LLM provider to use (e.g., OpenAILLM, AnthropicLLM)
 - **buffer_memory**: Short-term memory for the current conversation
 - **long_term_memory**: Persistent memory for storing information across sessions
+- **memobase**: Multi-user memory manager for user-specific contexts
 - **tools**: A list of tools the agent can use
 - **system_message**: Instructions that define the agent's behavior
 - **set_as_default**: Whether to set this as the default agent for the orchestrator
+- **multi_user_support**: Whether to enable user-specific memory via Memobase
 
 ## Interacting with an Agent
 
@@ -107,12 +151,22 @@ Once you've created an agent, you can interact with it in several ways:
 
 ```python
 # Continue from previous example
+
+# Standard agent interaction
 response = await orchestrator.run(agent_id, "What's the population of Tokyo?")
 print(response)
 
 # Using the default agent
 response = await orchestrator.run("Tell me about quantum computing")
 print(response)
+
+# Multi-user agent interaction
+response = await orchestrator.run("multi_user_agent", "My favorite color is blue", user_id=123)
+print(response)
+
+# The multi-user agent will remember user-specific information
+response = await orchestrator.run("multi_user_agent", "What's my favorite color?", user_id=123)
+print(response)  # Should respond with "Your favorite color is blue"
 ```
 
 ### Via the REST API
@@ -126,11 +180,22 @@ curl -X POST http://localhost:5050/agents/chat \
     "message": "What is the capital of France?"
   }'
 
-# Chat with the default agent
+# Chat with a multi-user agent (specify user_id)
 curl -X POST http://localhost:5050/agents/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "What is the capital of France?"
+    "agent_id": "multi_user_agent",
+    "message": "What is the capital of France?",
+    "user_id": 123
+  }'
+
+# Search memory for a multi-user agent
+curl -X POST http://localhost:5050/agents/memory/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "query": "favorite color",
+    "user_id": 123
   }'
 ```
 
@@ -144,10 +209,16 @@ import websockets
 async def chat_with_agent():
     uri = "ws://localhost:5050/ws"
     async with websockets.connect(uri) as websocket:
+        # Set user ID for multi-user agents
+        await websocket.send(json.dumps({
+            "type": "set_user",
+            "user_id": 123
+        }))
+
         # Subscribe to an agent
         await websocket.send(json.dumps({
             "type": "subscribe",
-            "agent_id": "my_agent"
+            "agent_id": "multi_user_agent"
         }))
 
         # Wait for subscription confirmation
@@ -157,7 +228,7 @@ async def chat_with_agent():
         # Send a message
         await websocket.send(json.dumps({
             "type": "chat",
-            "agent_id": "my_agent",
+            "agent_id": "multi_user_agent",
             "message": "What is the capital of France?"
         }))
 
@@ -218,6 +289,42 @@ orchestrator.create_agent(
 )
 ```
 
+### Multi-User Support
+
+You can create agents that support multiple users with separate memory contexts:
+
+```python
+from src.memory.memobase import Memobase
+from src.memory.long_term import LongTermMemory
+
+# Create a multi-user agent
+long_term_memory = LongTermMemory()
+memobase = Memobase(long_term_memory=long_term_memory)
+
+orchestrator.create_agent(
+    agent_id="customer_service",
+    llm=OpenAILLM(model="gpt-4o"),
+    buffer_memory=BufferMemory(),
+    memobase=memobase,
+    system_message="""
+    You are a customer service assistant that helps different customers.
+    Maintain a personalized conversation with each user.
+    Remember their preferences and previous interactions.
+    """
+)
+
+# Different users interact with the same agent
+user1_response = await orchestrator.chat("customer_service", "My name is John and I need help with my order #12345", user_id=1001)
+user2_response = await orchestrator.chat("customer_service", "I'm Sarah and I have a question about your return policy", user_id=1002)
+
+# Later interactions - the agent remembers each user
+user1_followup = await orchestrator.chat("customer_service", "Any updates on my order?", user_id=1001)
+# Agent will remember John and order #12345
+
+user2_followup = await orchestrator.chat("customer_service", "Thanks for the information yesterday", user_id=1002)
+# Agent will remember Sarah and the return policy discussion
+```
+
 ## Best Practices
 
 1. **Choose the right LLM**: Different tasks require different language models. For complex reasoning, use advanced models like GPT-4 or Claude 3.
@@ -231,6 +338,10 @@ orchestrator.create_agent(
 5. **Error handling**: Implement proper error handling for tool execution failures.
 
 6. **Regular testing**: Test your agents with diverse inputs to ensure they behave as expected.
+
+7. **User ID management**: For multi-user agents, ensure user IDs are consistently applied across interactions.
+
+8. **Memory partitioning**: Use Memobase for applications where user data isolation is important.
 
 ## Troubleshooting
 

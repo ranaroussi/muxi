@@ -7,6 +7,7 @@ A powerful, extensible framework for building AI agents with real-time communica
 - **Multi-Agent Orchestration**: Create and manage multiple AI agents with different capabilities
 - **Standardized LLM Communication**: Modern Control Protocol (MCP) for consistent interaction with various LLM providers
 - **Memory Systems**: Short-term buffer memory and long-term persistent memory for agents
+- **Multi-User Support**: Memobase provides user-specific memory partitioning for multi-tenant applications
 - **Tool Integration**: Extensible tool system with built-in utilities and custom tool support
 - **Real-Time Communication**: WebSocket support for instant messaging and streaming responses
 - **REST API**: Comprehensive API for managing agents, tools, and conversations
@@ -30,21 +31,46 @@ from src.core.orchestrator import Orchestrator
 from src.llm.openai import OpenAILLM
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
+from src.memory.memobase import Memobase
 
 # Create an orchestrator to manage agents
 orchestrator = Orchestrator()
 
-# Create an agent with memory
+# Create a basic agent with buffer memory
 orchestrator.create_agent(
     agent_id="assistant",
     llm=OpenAILLM(model="gpt-4o"),
     buffer_memory=BufferMemory(),
-    long_term_memory=LongTermMemory(),
     system_message="You are a helpful AI assistant."
 )
 
-# Chat with the agent
+# Create an agent with long-term memory
+long_term_memory = LongTermMemory()
+orchestrator.create_agent(
+    agent_id="researcher",
+    llm=OpenAILLM(model="gpt-4o"),
+    buffer_memory=BufferMemory(),
+    long_term_memory=long_term_memory,
+    system_message="You are a helpful research assistant."
+)
+
+# Create an agent with multi-user support
+long_term_memory = LongTermMemory()
+memobase = Memobase(long_term_memory=long_term_memory)
+orchestrator.create_agent(
+    agent_id="multi_user_assistant",
+    llm=OpenAILLM(model="gpt-4o"),
+    buffer_memory=BufferMemory(),
+    memobase=memobase,
+    system_message="You are a helpful assistant that supports multiple users."
+)
+
+# Chat with a regular agent
 response = orchestrator.chat("assistant", "Hello, can you help me with a Python question?")
+print(response)
+
+# Chat with a multi-user agent (specify user_id)
+response = orchestrator.chat("multi_user_assistant", "Remember that my name is Alice", user_id=123)
 print(response)
 ```
 
@@ -106,6 +132,12 @@ const socket = new WebSocket('ws://localhost:5050/ws');
 socket.onopen = () => {
   console.log('Connected to WebSocket server');
 
+  // Set user ID (for multi-user agents)
+  socket.send(JSON.stringify({
+    type: 'set_user',
+    user_id: 123
+  }));
+
   // Subscribe to an agent
   socket.send(JSON.stringify({
     type: 'subscribe',
@@ -131,6 +163,7 @@ socket.onmessage = (event) => {
 - `subscribe`: Subscribe to an agent
 - `chat`: Send a chat message
 - `ping`: Keep the connection alive
+- `set_user`: Set the user ID for this connection
 
 **Server to Client:**
 - `message`: Response from the agent
@@ -140,6 +173,7 @@ socket.onmessage = (event) => {
 
 ## Recent Improvements
 
+- **Multi-User Support**: Added Memobase for user-specific memory partitioning
 - **Shared Orchestrator Instance**: Fixed issue with WebSocket and REST API using different orchestrator instances
 - **Enhanced Error Handling**: Improved error handling and reporting in WebSocket connections
 - **Message Serialization**: Fixed JSON serialization issues with MCPMessage objects

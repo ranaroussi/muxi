@@ -1,9 +1,10 @@
 # Memory Systems
 
-Memory is a crucial component of the AI Agent Framework that allows agents to retain information over time. The framework provides two complementary memory systems:
+Memory is a crucial component of the AI Agent Framework that allows agents to retain information over time. The framework provides three complementary memory systems:
 
 1. **Buffer Memory**: Short-term memory for the current conversation context
 2. **Long-term Memory**: Persistent memory for storing information across multiple sessions
+3. **Memobase**: Multi-user memory system that partitions memories by user ID
 
 ## Buffer Memory
 
@@ -159,32 +160,166 @@ await memory.clear()
 await memory.update(memory_id, "The user now prefers JavaScript over Python for web development.")
 ```
 
+## Memobase
+
+Memobase is a multi-user memory manager that provides user-specific memory contexts using PostgreSQL/PGVector for storage. It's ideal for multi-tenant applications where each user should have their own memory context.
+
+### How Memobase Works
+
+Memobase:
+- Partitions memories by user ID
+- Creates separate collections for each user
+- Maintains user context between sessions
+- Uses PostgreSQL/PGVector for efficient semantic search
+- Provides a simple interface for user-specific operations
+
+### Using Memobase
+
+#### Initialization
+
+```python
+from src.memory.long_term import LongTermMemory
+from src.memory.memobase import Memobase
+
+# First, initialize a long-term memory instance
+long_term_memory = LongTermMemory(
+    connection_string="postgresql://user:password@localhost:5432/ai_agent_db"
+)
+
+# Then create a Memobase instance with the long-term memory
+memobase = Memobase(
+    long_term_memory=long_term_memory,
+    default_user_id=0  # Default user ID for single-user mode
+)
+```
+
+#### Adding Memories for Specific Users
+
+```python
+# Add a memory for user 123
+await memobase.add(
+    content="My name is Alice",
+    metadata={"type": "user_info"},
+    user_id=123
+)
+
+# Add a memory for user 456
+await memobase.add(
+    content="My name is Bob",
+    metadata={"type": "user_info"},
+    user_id=456
+)
+
+# Add to default user (single-user mode)
+await memobase.add(
+    content="System-wide information",
+    metadata={"type": "system_info"}
+)
+```
+
+#### Searching Memories for Specific Users
+
+```python
+# Search for user 123's memories
+results = await memobase.search(
+    query="What is my name?",
+    user_id=123,
+    limit=5
+)
+# Will find "My name is Alice"
+
+# Search for user 456's memories
+results = await memobase.search(
+    query="What is my name?",
+    user_id=456,
+    limit=5
+)
+# Will find "My name is Bob"
+
+# Search default user memories
+results = await memobase.search(
+    query="system information"
+)
+# Will find "System-wide information"
+```
+
+#### Clearing User-Specific Memories
+
+```python
+# Clear all memories for user 123
+memobase.clear_user_memory(user_id=123)
+
+# Clear default user memories
+memobase.clear_user_memory()
+```
+
+#### Retrieving All Memories for a User
+
+```python
+# Get all memories for user 123
+memories = memobase.get_user_memories(
+    user_id=123,
+    limit=10,
+    sort_by="created_at",
+    ascending=False
+)
+
+# Display the memories
+for memory in memories:
+    print(f"Content: {memory['content']}")
+    print(f"Metadata: {memory['metadata']}")
+    print(f"Created at: {memory['created_at']}")
+```
+
+### Advanced Filtering
+
+```python
+# Search with additional metadata filters
+results = await memobase.search(
+    query="info",
+    user_id=123,
+    additional_filter={"type": "user_info"}
+)
+```
+
 ## Integrating Memory with Agents
 
-### Using Both Memory Systems
+### Using Memobase with Agents
 
 ```python
 from src.core.orchestrator import Orchestrator
 from src.llm import OpenAILLM
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
+from src.memory.memobase import Memobase
 
 # Initialize memory systems
-buffer_memory = BufferMemory(max_tokens=4000)
+buffer_memory = BufferMemory()
 long_term_memory = LongTermMemory(
-    connection_string="postgresql://user:password@localhost:5432/ai_agent_db",
-    table_name="agent_memories"
+    connection_string="postgresql://user:password@localhost:5432/ai_agent_db"
 )
+memobase = Memobase(long_term_memory=long_term_memory)
 
-# Create an agent with both memory systems
+# Create an agent with multi-user support
 orchestrator = Orchestrator()
 orchestrator.create_agent(
-    agent_id="my_agent",
+    agent_id="multi_user_agent",
     llm=OpenAILLM(model="gpt-4o"),
     buffer_memory=buffer_memory,
-    long_term_memory=long_term_memory,
-    system_message="You are a helpful assistant with both short-term and long-term memory."
+    memobase=memobase,
+    system_message="You are an assistant that remembers information about different users."
 )
+
+# Chat with the agent with different user contexts
+response1 = await orchestrator.chat("multi_user_agent", "My name is Alice", user_id=123)
+response2 = await orchestrator.chat("multi_user_agent", "My name is Bob", user_id=456)
+
+# Each user has their own memory context
+response1 = await orchestrator.chat("multi_user_agent", "What is my name?", user_id=123)
+# Agent responds: "Your name is Alice."
+
+response2 = await orchestrator.chat("multi_user_agent", "What is my name?", user_id=456)
+# Agent responds: "Your name is Bob."
 ```
 
 ### Memory Augmented Generation

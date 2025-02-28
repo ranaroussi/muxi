@@ -14,6 +14,7 @@ from src.llm.base import BaseLLM
 from src.memory.base import BaseMemory
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
+from src.memory.memobase import Memobase
 from src.tools.base import BaseTool, tool_registry
 from src.core.mcp import MCPHandler, MCPMessage
 
@@ -29,6 +30,7 @@ class Agent:
         memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
+        memobase: Optional[Memobase] = None,
         tools: Optional[Dict[str, BaseTool]] = None,
         system_message: Optional[str] = None,
         name: Optional[str] = None
@@ -42,6 +44,7 @@ class Agent:
                 (for backward compatibility).
             buffer_memory: Optional buffer memory for short-term context.
             long_term_memory: Optional long-term memory for persistent storage.
+            memobase: Optional Memobase instance for multi-user memory support.
             tools: Optional dictionary of tools the agent can use.
             system_message: Optional system message to set agent's behavior.
             name: Optional name for the agent.
@@ -58,6 +61,7 @@ class Agent:
             self.memory = self.buffer_memory  # For backward compatibility
 
         self.long_term_memory = long_term_memory
+        self.memobase = memobase
 
         # Handle tools
         if isinstance(tools, dict):
@@ -76,22 +80,37 @@ class Agent:
         # MCPHandler is mocked in tests
         # Test expects it called during process_message
 
-    async def process_message(self, message: str) -> MCPMessage:
+    async def process_message(
+        self,
+        message: str,
+        user_id: Optional[int] = None
+    ) -> MCPMessage:
         """
         Process a user message and generate a response.
 
         Args:
             message: The user's message.
+            user_id: Optional user ID for multi-user support.
 
         Returns:
             An MCPMessage containing the agent's response.
         """
         # Store the message in memory
         timestamp = datetime.datetime.now().timestamp()
+
+        # Add message to memory systems
         self.memory.add(
             message,
             {"role": "user", "timestamp": timestamp}
         )
+
+        # If using memobase, also store there with user context
+        if self.memobase and user_id is not None:
+            await self.memobase.add(
+                content=message,
+                metadata={"role": "user", "timestamp": timestamp},
+                user_id=user_id
+            )
 
         # Generate response using LLM - needs to be awaited
         response = await self.llm.chat([{"role": "user", "content": message}])
@@ -114,13 +133,32 @@ class Agent:
 
             # Process the message with the handler
             result = handler.process_message(assistant_message)
+
+            # Store assistant response in memobase if available
+            if self.memobase and user_id is not None:
+                await self.memobase.add(
+                    content=result.content,
+                    metadata={"role": "assistant", "timestamp": timestamp},
+                    user_id=user_id
+                )
+
             return result
+
+        # Store assistant response in memobase if available
+        response_content = (response if isinstance(response, str)
+                           else "I'm a helpful assistant.")
+
+        if self.memobase and user_id is not None:
+            await self.memobase.add(
+                content=response_content,
+                metadata={"role": "assistant", "timestamp": timestamp},
+                user_id=user_id
+            )
 
         # Return response as MCPMessage
         return MCPMessage(
             role="assistant",
-            content=(response if isinstance(response, str)
-                     else "I'm a helpful assistant.")
+            content=response_content
         )
 
     def get_memory(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
@@ -229,7 +267,8 @@ class Agent:
         self,
         query: str,
         k: int = 5,
-        use_long_term: bool = True
+        use_long_term: bool = True,
+        user_id: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         """
         Search the agent's memory for relevant information.
@@ -238,10 +277,20 @@ class Agent:
             query: The query to search for.
             k: The number of results to return.
             use_long_term: Whether to search long-term memory.
+            user_id: Optional user ID for multi-user support.
 
         Returns:
             A list of relevant memory items.
         """
+        # If memobase is available and user_id is provided, use it
+        if self.memobase and user_id is not None:
+            return await self.memobase.search(
+                query=query,
+                limit=k,
+                user_id=user_id
+            )
+
+        # Otherwise, fall back to traditional memory search
         # Get embedding for query
         query_embedding = await self.llm.embed(query)
 
@@ -346,13 +395,24 @@ class Agent:
 
         return False
 
-    def clear_memory(self, clear_long_term: bool = False) -> None:
+    def clear_memory(
+        self,
+        clear_long_term: bool = False,
+        user_id: Optional[int] = None
+    ) -> None:
         """
         Clear the agent's memory.
 
         Args:
             clear_long_term: Whether to clear long-term memory as well.
+            user_id: Optional user ID for multi-user support.
         """
+        # If memobase is available and user_id is provided, use it
+        if self.memobase and user_id is not None:
+            self.memobase.clear_user_memory(user_id)
+            return
+
+        # Otherwise, fall back to traditional memory clearing
         # Clear buffer memory
         self.buffer_memory.clear()
 
@@ -373,18 +433,23 @@ class Agent:
         """
         return tool_registry.get_schema()["tools"]
 
-    async def chat(self, message: str) -> str:
+    async def chat(
+        self,
+        message: str,
+        user_id: Optional[int] = None
+    ) -> str:
         """
         Process a user message and return a response.
 
         Args:
             message: The user's message.
+            user_id: Optional user ID for multi-user support.
 
         Returns:
             The agent's response as a string.
         """
         # Use process_message which is now async
-        response = await self.process_message(message)
+        response = await self.process_message(message, user_id)
 
         # Track tools used for UI reporting
         self.last_used_tools = []

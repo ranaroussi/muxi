@@ -10,6 +10,7 @@ The REST API offers the following capabilities:
 - Access and search agent memory
 - List and manage available tools
 - Monitor agent and system status
+- Support multi-user contexts with user-specific memory
 
 ## Getting Started
 
@@ -109,18 +110,29 @@ Create a new agent:
 curl -X POST http://localhost:5050/agents \
   -H "Content-Type: application/json" \
   -d '{
-    "agent_id": "data_analyst",
-    "system_message": "You are a helpful data analysis assistant.",
-    "tools": ["calculator", "web_search"],
-    "set_as_default": false
+    "agent_id": "my_agent",
+    "llm_model": "gpt-4o",
+    "system_message": "You are a helpful AI assistant.",
+    "enable_web_search": true,
+    "enable_calculator": true,
+    "use_long_term_memory": true,
+    "multi_user_support": true
   }'
 
-# Response (201 Created)
+# Response (200 OK)
 {
-  "status": "success",
-  "message": "Agent 'data_analyst' created successfully"
+  "message": "Agent 'my_agent' created successfully"
 }
 ```
+
+Parameters:
+- `agent_id` (required): Unique identifier for the agent
+- `llm_model`: LLM model to use (default: "gpt-4o")
+- `system_message`: Instructions for the agent's behavior
+- `enable_web_search`: Whether to enable the web search tool (default: false)
+- `enable_calculator`: Whether to enable the calculator tool (default: false)
+- `use_long_term_memory`: Whether to enable long-term memory (default: false)
+- `multi_user_support`: Whether to enable multi-user support via Memobase (default: false)
 
 #### Get Agent
 
@@ -171,30 +183,33 @@ curl -X POST http://localhost:5050/agents/research_assistant/set_default
 
 ### Chat
 
-#### Chat with a Specific Agent
+#### Send Message to Agent
 
-Send a message to a specific agent:
+Send a message to an agent:
 
 ```bash
 # Request
 curl -X POST http://localhost:5050/agents/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "agent_id": "research_assistant",
-    "message": "What is the capital of France?"
+    "agent_id": "my_agent",
+    "message": "What is the capital of France?",
+    "user_id": 123
   }'
 
 # Response (200 OK)
 {
-  "agent_id": "research_assistant",
   "message": "The capital of France is Paris.",
-  "tokens": {
-    "prompt": 45,
-    "completion": 8,
-    "total": 53
-  }
+  "agent_id": "my_agent",
+  "user_id": 123,
+  "tools_used": []
 }
 ```
+
+Parameters:
+- `message` (required): The message to send to the agent
+- `agent_id`: ID of the agent to send the message to (uses default if omitted)
+- `user_id`: User ID for multi-user support (default: 0)
 
 #### Chat with Default Agent
 
@@ -249,35 +264,44 @@ data: {"chunk": "", "done": true}
 
 #### Search Agent Memory
 
-Search an agent's memory:
+Search an agent's memory for relevant information:
 
 ```bash
 # Request
 curl -X POST http://localhost:5050/agents/memory/search \
   -H "Content-Type: application/json" \
   -d '{
-    "agent_id": "research_assistant",
-    "query": "quantum computing",
-    "top_k": 5
+    "agent_id": "my_agent",
+    "query": "What did we discuss about Paris?",
+    "limit": 5,
+    "use_long_term": true,
+    "user_id": 123
   }'
 
 # Response (200 OK)
 {
-  "agent_id": "research_assistant",
+  "query": "What did we discuss about Paris?",
+  "agent_id": "my_agent",
+  "user_id": 123,
   "results": [
     {
-      "text": "Quantum computing uses quantum bits (qubits) that can exist in multiple states simultaneously.",
-      "score": 0.92,
-      "created_at": "2023-06-10T15:45:00Z"
-    },
-    {
-      "text": "Major companies investing in quantum computing include IBM, Google, and Microsoft.",
-      "score": 0.85,
-      "created_at": "2023-06-10T15:46:30Z"
+      "text": "User: What is the capital of France?\nAssistant: The capital of France is Paris.",
+      "source": "buffer",
+      "distance": 0.15,
+      "metadata": {
+        "timestamp": 1625097600
+      }
     }
   ]
 }
 ```
+
+Parameters:
+- `query` (required): The search query
+- `agent_id`: ID of the agent to search (uses default if omitted)
+- `limit`: Maximum number of results to return (default: 5)
+- `use_long_term`: Whether to include long-term memory in search (default: true)
+- `user_id`: User ID for multi-user support (default: 0)
 
 #### Clear Agent Memory
 
@@ -285,19 +309,26 @@ Clear an agent's memory:
 
 ```bash
 # Request
-curl -X DELETE http://localhost:5050/agents/memory \
+curl -X POST http://localhost:5050/agents/memory/clear \
   -H "Content-Type: application/json" \
   -d '{
-    "agent_id": "research_assistant",
-    "memory_type": "buffer"  // Options: "buffer", "long_term", "all"
+    "agent_id": "my_agent",
+    "clear_long_term": false,
+    "user_id": 123
   }'
 
 # Response (200 OK)
 {
-  "status": "success",
-  "message": "Buffer memory cleared for agent 'research_assistant'"
+  "message": "Memory cleared successfully",
+  "agent_id": "my_agent",
+  "user_id": 123
 }
 ```
+
+Parameters:
+- `agent_id`: ID of the agent to clear memory for (uses default if omitted)
+- `clear_long_term`: Whether to clear long-term memory as well (default: false)
+- `user_id`: User ID for multi-user support (default: 0)
 
 ### Tools
 
@@ -480,6 +511,93 @@ curl -X GET http://localhost:5050/system/resources
     }
   }
 }
+```
+
+## Multi-User Support
+
+The AI Agent Framework supports multi-user operations through the `user_id` parameter. This allows for:
+
+1. **User-specific memory contexts**: Each user gets their own memory space
+2. **Personalized conversations**: Agents can remember information specific to each user
+3. **Privacy boundaries**: User memories are isolated from each other
+
+### Creating a Multi-User Agent
+
+```bash
+curl -X POST http://localhost:5050/agents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "system_message": "You are a helpful assistant that remembers information about different users.",
+    "use_long_term_memory": true,
+    "multi_user_support": true
+  }'
+```
+
+### Interacting with a Multi-User Agent
+
+```bash
+# User 123 introduces themselves
+curl -X POST http://localhost:5050/agents/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "message": "My name is Alice and I live in New York.",
+    "user_id": 123
+  }'
+
+# User 456 introduces themselves
+curl -X POST http://localhost:5050/agents/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "message": "My name is Bob and I live in London.",
+    "user_id": 456
+  }'
+
+# User 123 asks a question (agent remembers it's Alice)
+curl -X POST http://localhost:5050/agents/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "message": "Where do I live?",
+    "user_id": 123
+  }'
+# Response will mention New York
+
+# User 456 asks the same question (agent remembers it's Bob)
+curl -X POST http://localhost:5050/agents/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "message": "Where do I live?",
+    "user_id": 456
+  }'
+# Response will mention London
+```
+
+### Searching User-Specific Memory
+
+```bash
+# Search Alice's memories
+curl -X POST http://localhost:5050/agents/memory/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "query": "Where does the user live?",
+    "user_id": 123
+  }'
+# Results will include information about New York
+
+# Search Bob's memories
+curl -X POST http://localhost:5050/agents/memory/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "query": "Where does the user live?",
+    "user_id": 456
+  }'
+# Results will include information about London
 ```
 
 ## Advanced API Usage

@@ -10,6 +10,7 @@ WebSocket support in the AI Agent Framework:
 - Supports subscription to specific agents
 - Allows for streaming responses from LLMs
 - Facilitates tool execution updates
+- Supports multi-user interactions with user-specific memory
 
 ## Server-side Implementation
 
@@ -700,150 +701,448 @@ The WebSocket protocol supports several message types:
    }
    ```
 
-## Advanced WebSocket Features
+## WebSocket Message Types
 
-### Streaming Responses
+### Client to Server Messages
 
-To implement streaming responses from LLMs:
+The client can send these message types to the server:
 
-```python
-# Server-side implementation
-async def handle_chat_message(client_id, agent_id, message):
-    """Handle a chat message with streaming response."""
-    orchestrator = get_orchestrator()
-    if not orchestrator:
-        await manager.send_json(
-            manager.active_connections[client_id],
-            {"type": "error", "message": "Orchestrator not available"}
-        )
-        return
+#### 1. Connect
 
-    # Notify that processing has started
-    await manager.send_json(
-        manager.active_connections[client_id],
-        {"type": "agent_thinking", "agent_id": agent_id}
-    )
+When a WebSocket connects, the server automatically assigns a connection ID and sends a welcome message. No special message is needed from the client.
 
-    try:
-        # Process the message with streaming
-        async for chunk in orchestrator.run_stream(agent_id, message):
-            await manager.send_json(
-                manager.active_connections[client_id],
-                {
-                    "type": "stream_chunk",
-                    "agent_id": agent_id,
-                    "chunk": chunk,
-                    "done": False
-                }
-            )
+#### 2. Set User ID
 
-        # Signal completion
-        await manager.send_json(
-            manager.active_connections[client_id],
-            {
-                "type": "stream_chunk",
-                "agent_id": agent_id,
-                "chunk": "",
-                "done": True
-            }
-        )
+Set the user ID for this connection. This is used for multi-user agents to maintain separate memory contexts per user.
 
-        # Notify that processing is complete
-        await manager.send_json(
-            manager.active_connections[client_id],
-            {"type": "agent_done", "agent_id": agent_id}
-        )
-    except Exception as e:
-        logger.error(f"Error processing message: {str(e)}")
-        await manager.send_json(
-            manager.active_connections[client_id],
-            {"type": "error", "message": f"Error processing message: {str(e)}"}
-        )
+```json
+{
+  "type": "set_user",
+  "user_id": 123
+}
 ```
 
-### Tool Execution Status Updates
+Response:
+```json
+{
+  "type": "user_set",
+  "user_id": 123
+}
+```
 
-To provide updates during tool execution:
+#### 3. Subscribe to Agent
 
-```python
-# Tool execution callback
-async def tool_callback(agent_id, tool_name, status, result=None):
-    """Callback for tool execution updates."""
-    message = {
-        "type": "tool_update",
-        "agent_id": agent_id,
-        "tool_name": tool_name,
-        "status": status
+Subscribe to a specific agent to receive messages and updates.
+
+```json
+{
+  "type": "subscribe",
+  "agent_id": "assistant"
+}
+```
+
+Response:
+```json
+{
+  "type": "subscribed",
+  "agent_id": "assistant",
+  "message": "Successfully subscribed to agent assistant"
+}
+```
+
+#### 4. Unsubscribe from Agent
+
+Unsubscribe from a specific agent.
+
+```json
+{
+  "type": "unsubscribe",
+  "agent_id": "assistant"
+}
+```
+
+Response:
+```json
+{
+  "type": "unsubscribed",
+  "agent_id": "assistant",
+  "message": "Successfully unsubscribed from agent assistant"
+}
+```
+
+#### 5. Send Chat Message
+
+Send a message to an agent. The user_id is automatically set to the one specified with the "set_user" message.
+
+```json
+{
+  "type": "chat",
+  "agent_id": "assistant",
+  "message": "Hello, can you help me with a question?"
+}
+```
+
+#### 6. Search Memory
+
+Search an agent's memory for relevant information. The user_id is automatically set to the one specified with the "set_user" message.
+
+```json
+{
+  "type": "search_memory",
+  "agent_id": "assistant",
+  "query": "What did we discuss yesterday?",
+  "limit": 5,
+  "use_long_term": true
+}
+```
+
+#### 7. Keep-alive Ping
+
+Send a ping to keep the connection alive.
+
+```json
+{
+  "type": "ping"
+}
+```
+
+### Server to Client Messages
+
+The server can send these message types to the client:
+
+## Client Implementation Examples
+
+### Browser Implementation
+
+```javascript
+class AgentWebSocket {
+  constructor(url = 'ws://localhost:5050/ws') {
+    this.url = url;
+    this.socket = null;
+    this.isConnected = false;
+    this.messageHandlers = {
+      'message': [],
+      'thinking': [],
+      'error': []
+    };
+
+    // Reconnection settings
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectDelay = 1000;
+
+    // User settings
+    this.userId = null;
+  }
+
+  connect() {
+    return new Promise((resolve, reject) => {
+      this.socket = new WebSocket(this.url);
+
+      this.socket.onopen = () => {
+        console.log('WebSocket connected');
+        this.isConnected = true;
+        this.reconnectAttempts = 0;
+        resolve();
+
+        // Set user ID if available
+        if (this.userId !== null) {
+          this.setUserId(this.userId);
+        }
+      };
+
+      this.socket.onclose = (event) => {
+        console.log(`WebSocket closed: ${event.code} ${event.reason}`);
+        this.isConnected = false;
+
+        // Attempt to reconnect
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+          this.reconnectAttempts++;
+          const delay = this.reconnectDelay * Math.pow(1.5, this.reconnectAttempts - 1);
+          console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+
+          setTimeout(() => {
+            this.connect().catch(err => {
+              console.error('Reconnection failed:', err);
+            });
+          }, delay);
+        }
+      };
+
+      this.socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        reject(error);
+      };
+
+      this.socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Received:', data);
+
+          // Call appropriate handlers
+          if (this.messageHandlers[data.type]) {
+            this.messageHandlers[data.type].forEach(handler => handler(data));
+          }
+
+          // Call general message handlers
+          this.messageHandlers['*']?.forEach(handler => handler(data));
+        } catch (error) {
+          console.error('Error parsing message:', error);
+        }
+      };
+    });
+  }
+
+  setUserId(userId) {
+    this.userId = userId;
+
+    if (this.isConnected) {
+      this.send({
+        type: 'set_user',
+        user_id: userId
+      });
+    }
+  }
+
+  subscribe(agentId) {
+    if (!this.isConnected) {
+      throw new Error('WebSocket is not connected');
     }
 
-    if result is not None:
-        message["result"] = result
+    this.send({
+      type: 'subscribe',
+      agent_id: agentId
+    });
+  }
 
-    await manager.broadcast_to_agent_subscribers(agent_id, message)
+  unsubscribe(agentId) {
+    if (!this.isConnected) {
+      throw new Error('WebSocket is not connected');
+    }
 
-# Register callback with the orchestrator
-orchestrator.set_tool_callback(tool_callback)
+    this.send({
+      type: 'unsubscribe',
+      agent_id: agentId
+    });
+  }
+
+  sendMessage(agentId, message) {
+    if (!this.isConnected) {
+      throw new Error('WebSocket is not connected');
+    }
+
+    this.send({
+      type: 'chat',
+      agent_id: agentId,
+      message: message
+    });
+  }
+
+  searchMemory(agentId, query, limit = 5, useLongTerm = true) {
+    if (!this.isConnected) {
+      throw new Error('WebSocket is not connected');
+    }
+
+    this.send({
+      type: 'search_memory',
+      agent_id: agentId,
+      query: query,
+      limit: limit,
+      use_long_term: useLongTerm
+    });
+  }
+
+  send(data) {
+    if (!this.isConnected) {
+      throw new Error('WebSocket is not connected');
+    }
+
+    this.socket.send(JSON.stringify(data));
+  }
+
+  on(eventType, callback) {
+    if (!this.messageHandlers[eventType]) {
+      this.messageHandlers[eventType] = [];
+    }
+
+    this.messageHandlers[eventType].push(callback);
+    return this;
+  }
+
+  off(eventType, callback) {
+    if (this.messageHandlers[eventType]) {
+      this.messageHandlers[eventType] = this.messageHandlers[eventType]
+        .filter(handler => handler !== callback);
+    }
+    return this;
+  }
+
+  close() {
+    if (this.socket) {
+      this.socket.close();
+    }
+  }
+}
+
+// Usage example
+const ws = new AgentWebSocket('ws://localhost:5050/ws');
+
+// Set handlers
+ws.on('message', data => {
+  console.log('Agent response:', data.content);
+});
+
+ws.on('thinking', data => {
+  console.log('Agent is thinking...');
+});
+
+ws.on('error', data => {
+  console.error('Error:', data.message);
+});
+
+// Connect and interact
+async function startChat() {
+  try {
+    await ws.connect();
+
+    // Set user ID for multi-user support
+    ws.setUserId(123);
+
+    // Subscribe to an agent
+    ws.subscribe('multi_user_agent');
+
+    // Send a message
+    ws.sendMessage('multi_user_agent', 'Hello, my name is John.');
+
+    // Later, search memory
+    ws.searchMemory('multi_user_agent', 'What is my name?');
+  } catch (error) {
+    console.error('Failed to connect:', error);
+  }
+}
+
+startChat();
 ```
 
-### Session Management
+## Multi-User Interaction Example
 
-To manage user sessions and conversation history:
+This example demonstrates how to create a simple chat interface that supports multiple users with separate memory contexts:
 
-```python
-class SessionManager:
-    def __init__(self):
-        self.sessions = {}
+```javascript
+// Set up the form
+const userIdInput = document.getElementById('user-id');
+const agentIdInput = document.getElementById('agent-id');
+const messageInput = document.getElementById('message');
+const sendButton = document.getElementById('send-button');
+const chatMessages = document.getElementById('chat-messages');
 
-    def create_session(self, session_id, user_id=None):
-        """Create a new session."""
-        if session_id not in self.sessions:
-            self.sessions[session_id] = {
-                "created_at": datetime.now(),
-                "user_id": user_id,
-                "last_active": datetime.now(),
-                "messages": []
-            }
-        return self.sessions[session_id]
+let currentUserId = 0;
+const ws = new AgentWebSocket('ws://localhost:5050/ws');
 
-    def add_message(self, session_id, message):
-        """Add a message to a session."""
-        if session_id in self.sessions:
-            self.sessions[session_id]["messages"].append({
-                "timestamp": datetime.now(),
-                "content": message
-            })
-            self.sessions[session_id]["last_active"] = datetime.now()
+// Update user ID when changed
+userIdInput.addEventListener('change', () => {
+  currentUserId = parseInt(userIdInput.value, 10);
 
-    def get_session(self, session_id):
-        """Get a session by ID."""
-        return self.sessions.get(session_id)
+  // Update WebSocket user ID
+  ws.setUserId(currentUserId);
 
-    def list_sessions(self, user_id=None):
-        """List all sessions, optionally filtered by user ID."""
-        if user_id:
-            return {k: v for k, v in self.sessions.items() if v["user_id"] == user_id}
-        return self.sessions
+  // Add system message
+  addMessage('system', `Switched to user ID: ${currentUserId}`);
+});
 
-    def delete_session(self, session_id):
-        """Delete a session."""
-        if session_id in self.sessions:
-            del self.sessions[session_id]
-            return True
-        return False
+// Send message when button is clicked
+sendButton.addEventListener('click', () => {
+  const agentId = agentIdInput.value;
+  const message = messageInput.value;
 
-# Initialize session manager
-session_manager = SessionManager()
+  if (!message.trim()) return;
 
-# Use in WebSocket endpoint
-@app.websocket("/ws/{session_id}")
-async def websocket_session(websocket: WebSocket, session_id: str):
-    client_id = str(uuid.uuid4())
+  // Add user message to chat
+  addMessage('user', message);
 
-    # Create or get session
-    session = session_manager.create_session(session_id)
+  // Clear input
+  messageInput.value = '';
 
-    # Handle the WebSocket connection
-    await websocket_endpoint(websocket, client_id)
+  // Send via WebSocket
+  ws.sendMessage(agentId, message);
+});
+
+// Add message to chat UI
+function addMessage(role, text) {
+  const messageEl = document.createElement('div');
+  messageEl.className = `message ${role}`;
+
+  // Add user ID for user messages
+  const header = role === 'user'
+    ? `User (ID: ${currentUserId})`
+    : role === 'assistant'
+      ? 'Assistant'
+      : 'System';
+
+  messageEl.innerHTML = `
+    <div class="message-header">${header}</div>
+    <div class="message-content">${text}</div>
+  `;
+
+  chatMessages.appendChild(messageEl);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Set up WebSocket
+ws.on('message', data => {
+  addMessage('assistant', data.content);
+});
+
+ws.on('thinking', data => {
+  addMessage('system', 'Assistant is thinking...');
+});
+
+ws.on('error', data => {
+  addMessage('system', `Error: ${data.message}`);
+});
+
+// Connect and subscribe
+async function initChat() {
+  try {
+    await ws.connect();
+    addMessage('system', 'Connected to server');
+
+    // Set initial user ID
+    ws.setUserId(currentUserId);
+
+    // Subscribe to default agent
+    const defaultAgent = agentIdInput.value;
+    ws.subscribe(defaultAgent);
+    addMessage('system', `Subscribed to agent: ${defaultAgent}`);
+  } catch (error) {
+    addMessage('system', `Connection error: ${error.message}`);
+  }
+}
+
+initChat();
+```
+
+```html
+<!-- HTML for the multi-user chat interface -->
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="user-selector">
+      <label for="user-id">User ID:</label>
+      <input type="number" id="user-id" value="0" min="0">
+    </div>
+    <div class="agent-selector">
+      <label for="agent-id">Agent:</label>
+      <input type="text" id="agent-id" value="multi_user_agent">
+    </div>
+  </div>
+
+  <div id="chat-messages" class="chat-messages"></div>
+
+  <div class="chat-input">
+    <input type="text" id="message" placeholder="Type your message...">
+    <button id="send-button">Send</button>
+  </div>
+</div>
 ```
 
 ## Best Practices
