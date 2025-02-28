@@ -140,3 +140,4 @@ logs/
 
 # Playwright
 .playwright-cache/
+.specstory/

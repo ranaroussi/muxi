@@ -7,7 +7,7 @@ agents created with the AI Agent Framework.
 """
 
 import argparse
-from src.ui.api import start_api
+from src.api import start_api
 
 
 def parse_args():

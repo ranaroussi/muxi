@@ -3,7 +3,7 @@
 Run the API server for the AI Agent Framework.
 """
 
-from src.ui.api.app import start_api
+from src.api.app import start_api
 
 
 if __name__ == "__main__":

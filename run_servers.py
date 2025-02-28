@@ -12,14 +12,14 @@ import os
 
 def run_api_server():
     """Start the API server."""
-    from src.ui.api.app import start_api
-    start_api(host="0.0.0.0", port=8000, reload=True)
+    from src.api.app import start_api
+    start_api(host="0.0.0.0", port=5050, reload=True)
 
 
 def run_web_ui():
     """Start the web UI development server."""
     # Change to the web UI directory
-    os.chdir(os.path.join(os.getcwd(), "src", "ui", "web"))
+    os.chdir(os.path.join(os.getcwd(), "src", "web"))
 
     # Run npm start
     subprocess.run(["npm", "start"], check=True)
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # Wait for API server to start
     print("Starting API server...")
     time.sleep(3)
-    print("API server running at http://localhost:8000")
+    print("API server running at http://localhost:5050")
 
     # Start web UI
     print("Starting web UI...")
