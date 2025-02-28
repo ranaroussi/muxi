@@ -1,0 +1,37 @@
+[
+  {
+    "key": "ctrl+alt+t",
+    "command": "python.execInTerminal",
+    "when": "editorLangId == 'python'"
+  },
+  {
+    "key": "ctrl+alt+r",
+    "command": "python.runCurrentFile",
+    "when": "editorLangId == 'python'"
+  },
+  {
+    "key": "ctrl+shift+t",
+    "command": "python.createTerminal",
+    "when": "resourceLangId == 'python'"
+  },
+  {
+    "key": "alt+shift+f",
+    "command": "python.runLinting",
+    "when": "editorLangId == 'python'"
+  },
+  {
+    "key": "ctrl+shift+d",
+    "command": "python.debugInTerminal",
+    "when": "editorLangId == 'python'"
+  },
+  {
+    "key": "ctrl+shift+b",
+    "command": "editor.action.formatDocument",
+    "when": "editorLangId == 'python'"
+  },
+  {
+    "key": "ctrl+shift+i",
+    "command": "python.sortImports",
+    "when": "editorLangId == 'python'"
+  }
+]

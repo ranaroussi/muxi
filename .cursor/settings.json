@@ -1,0 +1,37 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "editor.rulers": [79],
+  "editor.renderWhitespace": "trailing",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "editor.inlineSuggest.enabled": true,
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.tabSize": 4,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.linting.flake8Args": [
+    "--max-line-length=79",
+    "--ignore=E203,W503"
+  ],
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": [
+    "--line-length=79"
+  ],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true,
+    ".specstory": true
+  },
+  "search.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true,
+    ".specstory": true
+  }
+}
