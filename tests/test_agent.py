@@ -5,7 +5,8 @@ This module contains tests for the Agent class in the agent framework.
 """
 
 import unittest
-from unittest.mock import MagicMock, patch
+import asyncio
+from unittest.mock import MagicMock, patch, AsyncMock
 
 from src.core.agent import Agent
 from src.core.mcp import MCPMessage
@@ -25,6 +26,7 @@ class TestAgent(unittest.TestCase):
         }
 
         # Set up mock returns
+        self.mock_llm.chat = AsyncMock()
         self.mock_llm.chat.return_value = {
             "role": "assistant",
             "content": "I'm a helpful assistant."
@@ -54,8 +56,8 @@ class TestAgent(unittest.TestCase):
 
     def test_process_message(self):
         """Test processing a message."""
-        # Process a message
-        result = self.agent.process_message("Hello, agent!")
+        # Process a message asynchronously
+        result = asyncio.run(self.agent.process_message("Hello, agent!"))
 
         # Verify message was stored in memory
         self.mock_memory.add.assert_called_with(
@@ -100,8 +102,8 @@ class TestAgent(unittest.TestCase):
             content="The result is 4."
         )
 
-        # Process a message
-        result = self.agent.process_message("Calculate 2+2")
+        # Process a message asynchronously
+        result = asyncio.run(self.agent.process_message("Calculate 2+2"))
 
         # Verify handler was created and called
         mock_handler_class.assert_called_with(self.mock_llm, self.mock_tools)
