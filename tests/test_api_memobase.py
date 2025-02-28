@@ -11,7 +11,6 @@ from fastapi.testclient import TestClient
 
 from src.api.app import create_app
 from src.core.agent import Agent
-from src.core.mcp import MCPMessage
 
 
 @pytest.fixture
@@ -72,7 +71,8 @@ def test_create_agent_with_multi_user(
     mock_memobase_class, mock_long_term_memory_class, client, mock_orchestrator
 ):
     """Test creating an agent with multi-user support."""
-    # Set up mock orchestrator.get_agent to return None initially (agent doesn't exist)
+    # Set up mock orchestrator.get_agent to return None initially
+    # (agent doesn't exist)
     mock_orchestrator.get_agent.return_value = None
 
     # Set up mocks
@@ -82,7 +82,8 @@ def test_create_agent_with_multi_user(
     mock_memobase = MagicMock()
     mock_memobase_class.return_value = mock_memobase
 
-    # Set up mock orchestrator.create_agent to set has_agent to True after creation
+    # Set up mock orchestrator.create_agent to
+    # set has_agent to True after creation
     def side_effect(*args, **kwargs):
         mock_agent = MagicMock()
         # After creation, has_agent should return True for this agent
@@ -118,7 +119,8 @@ def test_create_agent_with_multi_user_integration(
     mock_memobase_class, mock_long_term_memory_class, client, mock_orchestrator
 ):
     """Test the integration between API, LongTermMemory, and Memobase."""
-    # Set up mock orchestrator.get_agent to return None initially (agent doesn't exist)
+    # Set up mock orchestrator.get_agent to return None initially
+    # (agent doesn't exist)
     mock_orchestrator.get_agent.return_value = None
 
     # Set up mocks
@@ -128,7 +130,8 @@ def test_create_agent_with_multi_user_integration(
     mock_memobase = MagicMock()
     mock_memobase_class.return_value = mock_memobase
 
-    # Set up mock orchestrator.create_agent to set has_agent to True after creation
+    # Set up mock orchestrator.create_agent to
+    # set has_agent to True after creation
     def side_effect(*args, **kwargs):
         mock_agent = MagicMock()
         # After creation, has_agent should return True for this agent
