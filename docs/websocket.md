@@ -18,7 +18,7 @@ WebSocket support in the AI Agent Framework:
 The framework includes a WebSocket server implementation:
 
 ```python
-# src/ui/api/websocket.py
+# src/api/websocket.py
 import asyncio
 import json
 import logging
@@ -221,11 +221,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str = None):
 To integrate the WebSocket server with FastAPI:
 
 ```python
-# src/ui/api/app.py
+# src/api/app.py
 from fastapi import FastAPI, WebSocket, Depends
 import uuid
 from src.core.orchestrator import Orchestrator
-from src.ui.api.websocket import websocket_endpoint, set_orchestrator
+from src.api.websocket import websocket_endpoint, set_orchestrator
 
 app = FastAPI(title="AI Agent Framework API")
 
