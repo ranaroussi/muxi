@@ -146,6 +146,32 @@ class MemorySearchResponse(BaseModel):
     )
 
 
+class ClearMemoryRequest(BaseModel):
+    """Model for clearing agent memory."""
+    agent_id: Optional[str] = Field(
+        None,
+        description="Agent ID to clear memories of (uses default if None)"
+    )
+    user_id: Optional[int] = Field(
+        0,
+        description="User ID for multi-user support (0 for single-user mode)"
+    )
+    clear_long_term: bool = Field(
+        False,
+        description="Whether to clear long-term memory (default: False)"
+    )
+
+
+class ClearMemoryResponse(BaseModel):
+    """Model for memory clear results."""
+    message: str = Field(..., description="Status message")
+    agent_id: str = Field(..., description="ID of the agent")
+    user_id: Optional[int] = Field(
+        0,
+        description="User ID of the requester"
+    )
+
+
 class AgentListResponse(BaseModel):
     """Model for listing agents."""
     agents: List[Dict[str, Any]] = Field(
@@ -464,6 +490,45 @@ def create_app() -> FastAPI:
             raise HTTPException(
                 status_code=500,
                 detail=f"Error searching memory: {str(e)}"
+            )
+
+    @app.post(
+        "/agents/memory/clear",
+        response_model=ClearMemoryResponse,
+        tags=["Memory"]
+    )
+    async def clear_memory_endpoint(request: ClearMemoryRequest):
+        """
+        Clear an agent's memory.
+        """
+        try:
+            agent_id = request.agent_id or config.agent.default_agent_id
+            agent = orchestrator.get_agent(agent_id)
+
+            if not agent:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Agent with ID '{agent_id}' not found"
+                )
+
+            # Clear memory
+            agent.clear_memory(
+                clear_long_term=request.clear_long_term,
+                user_id=request.user_id
+            )
+
+            return {
+                "message": "Memory cleared successfully",
+                "agent_id": agent_id,
+                "user_id": request.user_id
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error clearing memory: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error clearing memory: {str(e)}"
             )
 
     @app.get(

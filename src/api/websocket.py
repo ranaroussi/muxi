@@ -283,6 +283,11 @@ async def handle_chat_message(
     agent_id = message.get("agent_id")
     content = message.get("message")
 
+    logger.debug(
+        f"handle_chat_message: connection_id={connection_id}, "
+        f"agent_id={agent_id}, user_id={user_id}"
+    )
+
     if not agent_id or not content:
         await websocket.send_json({
             "type": "error",
@@ -307,6 +312,7 @@ async def handle_chat_message(
         })
 
         # Process the message
+        logger.debug(f"Calling agent.chat with user_id={user_id}")
         response = await agent.chat(content, user_id=user_id)
 
         # Send the response
@@ -356,6 +362,11 @@ async def handle_memory_search(
     limit = message.get("limit", 5)
     use_long_term = message.get("use_long_term", True)
 
+    logger.debug(
+        f"handle_memory_search: connection_id={connection_id}, "
+        f"agent_id={agent_id}, user_id={user_id}"
+    )
+
     if not agent_id or not query:
         await websocket.send_json({
             "type": "error",
@@ -374,6 +385,7 @@ async def handle_memory_search(
             return
 
         # Search memory
+        logger.debug(f"Calling agent.search_memory with user_id={user_id}")
         memories = await agent.search_memory(
             query=query,
             k=limit,

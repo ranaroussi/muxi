@@ -204,12 +204,9 @@ class Memobase:
         collection = f"user_{user_id}"
 
         # Get memories from the collection
-        memories = self.long_term_memory.get_memories(
+        memories = self.long_term_memory.get_recent_memories(
             collection=collection,
-            limit=limit,
-            offset=offset,
-            sort_by=sort_by,
-            ascending=ascending
+            limit=limit
         )
 
         return [
