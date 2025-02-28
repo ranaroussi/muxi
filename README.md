@@ -164,6 +164,8 @@ socket.onmessage = (event) => {
 - `chat`: Send a chat message
 - `ping`: Keep the connection alive
 - `set_user`: Set the user ID for this connection
+- `search_memory`: Search agent memory for relevant information
+- `clear_memory`: Clear agent memory for a specific user
 
 **Server to Client:**
 - `message`: Response from the agent
@@ -174,11 +176,13 @@ socket.onmessage = (event) => {
 ## Recent Improvements
 
 - **Multi-User Support**: Added Memobase for user-specific memory partitioning
+- **Memory Management**: Added endpoints for memory search and clearing, with support for user-specific operations
 - **Shared Orchestrator Instance**: Fixed issue with WebSocket and REST API using different orchestrator instances
 - **Enhanced Error Handling**: Improved error handling and reporting in WebSocket connections
 - **Message Serialization**: Fixed JSON serialization issues with MCPMessage objects
 - **Reliable Connection Management**: Implemented automatic reconnection and subscription recovery
 - **Documentation**: Added comprehensive documentation for all components
+- **Test Coverage**: Added extensive test coverage for all API endpoints, especially multi-user functionality
 
 ## Documentation
 

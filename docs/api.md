@@ -600,6 +600,36 @@ curl -X POST http://localhost:5050/agents/memory/search \
 # Results will include information about London
 ```
 
+### Clearing User-Specific Memory
+
+```bash
+# Clear Alice's buffer memory
+curl -X POST http://localhost:5050/agents/memory/clear \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "user_id": 123,
+    "clear_long_term": false
+  }'
+
+# Clear Bob's entire memory (buffer and long-term)
+curl -X POST http://localhost:5050/agents/memory/clear \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "user_id": 456,
+    "clear_long_term": true
+  }'
+
+# Clear default user memory
+curl -X POST http://localhost:5050/agents/memory/clear \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "multi_user_agent",
+    "clear_long_term": false
+  }'
+```
+
 ## Advanced API Usage
 
 ### Error Handling
@@ -746,6 +776,21 @@ class AIAgentClient:
         }
         response = requests.post(
             f"{self.base_url}/agents/memory/search",
+            headers=self.headers,
+            data=json.dumps(payload)
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def clear_memory(self, agent_id, user_id=0, clear_long_term=False):
+        """Clear an agent's memory."""
+        payload = {
+            "agent_id": agent_id,
+            "user_id": user_id,
+            "clear_long_term": clear_long_term
+        }
+        response = requests.post(
+            f"{self.base_url}/agents/memory/clear",
             headers=self.headers,
             data=json.dumps(payload)
         )
@@ -909,6 +954,26 @@ class AIAgentClient {
         };
 
         const response = await fetch(`${this.baseUrl}/agents/memory/search`, {
+            method: 'POST',
+            headers: this.headers,
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    }
+
+    async clearMemory(agentId, userId = 0, clearLongTerm = false) {
+        const payload = {
+            agent_id: agentId,
+            user_id: userId,
+            clear_long_term: clearLongTerm
+        };
+
+        const response = await fetch(`${this.baseUrl}/agents/memory/clear`, {
             method: 'POST',
             headers: this.headers,
             body: JSON.stringify(payload)

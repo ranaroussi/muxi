@@ -376,6 +376,32 @@ class AgentWebSocketClient {
             this.socket.close();
         }
     }
+
+    searchMemory(agentId, query, limit = 5, useLongTerm = true) {
+        if (!this.connected) {
+            throw new Error('WebSocket is not connected');
+        }
+
+        this.sendMessage({
+            type: 'search_memory',
+            agent_id: agentId,
+            query: query,
+            limit: limit,
+            use_long_term: useLongTerm
+        });
+    }
+
+    clearMemory(agentId, clearLongTerm = false) {
+        if (!this.connected) {
+            throw new Error('WebSocket is not connected');
+        }
+
+        this.sendMessage({
+            type: 'clear_memory',
+            agent_id: agentId,
+            clear_long_term: clearLongTerm
+        });
+    }
 }
 
 // Usage example
@@ -619,6 +645,43 @@ The WebSocket protocol supports several message types:
    ```json
    {
      "type": "ping"
+   }
+   ```
+
+4. **set_user**
+   - Set the user ID for this connection
+   - Parameters: `user_id`
+
+   ```json
+   {
+     "type": "set_user",
+     "user_id": 123
+   }
+   ```
+
+5. **search_memory**
+   - Search agent memory for a query
+   - Parameters: `agent_id`, `query`, `limit`, `use_long_term`
+
+   ```json
+   {
+     "type": "search_memory",
+     "agent_id": "my_agent",
+     "query": "What did we discuss yesterday?",
+     "limit": 5,
+     "use_long_term": true
+   }
+   ```
+
+6. **clear_memory**
+   - Clear agent memory for a specific user
+   - Parameters: `agent_id`, `clear_long_term`
+
+   ```json
+   {
+     "type": "clear_memory",
+     "agent_id": "my_agent",
+     "clear_long_term": false
    }
    ```
 
@@ -949,6 +1012,18 @@ class AgentWebSocket {
       query: query,
       limit: limit,
       use_long_term: useLongTerm
+    });
+  }
+
+  clearMemory(agentId, clearLongTerm = false) {
+    if (!this.isConnected) {
+      throw new Error('WebSocket is not connected');
+    }
+
+    this.send({
+      type: 'clear_memory',
+      agent_id: agentId,
+      clear_long_term: clearLongTerm
     });
   }
 
