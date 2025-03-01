@@ -291,8 +291,10 @@ function Chat() {
     if (!selectedAgentId) return;
 
     try {
-      const response = await createAgent({
+      // Create the agent
+      await createAgent({
         agent_id: selectedAgentId,
+        llm_model: "gpt-4o",
         system_message: "You are a helpful AI assistant."
       });
 

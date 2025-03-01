@@ -15,7 +15,7 @@ from src.api.websocket import (
     handle_chat_message,
     handle_memory_search,
     connection_user_id,
-    update_activity
+    update_activity,
 )
 
 
@@ -35,14 +35,16 @@ def mock_agent():
     """Create a mock agent for testing."""
     agent = MagicMock()
     agent.chat = AsyncMock(return_value="I'm a helpful assistant.")
-    agent.search_memory = AsyncMock(return_value=[
-        {
-            "content": "User-specific memory content",
-            "metadata": {"user_id": 123},
-            "source": "memobase",
-            "distance": 0.8
-        }
-    ])
+    agent.search_memory = AsyncMock(
+        return_value=[
+            {
+                "content": "User-specific memory content",
+                "metadata": {"user_id": 123},
+                "source": "memobase",
+                "distance": 0.8,
+            }
+        ]
+    )
     return agent
 
 
@@ -55,18 +57,15 @@ def mock_orchestrator(mock_agent):
 
 
 @patch("src.api.websocket._orchestrator")
-async def test_set_user_id_message(
-    mock_orchestrator_global, mock_websocket
-):
+async def test_set_user_id_message(mock_orchestrator_global, mock_websocket):
     """Test setting user_id via WebSocket message."""
     # Set up mock to receive a set_user message
-    connection_id = "test_connection"
     mock_websocket.receive_text.side_effect = [
         json.dumps({"type": "set_user", "user_id": 123}),
-        Exception("Stop test")  # To exit the loop
+        Exception("Stop test"),  # To exit the loop
     ]
 
-    # Call handle_websocket (which will exit after the first message due to exception)
+    # Test the WebSocket handler, will exit after first message
     try:
         await handle_websocket(mock_websocket)
     except Exception as e:
@@ -108,14 +107,11 @@ async def test_handle_chat_message_with_user_id(
         connection_id,
         mock_websocket,
         {"agent_id": "test_agent", "message": "Hello, assistant!"},
-        user_id=123
+        user_id=123,
     )
 
     # Verify agent.chat was called with user_id
-    mock_agent.chat.assert_called_with(
-        "Hello, assistant!",
-        user_id=123
-    )
+    mock_agent.chat.assert_called_with("Hello, assistant!", user_id=123)
 
     # Verify appropriate messages were sent
     thinking_call = False
@@ -152,14 +148,11 @@ async def test_handle_chat_message_without_user_id(
     await handle_chat_message(
         connection_id,
         mock_websocket,
-        {"agent_id": "test_agent", "message": "Hello, assistant!"}
+        {"agent_id": "test_agent", "message": "Hello, assistant!"},
     )
 
     # Verify agent.chat was called with default user_id (0)
-    mock_agent.chat.assert_called_with(
-        "Hello, assistant!",
-        user_id=0
-    )
+    mock_agent.chat.assert_called_with("Hello, assistant!", user_id=0)
 
     # Verify appropriate messages were sent with default user_id
     message_sent = False
@@ -167,7 +160,7 @@ async def test_handle_chat_message_without_user_id(
         args, kwargs = call
         message = args[0]
         if (message.get("type") == "message" and
-            message.get("user_id", None) == 0):
+                message.get("user_id", None) == 0):
             message_sent = True
             break
 
@@ -190,19 +183,13 @@ async def test_handle_memory_search_with_user_id(
     await handle_memory_search(
         connection_id,
         mock_websocket,
-        {
-            "agent_id": "test_agent",
-            "query": "What did we discuss?"
-        },
-        user_id=123
+        {"agent_id": "test_agent", "query": "What did we discuss?"},
+        user_id=123,
     )
 
     # Verify agent.search_memory was called with user_id
     mock_agent.search_memory.assert_called_with(
-        query="What did we discuss?",
-        k=5,
-        use_long_term=True,
-        user_id=123
+        query="What did we discuss?", k=5, use_long_term=True, user_id=123
     )
 
     # Verify appropriate response was sent
@@ -211,7 +198,7 @@ async def test_handle_memory_search_with_user_id(
         args, kwargs = call
         message = args[0]
         if (message.get("type") == "memory_results" and
-            message.get("user_id") == 123):
+                message.get("user_id") == 123):
             response_sent = True
             break
 
@@ -235,18 +222,12 @@ async def test_handle_memory_search_without_user_id(
     await handle_memory_search(
         connection_id,
         mock_websocket,
-        {
-            "agent_id": "test_agent",
-            "query": "What did we discuss?"
-        }
+        {"agent_id": "test_agent", "query": "What did we discuss?"},
     )
 
     # Verify agent.search_memory was called with default user_id (0)
     mock_agent.search_memory.assert_called_with(
-        query="What did we discuss?",
-        k=5,
-        use_long_term=True,
-        user_id=0
+        query="What did we discuss?", k=5, use_long_term=True, user_id=0
     )
 
     # Verify appropriate response was sent with default user_id
@@ -254,8 +235,10 @@ async def test_handle_memory_search_without_user_id(
     for call in mock_websocket.send_json.call_args_list:
         args, kwargs = call
         message = args[0]
-        if (message.get("type") == "memory_results" and
-            message.get("user_id", None) == 0):
+        if (
+            message.get("type") == "memory_results"
+            and message.get("user_id", None) == 0
+        ):
             response_sent = True
             break
 
@@ -272,5 +255,6 @@ async def test_websocket_connection_activity_tracking():
 
     # Check if connection_id is in connection_last_activity
     from src.api.websocket import connection_last_activity
+
     assert connection_id in connection_last_activity
     assert isinstance(connection_last_activity[connection_id], float)

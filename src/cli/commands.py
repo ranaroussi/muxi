@@ -63,7 +63,7 @@ def api(host: str, port: int, reload: bool):
 @cli_main.command()
 def run():
     """Run both the API server and web UI."""
-    from src.run import main
+    from src.__main__ import main
     main()
 
 

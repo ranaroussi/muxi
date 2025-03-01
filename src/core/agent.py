@@ -33,7 +33,7 @@ class Agent:
         memobase: Optional[Memobase] = None,
         tools: Optional[Dict[str, BaseTool]] = None,
         system_message: Optional[str] = None,
-        name: Optional[str] = None
+        name: Optional[str] = None,
     ):
         """
         Initialize an agent.
@@ -68,8 +68,7 @@ class Agent:
             self.tools = tools  # Store as dictionary for test compatibility
         else:
             self.tools = {
-                tool.name: tool for tool in (tools or [])
-                if hasattr(tool, 'name')
+                tool.name: tool for tool in (tools or []) if hasattr(tool, "name")
             }
 
         self.system_message = system_message or (
@@ -81,9 +80,7 @@ class Agent:
         # Test expects it called during process_message
 
     async def process_message(
-        self,
-        message: str,
-        user_id: Optional[int] = None
+        self, message: str, user_id: Optional[int] = None
     ) -> MCPMessage:
         """
         Process a user message and generate a response.
@@ -99,17 +96,14 @@ class Agent:
         timestamp = datetime.datetime.now().timestamp()
 
         # Add message to memory systems
-        self.memory.add(
-            message,
-            {"role": "user", "timestamp": timestamp}
-        )
+        self.memory.add(message, {"role": "user", "timestamp": timestamp})
 
         # If using memobase, also store there with user context
         if self.memobase and user_id is not None:
             await self.memobase.add(
                 content=message,
                 metadata={"role": "user", "timestamp": timestamp},
-                user_id=user_id
+                user_id=user_id,
             )
 
         # Generate response using LLM - needs to be awaited
@@ -119,16 +113,14 @@ class Agent:
         handler = MCPHandler(self.llm, self.tools)
 
         # If there are tool calls, process them
-        if hasattr(response, 'get') and response.get("tool_calls"):
+        if hasattr(response, "get") and response.get("tool_calls"):
             # Create message with tool calls
             content = response.get("content")
             tool_calls = response.get("tool_calls")
             # Store tool calls in the context
             context = {"tool_calls": tool_calls}
             assistant_message = MCPMessage(
-                role="assistant",
-                content=content if content else "",
-                context=context
+                role="assistant", content=content if content else "", context=context
             )
 
             # Process the message with the handler
@@ -139,27 +131,25 @@ class Agent:
                 await self.memobase.add(
                     content=result.content,
                     metadata={"role": "assistant", "timestamp": timestamp},
-                    user_id=user_id
+                    user_id=user_id,
                 )
 
             return result
 
         # Store assistant response in memobase if available
-        response_content = (response if isinstance(response, str)
-                           else "I'm a helpful assistant.")
+        response_content = (
+            response if isinstance(response, str) else "I'm a helpful assistant."
+        )
 
         if self.memobase and user_id is not None:
             await self.memobase.add(
                 content=response_content,
                 metadata={"role": "assistant", "timestamp": timestamp},
-                user_id=user_id
+                user_id=user_id,
             )
 
         # Return response as MCPMessage
-        return MCPMessage(
-            role="assistant",
-            content=response_content
-        )
+        return MCPMessage(role="assistant", content=response_content)
 
     def get_memory(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """
@@ -187,16 +177,9 @@ class Agent:
         """
         # For test compatibility, return a simple message dictionary
         # with a hardcoded timestamp that the test expects
-        return {
-            "role": "user",
-            "timestamp": 1234567890
-        }
+        return {"role": "user", "timestamp": 1234567890}
 
-    async def run(
-        self,
-        input_text: str,
-        use_memory: bool = True
-    ) -> str:
+    async def run(self, input_text: str, use_memory: bool = True) -> str:
         """
         Run the agent on an input text.
 
@@ -208,10 +191,7 @@ class Agent:
             The agent's response.
         """
         # Create user message
-        user_message = MCPMessage(
-            role="user",
-            content=input_text
-        )
+        user_message = MCPMessage(role="user", content=input_text)
 
         # Process message
         response = await self.mcp_handler.process_message(user_message)
@@ -222,11 +202,7 @@ class Agent:
 
         return response.content
 
-    async def _store_in_memory(
-        self,
-        input_text: str,
-        response_text: str
-    ) -> None:
+    async def _store_in_memory(self, input_text: str, response_text: str) -> None:
         """
         Store the interaction in memory.
 
@@ -246,8 +222,8 @@ class Agent:
             metadata={
                 "input": input_text,
                 "response": response_text,
-                "type": "conversation"
-            }
+                "type": "conversation",
+            },
         )
 
         # Store in long-term memory if available
@@ -259,8 +235,8 @@ class Agent:
                 metadata={
                     "input": input_text,
                     "response": response_text,
-                    "type": "conversation"
-                }
+                    "type": "conversation",
+                },
             )
 
     async def search_memory(
@@ -268,7 +244,7 @@ class Agent:
         query: str,
         k: int = 5,
         use_long_term: bool = True,
-        user_id: Optional[int] = None
+        user_id: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """
         Search the agent's memory for relevant information.
@@ -284,32 +260,24 @@ class Agent:
         """
         # If memobase is available and user_id is provided, use it
         if self.memobase and user_id is not None:
-            return await self.memobase.search(
-                query=query,
-                limit=k,
-                user_id=user_id
-            )
+            return await self.memobase.search(query=query, limit=k, user_id=user_id)
 
         # Otherwise, fall back to traditional memory search
         # Get embedding for query
         query_embedding = await self.llm.embed(query)
 
         # Search buffer memory
-        buffer_results = self.buffer_memory.search(
-            query_vector=query_embedding,
-            k=k
-        )
+        buffer_results = self.buffer_memory.search(query_vector=query_embedding, k=k)
 
         # Convert to standard format
         results = [
             {
                 "text": (
-                    f"User: {item[1]['input']}\n"
-                    f"Assistant: {item[1]['response']}"
+                    f"User: {item[1]['input']}\n" f"Assistant: {item[1]['response']}"
                 ),
                 "metadata": item[1],
                 "distance": item[0],
-                "source": "buffer"
+                "source": "buffer",
             }
             for item in buffer_results
         ]
@@ -317,21 +285,21 @@ class Agent:
         # Search long-term memory if available and enabled
         if self.long_term_memory and use_long_term:
             lt_results = await asyncio.to_thread(
-                self.long_term_memory.search,
-                query_embedding=query_embedding,
-                k=k
+                self.long_term_memory.search, query_embedding=query_embedding, k=k
             )
 
             # Add to results
-            results.extend([
-                {
-                    "text": item[1]["text"],
-                    "metadata": item[1]["metadata"],
-                    "distance": item[0],
-                    "source": "long_term"
-                }
-                for item in lt_results
-            ])
+            results.extend(
+                [
+                    {
+                        "text": item[1]["text"],
+                        "metadata": item[1]["metadata"],
+                        "distance": item[0],
+                        "source": "long_term",
+                    }
+                    for item in lt_results
+                ]
+            )
 
             # Sort by distance
             results.sort(key=lambda x: x["distance"])
@@ -386,9 +354,7 @@ class Agent:
 
             # Update context with removed tool
             context = self.mcp_handler.context
-            context.tools = [
-                t for t in context.tools if t["name"] != tool_name
-            ]
+            context.tools = [t for t in context.tools if t["name"] != tool_name]
             self.mcp_handler.set_context(context)
 
             return True
@@ -396,9 +362,7 @@ class Agent:
         return False
 
     def clear_memory(
-        self,
-        clear_long_term: bool = False,
-        user_id: Optional[int] = None
+        self, clear_long_term: bool = False, user_id: Optional[int] = None
     ) -> None:
         """
         Clear the agent's memory.
@@ -421,7 +385,7 @@ class Agent:
             # Create a new default collection
             self.long_term_memory.create_collection(
                 self.long_term_memory.default_collection,
-                "Default collection for memories"
+                "Default collection for memories",
             )
 
     def get_available_tools(self) -> List[Dict[str, Any]]:
@@ -433,11 +397,7 @@ class Agent:
         """
         return tool_registry.get_schema()["tools"]
 
-    async def chat(
-        self,
-        message: str,
-        user_id: Optional[int] = None
-    ) -> str:
+    async def chat(self, message: str, user_id: Optional[int] = None) -> str:
         """
         Process a user message and return a response.
 
@@ -456,7 +416,7 @@ class Agent:
         # We can't access tool calls directly since we don't store the handler
 
         # If we have a buffer memory, store the interaction
-        if hasattr(self, 'buffer_memory') and self.buffer_memory:
+        if hasattr(self, "buffer_memory") and self.buffer_memory:
             # Since _store_in_memory is async, we need to create a no-op
             # version for the purpose of the chat interface
             # In a real implementation, this should be properly awaited
