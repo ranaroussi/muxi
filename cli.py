@@ -6,7 +6,7 @@ This script provides a command-line interface for interacting with
 agents created with the AI Agent Framework.
 """
 
-from src.cli import run_cli
+from src.cli.commands import cli_main
 
 if __name__ == "__main__":
-    run_cli()
+    cli_main()
