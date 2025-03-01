@@ -225,6 +225,9 @@ Comprehensive documentation is available in the `docs` directory:
 - [Modern Control Protocol (MCP)](docs/mcp.md)
 - [WebSocket Implementation](docs/websocket.md)
 - [REST API Documentation](docs/api.md)
+- [CLI Documentation](docs/cli.md)
+- [Architecture](docs/architecture.md)
+- [Agents vs Orchestrators](docs/agents-vs-orchestrators.md)
 
 ## Contributing
 
