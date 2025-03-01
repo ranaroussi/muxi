@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || '',
+  baseURL: process.env.BACKEND_API_URL || '',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -47,7 +47,7 @@ export const fetchTools = () => api.get('/tools');
 // WebSocket connection
 export const createWebSocketConnection = (onMessage, onOpen, onClose, onError) => {
   // Determine API host and port from environment variable or fallback
-  const apiUrl = process.env.REACT_APP_API_URL || window.location.origin;
+  const apiUrl = process.env.BACKEND_API_URL || window.location.origin;
 
   // Parse the API URL to get the hostname and port
   let apiHost, apiPort;

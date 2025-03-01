@@ -22,7 +22,7 @@ function Settings() {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [settings, setSettings] = useState({
-    apiUrl: process.env.REACT_APP_API_URL || window.location.origin,
+    apiUrl: process.env.BACKEND_API_URL || window.location.origin,
     enableNotifications: true,
     enableAutoReconnect: true,
     darkMode: false,

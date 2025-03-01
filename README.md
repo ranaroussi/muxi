@@ -122,11 +122,11 @@ python -m src.api.run --host 0.0.0.0 --port 5050
 
 > **Note:** The WebSocket server runs on the same port as the API server. When you change the API port, the WebSocket port changes too.
 
-When running the frontend on a different server, update the `REACT_APP_API_URL` in `src/web/.env`:
+When running the frontend on a different server, update the `BACKEND_API_URL` in `src/web/.env`:
 
 ```
 # Replace with your API server's IP or domain name
-REACT_APP_API_URL=http://your-server-ip:5050
+BACKEND_API_URL=http://your-server-ip:5050
 ```
 
 Create a new agent:

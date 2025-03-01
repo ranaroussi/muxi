@@ -40,11 +40,11 @@ A modern web dashboard for interacting with the AI Agent Framework.
 3. Create a `.env` file (optional):
    ```
    # Replace with your API server's address (IP or FQDN) including the port
-   REACT_APP_API_URL=http://localhost:5050
+   BACKEND_API_URL=http://localhost:5050
 
    # Examples:
-   # REACT_APP_API_URL=http://192.168.1.100:5050
-   # REACT_APP_API_URL=http://api.yourdomain.com:8000
+   # BACKEND_API_URL=http://192.168.1.100:5050
+   # BACKEND_API_URL=http://api.yourdomain.com:8000
    ```
 
 4. Start the development server:
@@ -68,7 +68,7 @@ This will create a `build` directory with optimized production files.
 
 You can configure the dashboard using the following environment variables:
 
-- `REACT_APP_API_URL`: URL of the AI Agent Framework API (defaults to the same host as the dashboard)
+- `BACKEND_API_URL`: URL of the AI Agent Framework API (defaults to the same host as the dashboard)
 
 ## Deployment
 
