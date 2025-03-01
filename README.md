@@ -219,6 +219,7 @@ socket.onmessage = (event) => {
 Comprehensive documentation is available in the `docs` directory:
 
 ### Overview
+- [Framework Overview](docs/overview.md)
 - [Architecture](docs/architecture.md)
 - [Agent Guide](docs/agent.md)
 - [Orchestrator Documentation](docs/orchestrator.md)
