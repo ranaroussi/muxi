@@ -143,6 +143,3 @@ logs/
 .playwright-cache/
 .specstory/
 .specstory/
-
-# Personal notes
-NEXT_STEPS.md
