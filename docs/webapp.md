@@ -38,6 +38,7 @@ A modern web dashboard for interacting with the AI Agent Framework.
    ```
 
 3. Create a `.env` file (optional):
+
    ```
    # Replace with your API server's address (IP or FQDN) including the port
    BACKEND_API_URL=http://localhost:5050
@@ -74,9 +75,10 @@ You can configure the dashboard using the following environment variables:
 
 ### With the AI Agent Framework
 
-The dashboard can be served by the AI Agent Framework API server. To do this:
+The AI Agent Framework API server can serve the dashboard. To do this:
 
 1. Build the dashboard:
+2.
    ```bash
    npm run build
    ```
@@ -118,6 +120,3 @@ src/
 2. **API Endpoints**: Add new API endpoints in `services/api.js`
 3. **WebSocket Events**: Handle new WebSocket events in `hooks/useWebSocket.js`
 
-## License
-
-This project is part of the AI Agent Framework and is licensed under the same terms.

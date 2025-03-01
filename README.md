@@ -218,21 +218,25 @@ socket.onmessage = (event) => {
 
 Comprehensive documentation is available in the `docs` directory:
 
+### Overview
+- [Architecture](docs/architecture.md)
 - [Agent Guide](docs/agent.md)
 - [Orchestrator Documentation](docs/orchestrator.md)
 - [Memory Systems](docs/memory.md)
 - [Tool System](docs/tools.md)
 - [Modern Control Protocol (MCP)](docs/mcp.md)
-- [WebSocket Implementation](docs/websocket.md)
-- [REST API Documentation](docs/api.md)
+- [Agents vs Tools](docs/agents-vs-tools.md)
+
+### Interfaces
 - [CLI Documentation](docs/cli.md)
-- [Architecture](docs/architecture.md)
-- [Agents vs Orchestrators](docs/agents-vs-orchestrators.md)
+- [Webapp Documentation](docs/webapp.md)
+- [REST API Documentation](docs/api.md)
+- [WebSocket Implementation](docs/websocket.md)
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! This project relies on the community to investigate bugs, review code, and contribute code. Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE.txt) file for details.
