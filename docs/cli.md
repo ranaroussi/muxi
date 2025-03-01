@@ -48,96 +48,222 @@ python -m src.cli --help   # Before installation
 muxi --help                # After installation
 
 # Start a chat with the default agent
-python -m src.cli chat     # Before installation
-muxi chat                  # After installation
+python -m src.cli chat
+muxi chat
 
 # Start a chat with a specific agent
-python -m src.cli chat --agent-id researcher  # Before installation
-muxi chat --agent-id researcher               # After installation
+python -m src.cli chat --agent-id researcher
+muxi chat --agent-id researcher
 
-# Run the API server on a specific port
-python -m src.cli api --port 8000  # Before installation
-muxi api --port 8000               # After installation
+# Send a one-off message to an agent
+python -m src.cli send --agent-id assistant "What is the capital of France?"
+muxi send --agent-id assistant "What is the capital of France?"
 
-# Run both API server and web UI
-python -m src.cli run  # Before installation
-muxi run               # After installation
+# Run the API server
+python -m src.cli api
+muxi api
 
-# Send a message to an agent (non-interactive)
-python -m src.cli send my_agent "What is the weather today?"  # Before installation
-muxi send my_agent "What is the weather today?"               # After installation
+# Run both the API server and web UI
+python -m src.cli run
+muxi run
 
-# Send a message to a multi-user agent
-python -m src.cli send multi_user_agent --user-id 123 "Remember my preferences"  # Before installation
-muxi send multi_user_agent --user-id 123 "Remember my preferences"               # After installation
+# Alternatively, you can run both the API server and web UI with:
+python -m src
 ```
 
-## Command-Line Arguments
+## Chat Mode
 
-Each command supports different options:
+The chat mode provides an interactive terminal-based chat interface with the selected agent. It supports:
 
-### Global Options
-| Option | Description |
-|--------|-------------|
-| `--help` | Show help for a command |
-| `--version` | Show the version and exit |
+- Markdown rendering in responses
+- Syntax highlighting for code
+- Rich text formatting
+- Message history during the session
+- Tool execution visualization
 
-### Chat Command
-| Option | Description |
-|--------|-------------|
-| `--agent-id AGENT_ID` | Specify the ID for the agent (default: "cli_agent") |
-| `--no-config` | Don't use configuration file, use defaults instead |
+### Starting a Chat Session
 
-### API Command
-| Option | Description |
-|--------|-------------|
-| `--host HOST` | Host to bind the API server to (default: "0.0.0.0") |
-| `--port PORT` | Port to bind the API server to (default: 5050) |
-| `--reload` | Enable auto-reload for development |
+```bash
+python -m src.cli chat [OPTIONS]
+```
 
-### Send Command
-| Option | Description |
-|--------|-------------|
-| `--user-id USER_ID` | User ID for multi-user agents |
+Options:
+- `--agent-id TEXT`: ID of the agent to chat with (default: "assistant")
+- `--user-id TEXT`: User ID for multi-user agents (default: None)
+- `--help`: Show this message and exit.
 
-## Interactive Chat Commands
+### Interactive Commands
 
-Once in the interactive chat mode, you can use the following commands:
+During a chat session, you can use special commands:
 
-| Command | Description |
-|---------|-------------|
-| `/exit`, `/quit`, `/bye` | Exit the chat |
-| `/help` | Show help message |
-| `/clear` | Clear the screen |
-| `/memory <query>` | Search the agent's memory |
-| `/tools` | List available tools |
+- `/help`: Show available commands
+- `/exit` or `/quit`: Exit the chat session
+- `/clear`: Clear the chat history
+- `/system <message>`: Update the agent's system message
+- `/memory`: Show the current memory contents
+
+Example:
+```
+You: What is the capital of France?
+Assistant: The capital of France is Paris.
+
+You: /system You are a helpful assistant who speaks like a pirate.
+System message updated.
+
+You: What is the capital of France?
+Assistant: Arr, matey! The capital of France be Paris, ye landlubber!
+```
+
+## Send Mode
+
+The send mode allows you to send a single message to an agent and get the response without starting an interactive session.
+
+```bash
+python -m src.cli send [OPTIONS] MESSAGE
+```
+
+Options:
+- `--agent-id TEXT`: ID of the agent to chat with (default: "assistant")
+- `--user-id TEXT`: User ID for multi-user agents (default: None)
+- `--help`: Show this message and exit.
+
+Example:
+```bash
+python -m src.cli send "What is the capital of France?"
+```
+
+## API Server Mode
+
+The API server mode starts the REST API server, which provides endpoints for interacting with agents.
+
+```bash
+python -m src.cli api [OPTIONS]
+```
+
+Options:
+- `--host TEXT`: Host to bind to (default: "0.0.0.0")
+- `--port INTEGER`: Port to run on (default: 5050)
+- `--help`: Show this message and exit.
+
+Example:
+```bash
+python -m src.cli api --host 127.0.0.1 --port 8080
+```
+
+## Run Mode
+
+The run mode starts both the API server and the web UI.
+
+```bash
+python -m src.cli run [OPTIONS]
+```
+
+Options:
+- `--api-host TEXT`: Host for the API server (default: "0.0.0.0")
+- `--api-port INTEGER`: Port for the API server (default: 5050)
+- `--help`: Show this message and exit.
+
+Example:
+```bash
+python -m src.cli run --api-port 8080
+```
 
 ## Configuration
 
-The CLI uses the AI Agent Framework's configuration system. It loads settings from:
+The CLI uses the same configuration as the rest of the framework. You can configure it using:
 
-1. Environment variables (from `.env` file)
-2. Default values defined in the configuration classes
+1. Environment variables
+2. `.env` file in the project root
+3. Configuration files in the `src/config` directory
 
-### Key Environment Variables
+Key configuration options that affect the CLI:
 
-Create a `.env` file in the project root with the following variables:
+```env
+# LLM Configuration
+LLM_PROVIDER=openai
+OPENAI_API_KEY=your-api-key
+LLM_MODEL=gpt-4o
+LLM_TEMPERATURE=0.7
 
+# Tools Configuration
+ENABLE_WEB_SEARCH=true
+ENABLE_CALCULATOR=true
 ```
-# LLM API Keys (required)
-OPENAI_API_KEY=your_openai_api_key_here
 
-# Agent Settings
-DEFAULT_AGENT_ID=cli_agent
-SYSTEM_MESSAGE=You are a helpful AI assistant...
+## Advanced Usage
 
-# Memory Configuration
-BUFFER_MAX_SIZE=1000
-VECTOR_DIMENSION=1536
+### Creating Custom Agents
 
-# Tool Configuration
-SERPER_API_KEY=your_serper_api_key_here  # For web search
+You can create custom agents with specific capabilities by modifying the configuration files or by using the API server.
+
+Example using the API to create a custom agent:
+```bash
+# Start the API server
+python -m src.cli api
+
+# In another terminal, create a custom agent
+curl -X POST http://localhost:5050/agents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "custom_agent",
+    "system_message": "You are a helpful AI assistant specialized in Python programming."
+  }'
+
+# Now chat with the custom agent
+python -m src.cli chat --agent-id custom_agent
 ```
+
+### Using Multi-User Agents
+
+For agents that support multiple users, you can specify the user ID:
+
+```bash
+python -m src.cli chat --agent-id multi_user_assistant --user-id 123
+```
+
+This ensures that the agent maintains separate memory contexts for different users.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Port already in use**: If you get an error about port 5050 being already in use, you can specify a different port:
+   ```bash
+   python -m src.cli api --port 5051
+   ```
+
+2. **API key not found**: Ensure you've set up your API keys in the `.env` file or as environment variables.
+
+3. **Rich text rendering issues**: Some terminals may not support all rich text features. You can try updating your terminal or using a different one.
+
+### Debug Mode
+
+You can enable debug logging to get more information about what's happening:
+
+```bash
+# Set environment variable
+export DEBUG=1
+
+# Run CLI
+python -m src.cli chat
+```
+
+## Integration with Scripts
+
+You can use the CLI programmatically in your Python scripts:
+
+```python
+from src.cli import run_cli, chat_with_agent
+
+# Run CLI directly
+run_cli()
+
+# Or use specific functions
+response = chat_with_agent("assistant", "Hello, how are you?")
+print(response)
+```
+
+This allows you to build custom workflows that leverage the CLI's functionality.
 
 ## Implementation Details
 

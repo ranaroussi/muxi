@@ -11,6 +11,7 @@ A powerful, extensible framework for building AI agents with real-time communica
 - **Tool Integration**: Extensible tool system with built-in utilities and custom tool support
 - **Real-Time Communication**: WebSocket support for instant messaging and streaming responses
 - **REST API**: Comprehensive API for managing agents, tools, and conversations
+- **Command Line Interface**: Rich terminal-based interface for creating and interacting with agents
 - **Reliable Message Handling**: Robust error handling and automatic reconnection mechanisms
 
 ## Installation
@@ -72,6 +73,35 @@ print(response)
 # Chat with a multi-user agent (specify user_id)
 response = orchestrator.chat("multi_user_assistant", "Remember that my name is Alice", user_id=123)
 print(response)
+```
+
+## Using the Command Line Interface
+
+The framework includes a rich CLI for interacting with agents directly from your terminal:
+
+```bash
+# Start the CLI (before package installation)
+python -m src.cli
+
+# Start a chat session with an agent
+python -m src.cli chat --agent-id assistant
+
+# Send a one-off message to an agent
+python -m src.cli send --agent-id assistant "What is the capital of France?"
+
+# Start the API server
+python -m src.cli api
+
+# Start both API server and web UI
+python -m src.cli run
+# or simply
+python -m src
+```
+
+After installing the package, you can use the `muxi` command instead:
+
+```bash
+muxi chat --agent-id assistant
 ```
 
 ## Architecture
