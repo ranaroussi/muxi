@@ -409,7 +409,7 @@ class Agent:
             The agent's response as a string.
         """
         # Use process_message which is now async
-        response = await self.process_message(message, user_id)
+        response = await self.process_message(message, user_id=user_id)
 
         # Track tools used for UI reporting
         self.last_used_tools = []

@@ -1,31 +1,25 @@
 """
-WebSocket module for real-time communication with AI agents.
+WebSocket implementation for the AI Agent Framework.
 
 This module provides WebSocket endpoints for real-time interaction with
 agents created with the AI Agent Framework.
 """
 
 import asyncio
-import logging
-import uuid
 import json
 import time
-from typing import Dict, Set, Any
+import uuid
+from typing import Dict, Set, Any, Optional
+import threading
 
-from fastapi import WebSocket, WebSocketDisconnect, FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from contextlib import asynccontextmanager
+from loguru import logger
 
 from src.core.orchestrator import Orchestrator
 
 # This will be set by register_websocket_routes
-_orchestrator = None
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger("websocket")
-
+_orchestrator: Optional[Orchestrator] = None
 
 # Global connection tracking
 connected_websockets: Dict[str, WebSocket] = {}
@@ -34,6 +28,12 @@ agent_connections: Dict[str, Set[str]] = {}
 connection_last_activity: Dict[str, float] = {}
 # Track user_id for each connection
 connection_user_id: Dict[str, int] = {}
+
+# Lock for thread-safe operations
+_lock = threading.Lock()
+
+# Connection timeout in seconds (5 minutes)
+CONNECTION_TIMEOUT = 5 * 60
 
 
 # Get agent function
@@ -236,7 +236,7 @@ async def handle_websocket(websocket: WebSocket):
 
 def register_websocket_routes(app: FastAPI, orchestrator: Orchestrator):
     """
-    Register WebSocket routes with the FastAPI application.
+    Register WebSocket routes with the FastAPI app.
 
     Args:
         app: The FastAPI application
@@ -246,10 +246,17 @@ def register_websocket_routes(app: FastAPI, orchestrator: Orchestrator):
     global _orchestrator
     _orchestrator = orchestrator
 
-    # Start the connection timeout checker task
-    @app.on_event("startup")
-    async def start_timeout_checker():
-        asyncio.create_task(check_connection_timeouts())
+    # Define lifespan context manager for startup/shutdown events
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Startup: create background task for timeout checking
+        timeout_task = asyncio.create_task(check_connection_timeouts())
+        yield
+        # Shutdown: cancel the background task if needed
+        timeout_task.cancel()
+
+    # Apply the lifespan context manager to the app
+    app.router.lifespan_context = lifespan
 
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket):

@@ -11,8 +11,7 @@ from sqlalchemy import (
     create_engine, Column, Integer, String,
     DateTime, Text, select, func, desc
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 from pgvector.sqlalchemy import Vector
 from loguru import logger

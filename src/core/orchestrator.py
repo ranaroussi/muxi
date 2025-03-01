@@ -12,6 +12,7 @@ from loguru import logger
 from src.llm.base import BaseLLM
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
+from src.memory.memobase import Memobase
 from src.tools.base import BaseTool, ToolRegistry
 from src.core.agent import Agent
 from src.core.mcp import MCPMessage
@@ -38,6 +39,7 @@ class Orchestrator:
         llm: BaseLLM,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
+        memobase: Optional[Memobase] = None,
         tools: Optional[List[BaseTool]] = None,
         system_message: Optional[str] = None,
         set_as_default: bool = False
@@ -50,6 +52,7 @@ class Orchestrator:
             llm: The LLM to use for the agent.
             buffer_memory: Optional buffer memory for the agent.
             long_term_memory: Optional long-term memory for the agent.
+            memobase: Optional memobase for multi-user memory support.
             tools: Optional list of tools for the agent.
             system_message: Optional system message for the agent.
             set_as_default: Whether to set this agent as the default.
@@ -68,6 +71,7 @@ class Orchestrator:
             llm=llm,
             buffer_memory=buffer_memory,
             long_term_memory=long_term_memory,
+            memobase=memobase,
             tools=tools,
             system_message=system_message
         )

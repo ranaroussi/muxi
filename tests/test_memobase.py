@@ -10,6 +10,7 @@ import time
 
 from src.memory.memobase import Memobase
 from src.memory.long_term import LongTermMemory
+from tests.utils.async_test import async_test
 
 
 class TestMemobase(unittest.TestCase):
@@ -46,6 +47,7 @@ class TestMemobase(unittest.TestCase):
             long_term_memory=self.mock_long_term_memory, default_user_id=0
         )
 
+    @async_test
     @patch("asyncio.to_thread")
     async def test_add(self, mock_to_thread):
         """Test adding content to Memobase."""
@@ -75,6 +77,7 @@ class TestMemobase(unittest.TestCase):
         # Verify the returned memory ID
         self.assertEqual(memory_id, 123)
 
+    @async_test
     @patch("asyncio.to_thread")
     async def test_add_default_user(self, mock_to_thread):
         """Test adding content with default user ID."""
@@ -91,6 +94,7 @@ class TestMemobase(unittest.TestCase):
         # Verify the metadata has default user_id
         self.assertEqual(kwargs.get("metadata").get("user_id"), 0)
 
+    @async_test
     @patch("asyncio.to_thread")
     async def test_search(self, mock_to_thread):
         """Test searching in Memobase."""
@@ -125,6 +129,7 @@ class TestMemobase(unittest.TestCase):
         self.assertEqual(results[0]["distance"], 0.8)
         self.assertEqual(results[0]["metadata"]["user_id"], 123)
 
+    @async_test
     @patch("asyncio.to_thread")
     async def test_search_with_additional_filter(self, mock_to_thread):
         """Test searching with additional filter."""

@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch, AsyncMock
 from src.core.agent import Agent
 from src.memory.memobase import Memobase
 from src.core.mcp import MCPMessage
+from tests.utils.async_test import async_test
 
 
 class TestAgentWithMemobase(unittest.TestCase):
@@ -64,6 +65,7 @@ class TestAgentWithMemobase(unittest.TestCase):
             tools=self.mock_tools
         )
 
+    @async_test
     async def test_process_message_with_user_id(self):
         """Test processing a message with user ID."""
         # Process a message with user_id
@@ -79,7 +81,7 @@ class TestAgentWithMemobase(unittest.TestCase):
         )
 
         # Verify message was stored in memobase with user_id
-        self.mock_memobase.add.assert_called_with(
+        self.mock_memobase.add.assert_any_call(
             content="Hello, agent!",
             metadata={"role": "user", "timestamp": unittest.mock.ANY},
             user_id=123
@@ -89,15 +91,16 @@ class TestAgentWithMemobase(unittest.TestCase):
         self.assertTrue(self.mock_llm.chat.called)
 
         # Verify result
-        self.assertEqual(result.content, "I'm a helpful multi-user assistant.")
+        self.assertEqual(result.content, "I'm a helpful assistant.")
 
         # Verify response was stored in memobase with user_id
         self.mock_memobase.add.assert_any_call(
-            content="I'm a helpful multi-user assistant.",
+            content="I'm a helpful assistant.",
             metadata={"role": "assistant", "timestamp": unittest.mock.ANY},
             user_id=123
         )
 
+    @async_test
     async def test_process_message_without_user_id(self):
         """Test processing a message without user ID."""
         # Process a message without user_id
@@ -116,8 +119,9 @@ class TestAgentWithMemobase(unittest.TestCase):
         self.assertTrue(self.mock_llm.chat.called)
 
         # Verify result
-        self.assertEqual(result.content, "I'm a helpful multi-user assistant.")
+        self.assertEqual(result.content, "I'm a helpful assistant.")
 
+    @async_test
     @patch('src.core.agent.MCPHandler')
     async def test_process_tool_calls_with_user_id(self, mock_handler_class):
         """Test processing tool calls with user ID."""
@@ -169,6 +173,7 @@ class TestAgentWithMemobase(unittest.TestCase):
             user_id=123
         )
 
+    @async_test
     async def test_search_memory_with_user_id(self):
         """Test searching memory with user ID."""
         # Search memory with user_id
@@ -190,6 +195,7 @@ class TestAgentWithMemobase(unittest.TestCase):
         self.assertEqual(results[0]["content"], "User-specific previous content")
         self.assertEqual(results[0]["metadata"]["user_id"], 123)
 
+    @async_test
     async def test_search_memory_without_user_id(self):
         """Test searching memory without user ID."""
         # Set up mock for LLM embed
@@ -238,6 +244,7 @@ class TestAgentWithMemobase(unittest.TestCase):
         # Verify memobase.clear_user_memory was NOT called
         self.mock_memobase.clear_user_memory.assert_not_called()
 
+    @async_test
     async def test_chat_with_user_id(self):
         """Test chat with user ID."""
         # Set up mock for process_message
@@ -251,14 +258,12 @@ class TestAgentWithMemobase(unittest.TestCase):
         response = await self.agent.chat("Hello again", user_id=123)
 
         # Verify process_message was called with user_id
-        self.agent.process_message.assert_called_with(
-            "Hello again",
-            user_id=123
-        )
+        self.agent.process_message.assert_called_once_with("Hello again", user_id=123)
 
         # Verify response
         self.assertEqual(response, "I remember you from before!")
 
+    @async_test
     async def test_chat_without_user_id(self):
         """Test chat without user ID."""
         # Set up mock for process_message
@@ -272,10 +277,7 @@ class TestAgentWithMemobase(unittest.TestCase):
         response = await self.agent.chat("Hello")
 
         # Verify process_message was called without user_id
-        self.agent.process_message.assert_called_with(
-            "Hello",
-            user_id=None
-        )
+        self.agent.process_message.assert_called_once_with("Hello", user_id=None)
 
         # Verify response
         self.assertEqual(response, "Nice to meet you!")
