@@ -5,7 +5,7 @@
 config:
   theme: base
   themeVariables:
-    fontFamily: ''
+    fontFamily: 'Arial'
     fontSize: 13px
   flowchart:
     defaultRenderer: elk
@@ -13,25 +13,25 @@ config:
 ---
 flowchart TB
     subgraph MS["Memory"]
-        Buffer["FAISS (ST)"]
-        PGSQL["PGVector (LT)"]
-        MBASE["Memobase"]
+        Buffer["FAISS&nbsp;(ST)"]
+        PGSQL["PGVector&nbsp;(LT)"]
+        MBASE["Memobase<br>(user-aware)"]
     end
     subgraph LE["LLM Engines"]
         LLM["Open AI"]
-        Grok["Grok"]
+        Grok["Anthropic"]
         Ollama["Ollama"]
     end
     subgraph Tools["Tools"]
-        BuiltIn["Built-in<br>Calculator, Search, etc."]
-        Custom["Custom<br>User Tools"]
+        BuiltIn["Built-in<br>Files,&nbsp;Search,&nbsp;etc."]
+        Custom["Custom<br>User&nbsp;Generated"]
     end
     subgraph AIA["<b><big>Framework</big></b>"]
         Server["Server"]
         Orchestrator["Orchestrator"]
-        Agent["Agent 1"]
-        Agent2["Agent 2"]
-        AgentN["Agent N"]
+        Agent["Agent&nbsp;1"]
+        Agent2["Agent&nbsp;N"]
+        AgentN["Agent&nbsp;2"]
         MCP["MCP Handler"]
         MS
         LE
@@ -40,6 +40,7 @@ flowchart TB
     REST["&nbsp;REST API&nbsp;"] --> Server
     WS["&nbsp;WebSocket&nbsp;"] --> Server
     APP["&nbsp;Web App&nbsp;"] --> Server
+    CLI["&nbsp;CLI&nbsp;"] --> Server
     Server -- &nbsp;Forwards Request&nbsp; --> Orchestrator
     Orchestrator -- &nbsp;Manages&nbsp; --> Agent & Agent2 & AgentN
     Agent -- Uses --> LLM
