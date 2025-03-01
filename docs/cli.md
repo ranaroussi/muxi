@@ -12,15 +12,15 @@ The CLI provides a rich terminal-based interface for:
 
 ## Installation
 
-The CLI is included with the AI Agent Framework. After installing the framework, you can use it in two ways:
+The CLI is included with the AI Agent Framework. You can use it in two ways:
 
-### As a module
+### As a module (before package installation)
 ```bash
 # From the project root directory
-python cli.py
+python -m src.cli
 ```
 
-### As a standalone command (after PyPI installation)
+### As a standalone command (after package installation)
 ```bash
 # After installing the package from PyPI
 muxi
@@ -44,25 +44,32 @@ Available commands:
 
 ```bash
 # Show help
-muxi --help
+python -m src.cli --help   # Before installation
+muxi --help                # After installation
 
 # Start a chat with the default agent
-muxi chat
+python -m src.cli chat     # Before installation
+muxi chat                  # After installation
 
 # Start a chat with a specific agent
-muxi chat --agent-id researcher
+python -m src.cli chat --agent-id researcher  # Before installation
+muxi chat --agent-id researcher               # After installation
 
 # Run the API server on a specific port
-muxi api --port 8000
+python -m src.cli api --port 8000  # Before installation
+muxi api --port 8000               # After installation
 
 # Run both API server and web UI
-muxi run
+python -m src.cli run  # Before installation
+muxi run               # After installation
 
 # Send a message to an agent (non-interactive)
-muxi send my_agent "What is the weather today?"
+python -m src.cli send my_agent "What is the weather today?"  # Before installation
+muxi send my_agent "What is the weather today?"               # After installation
 
 # Send a message to a multi-user agent
-muxi send multi_user_agent --user-id 123 "Remember my preferences"
+python -m src.cli send multi_user_agent --user-id 123 "Remember my preferences"  # Before installation
+muxi send multi_user_agent --user-id 123 "Remember my preferences"               # After installation
 ```
 
 ## Command-Line Arguments
