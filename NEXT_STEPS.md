@@ -1,4 +1,6 @@
-# AI Agent Framework: Next Steps
+# Developer Tasks and Implementation Checklist
+
+This document provides a detailed task tracker for developers working on the AI Agent Framework. It contains specific implementation tasks, checklists, and tracks completed work. For the high-level strategic vision and roadmap, see the `docs/Strategic_Roadmap.md` file.
 
 ## Completed Work
 

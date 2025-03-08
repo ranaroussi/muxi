@@ -1,6 +1,9 @@
 # AI Agent Framework
 
-A powerful, extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration.
+An extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration.
+
+> [!WARNING]
+> This project is a work in progress and is not even close to being ready for production use. I'm actively developing the framework and adding new features. Please refer to the [roadmap](docs/roadmap.md) for detailed information about the current state of the project and where it's headed.
 
 ## Features
 
@@ -29,7 +32,7 @@ pip install -r requirements.txt
 
 ```python
 from src.core.orchestrator import Orchestrator
-from src.llm.openai import OpenAILLM
+from src.models.openai import OpenAIModel
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
 from src.memory.memobase import Memobase
@@ -40,7 +43,7 @@ orchestrator = Orchestrator()
 # Create a basic agent with buffer memory
 orchestrator.create_agent(
     agent_id="assistant",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
     system_message="You are a helpful AI assistant."
 )
@@ -49,7 +52,7 @@ orchestrator.create_agent(
 long_term_memory = LongTermMemory()
 orchestrator.create_agent(
     agent_id="researcher",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
     long_term_memory=long_term_memory,
     system_message="You are a helpful research assistant."
@@ -60,7 +63,7 @@ long_term_memory = LongTermMemory()
 memobase = Memobase(long_term_memory=long_term_memory)
 orchestrator.create_agent(
     agent_id="multi_user_assistant",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
     memobase=memobase,
     system_message="You are a helpful assistant that supports multiple users."
@@ -189,7 +192,8 @@ socket.onmessage = (event) => {
 
 ### WebSocket Message Types
 
-**Client to Server:**
+#### Client to Server:
+
 - `subscribe`: Subscribe to an agent
 - `chat`: Send a chat message
 - `ping`: Keep the connection alive
@@ -197,7 +201,8 @@ socket.onmessage = (event) => {
 - `search_memory`: Search agent memory for relevant information
 - `clear_memory`: Clear agent memory for a specific user
 
-**Server to Client:**
+#### Server to Client:
+
 - `message`: Response from the agent
 - `error`: Error message
 - `tool_start`: Notification that a tool is being executed
@@ -226,7 +231,10 @@ Comprehensive documentation is available in the `docs` directory:
 - [Memory Systems](docs/memory.md)
 - [Tool System](docs/tools.md)
 - [Modern Control Protocol (MCP)](docs/mcp.md)
-- [Agents vs Tools](docs/agents-vs-tools.md)
+
+### Concepts
+- [Agents vs Tools](docs/agents_vs_tools.md)
+- [Tools vs MCP](docs/tools_vs_mcp.md)
 
 ### Interfaces
 - [CLI Documentation](docs/cli.md)
@@ -236,8 +244,7 @@ Comprehensive documentation is available in the `docs` directory:
 
 ## Contributing
 
-Contributions are welcome! This project relies on the community to investigate bugs, review code, and contribute code. Please feel free to submit a Pull Request.
-
+**Contributions are welcome!** Please read our [Contributing Guide](docs/contributing.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
 ## License
 
 This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE.txt) file for details.

@@ -25,6 +25,7 @@ beautifulsoup4>=4.12.2
 duckduckgo-search>=3.8.0
 playwright>=1.38.0
 requests>=2.31.0
+nanoid>=2.0.0
 
 # Testing
 pytest>=7.4.0
