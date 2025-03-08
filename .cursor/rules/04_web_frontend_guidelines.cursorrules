@@ -1,0 +1,114 @@
+# AI Agent Framework - Web Frontend Guidelines
+
+> These rules define best practices for React and frontend development
+
+## Component Structure
+- Use functional components with hooks instead of class components
+- Keep components small and focused on a single responsibility
+- Follow container/presentation component pattern
+- Implement proper prop validation with PropTypes or TypeScript
+- Use lazy loading for code splitting to improve initial load time
+- Extract reusable UI elements into separate components
+- Organize components by feature rather than by type
+- Use React.memo for performance optimization where appropriate
+- Implement error boundaries for fault tolerance
+- Use fragments to avoid unnecessary div wrappers
+
+## TypeScript Usage
+- Use TypeScript for all frontend code
+- Define interfaces for all props
+- Use union types for props that can be multiple types
+- Define type aliases for complex or reused types
+- Use generics for reusable components and hooks
+- Properly type event handlers
+- Use readonly for immutable data
+- Define strict null checks
+- Use discriminated unions for state management
+- Export types/interfaces for reuse
+- Use enums for fixed sets of values
+
+## State Management
+- Use React context + hooks for simpler applications
+- Consider Redux for complex state management needs
+- Maintain normalized state shape
+- Minimize state duplication
+- Implement proper loading/error states
+- Use local component state for UI-only state
+- Separate UI state from domain/application state
+- Consider React Query for server state management
+- Implement optimistic updates for better UX
+- Handle loading, error, and success states explicitly
+
+## Styling
+- Use CSS-in-JS or CSS modules to avoid global styles
+- Follow a consistent design system
+- Implement responsive designs with mobile-first approach
+- Use semantic HTML elements
+- Ensure accessibility (WCAG compliance)
+- Define common styles in theme files
+- Use CSS variables for theming
+- Implement dark mode support
+- Use flexbox and grid for layouts
+- Define reusable style components for common patterns
+- Avoid inline styles except for dynamic values
+
+## Performance
+- Implement memoization for expensive operations (useMemo, useCallback)
+- Use virtualization for long lists (react-window or react-virtualized)
+- Optimize bundle size with code splitting
+- Implement lazy loading for routes and large components
+- Measure and monitor render performance
+- Optimize images and assets
+- Minimize re-renders with proper dependency arrays in hooks
+- Use Web Workers for CPU-intensive tasks
+- Implement proper React key usage for lists
+- Use the React Profiler to identify performance issues
+- Avoid deep component trees
+
+## API Communication
+- Use a consistent approach for API calls (fetch, axios, etc.)
+- Implement proper error handling for API requests
+- Use React Query or SWR for data fetching and caching
+- Implement appropriate loading indicators
+- Handle token-based authentication properly
+- Refresh tokens automatically when needed
+- Implement request cancellation for unmounted components
+- Use TypeScript interfaces for API responses
+- Centralize API call logic in dedicated services
+- Handle offline scenarios gracefully
+
+## WebSocket Integration
+- Implement proper connection management
+- Handle reconnection automatically
+- Use a consistent message format
+- Implement proper error handling
+- Decouple WebSocket logic from UI components
+- Create custom hooks for WebSocket interactions
+- Use appropriate state updates for received messages
+- Handle connection status in UI
+- Clean up connections on component unmount
+- Test WebSocket functionality thoroughly
+
+## Testing
+- Write unit tests for components and hooks
+- Use React Testing Library for component tests
+- Test for accessibility with jest-axe
+- Implement integration tests for key user flows
+- Test both happy paths and error states
+- Mock API calls in tests
+- Use meaningful test assertions
+- Implement snapshot testing judiciously
+- Test performance-critical components with benchmarks
+- Set up continuous integration for frontend tests
+
+## Developer Experience
+- Use ESLint and Prettier for code quality
+- Implement pre-commit hooks
+- Use meaningful commit messages
+- Document components with Storybook
+- Create reusable component templates
+- Implement hot reloading for development
+- Use meaningful folder structure
+- Maintain comprehensive documentation
+- Set up proper development, staging, and production environments
+- Use environment variables for configuration

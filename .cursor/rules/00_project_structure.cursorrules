@@ -1,0 +1,69 @@
+# AI Agent Framework - Project Structure
+
+> This file defines the project structure and organization
+
+
+## Project Description
+This is an AI Agent Framework for building and orchestrating intelligent agents
+with memory, tool integration, and real-time communication capabilities.
+
+## Repository Structure
+```
+.github/                  # GitHub configuration (workflows, templates)
+docs/                     # Documentation files
+src/                      # Source code
+ └─ core/                 # Core components
+   ├── agent.py           # Agent implementation
+   ├── orchestrator.py    # Orchestrator for managing multiple agents
+   └── config.py          # Configuration handling
+ └─ models/               # LLM provider implementations
+   ├── base.py            # Base LLM interface
+   ├── openai.py          # OpenAI implementation
+   └── providers/         # Additional LLM providers
+ └─ memory/               # Memory systems
+   ├── buffer.py          # Short-term buffer memory
+   ├── long_term.py       # Long-term persistent memory
+   ├── memobase.py        # User-aware memory system
+   └── utils/             # Memory utilities
+ └─ tools/                # Tool system
+   ├── base.py            # Base tool interface
+   ├── registry.py        # Tool registry
+   └── implementations/   # Tool implementations
+ └─ api/                  # API server
+   ├── server.py          # FastAPI server
+   ├── routes/            # API routes
+   └── middleware/        # API middleware
+ └─ web/                  # Web dashboard
+   ├── components/        # React components
+   ├── hooks/             # Custom React hooks
+   └── pages/             # Page components
+ └─ utils/                # Utility functions
+   ├── logging.py         # Logging utilities
+   ├── errors.py          # Error handling
+   └── validation.py      # Validation utilities
+tests/                    # Test files
+ └─ unit/                 # Unit tests
+ └─ integration/          # Integration tests
+ └─ conftest.py           # Test configuration
+example/                  # Example usage
+scripts/                  # Utility scripts
+requirements.txt          # Dependency file
+```
+
+## File Naming Conventions
+- Use lowercase with underscores for Python files
+- Use lowercase with hyphens for documentation files
+- Use PascalCase for React components
+- Use lowercase with underscores for test files
+- Prefix test files with test_
+- Use descriptive names that reflect purpose
+
+## Module Organization
+- Organize code by feature not by type
+- Keep related functionality together
+- Use __init__.py to expose public interfaces
+- Minimize circular dependencies
+- Use relative imports within modules
+- Use absolute imports across modules
+- Keep modules focused on specific functionality
+- Limit file size to 500 lines where possible

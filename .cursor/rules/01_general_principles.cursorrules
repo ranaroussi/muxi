@@ -1,0 +1,47 @@
+# AI Agent Framework - General Programming Principles
+
+> These rules define general development principles for the project
+
+## Dependency Management
+- Prefer built-in libraries over external dependencies when functionality is equivalent
+- Only use external libraries with permissive licenses (MIT, Apache 2.0, BSD) that allow commercial use
+- Document purpose of each dependency in requirements files
+- Pin dependency versions for reproducible builds (requirements.txt or pyproject.toml)
+- Regularly audit dependencies for security vulnerabilities
+- Avoid dependencies with native compilation requirements unless absolutely necessary
+
+## Code Organization
+- Follow single responsibility principle for modules and classes
+- Keep files focused on a single concern
+- Organize code by feature, not by type
+- Limit file size to 500 lines where possible (split larger files)
+- Use consistent directory structure within features
+- Minimize circular dependencies between modules
+- Maintain clear separation of concerns between layers (API, business logic, data access)
+
+## Error Handling
+- Use custom exception types for application-specific errors
+- Log all exceptions with appropriate context (user_id, request_id, etc.)
+- Fail early and visibly during development
+- Gracefully handle expected errors in production
+- Never silently catch exceptions without appropriate handling
+- Provide helpful error messages with suggested resolutions where possible
+- Distinguish between user errors and system errors
+
+## Performance Considerations
+- Optimize for readability first
+- Profile before optimizing
+- Focus on algorithmic improvements over micro-optimizations
+- Document performance-critical code
+- Benchmark against realistic workloads
+- Consider both latency and throughput requirements
+- Be mindful of memory usage, especially for long-running processes
+
+## Security Best Practices
+- Follow principle of least privilege
+- Sanitize all user inputs
+- Avoid storing sensitive information in code
+- Use environment variables for configuration
+- Implement proper authentication and authorization
+- Keep security dependencies up to date
+- Follow OWASP guidelines for relevant security concerns

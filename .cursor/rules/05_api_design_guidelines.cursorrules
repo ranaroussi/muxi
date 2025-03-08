@@ -1,0 +1,97 @@
+# AI Agent Framework - API Design Guidelines
+
+> These rules define best practices for API design and documentation
+
+## RESTful API Design
+- Use appropriate HTTP methods (GET, POST, PUT, DELETE)
+- Return proper status codes (200, 201, 400, 404, 500, etc.)
+- Implement consistent URL structure (/resources/{id}/subresources)
+- Version APIs appropriately (v1, v2, etc.)
+- Use pagination for large collections
+- Implement filtering, sorting, and search capabilities
+- Use query parameters for filtering and pagination
+- Use consistent naming conventions for endpoints
+- Return meaningful error responses with details
+- Implement proper rate limiting
+- Support CORS for browser clients
+- Use consistent date/time formats (ISO 8601)
+- Implement proper content negotiation
+- Use HTTPS for all API endpoints
+
+## API Serialization
+- Use JSON as the primary serialization format
+- Maintain consistent naming convention (snake_case or camelCase)
+- Include proper metadata in responses (pagination info, etc.)
+- Use nested objects sparingly to avoid deep nesting
+- Include a top-level status or success field for all responses
+- Implement envelope-style response for consistent error handling
+- Use consistent date/time formats (ISO 8601)
+- Handle null values consistently
+- Include resource IDs in response bodies
+- Use meaningful field names that reflect their purpose
+- Support field selection (partial responses) where appropriate
+- Implement consistent serialization/deserialization
+
+## WebSocket Standards
+- Define clear message types
+- Implement proper connection management
+- Handle reconnection gracefully
+- Document message formats
+- Include appropriate error handling
+- Use a consistent message envelope format
+- Implement heartbeat mechanism
+- Handle connection timeouts
+- Support authentication
+- Document connection lifecycle
+- Implement proper error codes
+- Support binary message formats when needed
+- Implement message ordering and acknowledgment when required
+
+## API Documentation
+- Document all endpoints with OpenAPI/Swagger
+- Include example requests and responses
+- Document error conditions and responses
+- Keep documentation in sync with code
+- Generate client SDKs from specification
+- Include authentication requirements
+- Document rate limits
+- Add pagination examples
+- Include versioning information
+- Provide getting started guide
+- Document security considerations
+- Include API changelog
+- Add search functionality to documentation
+- Provide sandbox environment for testing
+- Include code examples in multiple languages
+
+## API Security
+- Implement proper authentication (JWT, OAuth, etc.)
+- Use HTTPS for all API endpoints
+- Implement proper authorization for resources
+- Validate all inputs
+- Implement proper rate limiting
+- Use secure HTTP headers
+- Handle PII data securely
+- Implement CORS properly
+- Log security-relevant events
+- Use appropriate token expiration
+- Implement proper error handling that doesn't leak information
+- Perform security audits regularly
+- Keep dependencies up to date
+- Follow OWASP API security guidelines
+
+## API Testing
+- Test happy path scenarios
+- Test error conditions
+- Test edge cases
+- Implement integration tests
+- Test performance under load
+- Automate API tests
+- Test with various client libraries
+- Validate response schemas
+- Test authentication and authorization
+- Include API tests in CI/CD pipeline
+- Test rate limiting
+- Implement contract testing
+- Test backward compatibility for updated endpoints
+- Use meaningful test data

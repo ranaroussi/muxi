@@ -1,0 +1,109 @@
+# AI Agent Framework - Python Guidelines
+
+> These rules define Python-specific coding conventions
+
+## Code Style
+- Follow PEP 8 guidelines for code formatting
+- Use 4 spaces for indentation (no tabs)
+- Maximum line length of 88 characters (Black default)
+- Use Black for code formatting
+- Use isort for import sorting
+- Use flake8 for linting
+- Use descriptive variable names in snake_case
+- Use PascalCase for class names
+- Use `UPPER_SNAKE_CASE` for constants
+- Use _leading_underscore for private attributes/methods
+
+## ID Generation
+- Use Nano IDs instead of UUIDs for all identifiers
+- Add the nanoid package to project dependencies
+- Use the nanoid Python library for application-level ID generation
+- Keep ID generation consistent between application and database
+- Standard ID length should be 21 characters (adjustable if needed)
+- Implement helper functions for consistent ID generation
+- Use the same character set as the database nanoid implementation
+- Document ID format in code comments
+
+```python
+# Add to requirements.txt or pyproject.toml
+# nanoid==2.0.0
+
+# Example helper module for ID generation
+from nanoid import generate
+
+def generate_id(size: int = 21) -> str:
+    """Generate a Nano ID of the specified size.
+
+    Args:
+        size: Length of the ID to generate. Default is 21 characters.
+
+    Returns:
+        A new Nano ID string.
+    """
+    alphabet = '_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    return generate(alphabet, size)
+```
+
+## Type Hinting
+- Use type hints for all function signatures and return values
+- Use `Optional[]` for parameters that may be None
+- Use `Union[]` for parameters that may be different types
+- Create custom type aliases for complex types
+- Use `TypedDict` for dictionary structures with known keys
+- Use `Literal` for parameters with a finite set of string values
+- Use `mypy` for static type checking
+- Add typing imports at the top of the file
+
+## Import Conventions
+- Import specific types from typing (`Dict`, `List`, `Optional`, `Any`, etc.)
+- Standard library imports first
+- Third-party library imports second
+- Local application imports last
+- Use absolute imports for application modules
+- Avoid wildcard imports (from module import *)
+- Group imports by source with a blank line between groups
+- Sort imports alphabetically within groups
+- Avoid circular imports
+
+## Functional Patterns
+- Prefer immutable data structures where appropriate
+- Use list/dict comprehensions over explicit loops for simple transformations
+- Consider generator expressions for large datasets
+- Minimize side effects in functions
+- Use dataclasses for data containers
+- Use named tuples for lightweight immutable data structures
+- Consider using functools.lru_cache for expensive functions with repeated calls
+- Prefer pure functions where appropriate
+
+## OOP Guidelines
+- Prefer composition over inheritance
+- Use abstract base classes (ABC) for interface definitions
+- Implement dunder methods appropriately (`__str__`, `__repr__`, etc.)
+- Follow SOLID principles
+- Keep class hierarchies shallow (avoid deep inheritance)
+- Make properties and methods private unless they need to be accessed externally
+- Implement proper equality methods when needed
+- Use property decorators instead of getters/setters
+- Use classmethod for alternative constructors
+
+## Async Programming
+- Use async/await for IO-bound operations
+- Properly handle task cancellation and cleanup
+- Use `asyncio.gather` for concurrent operations
+- Be cautious with thread pools for CPU-bound tasks
+- Handle exceptions properly in async code
+- Use proper async libraries (asyncio, aiohttp, etc.)
+- Avoid mixing sync and async code without proper bridging
+- Use context managers for resource management in async code
+
+## Testing
+- Write unit tests for all components
+- Use pytest as the testing framework
+- Use descriptive test names that explain the behavior being tested
+- Structure tests using the Arrange-Act-Assert pattern
+- Mock external dependencies appropriately
+- Test both happy paths and error cases
+- Aim for high test coverage, especially for business logic
+- Use fixtures to set up common test dependencies
+- Use parametrized tests for testing multiple inputs
+- Use tox for testing across multiple Python versions

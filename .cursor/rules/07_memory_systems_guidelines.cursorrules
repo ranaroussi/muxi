@@ -1,0 +1,101 @@
+# AI Agent Framework - Memory Systems Guidelines
+
+> These rules define best practices for implementing and using memory systems
+
+## Buffer Memory (Short-Term)
+- Use FAISS for efficient similarity search
+- Implement proper vector normalization
+- Handle document chunking appropriately
+- Implement memory pruning to stay within context limits
+- Properly serialize vectors for storage
+- Implement efficient retrieval strategies
+- Use appropriate similarity metrics (cosine, dot product, etc.)
+- Optimize index parameters for your specific use case
+- Implement proper error handling for retrieval failures
+- Support metadata storage alongside vectors
+- Implement memory summarization when needed
+- Properly handle updates to existing memories
+
+## Long-Term Memory
+- Use PostgreSQL with pgvector for persistent storage
+- Implement proper schema design for memory storage
+- Use appropriate indexes for vector columns
+- Implement proper query optimization for vector searches
+- Handle large volumes of data efficiently
+- Implement memory cleanup and archiving
+- Support metadata filtering in searches
+- Implement proper error handling for database operations
+- Use transactions for related operations
+- Implement connection pooling
+- Handle concurrent access properly
+- Support memory exports and imports
+
+## Memobase (User-Aware Memory)
+- Properly partition memories by user_id
+- Implement access control for memories
+- Support cross-user memory sharing when appropriate
+- Implement proper cleanup of user memories
+- Handle user deletion appropriately
+- Support memory migration between users
+- Implement analytics on memory usage
+- Support different memory retention policies per user
+- Implement memory prioritization
+- Handle memory conflicts
+- Support memory search across users for administrators
+- Implement proper backup and restore mechanisms
+
+## Vector Operations
+- Choose appropriate vector dimensions based on model
+- Implement proper vector normalization when using cosine similarity
+- Use dimensionality reduction for very high-dimensional vectors
+- Benchmark different vector similarity approaches
+- Optimize vector storage format
+- Implement caching for frequent vector operations
+- Use batch operations for multiple vectors
+- Implement appropriate vector preprocessing
+- Handle out-of-vocabulary tokens in embeddings
+- Support different embedding models
+- Implement fallbacks for embedding generation failures
+- Document vector format and dimensionality
+
+## Memory Retrieval
+- Implement relevance scoring for retrieved memories
+- Support hybrid search (vector + keyword)
+- Implement proper ranking algorithms
+- Support different retrieval strategies based on query type
+- Implement context-aware retrieval
+- Support filters in retrieval operations
+- Optimize top-k retrieval performance
+- Implement memory deduplication
+- Support time-weighted retrieval
+- Implement recency bias when appropriate
+- Handle retrieval errors gracefully
+- Support pagination for large result sets
+
+## Memory Integration
+- Properly integrate memories into prompt construction
+- Handle context length limits by prioritizing memories
+- Implement memory summarization for efficient context use
+- Support different memory integration strategies
+- Properly attribute information to memory sources
+- Handle conflicting information from different memories
+- Implement memory weighting based on relevance
+- Support streaming memory integration
+- Handle memory format conversion for different LLMs
+- Support memory collection during conversations
+- Implement feedback loops for memory relevance
+- Document memory integration patterns
+
+## Performance and Scalability
+- Optimize vector operations for performance
+- Implement appropriate caching strategies
+- Use batch operations for efficiency
+- Monitor memory system performance
+- Implement sharding for large memory stores
+- Optimize database queries for vector operations
+- Use connection pooling for database access
+- Implement proper indexing for frequent queries
+- Benchmark memory operations with realistic workloads
+- Implement circuit breakers for external dependencies
+- Support horizontal scaling of memory systems
+- Document performance characteristics

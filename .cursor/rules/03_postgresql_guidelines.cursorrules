@@ -1,0 +1,167 @@
+# AI Agent Framework - PostgreSQL Guidelines
+
+> These rules define best practices for working with PostgreSQL
+
+## Schema Design
+- Use snake_case for table and column names
+- Prefer singular names for tables (user not users)
+- Always include an id column as the primary key, preferably using Nano ID (not UUID)
+- Use proper foreign key constraints for relationships
+- Add appropriate indexes for frequently queried columns
+- Include created_at and updated_at timestamp columns on all tables
+- Use appropriate data types (int, text, jsonb, etc.) based on the data
+- Set NOT NULL constraints for required fields
+- Use CHECK constraints to enforce data integrity rules
+- Use ENUM types for columns with a fixed set of possible values
+- Implement Row-Level Security (RLS) policies when appropriate
+- Include descriptive comments on tables and columns
+
+## ID Generation
+- Use Nano IDs instead of UUIDs for primary keys and unique identifiers
+- Implement the nanoid() PostgreSQL function for database-level ID generation
+- Use 21 characters for standard IDs (adjustable if needed)
+- Ensure the function is included in migration scripts
+- Consider ID generation during bulk inserts for performance
+- Use the same ID generation strategy across the application
+- Document ID format in schema documentation
+
+```sql
+CREATE OR REPLACE FUNCTION nanoid(
+    size int DEFAULT 21,
+    alphabet text DEFAULT '_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+)
+    RETURNS text
+    LANGUAGE plpgsql
+    volatile
+AS
+$$
+DECLARE
+    idBuilder      text := '';
+    counter        int  := 0;
+    bytes          bytea;
+    alphabetIndex  int;
+    alphabetArray  text[];
+    alphabetLength int;
+    mask           int;
+    step           int;
+BEGIN
+    alphabetArray := regexp_split_to_array(alphabet, '');
+    alphabetLength := array_length(alphabetArray, 1);
+    mask := (2 << cast(floor(log(alphabetLength - 1) / log(2)) as int)) - 1;
+    step := cast(ceil(1.6 * mask * size / alphabetLength) AS int);
+
+    while true
+        loop
+            bytes := gen_random_bytes(step);
+            while counter < step
+                loop
+                    alphabetIndex := (get_byte(bytes, counter) & mask) + 1;
+                    if alphabetIndex <= alphabetLength then
+                        idBuilder := idBuilder || alphabetArray[alphabetIndex];
+                        if length(idBuilder) = size then
+                            return idBuilder;
+                        end if;
+                    end if;
+                    counter := counter + 1;
+                end loop;
+
+            counter := 0;
+        end loop;
+END
+$$;
+```
+
+## SQL Writing Style
+- Format SQL for readability with consistent indentation
+- Use uppercase for SQL keywords (SELECT, FROM, WHERE)
+- Use lowercase for identifiers (table names, column names)
+- Align clauses vertically for complex queries
+- Use table aliases for joins (but make them meaningful)
+- Include explicit JOIN types (INNER JOIN, LEFT JOIN)
+- Qualify column names with table aliases in joins
+- Use CTEs (WITH queries) for complex queries
+- Avoid SELECT * except in development
+- Place each column on a new line for multi-column SELECTs
+- Add explicit ORDER BY clauses for deterministic results
+- Use consistent formatting for subqueries and nested structures
+- Add comments for complex queries
+
+## Query Construction
+- Use SQLAlchemy ORM for most database operations
+- Use SQLAlchemy Core for performance-critical or complex queries
+- Never use string formatting/concatenation for SQL (prevent injection)
+- Use parameterized queries consistently
+- Document complex queries with comments
+- Use appropriate transaction isolation levels
+- Batch operations for bulk inserts/updates
+- Implement proper error handling for database operations
+- Use named parameters for clarity
+
+## Migrations
+- Create migrations for all schema changes
+- Ensure migrations are reversible (include DOWN migrations)
+- Test migrations on a copy of production data before applying
+- Include descriptive comments in migration files
+- Split complex schema changes into multiple migrations
+- Keep migrations small and focused
+- Avoid data migrations in schema migration files when possible
+- Use separate scripts for large data migrations
+- Version migrations sequentially
+- Include verification steps in migrations
+- Follow the naming convention: `YYYYMMDDHHMMSS_descriptive_name.sql`
+
+## Indexing Strategy
+- Create indexes on ALL columns used in WHERE clauses, JOIN conditions, or ORDER BY statements
+- Don't rely on "frequent use" heuristics - if a column is used for data retrieval, it needs an index
+- Consider composite indexes for queries that filter on multiple columns together
+- Use the appropriate index type for the data and query patterns:
+  - B-tree for equality and range queries (default)
+  - GIN for full-text search and array containment
+  - GIST for geometric data and custom data types
+  - BRIN for very large tables with linear correlation between physical and logical order
+- Create indexes during table creation in migrations, not as afterthoughts
+- Name indexes consistently using pattern: `idx_{table}_{column(s)}_{type}`
+- Monitor index usage with `pg_stat_user_indexes` to identify unused indexes
+- Test query performance with EXPLAIN ANALYZE before and after adding indexes
+- Consider partial indexes for tables where queries target specific subsets of data
+- Include an index maintenance strategy in database operations documentation
+- Remember that indexes speed up reads but slow down writes, so balance accordingly
+
+## Performance Optimization
+- Create indexes for frequently queried columns
+- Use EXPLAIN ANALYZE to identify slow queries
+- Implement proper connection pooling
+- Consider denormalization for read-heavy workloads
+- Use materialized views for complex, frequent queries
+- Implement appropriate caching strategies
+- Avoid N+1 query problems
+- Use database functions for complex operations
+- Consider partitioning for very large tables
+- Regularly analyze and vacuum the database
+- Monitor query performance in production
+
+## Vector Operations (pgvector)
+- Use pgvector's optimized operations for vector similarity searches
+- Implement appropriate vector indexing (HNSW, IVFFlat) based on dataset size
+- Benchmark different approaches for your specific use case
+- Consider dimensionality reduction for very high-dimensional vectors
+- Use efficient vector serialization techniques
+- Set appropriate index parameters based on dataset size and query patterns
+- Monitor index size and rebuild as necessary
+- Use approximate nearest neighbor searches for large datasets
+- Implement vector normalization when using cosine distance
+- Consider chunking large vectors if dimensionality is very high
+
+## Database Functions
+- Use SECURITY DEFINER only when absolutely necessary
+- Always schema-qualify function names
+- Use RETURNS TABLE for multi-row results
+- Return NULL on invalid inputs instead of erroring
+- Document all function parameters and return values
+- Use STABLE or IMMUTABLE annotations when appropriate
+- Avoid excessive procedural logic in database functions
+- Test functions with edge cases
+- Use appropriate variable naming in function bodies
+- Handle exceptions gracefully within functions
+- Use function overloading instead of optional parameters when possible
+- Add version numbers to function names if changing signatures

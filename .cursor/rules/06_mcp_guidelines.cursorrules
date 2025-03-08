@@ -1,0 +1,101 @@
+# AI Agent Framework - MCP (Modern Control Protocol) Guidelines
+
+> These rules define best practices for MCP implementation
+
+## Message Format
+- Follow the official MCP specification for message formats
+- Properly serialize and deserialize MCP messages
+- Include required fields in all messages
+- Use consistent naming conventions for custom message types
+- Validate message format before processing
+- Handle malformed messages gracefully
+- Implement proper error responses
+- Use appropriate content types
+- Include message IDs for tracking and correlation
+- Properly handle different versions of the protocol
+- Support streaming responses when appropriate
+- Document any extensions to the standard protocol
+
+## Tool Calls
+- Implement proper tool call handling
+- Register tools with unique identifiers
+- Include detailed tool descriptions
+- Handle tool execution errors gracefully
+- Return standardized tool results
+- Include execution metadata in responses
+- Implement timeout handling for long-running tool calls
+- Support parallel tool execution when appropriate
+- Properly handle tool authentication and authorization
+- Log all tool calls for debugging and audit
+- Include rate limiting for resource-intensive tools
+- Implement proper error messages for tool failures
+
+## LLM Integration
+- Properly format messages for different LLM providers
+- Handle provider-specific extensions
+- Implement fallback mechanisms for provider outages
+- Properly handle streaming responses
+- Process tool call requests from LLMs
+- Format tool results for LLM consumption
+- Handle context limitations appropriately
+- Implement appropriate retry logic
+- Monitor token usage and implement limits
+- Handle provider rate limits gracefully
+- Process and validate LLM responses
+- Support different model capabilities
+
+## Security
+- Validate all inputs
+- Implement proper authentication for tool access
+- Limit tool capabilities based on user permissions
+- Sanitize tool inputs and outputs
+- Implement proper error handling that doesn't leak information
+- Log security-relevant events
+- Handle sensitive information appropriately
+- Implement timeouts for all external calls
+- Validate message integrity
+- Use secure communication channels
+- Implement proper access control for different tools
+- Monitor for abuse patterns
+
+## External MCP Servers
+- Implement proper connection management
+- Handle reconnection automatically
+- Implement proper error handling for server errors
+- Support authentication
+- Validate server responses
+- Implement timeout handling
+- Support MCP server discovery
+- Log all external server interactions
+- Implement circuit breakers for fault tolerance
+- Monitor server health
+- Handle version compatibility
+- Document server requirements and capabilities
+
+## Testing
+- Test happy path scenarios for all tools
+- Test error conditions and failures
+- Implement integration tests with actual LLM providers
+- Test with mock LLMs for predictable results
+- Validate message formats
+- Test timeout and cancellation handling
+- Test authentication and authorization
+- Include MCP tests in CI/CD pipeline
+- Test rate limiting
+- Implement contract testing
+- Test with different LLM providers
+- Use representative test data
+
+## Docker Integration
+- Package MCP servers in containerized environments
+- Use consistent port mapping for MCP servers
+- Implement proper health checks
+- Support dynamic configuration through environment variables
+- Implement proper logging for containerized environments
+- Support container orchestration
+- Provide clear documentation for container configuration
+- Implement proper shutdown handling
+- Support service discovery
+- Optimize container size and performance
+- Support horizontal scaling
+- Implement resource constraints
