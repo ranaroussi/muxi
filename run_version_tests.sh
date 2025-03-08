@@ -3,7 +3,7 @@
 # Run version tests
 
 echo "Running MUXI Framework version tests..."
-echo "============================================="
+echo "======================================="
 
 # Change to the project root directory
 cd "$(dirname "$0")"
