@@ -5,15 +5,16 @@ This module provides a vector-based memory system that uses embeddings
 to store and retrieve content.
 """
 
-from typing import Dict, List, Any, Optional
-import os
 import json
-import numpy as np
-import faiss
+import os
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import faiss
+import numpy as np
 
 from src.memory.base import BaseMemory
-from src.llm.base import BaseLLM
+from src.models.base import BaseModel
 
 
 class VectorMemory(BaseMemory):
@@ -26,21 +27,21 @@ class VectorMemory(BaseMemory):
 
     def __init__(
         self,
-        llm: BaseLLM,
+        model: BaseModel,
         vector_dimension: int = 1536,
         index_path: Optional[str] = None,
-        save_on_update: bool = True
+        save_on_update: bool = True,
     ):
         """
         Initialize the vector memory.
 
         Args:
-            llm: The language model to use for generating embeddings.
+            model: The language model to use for generating embeddings.
             vector_dimension: The dimension of the embedding vectors.
             index_path: Optional path to save/load the FAISS index.
             save_on_update: Whether to save the index after each update.
         """
-        self.llm = llm
+        self.model = model
         self.dimension = vector_dimension
         self.index_path = index_path
         self.save_on_update = save_on_update
@@ -65,7 +66,7 @@ class VectorMemory(BaseMemory):
 
             # Load the document metadata if it exists
             if metadata_file.exists():
-                with open(metadata_file, 'r') as f:
+                with open(metadata_file, "r") as f:
                     self.documents = json.load(f)
         except Exception as e:
             print(f"Error loading index: {e}")
@@ -82,7 +83,7 @@ class VectorMemory(BaseMemory):
         faiss.write_index(self.index, self.index_path)
 
         # Save the document metadata
-        with open(f"{self.index_path}.meta", 'w') as f:
+        with open(f"{self.index_path}.meta", "w") as f:
             json.dump(self.documents, f)
 
     def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> None:
@@ -97,17 +98,14 @@ class VectorMemory(BaseMemory):
             metadata = {}
 
         # Generate embedding for the content
-        embedding = self.llm.embed(content)
+        embedding = self.model.embed(content)
 
         # Add the embedding to the index
-        vector = np.array([embedding]).astype('float32')
+        vector = np.array([embedding]).astype("float32")
         self.index.add(vector)
 
         # Store the document metadata
-        self.documents.append({
-            "content": content,
-            "metadata": metadata
-        })
+        self.documents.append({"content": content, "metadata": metadata})
 
         # Save the index if required
         if self.save_on_update and self.index_path:
@@ -128,16 +126,13 @@ class VectorMemory(BaseMemory):
             return []
 
         # Generate embedding for the query
-        query_embedding = self.llm.embed(query)
+        query_embedding = self.model.embed(query)
 
         # Convert to numpy array
-        query_vector = np.array([query_embedding]).astype('float32')
+        query_vector = np.array([query_embedding]).astype("float32")
 
         # Search the index
-        distances, indices = self.index.search(
-            query_vector,
-            min(limit, len(self.documents))
-        )
+        distances, indices = self.index.search(query_vector, min(limit, len(self.documents)))
 
         # Return the matching documents with scores
         results = []

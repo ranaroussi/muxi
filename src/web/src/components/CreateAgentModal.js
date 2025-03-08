@@ -24,7 +24,7 @@ function CreateAgentModal({ isOpen, onClose, onAgentCreated }) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     agent_id: '',
-    llm_model: 'gpt-4o',
+    model: 'gpt-4o',
     system_message: 'You are a friendly assistant',
     enable_web_search: true,
     enable_calculator: true,
@@ -58,7 +58,7 @@ function CreateAgentModal({ isOpen, onClose, onAgentCreated }) {
       // Reset form and close modal
       setFormData({
         agent_id: '',
-        llm_model: 'gpt-4o',
+        model: 'gpt-4o',
         system_message: 'You are a friendly assistant',
         enable_web_search: true,
         enable_calculator: true,
@@ -108,8 +108,8 @@ function CreateAgentModal({ isOpen, onClose, onAgentCreated }) {
               <FormControl>
                 <FormLabel>LLM Model</FormLabel>
                 <Select
-                  name="llm_model"
-                  value={formData.llm_model}
+                  name="model"
+                  value={formData.model}
                   onChange={handleChange}
                 >
                   <option value="gpt-4o">GPT-4o</option>

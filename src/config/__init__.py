@@ -1,77 +1,64 @@
 """
-Configuration package for the AI Agent Framework.
+Configuration for the AI Agent Framework.
 
-This package provides a centralized configuration management system.
+This module provides configuration settings for the AI Agent Framework.
 """
 
-from dotenv import load_dotenv
+import os
+from importlib import import_module
+
 from pydantic import BaseModel, Field
-from typing import Dict, Any
 
-# Import configuration components
-from src.config.database import database_config, DatabaseConfig
-from src.config.memory import memory_config, MemoryConfig
-from src.config.llm import llm_config, LLMConfig
-from src.config.tools import tools_config, ToolsConfig
-from src.config.logging import logging_config, LoggingConfig, configure_logging
-from src.config.app import app_config, AppConfig
-
-# Load environment variables from .env file
-load_dotenv()
+from src.config.database import DatabaseConfig, database_config
+from src.config.memory import MemoryConfig, memory_config
+from src.config.model import ModelConfig, model_config
+from src.config.tools import ToolsConfig, tools_config
 
 
 class Config(BaseModel):
     """
-    Main configuration class that combines all component configurations.
+    Main configuration class for the AI Agent Framework.
+
+    This class combines all configuration settings into a single object.
     """
 
     database: DatabaseConfig = Field(default_factory=lambda: database_config)
     memory: MemoryConfig = Field(default_factory=lambda: memory_config)
-    llm: LLMConfig = Field(default_factory=lambda: llm_config)
+    model: ModelConfig = Field(default_factory=lambda: model_config)
     tools: ToolsConfig = Field(default_factory=lambda: tools_config)
-    logging: LoggingConfig = Field(default_factory=lambda: logging_config)
-    app: AppConfig = Field(default_factory=lambda: app_config)
+    debug: bool = Field(default=os.getenv("DEBUG", "false").lower() == "true")
+    telemetry_enabled: bool = Field(
+        default=os.getenv("TELEMETRY_ENABLED", "true").lower() == "true"
+    )
 
-    # Custom configuration values
-    custom: Dict[str, Any] = Field(default_factory=dict)
-
-    def get_custom(self, key: str, default: Any = None) -> Any:
+    def register_provider(self, provider_type: str, provider_name: str) -> None:
         """
-        Get a custom configuration value.
+        Register a custom provider module.
 
         Args:
-            key: The key of the custom configuration value.
-            default: The default value to return if the key is not found.
-
-        Returns:
-            The custom configuration value, or the default if not found.
+            provider_type: Type of provider (e.g., "embeddings", "model")
+            provider_name: Name of the provider module
         """
-        return self.custom.get(key, default)
-
-    def set_custom(self, key: str, value: Any) -> None:
-        """
-        Set a custom configuration value.
-
-        Args:
-            key: The key of the custom configuration value.
-            value: The value to set.
-        """
-        self.custom[key] = value
+        try:
+            import_module(f"src.providers.{provider_type}.{provider_name}")
+        except ImportError as error:
+            module_path = f"src.providers.{provider_type}.{provider_name}"
+            raise ImportError(f"Could not import provider module {module_path}: {error}")
 
 
 # Create a global config instance
 config = Config()
 
-# Initialize logging
-configure_logging()
 
-# Export components for direct access
 __all__ = [
-    "config", "Config", "configure_logging",
-    "database_config", "DatabaseConfig",
-    "memory_config", "MemoryConfig",
-    "llm_config", "LLMConfig",
-    "tools_config", "ToolsConfig",
-    "logging_config", "LoggingConfig",
-    "app_config", "AppConfig"
+    "config",
+    "Config",
+    "database_config",
+    "DatabaseConfig",
+    "memory_config",
+    "MemoryConfig",
+    "model_config",
+    "ModelConfig",
+    "tools_config",
+    "ToolsConfig",
 ]

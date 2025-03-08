@@ -5,33 +5,29 @@ This module provides a rich command-line interface for interacting with
 agents created with the AI Agent Framework.
 """
 
-import asyncio
 import argparse
+import asyncio
 
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
-from dotenv import load_dotenv
 
-from src.llm import OpenAILLM
+from src.config import config
+from src.core.orchestrator import Orchestrator
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
-from src.core.orchestrator import Orchestrator
-from src.tools.web_search import WebSearch
+from src.models import OpenAIModel
 from src.tools.calculator import Calculator
-from src.config import config
+from src.tools.web_search import WebSearch
 from src.utils import get_version
-
 
 console = Console()
 
 
-def create_agent_from_config(
-    orchestrator: Orchestrator,
-    agent_id: str
-) -> None:
+def create_agent_from_config(orchestrator: Orchestrator, agent_id: str) -> None:
     """
     Create an agent from the configuration.
 
@@ -40,18 +36,18 @@ def create_agent_from_config(
         agent_id: The ID of the agent to create.
     """
     # Get LLM configuration
-    llm_config = config.llm
+    model_config = config.model
 
     # Create LLM
-    llm = OpenAILLM(
-        api_key=llm_config.api_key,
-        model=llm_config.model,
-        temperature=llm_config.temperature,
+    model = OpenAIModel(
+        api_key=model_config.api_key,
+        model=model_config.model,
+        temperature=model_config.temperature,
     )
 
     # Create memory
     buffer_memory = BufferMemory(
-        dimension=llm_config.embedding_dimension,
+        dimension=model_config.embedding_dimension,
         max_size=config.memory.buffer_max_size,
     )
 
@@ -76,7 +72,7 @@ def create_agent_from_config(
     # Create agent
     orchestrator.create_agent(
         agent_id=agent_id,
-        llm=llm,
+        model=model,
         buffer_memory=buffer_memory,
         long_term_memory=long_term_memory,
         tools=tools,
@@ -102,9 +98,7 @@ Type `/help` for available commands or `/exit` to quit.
 
     agent = orchestrator.get_agent(agent_id)
     if not agent:
-        console.print(
-            f"[bold red]Error:[/bold red] Agent '{agent_id}' not found."
-        )
+        console.print(f"[bold red]Error:[/bold red] Agent '{agent_id}' not found.")
         return
 
     tools_list = agent.get_available_tools()
@@ -126,7 +120,7 @@ Type `/help` for available commands or `/exit` to quit.
         user_input = Prompt.ask("\n[bold cyan]You[/bold cyan]")
 
         # Process commands
-        if user_input.startswith('/'):
+        if user_input.startswith("/"):
             command = user_input[1:].lower()
 
             if command in ["exit", "quit", "bye"]:
@@ -153,15 +147,11 @@ Type `/help` for available commands or `/exit` to quit.
             elif command.startswith("memory "):
                 query = command[7:].strip()
                 if query:
-                    with console.status(
-                        "[bold green]Searching memory...[/bold green]"
-                    ):
+                    with console.status("[bold green]Searching memory...[/bold green]"):
                         memories = await agent.search_memory(query)
 
                     if memories:
-                        memory_table = Table(
-                            title=f"Memory Results for '{query}'"
-                        )
+                        memory_table = Table(title=f"Memory Results for '{query}'")
                         memory_table.add_column("Text")
                         memory_table.add_column("Source")
                         memory_table.add_column("Distance")
@@ -170,16 +160,14 @@ Type `/help` for available commands or `/exit` to quit.
                             memory_table.add_row(
                                 Text(memory["text"], overflow="fold"),
                                 memory["source"],
-                                f"{memory['distance']:.4f}"
+                                f"{memory['distance']:.4f}",
                             )
 
                         console.print(memory_table)
                     else:
                         console.print("[yellow]No memories found.[/yellow]")
                 else:
-                    console.print(
-                        "[bold red]Error:[/bold red] Please provide a search query."
-                    )
+                    console.print("[bold red]Error:[/bold red] Please provide a search query.")
                 continue
 
             elif command == "tools":
@@ -197,15 +185,11 @@ Type `/help` for available commands or `/exit` to quit.
                 continue
 
             else:
-                console.print(
-                    f"[bold red]Unknown command:[/bold red] {command}"
-                )
+                console.print(f"[bold red]Unknown command:[/bold red] {command}")
                 continue
 
         # Process regular message
-        with console.status(
-            "[bold green]Agent is thinking...[/bold green]"
-        ):
+        with console.status("[bold green]Agent is thinking...[/bold green]"):
             try:
                 response = await orchestrator.run(user_input)
                 console.print("\n[bold green]Agent:[/bold green]")
@@ -218,21 +202,14 @@ def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="AI Agent Framework CLI")
     parser.add_argument(
-        "--agent-id",
-        type=str,
-        default="cli_agent",
-        help="ID for the agent (default: cli_agent)"
+        "--agent-id", type=str, default="cli_agent", help="ID for the agent (default: cli_agent)"
     )
     parser.add_argument(
         "--no-config",
         action="store_true",
-        help="Don't use configuration file, use defaults instead"
+        help="Don't use configuration file, use defaults instead",
     )
-    parser.add_argument(
-        "--version",
-        action="store_true",
-        help="Show the version and exit"
-    )
+    parser.add_argument("--version", action="store_true", help="Show the version and exit")
     return parser.parse_args()
 
 
