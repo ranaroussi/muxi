@@ -300,7 +300,7 @@ To make tools available to an agent, they need to be registered when creating th
 
 ```python
 from src.core.orchestrator import Orchestrator
-from src.llm import OpenAILLM
+from src.models import OpenAIModel
 from src.memory.buffer import BufferMemory
 from src.tools.calculator import CalculatorTool
 from src.tools.web_search import WebSearchTool
@@ -313,7 +313,7 @@ db_tool = DatabaseQueryTool("postgresql://user:password@localhost:5432/mydb")
 orchestrator = Orchestrator()
 orchestrator.create_agent(
     agent_id="assistant",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
     tools=[CalculatorTool(), WebSearchTool(), weather_tool, db_tool],
     system_message="You are a helpful assistant with access to tools."

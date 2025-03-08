@@ -29,14 +29,14 @@ orchestrator = Orchestrator()
 The primary function of the Orchestrator is to create and manage agents:
 
 ```python
-from src.llm import OpenAILLM
+from src.models import OpenAIModel
 from src.memory.buffer import BufferMemory
 from src.tools.web_search import WebSearchTool
 
 # Create an agent with the orchestrator
 orchestrator.create_agent(
     agent_id="research_agent",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
     tools=[WebSearchTool()],
     system_message="You are a research assistant specialized in finding and summarizing information.",
@@ -46,7 +46,7 @@ orchestrator.create_agent(
 # Create another agent
 orchestrator.create_agent(
     agent_id="coding_agent",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
     tools=[],
     system_message="You are a coding assistant specialized in Python programming.",
@@ -172,7 +172,7 @@ async def get_specialized_agent(domain):
 
         orchestrator.create_agent(
             agent_id=agent_id,
-            llm=OpenAILLM(model="gpt-4o"),
+            model=OpenAIModel(model="gpt-4o"),
             buffer_memory=BufferMemory(),
             system_message=system_message
         )

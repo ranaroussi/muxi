@@ -22,13 +22,13 @@ Multiple agents can specialize in different domains, providing more accurate and
 # Create specialized agents for different domains
 orchestrator.create_agent(
     agent_id="code_assistant",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     system_message="You are an expert programmer specializing in Python and JavaScript."
 )
 
 orchestrator.create_agent(
     agent_id="marketing_assistant",
-    llm=AnthropicLLM(model="claude-3-opus"),
+    model=AnthropicModel(model="claude-3-opus"),
     system_message="You are a creative marketing expert who helps craft compelling content."
 )
 ```
@@ -61,7 +61,7 @@ orchestrator.create_agent(
 
 Having multiple agents enables more sophisticated system architectures:
 
-- **Model optimization**: Use different LLM models based on task requirements
+- **Model optimization**: Use different language models based on task requirements
   - Powerful models for complex reasoning
   - Efficient models for simple, frequent tasks
 - **Resource allocation**: Distribute computational resources efficiently
@@ -72,12 +72,12 @@ Having multiple agents enables more sophisticated system architectures:
 # Cost optimization with different models for different tasks
 orchestrator.create_agent(
     agent_id="reasoning_agent",
-    llm=OpenAILLM(model="gpt-4o")  # More powerful, expensive model
+    model=OpenAIModel(model="gpt-4o")  # More powerful, expensive model
 )
 
 orchestrator.create_agent(
     agent_id="classification_agent",
-    llm=OpenAILLM(model="gpt-3.5-turbo")  # More efficient, less expensive model
+    model=OpenAIModel(model="gpt-3.5-turbo")  # More efficient, less expensive model
 )
 ```
 
@@ -152,7 +152,7 @@ While the multi-agent approach has many advantages, there are cases where a sing
 # Single agent with multiple tools
 agent = Agent(
     name="multipurpose_assistant",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     memory=BufferMemory(),
     tools={
         "calculator": Calculator(),

@@ -288,7 +288,7 @@ results = await memobase.search(
 
 ```python
 from src.core.orchestrator import Orchestrator
-from src.llm import OpenAILLM
+from src.models import OpenAIModel
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
 from src.memory.memobase import Memobase
@@ -304,7 +304,7 @@ memobase = Memobase(long_term_memory=long_term_memory)
 orchestrator = Orchestrator()
 orchestrator.create_agent(
     agent_id="multi_user_agent",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     buffer_memory=buffer_memory,
     memobase=memobase,
     system_message="You are an assistant that remembers information about different users."
@@ -352,7 +352,7 @@ async def process_message_with_memory(agent, user_message):
     messages = await agent.buffer_memory.get_formatted_messages()
 
     # Send to LLM for processing
-    response = await agent.llm.generate(messages)
+    response = await agent.model.generate(messages)
 
     # Add the response to buffer memory
     await agent.buffer_memory.add_message("assistant", response)
@@ -473,8 +473,8 @@ class ContextWindowManager:
 
 ```python
 class MemoryExtractor:
-    def __init__(self, llm, long_term_memory):
-        self.llm = llm
+    def __init__(self, model, long_term_memory):
+        self.model = model
         self.long_term_memory = long_term_memory
 
     async def extract_and_store(self, conversation):
@@ -489,7 +489,7 @@ class MemoryExtractor:
         Important facts to remember:
         """
 
-        extraction_result = await self.llm.generate([{"role": "user", "content": prompt}])
+        extraction_result = await self.model.generate([{"role": "user", "content": prompt}])
 
         # Parse the bullet points
         facts = [line.strip("- ") for line in extraction_result.split("\n") if line.strip().startswith("-")]

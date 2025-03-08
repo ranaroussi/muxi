@@ -1,12 +1,12 @@
 # Agent
 
-Agents are the core component of the AI Agent Framework. An agent combines a Large Language Model (LLM), memory systems, and tools to create an intelligent assistant that can understand and respond to user requests.
+Agents are the core component of the AI Agent Framework. An agent combines a language model, memory systems, and tools to create an intelligent assistant that can understand and respond to user requests.
 
 ## What is an Agent?
 
 An agent is an autonomous entity that:
 - Communicates with users via natural language
-- Processes requests and generates responses using an LLM
+- Processes requests and generates responses using a language model
 - Stores conversation history in memory
 - Executes tools to perform actions or retrieve information
 - Can maintain separate memory contexts for different users (with Memobase)
@@ -19,7 +19,7 @@ Agents can be created through the Orchestrator, which manages multiple agents an
 
 ```python
 import asyncio
-from src.llm import OpenAILLM
+from src.models import OpenAIModel
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
 from src.memory.memobase import Memobase
@@ -28,8 +28,8 @@ from src.tools.calculator import CalculatorTool
 from src.core.orchestrator import Orchestrator
 
 async def create_agent():
-    # Create LLM
-    llm = OpenAILLM(model="gpt-4o")
+    # Create language model
+    model = OpenAIModel(model="gpt-4o")
 
     # Create memory systems
     buffer_memory = BufferMemory(max_tokens=4000)
@@ -51,7 +51,7 @@ async def create_agent():
     # Create a standard agent
     orchestrator.create_agent(
         agent_id=agent_id,
-        llm=llm,
+        model=model,
         buffer_memory=buffer_memory,
         long_term_memory=long_term_memory,
         tools=tools,
@@ -62,11 +62,11 @@ async def create_agent():
     # Create a multi-user agent
     orchestrator.create_agent(
         agent_id="multi_user_agent",
-        llm=llm,
+        model=model,
         buffer_memory=BufferMemory(),
         memobase=memobase,
         tools=tools,
-        system_message="You are a helpful assistant that serves multiple users."
+        system_message="You are a helpful AI assistant that remembers user preferences."
     )
 
     return orchestrator, agent_id
@@ -110,7 +110,7 @@ curl -X POST http://localhost:5050/agents \
   -H "Content-Type: application/json" \
   -d '{
     "agent_id": "multi_user_agent",
-    "system_message": "You are a helpful assistant that serves multiple users.",
+    "system_message": "You are a helpful AI assistant that remembers user preferences.",
     "tools": ["web_search", "calculator"],
     "use_long_term_memory": true,
     "multi_user_support": true
@@ -126,7 +126,7 @@ The framework provides a CLI command to create agents:
 python -m src.cli.agent create my_agent --system "You are a helpful AI assistant." --tools web_search calculator
 
 # Create a multi-user agent
-python -m src.cli.agent create multi_user_agent --system "You are a helpful assistant that serves multiple users." --tools web_search calculator --multi-user
+python -m src.cli.agent create multi_user_agent --system "You are a helpful AI assistant that remembers user preferences." --tools web_search calculator --multi-user
 ```
 
 ## Agent Parameters
@@ -134,7 +134,7 @@ python -m src.cli.agent create multi_user_agent --system "You are a helpful assi
 When creating an agent, you can configure various parameters:
 
 - **agent_id** (required): A unique identifier for the agent
-- **llm** (required): The LLM provider to use (e.g., OpenAILLM, AnthropicLLM)
+- **model** (required): The language model provider to use (e.g., OpenAIModel, AnthropicModel)
 - **buffer_memory**: Short-term memory for the current conversation
 - **long_term_memory**: Persistent memory for storing information across sessions
 - **memobase**: Multi-user memory manager for user-specific contexts
@@ -261,7 +261,7 @@ You are an AI assistant specialized in helping with scientific research.
 
 orchestrator.create_agent(
     agent_id="science_agent",
-    llm=llm,
+    model=model,
     system_message=system_message,
     # Other parameters...
 )
@@ -275,7 +275,7 @@ You can create specialized agents for specific tasks:
 # Create a programming assistant
 orchestrator.create_agent(
     agent_id="code_assistant",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     tools=[CalculatorTool()],
     system_message="You are an expert coding assistant. Provide clean, efficient code examples and explain your reasoning.",
 )
@@ -283,7 +283,7 @@ orchestrator.create_agent(
 # Create a customer service agent
 orchestrator.create_agent(
     agent_id="customer_service",
-    llm=AnthropicLLM(model="claude-3-opus"),
+    model=AnthropicModel(model="claude-3-opus"),
     tools=[WebSearchTool()],
     system_message="You are a friendly customer service representative. Help users with their questions in a polite and helpful manner.",
 )
@@ -303,7 +303,7 @@ memobase = Memobase(long_term_memory=long_term_memory)
 
 orchestrator.create_agent(
     agent_id="customer_service",
-    llm=OpenAILLM(model="gpt-4o"),
+    model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
     memobase=memobase,
     system_message="""
@@ -327,7 +327,7 @@ user2_followup = await orchestrator.chat("customer_service", "Thanks for the inf
 
 ## Best Practices
 
-1. **Choose the right LLM**: Different tasks require different language models. For complex reasoning, use advanced models like GPT-4 or Claude 3.
+1. **Choose the right language model**: Different tasks require different language models. For complex reasoning, use advanced models like GPT-4 or Claude 3.
 
 2. **Craft effective system messages**: Be specific about the agent's role, tone, and constraints.
 
@@ -347,7 +347,7 @@ user2_followup = await orchestrator.chat("customer_service", "Thanks for the inf
 
 ### Agent Not Responding
 
-- Check if the LLM API key is valid
+- Check if the language model API key is valid
 - Ensure the agent ID is correct
 - Verify that the WebSocket connection is established
 

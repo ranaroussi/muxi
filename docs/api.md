@@ -111,7 +111,7 @@ curl -X POST http://localhost:5050/agents \
   -H "Content-Type: application/json" \
   -d '{
     "agent_id": "my_agent",
-    "llm_model": "gpt-4o",
+    "model": "gpt-4o",
     "system_message": "You are a helpful AI assistant.",
     "enable_web_search": true,
     "enable_calculator": true,
@@ -127,7 +127,7 @@ curl -X POST http://localhost:5050/agents \
 
 Parameters:
 - `agent_id` (required): Unique identifier for the agent
-- `llm_model`: LLM model to use (default: "gpt-4o")
+- `model`: LLM model to use (default: "gpt-4o")
 - `system_message`: Instructions for the agent's behavior
 - `enable_web_search`: Whether to enable the web search tool (default: false)
 - `enable_calculator`: Whether to enable the calculator tool (default: false)
