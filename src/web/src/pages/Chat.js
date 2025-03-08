@@ -38,11 +38,7 @@ function Chat() {
   const [conversation, setConversation] = useState([]);
   const messagesEndRef = useRef(null);
   const toast = useToast();
-  const [error, setError] = useState(null);
   const [agentError, setAgentError] = useState(null);
-  const [showTroubleshooting, setShowTroubleshooting] = useState(false);
-  const [showDebugInfo, setShowDebugInfo] = useState(false);
-  const [wsEvents, setWsEvents] = useState([]);
   const [agentIsThinking, setAgentIsThinking] = useState(false);
 
   // Simple WebSocket implementation
@@ -56,7 +52,8 @@ function Chat() {
   // WebSocket ref
   const socketRef = useRef(null);
 
-  // Function to add a debug event
+  // Function to add a debug event - kept for future debugging needs
+  // eslint-disable-next-line no-unused-vars
   const addDebugEvent = useCallback((event) => {
     const timestamp = new Date().toLocaleTimeString();
     setDebugEvents(prev => [...prev, { time: timestamp, event }]);
@@ -294,7 +291,7 @@ function Chat() {
       // Create the agent
       await createAgent({
         agent_id: selectedAgentId,
-        llm_model: "gpt-4o",
+        model: "gpt-4o",
         system_message: "You are a helpful AI assistant."
       });
 
