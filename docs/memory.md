@@ -1,6 +1,6 @@
 # Memory Systems
 
-Memory is a crucial component of the AI Agent Framework that allows agents to retain information over time. The framework provides three complementary memory systems:
+Memory is a crucial component of the MUXI Framework that allows agents to retain information over time. The framework provides three complementary memory systems:
 
 1. **Buffer Memory**: Short-term memory for the current conversation context
 2. **Long-term Memory**: Persistent memory for storing information across multiple sessions

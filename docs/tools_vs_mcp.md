@@ -1,6 +1,6 @@
 # Tools versus MCP Servers
 
-This document outlines the key differences, trade-offs, and use cases for using internal Tools versus external MCP Servers in the AI Agent Framework.
+This document outlines the key differences, trade-offs, and use cases for using internal Tools versus external MCP Servers in the MUXI Framework.
 
 ## Key Concepts
 

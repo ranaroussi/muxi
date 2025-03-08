@@ -1,6 +1,6 @@
 # Orchestrator
 
-The Orchestrator is a central component of the AI Agent Framework responsible for managing multiple agents and coordinating their interactions. It serves as the control center for agent creation, access, and communication.
+The Orchestrator is a central component of the MUXI Framework responsible for managing multiple agents and coordinating their interactions. It serves as the control center for agent creation, access, and communication.
 
 ## What is the Orchestrator?
 

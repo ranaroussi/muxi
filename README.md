@@ -1,6 +1,6 @@
-# AI Agent Framework
+# MUXI MUXI Framework
 
-An extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration.
+MUXI is an extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration.
 
 > [!WARNING]
 > This project is a work in progress and is not even close to being ready for production use. I'm actively developing the framework and adding new features. Please refer to the [roadmap](docs/roadmap.md) for detailed information about the current state of the project and where it's headed.

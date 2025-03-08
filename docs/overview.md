@@ -1,8 +1,8 @@
-# AI Agent Framework Overview
+# MUXI Framework Overview
 
 ## Introduction
 
-The AI Agent Framework is a powerful, extensible system designed for building intelligent agents with memory persistence, tool integration, and real-time communication capabilities. This document provides a comprehensive overview of the framework's architecture, components, and how they interact to create a cohesive system.
+The MUXI Framework is a powerful, extensible system designed for building intelligent agents with memory persistence, tool integration, and real-time communication capabilities. This document provides a comprehensive overview of the framework's architecture, components, and how they interact to create a cohesive system.
 
 ## Core Architecture
 
@@ -134,6 +134,6 @@ The framework can be integrated into larger systems through:
 
 ## Conclusion
 
-The AI Agent Framework provides a comprehensive solution for building, deploying, and managing intelligent agents. Its modular design allows for extensive customization while maintaining a consistent core architecture. By separating concerns between orchestration, agent behavior, memory systems, and tool execution, the framework enables building sophisticated agent-based applications with minimal overhead.
+The MUXI Framework provides a comprehensive solution for building, deploying, and managing intelligent agents. Its modular design allows for extensive customization while maintaining a consistent core architecture. By separating concerns between orchestration, agent behavior, memory systems, and tool execution, the framework enables building sophisticated agent-based applications with minimal overhead.
 
 Whether you're building a simple chatbot, a complex multi-agent system, or integrating AI capabilities into existing applications, the framework provides the necessary building blocks and extension points to realize your vision.

@@ -1,6 +1,6 @@
-# AI Agent Framework Dashboard
+# MUXI Framework Dashboard
 
-A modern web dashboard for interacting with the AI Agent Framework.
+A modern web dashboard for interacting with the MUXI Framework.
 
 ## Features
 
@@ -23,7 +23,7 @@ A modern web dashboard for interacting with the AI Agent Framework.
 ### Prerequisites
 
 - Node.js 14+ and npm
-- AI Agent Framework API server running
+- MUXI Framework API server running
 
 ### Installation
 
@@ -69,13 +69,13 @@ This will create a `build` directory with optimized production files.
 
 You can configure the dashboard using the following environment variables:
 
-- `BACKEND_API_URL`: URL of the AI Agent Framework API (defaults to the same host as the dashboard)
+- `BACKEND_API_URL`: URL of the MUXI Framework API (defaults to the same host as the dashboard)
 
 ## Deployment
 
-### With the AI Agent Framework
+### With the MUXI Framework
 
-The AI Agent Framework API server can serve the dashboard. To do this:
+The MUXI Framework API server can serve the dashboard. To do this:
 
 1. Build the dashboard:
 2.

@@ -1,6 +1,6 @@
 # Agents versus Tools: Why Use Multiple Agents?
 
-In the AI Agent Framework, you have two primary approaches to building intelligent systems:
+In the MUXI Framework, you have two primary approaches to building intelligent systems:
 
 1. **Single Agent with Multiple Tools**: One agent that has access to various tools
 2. **Multiple Specialized Agents**: Several agents managed by an orchestrator
@@ -168,4 +168,4 @@ agent = Agent(
 
 The choice between multiple specialized agents and a single agent with multiple tools depends on your specific requirements. For complex applications that span multiple domains, handle multiple users, or require different types of AI capabilities, the multi-agent approach with an orchestrator provides significant architectural advantages.
 
-The AI Agent Framework is designed to support both approaches, giving you the flexibility to choose the right architecture for your needs or even combine them as your system evolves.
+The MUXI Framework is designed to support both approaches, giving you the flexibility to choose the right architecture for your needs or even combine them as your system evolves.

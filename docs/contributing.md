@@ -1,6 +1,6 @@
-# Contributing to the AI Agent Framework
+# Contributing to the MUXI Framework
 
-Thank you for your interest in contributing to the AI Agent Framework! This guide will help you start contributing to the project, whether you're fixing bugs, adding new features, improving documentation, or reporting issues.
+Thank you for your interest in contributing to the MUXI Framework! This guide will help you start contributing to the project, whether you're fixing bugs, adding new features, improving documentation, or reporting issues.
 
 ## Table of Contents
 
@@ -80,7 +80,7 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
 
 ## Project Structure
 
-The AI Agent Framework follows a modular structure:
+The MUXI Framework follows a modular structure:
 
 ```
 .github/                  # GitHub configuration (workflows, templates)
@@ -232,4 +232,4 @@ Join our community channels to get help, discuss features, or connect with other
 
 ---
 
-Thank you for contributing to the AI Agent Framework! Your efforts help make this project better for everyone.
+Thank you for contributing to the MUXI Framework! Your efforts help make this project better for everyone.

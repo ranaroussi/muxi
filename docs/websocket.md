@@ -1,10 +1,10 @@
 # WebSocket Communication
 
-WebSockets provide real-time, bidirectional communication between clients and the AI Agent Framework. This guide explains how to implement, use, and troubleshoot WebSocket connections for interactive agent communication.
+WebSockets provide real-time, bidirectional communication between clients and the MUXI Framework. This guide explains how to implement, use, and troubleshoot WebSocket connections for interactive agent communication.
 
 ## What is WebSocket Support?
 
-WebSocket support in the AI Agent Framework:
+WebSocket support in the MUXI Framework:
 - Enables real-time communication with agents
 - Provides immediate responses as they're generated
 - Supports subscription to specific agents
@@ -228,7 +228,7 @@ import uuid
 from src.core.orchestrator import Orchestrator
 from src.api.websocket import websocket_endpoint, set_orchestrator
 
-app = FastAPI(title="AI Agent Framework API")
+app = FastAPI(title="MUXI Framework API")
 
 # Create orchestrator
 orchestrator = Orchestrator()

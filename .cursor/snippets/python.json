@@ -32,7 +32,7 @@
       "from typing import Any, Dict",
       "",
       "class ${1:Custom}Tool(BaseTool):",
-      "    \"\"\"${2:A custom tool for the AI Agent Framework.}\"\"\"",
+      "    \"\"\"${2:A custom tool for the MUXI Framework.}\"\"\"",
       "",
       "    name = \"${3:custom_tool}\"",
       "    description = \"${4:This tool performs a custom operation.}\"",
@@ -61,7 +61,7 @@
       "                \"error\": str(e)",
       "            }"
     ],
-    "description": "Create a custom tool for the AI Agent Framework"
+    "description": "Create a custom tool for the MUXI Framework"
   },
   "WebSocket Handler": {
     "prefix": "aiws",
@@ -71,7 +71,7 @@
       "import websockets",
       "",
       "async def handle_websocket_messages():",
-      "    \"\"\"Handle WebSocket messages from the AI Agent Framework.\"\"\"",
+      "    \"\"\"Handle WebSocket messages from the MUXI Framework.\"\"\"",
       "    uri = \"ws://localhost:${1:5050}/ws\"",
       "    async with websockets.connect(uri) as websocket:",
       "        # Subscribe to an agent",
@@ -101,7 +101,7 @@
       "            elif data.get(\"type\") == \"tool_end\":",
       "                print(f\"Tool execution completed: {data.get('result')}\")"
     ],
-    "description": "Create a WebSocket handler for the AI Agent Framework"
+    "description": "Create a WebSocket handler for the MUXI Framework"
   },
   "API Test": {
     "prefix": "aiapitest",

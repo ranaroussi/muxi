@@ -1,6 +1,6 @@
 # Command Line Interface (CLI)
 
-The AI Agent Framework includes a powerful command-line interface (CLI) that allows you to interact with AI agents directly from your terminal. This document covers how to set up and use the CLI effectively.
+The MUXI Framework includes a powerful command-line interface (CLI) that allows you to interact with AI agents directly from your terminal. This document covers how to set up and use the CLI effectively.
 
 ## Overview
 
@@ -12,7 +12,7 @@ The CLI provides a rich terminal-based interface for:
 
 ## Installation
 
-The CLI is included with the AI Agent Framework. You can use it in two ways:
+The CLI is included with the MUXI Framework. You can use it in two ways:
 
 ### As a module (before package installation)
 ```bash
@@ -280,7 +280,7 @@ The CLI is implemented using the Click library and provides the following featur
 Here's an example of a CLI session:
 
 ```
-# AI Agent Framework CLI
+# MUXI Framework CLI
 
 You are now chatting with an AI agent (cli_agent).
 Type `/help` for available commands or `/exit` to quit.
@@ -293,10 +293,10 @@ Available Tools
 │ calculator   │ Perform mathematical calculations                   │
 └──────────────┴─────────────────────────────────────────────────────┘
 
-You: Tell me about the AI Agent Framework
+You: Tell me about the MUXI Framework
 
 Agent:
-The AI Agent Framework is a powerful, extensible system for building AI agents with memory, tools, and real-time communication capabilities. Here are the key features:
+The MUXI Framework is a powerful, extensible system for building AI agents with memory, tools, and real-time communication capabilities. Here are the key features:
 
 - **Multi-Agent Orchestration**: Create and manage multiple AI agents with different capabilities
 - **Memory Systems**: Short-term buffer memory and long-term persistent memory

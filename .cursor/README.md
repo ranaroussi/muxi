@@ -1,12 +1,12 @@
 # Cursor IDE Configuration
 
-This directory contains configuration files for the Cursor IDE to enhance the development experience for the AI Agent Framework.
+This directory contains configuration files for the Cursor IDE to enhance the development experience for the MUXI Framework.
 
 ## Available Configurations
 
 - **settings.json**: Contains IDE-wide settings optimized for Python development
 - **keybindings.json**: Custom keyboard shortcuts for common operations
-- **snippets/python.json**: Code snippets specific to this AI Agent Framework
+- **snippets/python.json**: Code snippets specific to this MUXI Framework
 
 ## Keyboard Shortcuts
 
@@ -25,8 +25,8 @@ This directory contains configuration files for the Cursor IDE to enhance the de
 | Prefix | Description |
 |--------|-------------|
 | `aiagent` | Initialize an AI Agent with memory |
-| `aitool` | Create a custom tool for the AI Agent Framework |
-| `aiws` | Setup a WebSocket handler for the AI Agent Framework |
+| `aitool` | Create a custom tool for the MUXI Framework |
+| `aiws` | Setup a WebSocket handler for the MUXI Framework |
 | `aiapitest` | Create a test for an API endpoint |
 
 ## Usage

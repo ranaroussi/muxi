@@ -1,6 +1,6 @@
 # Agent
 
-Agents are the core component of the AI Agent Framework. An agent combines a language model, memory systems, and tools to create an intelligent assistant that can understand and respond to user requests.
+Agents are the core component of the MUXI Framework. An agent combines a language model, memory systems, and tools to create an intelligent assistant that can understand and respond to user requests.
 
 ## What is an Agent?
 

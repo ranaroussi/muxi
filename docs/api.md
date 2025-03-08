@@ -1,6 +1,6 @@
 # REST API
 
-The AI Agent Framework provides a comprehensive REST API for interacting with agents, managing tools, and accessing memory. This guide explains the available endpoints and how to use them.
+The MUXI Framework provides a comprehensive REST API for interacting with agents, managing tools, and accessing memory. This guide explains the available endpoints and how to use them.
 
 ## API Overview
 
@@ -515,7 +515,7 @@ curl -X GET http://localhost:5050/system/resources
 
 ## Multi-User Support
 
-The AI Agent Framework supports multi-user operations through the `user_id` parameter. This allows for:
+The MUXI Framework supports multi-user operations through the `user_id` parameter. This allows for:
 
 1. **User-specific memory contexts**: Each user gets their own memory space
 2. **Personalized conversations**: Agents can remember information specific to each user
