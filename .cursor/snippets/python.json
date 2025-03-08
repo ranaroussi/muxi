@@ -3,7 +3,7 @@
     "prefix": "aiagent",
     "body": [
       "from src.core.orchestrator import Orchestrator",
-      "from src.llm.openai import OpenAILLM",
+      "from src.models.openai import OpenAIModel",
       "from src.memory.buffer import BufferMemory",
       "from src.memory.long_term import LongTermMemory",
       "",
@@ -13,7 +13,7 @@
       "# Create an agent with memory",
       "orchestrator.create_agent(",
       "    agent_id=\"${1:assistant}\",",
-      "    llm=OpenAILLM(model=\"${2:gpt-4o}\"),",
+      "    model=OpenAIModel(model=\"${2:gpt-4o}\"),",
       "    buffer_memory=BufferMemory(),",
       "    long_term_memory=LongTermMemory(),",
       "    system_message=\"${3:You are a helpful AI assistant.}\"",
