@@ -7,27 +7,26 @@ agents created with the AI Agent Framework.
 
 import logging
 import os
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from dotenv import load_dotenv
 
-from src.llm import OpenAILLM
+from src.api.websocket import register_websocket_routes
+from src.config import config
+from src.core.orchestrator import Orchestrator
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
 from src.memory.memobase import Memobase
-from src.core.orchestrator import Orchestrator
-from src.tools.web_search import WebSearch
+from src.models import OpenAIModel
 from src.tools.calculator import Calculator
-from src.config import config
-from src.api.websocket import register_websocket_routes
+from src.tools.web_search import WebSearch
 from src.utils import get_version
-
 
 # Load environment variables
 load_dotenv()
@@ -48,8 +47,8 @@ class AgentRequest(BaseModel):
     """Model for creating an agent."""
 
     agent_id: str = Field(..., description="Unique identifier for the agent")
-    llm_model: str = Field(
-        config.llm.default_model, description="LLM model to use (e.g., gpt-4o)"
+    model_name: str = Field(
+        config.model.default_model, description="Language model to use (e.g., gpt-4o)"
     )
     system_message: Optional[str] = Field(
         None, description="System message to customize agent behavior"
@@ -102,9 +101,7 @@ class MemorySearchRequest(BaseModel):
         0, description="User ID for multi-user support (0 for single-user mode)"
     )
     limit: int = Field(5, description="Maximum number of results to return")
-    use_long_term: bool = Field(
-        True, description="Whether to include long-term memory in search"
-    )
+    use_long_term: bool = Field(True, description="Whether to include long-term memory in search")
 
 
 class MemoryItem(BaseModel):
@@ -124,9 +121,7 @@ class MemorySearchResponse(BaseModel):
     query: str = Field(..., description="Original search query")
     agent_id: str = Field(..., description="ID of the agent searched")
     user_id: Optional[int] = Field(0, description="User ID of the requester")
-    results: List[MemoryItem] = Field(
-        default_factory=list, description="Search results"
-    )
+    results: List[MemoryItem] = Field(default_factory=list, description="Search results")
 
 
 class ClearMemoryRequest(BaseModel):
@@ -154,17 +149,13 @@ class ClearMemoryResponse(BaseModel):
 class AgentListResponse(BaseModel):
     """Model for listing agents."""
 
-    agents: List[Dict[str, Any]] = Field(
-        default_factory=list, description="List of agents"
-    )
+    agents: List[Dict[str, Any]] = Field(default_factory=list, description="List of agents")
 
 
 class ToolListResponse(BaseModel):
     """Model for listing tools."""
 
-    tools: List[Dict[str, Any]] = Field(
-        default_factory=list, description="List of available tools"
-    )
+    tools: List[Dict[str, Any]] = Field(default_factory=list, description="List of available tools")
 
 
 def create_app() -> FastAPI:
@@ -185,15 +176,11 @@ def create_app() -> FastAPI:
     )
 
     # Set up static file serving for the React app
-    web_build_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../web/build")
-    )
+    web_build_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../web/build"))
 
     if os.path.exists(web_build_dir):
         # Mount static files
-        app.mount(
-            "/static", StaticFiles(directory=f"{web_build_dir}/static"), name="static"
-        )
+        app.mount("/static", StaticFiles(directory=f"{web_build_dir}/static"), name="static")
 
         # Also mount any other static assets at the root level
         if os.path.exists(os.path.join(web_build_dir, "assets")):
@@ -250,7 +237,7 @@ def create_app() -> FastAPI:
                 pass
 
             # Create LLM
-            llm = OpenAILLM(model=request.llm_model)
+            model = OpenAIModel(model=request.model_name)
 
             # Create memory systems
             buffer_memory = BufferMemory()
@@ -284,7 +271,7 @@ def create_app() -> FastAPI:
             # Create agent
             orchestrator.create_agent(
                 agent_id=request.agent_id,
-                llm=llm,
+                model=model,
                 buffer_memory=buffer_memory,
                 long_term_memory=long_term_memory,
                 memobase=memobase,
@@ -297,9 +284,7 @@ def create_app() -> FastAPI:
             raise
         except Exception as e:
             logger.error(f"Error creating agent: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Error creating agent: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Error creating agent: {str(e)}")
 
     @app.get("/agents", response_model=AgentListResponse, tags=["Agents"])
     async def list_agents():
@@ -322,9 +307,7 @@ def create_app() -> FastAPI:
 
         except Exception as e:
             logger.error(f"Error listing agents: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Error listing agents: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Error listing agents: {str(e)}")
 
     @app.delete("/agents/{agent_id}", response_model=Dict[str, str], tags=["Agents"])
     async def delete_agent(agent_id: str):
@@ -349,9 +332,7 @@ def create_app() -> FastAPI:
 
         except Exception as e:
             logger.error(f"Error deleting agent: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Error deleting agent: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Error deleting agent: {str(e)}")
 
     @app.post("/agents/chat", response_model=MessageResponse, tags=["Chat"])
     async def chat_with_agent(request: MessageRequest):
@@ -363,14 +344,10 @@ def create_app() -> FastAPI:
             agent = orchestrator.get_agent(agent_id)
 
             if not agent:
-                raise HTTPException(
-                    status_code=404, detail=f"Agent with ID '{agent_id}' not found"
-                )
+                raise HTTPException(status_code=404, detail=f"Agent with ID '{agent_id}' not found")
 
             # Get a response from the agent
-            response = await agent.chat(
-                message=request.message, user_id=request.user_id
-            )
+            response = await agent.chat(message=request.message, user_id=request.user_id)
 
             return {
                 "message": response,
@@ -386,9 +363,7 @@ def create_app() -> FastAPI:
                 status_code=500, detail=f"Error getting response from agent: {str(e)}"
             )
 
-    @app.post(
-        "/agents/memory/search", response_model=MemorySearchResponse, tags=["Memory"]
-    )
+    @app.post("/agents/memory/search", response_model=MemorySearchResponse, tags=["Memory"])
     async def search_memory(request: MemorySearchRequest):
         """
         Search an agent's memory for relevant information.
@@ -398,9 +373,7 @@ def create_app() -> FastAPI:
             agent = orchestrator.get_agent(agent_id)
 
             if not agent:
-                raise HTTPException(
-                    status_code=404, detail=f"Agent with ID '{agent_id}' not found"
-                )
+                raise HTTPException(status_code=404, detail=f"Agent with ID '{agent_id}' not found")
 
             # Search memory
             results = await agent.search_memory(
@@ -449,13 +422,9 @@ def create_app() -> FastAPI:
             raise
         except Exception as e:
             logger.error(f"Error searching memory: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Error searching memory: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Error searching memory: {str(e)}")
 
-    @app.post(
-        "/agents/memory/clear", response_model=ClearMemoryResponse, tags=["Memory"]
-    )
+    @app.post("/agents/memory/clear", response_model=ClearMemoryResponse, tags=["Memory"])
     async def clear_memory_endpoint(request: ClearMemoryRequest):
         """
         Clear an agent's memory.
@@ -465,14 +434,10 @@ def create_app() -> FastAPI:
             agent = orchestrator.get_agent(agent_id)
 
             if not agent:
-                raise HTTPException(
-                    status_code=404, detail=f"Agent with ID '{agent_id}' not found"
-                )
+                raise HTTPException(status_code=404, detail=f"Agent with ID '{agent_id}' not found")
 
             # Clear memory
-            agent.clear_memory(
-                clear_long_term=request.clear_long_term, user_id=request.user_id
-            )
+            agent.clear_memory(clear_long_term=request.clear_long_term, user_id=request.user_id)
 
             return {
                 "message": "Memory cleared successfully",
@@ -483,9 +448,7 @@ def create_app() -> FastAPI:
             raise
         except Exception as e:
             logger.error(f"Error clearing memory: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Error clearing memory: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Error clearing memory: {str(e)}")
 
     @app.get("/tools", response_model=ToolListResponse, tags=["Tools"])
     async def list_tools():
@@ -493,16 +456,16 @@ def create_app() -> FastAPI:
         try:
             # Create a temporary agent to get the tool list
             if not orchestrator.agents:
-                llm = OpenAILLM(
-                    api_key=config.llm.openai_api_key,
-                    model=config.llm.default_model,
+                model = OpenAIModel(
+                    api_key=config.model.openai_api_key,
+                    model=config.model.default_model,
                 )
 
                 tools = [Calculator(), WebSearch()]
 
                 orchestrator.create_agent(
                     agent_id="_temp",
-                    llm=llm,
+                    model=model,
                     tools=tools,
                 )
 
@@ -517,9 +480,7 @@ def create_app() -> FastAPI:
 
         except Exception as e:
             logger.error(f"Error listing tools: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Error listing tools: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Error listing tools: {str(e)}")
 
     # Register WebSocket routes
     register_websocket_routes(app, orchestrator)
