@@ -8,7 +8,7 @@ the OpenAI API.
 import json
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import openai
 from loguru import logger
@@ -156,15 +156,61 @@ class OpenAIModel(BaseModel):
         content = response.choices[0].message.content
         return json.loads(content)
 
-    async def embed(self, text: str) -> List[float]:
+    async def embed(self, text: str, **kwargs: Any) -> List[float]:
         """
         Generate an embedding for the given text.
 
         Args:
             text: The text to embed
+            **kwargs: Additional provider-specific parameters.
 
         Returns:
             A list of floats representing the embedding vector
         """
         response = await self.client.embeddings.create(model="text-embedding-3-small", input=text)
         return response.data[0].embedding
+
+    async def chat(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        top_p: Optional[float] = None,
+        frequency_penalty: Optional[float] = None,
+        presence_penalty: Optional[float] = None,
+        stop: Optional[Union[str, List[str]]] = None,
+        **kwargs: Any,
+    ) -> str:
+        """
+        Generate a chat completion.
+
+        Args:
+            messages: A list of messages in the conversation.
+            temperature: Controls randomness.
+            max_tokens: The maximum number of tokens to generate.
+            top_p: An alternative to sampling with temperature.
+            frequency_penalty: Penalize new tokens based on frequency.
+            presence_penalty: Penalize new tokens based on presence.
+            stop: Sequences where the API will stop generating further tokens.
+            **kwargs: Additional provider-specific parameters.
+
+        Returns:
+            The generated text response.
+        """
+        # Use specified parameters or fall back to instance defaults
+        temp = temperature if temperature is not None else self.temperature
+        max_tok = max_tokens if max_tokens is not None else self.max_tokens
+
+        response = await self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=temp,
+            max_tokens=max_tok,
+            top_p=top_p,
+            frequency_penalty=frequency_penalty,
+            presence_penalty=presence_penalty,
+            stop=stop,
+            **kwargs,
+        )
+
+        return response.choices[0].message.content
