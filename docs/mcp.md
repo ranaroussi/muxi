@@ -1,14 +1,14 @@
 # Modern Control Protocol (MCP)
 
-The Modern Control Protocol (MCP) is a standardized format for communication between applications and Large Language Models (LLMs). It provides a structured way to send prompts, receive responses, and process tool calls.
+The Modern Control Protocol (MCP) is a standardized format for communication between applications and Large Language Models. It provides a structured way to send prompts, receive responses, and process tool calls.
 
 ## What is MCP?
 
 MCP is a protocol that:
-- Standardizes the format of messages sent to and received from LLMs
-- Enables structured tool calling by LLMs
-- Provides a consistent interface across different LLM providers
-- Improves the control and predictability of LLM interactions
+- Standardizes the format of messages sent to and received from language models
+- Enables structured tool calling by language models
+- Provides a consistent interface across different language model providers
+- Improves the control and predictability of language model interactions
 - Facilitates advanced features like parallel tool execution and multi-step reasoning
 
 ## MCP vs Tools: Understanding the Distinction
@@ -17,7 +17,7 @@ One common source of confusion is the relationship between MCP and tools. Let's 
 
 ### MCP is a Communication Protocol, Not the Tools
 
-- **MCP (Modern Control Protocol)**: A standardized message format and communication protocol for interacting with LLMs. It's the "language" your application uses to talk to models like GPT-4 or Claude.
+- **MCP (Modern Control Protocol)**: A standardized message format and communication protocol for interacting with language models. It's the "language" your application uses to talk to models like GPT-4 or Claude.
 
 - **Tools**: Specific capabilities that extend what your agent can do (like web search, calculations, database queries, etc.). Each tool has its own functionality that executes in your application environment.
 
@@ -26,14 +26,14 @@ One common source of confusion is the relationship between MCP and tools. Let's 
 The complete flow of tool usage looks like this:
 
 1. User sends a query to your agent
-2. The agent passes this query to the LLM via the MCP Handler
-3. The LLM determines a tool is needed and responds with a tool call request (in MCP format)
+2. The agent passes this query to the language model via the MCP Handler
+3. The language model determines a tool is needed and responds with a tool call request (in MCP format)
 4. The MCP Handler parses this response and recognizes the tool call
-5. **The framework (not the LLM, not the MCP) passes the request to the appropriate tool**
+5. **The framework (not the language model, not the MCP) passes the request to the appropriate tool**
 6. **The tool executes in your application environment with access to your system resources**
 7. The tool returns results to your framework
-8. Results are formatted as an MCP message and sent back to the LLM
-9. The LLM incorporates these results into its final response
+8. Results are formatted as an MCP message and sent back to the language model
+9. The language model incorporates these results into its final response
 
 ```
 ┌───────────┐    Query     ┌──────────────┐     MCP format     ┌─────┐
@@ -67,12 +67,12 @@ The complete flow of tool usage looks like this:
 
 ### Key Points to Remember
 
-- **MCP is the messenger**: It formats messages between your application and the LLM
-- **LLM makes the decision**: The LLM (not your code) decides when a tool is needed
-- **Your framework executes tools**: Tools run in your application's environment, not inside the LLM
-- **MCP formats tool results**: The results are sent back to the LLM through the MCP format
+- **MCP is the messenger**: It formats messages between your application and the language model
+- **Language model makes the decision**: The language model (not your code) decides when a tool is needed
+- **Your framework executes tools**: Tools run in your application's environment, not inside the language model
+- **MCP formats tool results**: The results are sent back to the language model through the MCP format
 
-This clarifies that MCP is not the tools themselves—it's just the standardized way to communicate about tools with the LLM.
+This clarifies that MCP is not the tools themselves—it's just the standardized way to communicate about tools with the language model.
 
 ## MCP Message Structure
 
@@ -91,9 +91,9 @@ class MCPMessage:
 
 MCP supports several message roles:
 
-- **user**: Messages from the user to the LLM
-- **assistant**: Responses from the LLM
-- **system**: System instructions that guide the LLM's behavior
+- **user**: Messages from the user to the language model
+- **assistant**: Responses from the language model
+- **system**: System instructions that guide the language model's behavior
 - **tool**: Results returned from tool executions
 
 ### Tool Calls
@@ -114,18 +114,18 @@ class MCPToolCall:
 
 ```python
 from src.mcp.message import MCPMessage
-from src.llm.openai import OpenAILLM
+from src.models.openai import OpenAIModel
 
 # Create messages
 system_message = MCPMessage(role="system", content="You are a helpful assistant.")
 user_message = MCPMessage(role="user", content="What's the weather in London?")
 
-# Prepare messages for LLM
+# Prepare messages for language model
 messages = [system_message, user_message]
 
-# Send to LLM
-llm = OpenAILLM(model="gpt-4o")
-response = await llm.generate(messages)
+# Send to language model
+model = OpenAIModel(model="gpt-4o")
+response = await model.generate(messages)
 
 # Process response
 if isinstance(response, MCPMessage):
@@ -144,12 +144,12 @@ The complete flow of a tool-enabled conversation:
 
 ```python
 from src.mcp.message import MCPMessage, MCPToolCall
-from src.llm.openai import OpenAILLM
+from src.models.openai import OpenAIModel
 from src.tools.registry import ToolRegistry
 from src.tools.weather import WeatherTool
 
-# Set up LLM and tools
-llm = OpenAILLM(model="gpt-4o")
+# Set up language model and tools
+model = OpenAIModel(model="gpt-4o")
 registry = ToolRegistry()
 registry.register(WeatherTool())
 
@@ -159,8 +159,8 @@ messages = [
     MCPMessage(role="user", content="What's the weather in London?")
 ]
 
-# Send to LLM
-response = await llm.generate(messages)
+# Send to language model
+response = await model.generate(messages)
 messages.append(response)
 
 # Process tool calls
@@ -182,8 +182,8 @@ if response.tool_calls:
             # Add tool response to messages
             messages.append(tool_message)
 
-    # Get final response from LLM
-    final_response = await llm.generate(messages)
+    # Get final response from language model
+    final_response = await model.generate(messages)
     messages.append(final_response)
     print(f"Assistant: {final_response.content}")
 ```
@@ -194,18 +194,18 @@ The framework provides an MCP handler to abstract the message processing:
 
 ```python
 from src.mcp.handler import MCPHandler
-from src.llm.openai import OpenAILLM
+from src.models.openai import OpenAIModel
 from src.tools.registry import ToolRegistry
 from src.tools.weather import WeatherTool
 
 async def chat_with_tools():
-    # Set up LLM, tools, and handler
-    llm = OpenAILLM(model="gpt-4o")
+    # Set up language model, tools, and handler
+    model = OpenAIModel(model="gpt-4o")
 
     registry = ToolRegistry()
     registry.register(WeatherTool())
 
-    handler = MCPHandler(llm=llm, tool_registry=registry)
+    handler = MCPHandler(model=model, tool_registry=registry)
 
     # Set system message
     handler.set_system_message("You are a helpful assistant with access to tools.")
@@ -222,18 +222,18 @@ async def chat_with_tools():
 await chat_with_tools()
 ```
 
-## MCP with Different LLM Providers
+## MCP with Different Language Model Providers
 
-The MCP standardizes interactions across different LLM providers:
+The MCP standardizes interactions across different language model providers:
 
 ### OpenAI Implementation
 
 ```python
 from src.mcp.message import MCPMessage
-from src.llm.openai import OpenAILLM
+from src.models.openai import OpenAIModel
 
-# Create an OpenAI LLM
-llm = OpenAILLM(model="gpt-4o")
+# Create an OpenAI language model
+model = OpenAIModel(model="gpt-4o")
 
 # Process MCP messages
 messages = [
@@ -241,7 +241,7 @@ messages = [
     MCPMessage(role="user", content="Who won the 2022 World Cup?")
 ]
 
-response = await llm.generate(messages)
+response = await model.generate(messages)
 print(response.content)
 ```
 
@@ -249,10 +249,10 @@ print(response.content)
 
 ```python
 from src.mcp.message import MCPMessage
-from src.llm.anthropic import AnthropicLLM
+from src.models.anthropic import AnthropicModel
 
-# Create an Anthropic LLM
-llm = AnthropicLLM(model="claude-3-opus")
+# Create an Anthropic language model
+model = AnthropicModel(model="claude-3-opus")
 
 # Process MCP messages (same format as OpenAI)
 messages = [
@@ -260,7 +260,7 @@ messages = [
     MCPMessage(role="user", content="Who won the 2022 World Cup?")
 ]
 
-response = await llm.generate(messages)
+response = await model.generate(messages)
 print(response.content)
 ```
 
@@ -274,8 +274,8 @@ MCP allows for parallel execution of multiple tool calls:
 from src.mcp.handler import MCPHandler, execute_tool_calls_parallel
 
 async def process_with_parallel_tools(handler, user_message):
-    # Get response from LLM
-    response = await handler.llm.generate([
+    # Get response from language model
+    response = await handler.model.generate([
         MCPMessage(role="system", content=handler.system_message),
         MCPMessage(role="user", content=user_message)
     ])
@@ -304,45 +304,45 @@ async def process_with_parallel_tools(handler, user_message):
             *tool_messages  # All tool results
         ]
 
-        final_response = await handler.llm.generate(messages)
+        final_response = await handler.model.generate(messages)
         return final_response.content
 
     return response.content
 ```
 
-### Multi-LLM Chain
+### Multi-Model Chain
 
-You can chain different LLMs together using MCP as a common interface:
+You can chain different language models together using MCP as a common interface:
 
 ```python
 from src.mcp.message import MCPMessage
-from src.llm.openai import OpenAILLM
-from src.llm.anthropic import AnthropicLLM
+from src.models.openai import OpenAIModel
+from src.models.anthropic import AnthropicModel
 
-async def multi_llm_processing(query):
-    # First LLM generates a detailed plan
-    planning_llm = OpenAILLM(model="gpt-4o")
+async def multi_model_processing(query):
+    # First model generates a detailed plan
+    planning_model = OpenAIModel(model="gpt-4o")
     plan_messages = [
         MCPMessage(role="system", content="You are a planning assistant. Create a detailed plan."),
         MCPMessage(role="user", content=f"Create a research plan for: {query}")
     ]
-    plan_response = await planning_llm.generate(plan_messages)
+    plan_response = await planning_model.generate(plan_messages)
 
-    # Second LLM executes the plan
-    execution_llm = AnthropicLLM(model="claude-3-opus")
+    # Second model executes the plan
+    execution_model = AnthropicModel(model="claude-3-opus")
     execution_messages = [
         MCPMessage(role="system", content="You are a research assistant. Execute the given plan."),
         MCPMessage(role="user", content=f"Execute this research plan:\n\n{plan_response.content}")
     ]
-    execution_response = await execution_llm.generate(execution_messages)
+    execution_response = await execution_model.generate(execution_messages)
 
-    # Third LLM summarizes the results
-    summary_llm = OpenAILLM(model="gpt-3.5-turbo")
+    # Third model summarizes the results
+    summary_model = OpenAIModel(model="gpt-3.5-turbo")
     summary_messages = [
         MCPMessage(role="system", content="You are a summarization assistant. Create concise summaries."),
         MCPMessage(role="user", content=f"Summarize these research results:\n\n{execution_response.content}")
     ]
-    summary_response = await summary_llm.generate(summary_messages)
+    summary_response = await summary_model.generate(summary_messages)
 
     return {
         "plan": plan_response.content,
@@ -461,7 +461,7 @@ import json
 
 async def handle_websocket(websocket, path):
     # Set up MCP handler
-    handler = MCPHandler(llm=llm, tool_registry=registry)
+    handler = MCPHandler(model=model, tool_registry=registry)
     handler.set_system_message("You are a helpful assistant.")
 
     async for message in websocket:
@@ -501,7 +501,7 @@ async def handle_websocket(websocket, path):
 
 2. **Tool Result Handling**: Properly format tool results as MCPMessages with the "tool" role
 
-3. **System Messages**: Use descriptive system messages to guide LLM behavior
+3. **System Messages**: Use descriptive system messages to guide language model behavior
 
 4. **Error Handling**: Implement robust error handling for tool calls
 
@@ -521,9 +521,9 @@ async def handle_websocket(websocket, path):
 - Verify that message roles are one of: "user", "assistant", "system", or "tool"
 - Ensure that tool response messages include the correct tool_call_id
 
-### LLM Provider Compatibility
+### Language Model Compatibility
 
-- Different LLM providers may have varying support for tool calling
+- Different language models may have varying support for tool calling
 - Check documentation for provider-specific limitations
 
 ## Next Steps
