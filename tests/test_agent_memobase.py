@@ -6,11 +6,11 @@ via Memobase in the AI Agent Framework.
 """
 
 import unittest
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from src.core.agent import Agent
-from src.memory.memobase import Memobase
 from src.core.mcp import MCPMessage
+from src.memory.memobase import Memobase
 from tests.utils.async_test import async_test
 
 
@@ -20,26 +20,20 @@ class TestAgentWithMemobase(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         # Create mock objects for dependencies
-        self.mock_llm = MagicMock()
+        self.mock_model = MagicMock()
         self.mock_buffer_memory = MagicMock()
         self.mock_memobase = MagicMock(spec=Memobase)
-        self.mock_tools = {
-            "calculator": MagicMock(),
-            "web_search": MagicMock()
-        }
+        self.mock_tools = {"calculator": MagicMock(), "web_search": MagicMock()}
 
         # Set up mock returns
-        self.mock_llm.chat = AsyncMock()
-        self.mock_llm.chat.return_value = {
+        self.mock_model.chat = AsyncMock()
+        self.mock_model.chat.return_value = {
             "role": "assistant",
-            "content": "I'm a helpful multi-user assistant."
+            "content": "I'm a helpful multi-user assistant.",
         }
 
         self.mock_buffer_memory.search.return_value = [
-            {
-                "content": "Previous conversation content",
-                "metadata": {"timestamp": 1234567890}
-            }
+            {"content": "Previous conversation content", "metadata": {"timestamp": 1234567890}}
         ]
 
         self.mock_memobase.add = AsyncMock()
@@ -52,43 +46,39 @@ class TestAgentWithMemobase(unittest.TestCase):
                 "metadata": {"user_id": 123, "timestamp": 1234567890},
                 "distance": 0.8,
                 "source": "memobase",
-                "id": 456
+                "id": 456,
             }
         ]
 
         # Create agent with mock dependencies
         self.agent = Agent(
             name="test_agent",
-            llm=self.mock_llm,
+            model=self.mock_model,
             buffer_memory=self.mock_buffer_memory,
             memobase=self.mock_memobase,
-            tools=self.mock_tools
+            tools=self.mock_tools,
         )
 
     @async_test
     async def test_process_message_with_user_id(self):
         """Test processing a message with user ID."""
         # Process a message with user_id
-        result = await self.agent.process_message(
-            "Hello, agent!",
-            user_id=123
-        )
+        result = await self.agent.process_message("Hello, agent!", user_id=123)
 
         # Verify message was stored in buffer memory
         self.mock_buffer_memory.add.assert_called_with(
-            "Hello, agent!",
-            {"role": "user", "timestamp": unittest.mock.ANY}
+            "Hello, agent!", {"role": "user", "timestamp": unittest.mock.ANY}
         )
 
         # Verify message was stored in memobase with user_id
         self.mock_memobase.add.assert_any_call(
             content="Hello, agent!",
             metadata={"role": "user", "timestamp": unittest.mock.ANY},
-            user_id=123
+            user_id=123,
         )
 
         # Verify LLM was called
-        self.assertTrue(self.mock_llm.chat.called)
+        self.assertTrue(self.mock_model.chat.called)
 
         # Verify result
         self.assertEqual(result.content, "I'm a helpful assistant.")
@@ -97,7 +87,7 @@ class TestAgentWithMemobase(unittest.TestCase):
         self.mock_memobase.add.assert_any_call(
             content="I'm a helpful assistant.",
             metadata={"role": "assistant", "timestamp": unittest.mock.ANY},
-            user_id=123
+            user_id=123,
         )
 
     @async_test
@@ -108,21 +98,20 @@ class TestAgentWithMemobase(unittest.TestCase):
 
         # Verify message was stored in buffer memory
         self.mock_buffer_memory.add.assert_called_with(
-            "Hello, agent!",
-            {"role": "user", "timestamp": unittest.mock.ANY}
+            "Hello, agent!", {"role": "user", "timestamp": unittest.mock.ANY}
         )
 
         # Verify memobase was NOT used (since user_id is None)
         self.mock_memobase.add.assert_not_called()
 
         # Verify LLM was called
-        self.assertTrue(self.mock_llm.chat.called)
+        self.assertTrue(self.mock_model.chat.called)
 
         # Verify result
         self.assertEqual(result.content, "I'm a helpful assistant.")
 
     @async_test
-    @patch('src.core.agent.MCPHandler')
+    @patch("src.core.agent.MCPHandler")
     async def test_process_tool_calls_with_user_id(self, mock_handler_class):
         """Test processing tool calls with user ID."""
         # Set up mock for MCPHandler
@@ -134,33 +123,26 @@ class TestAgentWithMemobase(unittest.TestCase):
             {
                 "id": "call_123",
                 "type": "function",
-                "function": {
-                    "name": "calculator",
-                    "arguments": '{"expression": "2+2"}'
-                }
+                "function": {"name": "calculator", "arguments": '{"expression": "2+2"}'},
             }
         ]
 
-        self.mock_llm.chat.return_value = {
+        self.mock_model.chat.return_value = {
             "role": "assistant",
             "content": None,
-            "tool_calls": tool_calls
+            "tool_calls": tool_calls,
         }
 
         # Set up mock to return final response
         mock_handler.process_message.return_value = MCPMessage(
-            role="assistant",
-            content="The result is 4."
+            role="assistant", content="The result is 4."
         )
 
         # Process a message with user_id
-        result = await self.agent.process_message(
-            "Calculate 2+2",
-            user_id=123
-        )
+        result = await self.agent.process_message("Calculate 2+2", user_id=123)
 
         # Verify handler was created and called
-        mock_handler_class.assert_called_with(self.mock_llm, self.mock_tools)
+        mock_handler_class.assert_called_with(self.mock_model, self.mock_tools)
         mock_handler.process_message.assert_called_once()
 
         # Verify result
@@ -170,25 +152,17 @@ class TestAgentWithMemobase(unittest.TestCase):
         self.mock_memobase.add.assert_any_call(
             content="The result is 4.",
             metadata={"role": "assistant", "timestamp": unittest.mock.ANY},
-            user_id=123
+            user_id=123,
         )
 
     @async_test
     async def test_search_memory_with_user_id(self):
         """Test searching memory with user ID."""
         # Search memory with user_id
-        results = await self.agent.search_memory(
-            query="test query",
-            k=5,
-            user_id=123
-        )
+        results = await self.agent.search_memory(query="test query", k=5, user_id=123)
 
         # Verify memobase.search was called with user_id
-        self.mock_memobase.search.assert_called_with(
-            query="test query",
-            limit=5,
-            user_id=123
-        )
+        self.mock_memobase.search.assert_called_with(query="test query", limit=5, user_id=123)
 
         # Verify result comes from memobase
         self.assertEqual(results[0]["source"], "memobase")
@@ -199,8 +173,8 @@ class TestAgentWithMemobase(unittest.TestCase):
     async def test_search_memory_without_user_id(self):
         """Test searching memory without user ID."""
         # Set up mock for LLM embed
-        self.mock_llm.embed = AsyncMock()
-        self.mock_llm.embed.return_value = [0.1, 0.2, 0.3, 0.4, 0.5]
+        self.mock_model.embed = AsyncMock()
+        self.mock_model.embed.return_value = [0.1, 0.2, 0.3, 0.4, 0.5]
 
         # Set up mock for buffer memory search
         self.mock_buffer_memory.search.return_value = [
@@ -208,10 +182,7 @@ class TestAgentWithMemobase(unittest.TestCase):
         ]
 
         # Search memory without user_id
-        results = await self.agent.search_memory(
-            query="test query",
-            k=5
-        )
+        results = await self.agent.search_memory(query="test query", k=5)
 
         # Verify memobase.search was NOT called
         self.mock_memobase.search.assert_not_called()
@@ -250,8 +221,7 @@ class TestAgentWithMemobase(unittest.TestCase):
         # Set up mock for process_message
         self.agent.process_message = AsyncMock()
         self.agent.process_message.return_value = MCPMessage(
-            role="assistant",
-            content="I remember you from before!"
+            role="assistant", content="I remember you from before!"
         )
 
         # Chat with user_id
@@ -269,8 +239,7 @@ class TestAgentWithMemobase(unittest.TestCase):
         # Set up mock for process_message
         self.agent.process_message = AsyncMock()
         self.agent.process_message.return_value = MCPMessage(
-            role="assistant",
-            content="Nice to meet you!"
+            role="assistant", content="Nice to meet you!"
         )
 
         # Chat without user_id

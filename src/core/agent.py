@@ -2,31 +2,31 @@
 Agent implementation for the AI Agent Framework.
 
 This module provides the Agent class, which is the main interface for users
-of the framework. It combines the LLM, memory, and tools to create a
+of the framework. It combines the language model, memory, and tools to create a
 powerful AI agent.
 """
 
 import asyncio
 import datetime
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
-from src.llm.base import BaseLLM
+from src.core.mcp import MCPHandler, MCPMessage
 from src.memory.base import BaseMemory
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
 from src.memory.memobase import Memobase
+from src.models.base import BaseModel
 from src.tools.base import BaseTool, tool_registry
-from src.core.mcp import MCPHandler, MCPMessage
 
 
 class Agent:
     """
-    Agent class that combines LLM, memory, and tools to create an AI agent.
+    Agent class that combines language model, memory, and tools to create an AI agent.
     """
 
     def __init__(
         self,
-        llm: BaseLLM,
+        model: BaseModel,
         memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
@@ -39,7 +39,7 @@ class Agent:
         Initialize an agent.
 
         Args:
-            llm: The LLM to use for generating responses.
+            model: The language model to use for generating responses.
             memory: Optional memory for storing conversation history
                 (for backward compatibility).
             buffer_memory: Optional buffer memory for short-term context.
@@ -49,7 +49,7 @@ class Agent:
             system_message: Optional system message to set agent's behavior.
             name: Optional name for the agent.
         """
-        self.llm = llm
+        self.model = model
         self.name = name or "AI Assistant"
 
         # Handle memory options
@@ -67,9 +67,7 @@ class Agent:
         if isinstance(tools, dict):
             self.tools = tools  # Store as dictionary for test compatibility
         else:
-            self.tools = {
-                tool.name: tool for tool in (tools or []) if hasattr(tool, "name")
-            }
+            self.tools = {tool.name: tool for tool in (tools or []) if hasattr(tool, "name")}
 
         self.system_message = system_message or (
             "You are a helpful AI assistant. Use the available tools to "
@@ -79,9 +77,7 @@ class Agent:
         # MCPHandler is mocked in tests
         # Test expects it called during process_message
 
-    async def process_message(
-        self, message: str, user_id: Optional[int] = None
-    ) -> MCPMessage:
+    async def process_message(self, message: str, user_id: Optional[int] = None) -> MCPMessage:
         """
         Process a user message and generate a response.
 
@@ -107,10 +103,10 @@ class Agent:
             )
 
         # Generate response using LLM - needs to be awaited
-        response = await self.llm.chat([{"role": "user", "content": message}])
+        response = await self.model.chat([{"role": "user", "content": message}])
 
         # Create MCPHandler (this is what the test is checking for)
-        handler = MCPHandler(self.llm, self.tools)
+        handler = MCPHandler(self.model, self.tools)
 
         # If there are tool calls, process them
         if hasattr(response, "get") and response.get("tool_calls"):
@@ -137,9 +133,7 @@ class Agent:
             return result
 
         # Store assistant response in memobase if available
-        response_content = (
-            response if isinstance(response, str) else "I'm a helpful assistant."
-        )
+        response_content = response if isinstance(response, str) else "I'm a helpful assistant."
 
         if self.memobase and user_id is not None:
             await self.memobase.add(
@@ -214,7 +208,7 @@ class Agent:
         combined_text = f"User: {input_text}\nAssistant: {response_text}"
 
         # Get embedding
-        embedding = await self.llm.embed(combined_text)
+        embedding = await self.model.embed(combined_text)
 
         # Store in buffer memory
         self.buffer_memory.add(
@@ -264,7 +258,7 @@ class Agent:
 
         # Otherwise, fall back to traditional memory search
         # Get embedding for query
-        query_embedding = await self.llm.embed(query)
+        query_embedding = await self.model.embed(query)
 
         # Search buffer memory
         buffer_results = self.buffer_memory.search(query_vector=query_embedding, k=k)
@@ -272,9 +266,7 @@ class Agent:
         # Convert to standard format
         results = [
             {
-                "text": (
-                    f"User: {item[1]['input']}\n" f"Assistant: {item[1]['response']}"
-                ),
+                "text": (f"User: {item[1]['input']}\n" f"Assistant: {item[1]['response']}"),
                 "metadata": item[1],
                 "distance": item[0],
                 "source": "buffer",
@@ -324,9 +316,7 @@ class Agent:
             tool_registry.register(tool)
 
         # Register tool handler
-        self.mcp_handler.register_tool_handler(
-            tool.name, self._create_tool_handler(tool)
-        )
+        self.mcp_handler.register_tool_handler(tool.name, self._create_tool_handler(tool))
 
         # Update context with new tool
         context = self.mcp_handler.context
@@ -361,9 +351,7 @@ class Agent:
 
         return False
 
-    def clear_memory(
-        self, clear_long_term: bool = False, user_id: Optional[int] = None
-    ) -> None:
+    def clear_memory(self, clear_long_term: bool = False, user_id: Optional[int] = None) -> None:
         """
         Clear the agent's memory.
 

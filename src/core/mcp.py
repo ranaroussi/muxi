@@ -1,16 +1,25 @@
 """
 Modern Control Protocol (MCP) implementation.
 
-This module provides functionality for communicating with LLMs using the
+This module provides functionality for communicating with language models using the
 Modern Control Protocol (MCP) as defined at https://modelcontextprotocol.io/.
 """
 
-import json
-from typing import Dict, List, Optional, Any, Union, Callable
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from loguru import logger
 
-from src.llm.base import BaseLLM
+from src.models.base import BaseModel
+
+
+@dataclass
+class MCPToolCall:
+    """Tool call information for MCP messages."""
+
+    tool_name: str
+    tool_id: str
+    tool_args: Dict[str, Any]
 
 
 class MCPMessage:
@@ -21,9 +30,11 @@ class MCPMessage:
     def __init__(
         self,
         role: str,
-        content: Union[str, Dict[str, Any]],
+        content: Union[str, Dict[str, Any], None],
         name: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
+        tool_calls: Optional[List[MCPToolCall]] = None,
+        tool_call_id: Optional[str] = None,
     ):
         """
         Initialize an MCP message.
@@ -35,11 +46,15 @@ class MCPMessage:
                 structured object.
             name: Optional name for the sender (used for tools).
             context: Optional context information for the message.
+            tool_calls: Optional list of tool calls in the message.
+            tool_call_id: Optional ID of the tool call this message responds to.
         """
         self.role = role
         self.content = content
         self.name = name
         self.context = context or {}
+        self.tool_calls = tool_calls or []
+        self.tool_call_id = tool_call_id
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -48,10 +63,7 @@ class MCPMessage:
         Returns:
             A dictionary representation of the message.
         """
-        message = {
-            "role": self.role,
-            "content": self.content
-        }
+        message = {"role": self.role, "content": self.content}
 
         if self.name:
             message["name"] = self.name
@@ -76,7 +88,9 @@ class MCPMessage:
             role=data["role"],
             content=data["content"],
             name=data.get("name"),
-            context=data.get("context", {})
+            context=data.get("context", {}),
+            tool_calls=[MCPToolCall(**tool_call) for tool_call in data.get("tool_calls", [])],
+            tool_call_id=data.get("tool_call_id"),
         )
 
 
@@ -89,7 +103,7 @@ class MCPContext:
         self,
         messages: Optional[List[MCPMessage]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        tools: Optional[List[Dict[str, Any]]] = None
+        tools: Optional[List[Dict[str, Any]]] = None,
     ):
         """
         Initialize an MCP context.
@@ -122,7 +136,7 @@ class MCPContext:
         return {
             "messages": [m.to_dict() for m in self.messages],
             "metadata": self.metadata,
-            "tools": self.tools
+            "tools": self.tools,
         }
 
     @classmethod
@@ -136,14 +150,10 @@ class MCPContext:
         Returns:
             An MCPContext instance.
         """
-        messages = [
-            MCPMessage.from_dict(m) for m in data.get("messages", [])
-        ]
+        messages = [MCPMessage.from_dict(m) for m in data.get("messages", [])]
 
         return cls(
-            messages=messages,
-            metadata=data.get("metadata", {}),
-            tools=data.get("tools", [])
+            messages=messages, metadata=data.get("metadata", {}), tools=data.get("tools", [])
         )
 
 
@@ -152,27 +162,21 @@ class MCPHandler:
     Handles communication with LLMs using the Modern Control Protocol.
     """
 
-    def __init__(
-        self,
-        llm: BaseLLM,
-        tool_handlers: Optional[Dict[str, Callable]] = None
-    ):
+    def __init__(self, model: BaseModel, tool_handlers: Optional[Dict[str, Callable]] = None):
         """
         Initialize an MCP handler.
 
         Args:
-            llm: The LLM to use for generating responses.
+            model: The language model to use for generating responses.
             tool_handlers: A dictionary mapping tool names to handler
                 functions.
         """
-        self.llm = llm
+        self.model = model
         self.tool_handlers = tool_handlers or {}
         self.context = MCPContext()
 
     async def process_message(
-        self,
-        message: MCPMessage,
-        context: Optional[MCPContext] = None
+        self, message: MCPMessage, context: Optional[MCPContext] = None
     ) -> MCPMessage:
         """
         Process a message and generate a response.
@@ -185,34 +189,31 @@ class MCPHandler:
         Returns:
             The response message.
         """
-        # Use provided context or the handler's context
+        # Use provided context or default to handler's context
         ctx = context or self.context
 
-        # Add the message to the context
+        # Add message to context
         ctx.add_message(message)
 
-        # Convert context to a format suitable for the LLM
-        llm_messages = self._context_to_llm_messages(ctx)
+        # Convert context to a format suitable for the language model
+        model_messages = self._context_to_model_messages(ctx)
 
         # Generate a response
-        response_content = await self.llm.chat(llm_messages)
+        response_content = await self.model.chat(model_messages)
 
         # Create a response message
         response = MCPMessage(
             role="assistant",
-            content=response_content
+            content=response_content,
         )
 
-        # Add the response to the context
+        # Add response to context
         ctx.add_message(response)
 
         return response
 
     async def process_tool_call(
-        self,
-        tool_name: str,
-        tool_input: Dict[str, Any],
-        context: Optional[MCPContext] = None
+        self, tool_name: str, tool_input: Dict[str, Any], context: Optional[MCPContext] = None
     ) -> MCPMessage:
         """
         Process a tool call and generate a response.
@@ -231,10 +232,7 @@ class MCPHandler:
 
         # Create a tool call message
         tool_call_message = MCPMessage(
-            role="user",
-            content="",
-            name=tool_name,
-            context={"input": tool_input}
+            role="user", content="", name=tool_name, context={"input": tool_input}
         )
 
         # Add the tool call message to the context
@@ -246,11 +244,7 @@ class MCPHandler:
             logger.error(error_message)
 
             # Create an error response
-            response = MCPMessage(
-                role="tool",
-                content={"error": error_message},
-                name=tool_name
-            )
+            response = MCPMessage(role="tool", content={"error": error_message}, name=tool_name)
 
             # Add the response to the context
             ctx.add_message(response)
@@ -263,11 +257,7 @@ class MCPHandler:
             result = await handler(tool_input)
 
             # Create a response message
-            response = MCPMessage(
-                role="tool",
-                content=result,
-                name=tool_name
-            )
+            response = MCPMessage(role="tool", content=result, name=tool_name)
 
             # Add the response to the context
             ctx.add_message(response)
@@ -278,51 +268,39 @@ class MCPHandler:
             logger.error(error_message)
 
             # Create an error response
-            response = MCPMessage(
-                role="tool",
-                content={"error": error_message},
-                name=tool_name
-            )
+            response = MCPMessage(role="tool", content={"error": error_message}, name=tool_name)
 
             # Add the response to the context
             ctx.add_message(response)
 
             return response
 
-    def _context_to_llm_messages(
-        self, context: MCPContext
-    ) -> List[Dict[str, str]]:
+    def _context_to_model_messages(self, context: MCPContext) -> List[Dict[str, str]]:
         """
-        Convert an MCP context to a format suitable for the LLM.
+        Convert an MCP context to a format suitable for the language model.
 
         Args:
             context: The MCP context to convert.
 
         Returns:
-            A list of messages in the format expected by the LLM.
+            A list of messages in the format expected by the language model.
         """
-        llm_messages = []
+        model_messages = []
 
         for message in context.messages:
-            llm_message = {
+            model_message = {
                 "role": message.role,
-                "content": (
-                    json.dumps(message.content)
-                    if isinstance(message.content, dict)
-                    else message.content
-                )
+                "content": message.content,
             }
 
             if message.name:
-                llm_message["name"] = message.name
+                model_message["name"] = message.name
 
-            llm_messages.append(llm_message)
+            model_messages.append(model_message)
 
-        return llm_messages
+        return model_messages
 
-    def register_tool_handler(
-        self, tool_name: str, handler: Callable
-    ) -> None:
+    def register_tool_handler(self, tool_name: str, handler: Callable) -> None:
         """
         Register a handler for a tool.
 

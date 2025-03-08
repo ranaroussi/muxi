@@ -5,17 +5,18 @@ This module provides the Orchestrator class, which manages agents and
 coordinates their interactions with users and other systems.
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-from src.llm.base import BaseLLM
+from src.core.agent import Agent
+from src.core.mcp import MCPMessage
+from src.memory.base import BaseMemory
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
 from src.memory.memobase import Memobase
+from src.models.base import BaseModel
 from src.tools.base import BaseTool, ToolRegistry
-from src.core.agent import Agent
-from src.core.mcp import MCPMessage
 
 
 class Orchestrator:
@@ -36,44 +37,50 @@ class Orchestrator:
     def create_agent(
         self,
         agent_id: str,
-        llm: BaseLLM,
+        model: BaseModel,
+        memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
         memobase: Optional[Memobase] = None,
         tools: Optional[List[BaseTool]] = None,
         system_message: Optional[str] = None,
-        set_as_default: bool = False
+        set_as_default: bool = False,
     ) -> Agent:
         """
         Create a new agent.
 
         Args:
-            agent_id: The ID to assign to the agent.
-            llm: The LLM to use for the agent.
-            buffer_memory: Optional buffer memory for the agent.
-            long_term_memory: Optional long-term memory for the agent.
-            memobase: Optional memobase for multi-user memory support.
-            tools: Optional list of tools for the agent.
-            system_message: Optional system message for the agent.
+            agent_id: Unique identifier for the agent.
+            model: The language model to use for the agent.
+            memory: Optional memory for storing conversation history
+                (for backward compatibility).
+            buffer_memory: Optional buffer memory for short-term context.
+            long_term_memory: Optional long-term memory for persistent storage.
+            memobase: Optional Memobase instance for multi-user memory support.
+            tools: Optional list of tools the agent can use.
+            system_message: Optional system message to set agent's behavior.
             set_as_default: Whether to set this agent as the default.
 
         Returns:
-            The newly created agent.
-
-        Raises:
-            ValueError: If an agent with the given ID already exists.
+            The created agent.
         """
         if agent_id in self.agents:
             raise ValueError(f"Agent with ID '{agent_id}' already exists")
 
-        # Create the agent
+        # Convert tools list to dictionary
+        tools_dict = {}
+        if tools:
+            for tool in tools:
+                tools_dict[tool.name] = tool
+
+        # Create agent
         agent = Agent(
-            llm=llm,
+            model=model,
             buffer_memory=buffer_memory,
             long_term_memory=long_term_memory,
             memobase=memobase,
-            tools=tools,
-            system_message=system_message
+            tools=tools_dict,
+            system_message=system_message,
         )
 
         # Store the agent
@@ -97,7 +104,7 @@ class Orchestrator:
         Raises:
             ValueError: If an agent with the same name already exists.
         """
-        if not hasattr(agent, 'name'):
+        if not hasattr(agent, "name"):
             raise ValueError("Agent must have a 'name' attribute")
 
         agent_id = agent.name
@@ -186,9 +193,7 @@ class Orchestrator:
 
         # Update default agent if necessary
         if self.default_agent_id == agent_id:
-            self.default_agent_id = (
-                next(iter(self.agents)) if self.agents else None
-            )
+            self.default_agent_id = next(iter(self.agents)) if self.agents else None
 
         logger.info(f"Removed agent with ID '{agent_id}'")
 
@@ -211,10 +216,7 @@ class Orchestrator:
         logger.info(f"Set agent '{agent_id}' as default")
 
     async def run(
-        self,
-        input_text: str,
-        agent_id: Optional[str] = None,
-        use_memory: bool = True
+        self, input_text: str, agent_id: Optional[str] = None, use_memory: bool = True
     ) -> str:
         """
         Run an agent on an input text.
@@ -232,11 +234,7 @@ class Orchestrator:
         return await agent.run(input_text, use_memory=use_memory)
 
     async def search_memory(
-        self,
-        query: str,
-        agent_id: Optional[str] = None,
-        k: int = 5,
-        use_long_term: bool = True
+        self, query: str, agent_id: Optional[str] = None, k: int = 5, use_long_term: bool = True
     ) -> List[Dict[str, Any]]:
         """
         Search an agent's memory for relevant information.
@@ -252,9 +250,7 @@ class Orchestrator:
             A list of relevant memory items.
         """
         agent = self.get_agent(agent_id)
-        return await agent.search_memory(
-            query, k=k, use_long_term=use_long_term
-        )
+        return await agent.search_memory(query, k=k, use_long_term=use_long_term)
 
     def register_tool(self, tool: BaseTool) -> None:
         """
@@ -292,8 +288,10 @@ class Orchestrator:
         return {
             agent_id: {
                 "is_default": agent_id == self.default_agent_id,
-                "tools_count": len(agent.tools) if hasattr(agent, 'tools') else 0,
-                "system_message": agent.system_message if hasattr(agent, 'system_message') else None
+                "tools_count": len(agent.tools) if hasattr(agent, "tools") else 0,
+                "system_message": (
+                    agent.system_message if hasattr(agent, "system_message") else None
+                ),
             }
             for agent_id, agent in self.agents.items()
         }
@@ -306,10 +304,7 @@ class Orchestrator:
             clear_long_term: Whether to clear long-term memories as well.
         """
         for agent in self.agents.values():
-            if hasattr(agent, 'clear_memory'):
+            if hasattr(agent, "clear_memory"):
                 agent.clear_memory(clear_long_term=clear_long_term)
 
-        logger.info(
-            f"Cleared {'all' if clear_long_term else 'buffer'} memories "
-            f"for all agents"
-        )
+        logger.info(f"Cleared {'all' if clear_long_term else 'buffer'} memories " f"for all agents")

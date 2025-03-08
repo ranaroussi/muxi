@@ -4,11 +4,11 @@ Unit tests for the MCP (Modern Control Protocol) module.
 This module contains tests for the MCP implementation in the agent framework.
 """
 
-import unittest
 import asyncio
-from unittest.mock import MagicMock, AsyncMock
+import unittest
+from unittest.mock import AsyncMock, MagicMock
 
-from src.core.mcp import MCPMessage, MCPContext, MCPHandler
+from src.core.mcp import MCPContext, MCPHandler, MCPMessage
 
 
 class TestMCPMessage(unittest.TestCase):
@@ -25,12 +25,7 @@ class TestMCPMessage(unittest.TestCase):
     def test_create_tool_message(self):
         """Test creating a message with tool information."""
         message = MCPMessage(
-            role="user",
-            content="",
-            name="calculator",
-            context={
-                "input": {"expression": "2+2"}
-            }
+            role="user", content="", name="calculator", context={"input": {"expression": "2+2"}}
         )
 
         self.assertEqual(message.role, "user")
@@ -40,11 +35,7 @@ class TestMCPMessage(unittest.TestCase):
 
     def test_create_tool_result_message(self):
         """Test creating a tool result message."""
-        message = MCPMessage(
-            role="tool",
-            content={"result": "4"},
-            name="calculator"
-        )
+        message = MCPMessage(role="tool", content={"result": "4"}, name="calculator")
 
         self.assertEqual(message.role, "tool")
         self.assertEqual(message.content, {"result": "4"})
@@ -52,11 +43,7 @@ class TestMCPMessage(unittest.TestCase):
 
     def test_to_dict(self):
         """Test converting a message to a dictionary."""
-        message = MCPMessage(
-            role="user",
-            content="Hello",
-            name="John"
-        )
+        message = MCPMessage(role="user", content="Hello", name="John")
 
         message_dict = message.to_dict()
         self.assertEqual(message_dict["role"], "user")
@@ -69,7 +56,7 @@ class TestMCPMessage(unittest.TestCase):
             "role": "assistant",
             "content": "Hello, how can I help?",
             "name": "AI",
-            "context": {"timestamp": 1234567890}
+            "context": {"timestamp": 1234567890},
         }
 
         message = MCPMessage.from_dict(message_dict)
@@ -89,9 +76,7 @@ class TestMCPContext(unittest.TestCase):
     def test_add_message(self):
         """Test adding a message to the context."""
         self.context.add_message(MCPMessage(role="user", content="Hello"))
-        self.context.add_message(
-            MCPMessage(role="assistant", content="Hi there")
-        )
+        self.context.add_message(MCPMessage(role="assistant", content="Hi there"))
 
         self.assertEqual(len(self.context.messages), 2)
         self.assertEqual(self.context.messages[0].role, "user")
@@ -113,59 +98,44 @@ class TestMCPHandler(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.mock_llm = MagicMock()
+        self.mock_model = MagicMock()
 
         # Mock the LLM to return a sample response
         async def mock_async_chat(*args, **kwargs):
-            return {
-                "choices": [
-                    {
-                        "message": {
-                            "content": "Sample response",
-                            "role": "assistant"
-                        }
-                    }
-                ]
-            }
+            return {"choices": [{"message": {"content": "Sample response", "role": "assistant"}}]}
 
-        self.mock_llm.chat = AsyncMock(side_effect=mock_async_chat)
+        self.mock_model.chat = AsyncMock(side_effect=mock_async_chat)
 
         # Mock tool handler
         async def mock_tool_handler(*args, **kwargs):
-            return {
-                "status": "success",
-                "result": "42"
-            }
+            return {"status": "success", "result": "42"}
 
         mock_handler = AsyncMock(side_effect=mock_tool_handler)
         self.tool_handlers = {"calculator": mock_handler}
 
-        self.handler = MCPHandler(self.mock_llm, self.tool_handlers)
+        self.handler = MCPHandler(self.mock_model, self.tool_handlers)
 
     def test_process_message(self):
         """Test processing a regular message."""
-        result = asyncio.run(self.handler.process_message(
-            MCPMessage(role="user", content="How can you help me?")
-        ))
+        result = asyncio.run(
+            self.handler.process_message(MCPMessage(role="user", content="How can you help me?"))
+        )
 
         # Verify result
         self.assertEqual(result.role, "assistant")
         self.assertEqual(
             result.content,
-            {"choices": [
-                {"message": {
-                    "content": "Sample response",
-                    "role": "assistant"
-                }}
-            ]}
+            {"choices": [{"message": {"content": "Sample response", "role": "assistant"}}]},
         )
 
     def test_process_tool_call(self):
         """Test processing a tool call."""
-        result = asyncio.run(self.handler.process_tool_call(
-            "calculator",
-            {"expression": "2+2"},
-        ))
+        result = asyncio.run(
+            self.handler.process_tool_call(
+                "calculator",
+                {"expression": "2+2"},
+            )
+        )
 
         # Verify result
         self.assertEqual(result.role, "tool")
@@ -174,10 +144,12 @@ class TestMCPHandler(unittest.TestCase):
 
     def test_process_invalid_tool_call(self):
         """Test processing an invalid tool call."""
-        result = asyncio.run(self.handler.process_tool_call(
-            "nonexistent_tool",
-            {"param": "value"},
-        ))
+        result = asyncio.run(
+            self.handler.process_tool_call(
+                "nonexistent_tool",
+                {"param": "value"},
+            )
+        )
 
         # Verify result
         self.assertEqual(result.role, "tool")
@@ -195,9 +167,7 @@ class TestMCPHandler(unittest.TestCase):
     def test_clear_context(self):
         """Test clearing the context."""
         # Add a message to the context
-        self.handler.context.add_message(
-            MCPMessage(role="user", content="Hello")
-        )
+        self.handler.context.add_message(MCPMessage(role="user", content="Hello"))
         self.assertEqual(len(self.handler.context.messages), 1)
 
         # Clear the context

@@ -4,18 +4,18 @@ Unit tests for the memory module.
 This module contains tests for the memory implementations in the agent framework.
 """
 
-import unittest
 import os
-import tempfile
 import shutil
-from unittest.mock import patch, MagicMock
+import tempfile
+import unittest
+from unittest.mock import MagicMock, patch
 
-import numpy as np
 import faiss
+import numpy as np
 
 from src.memory.buffer import BufferMemory
 from src.memory.vector import VectorMemory
-from src.llm.base import BaseLLM
+from src.models.base import BaseModel
 
 
 class TestBufferMemory(unittest.TestCase):
@@ -82,7 +82,7 @@ class TestBufferMemory(unittest.TestCase):
         self.assertEqual(results[1]["content"], "Second message")
 
 
-class MockLLM(BaseLLM):
+class MockLLM(BaseModel):
     """Mock LLM for testing vector memory."""
 
     def chat(self, messages, **kwargs):
@@ -104,13 +104,11 @@ class TestVectorMemory(unittest.TestCase):
         self.index_path = os.path.join(self.temp_dir, "index")
 
         # Mock LLM for generating embeddings
-        self.mock_llm = MockLLM()
+        self.mock_model = MockLLM()
 
         # Create vector memory
         self.memory = VectorMemory(
-            llm=self.mock_llm,
-            vector_dimension=5,
-            index_path=self.index_path
+            model=self.mock_model, vector_dimension=5, index_path=self.index_path
         )
 
     def tearDown(self):
@@ -169,11 +167,7 @@ class TestVectorMemory(unittest.TestCase):
         mock_read_index.return_value = mock_index
 
         # Test loading an existing index
-        memory = VectorMemory(
-            llm=self.mock_llm,
-            vector_dimension=5,
-            index_path=self.index_path
-        )
+        memory = VectorMemory(model=self.mock_model, vector_dimension=5, index_path=self.index_path)
 
         # Verify the read_index was called
         mock_read_index.assert_called_once_with(self.index_path)

@@ -7,13 +7,14 @@ AI Agent Framework.
 
 import asyncio
 import os
+
 from dotenv import load_dotenv
 
-from src.llm import OpenAILLM
-from src.memory.buffer import BufferMemory
-from src.tools.web_search import WebSearchTool
-from src.tools.calculator import CalculatorTool
 from src.core.orchestrator import Orchestrator
+from src.memory.buffer import BufferMemory
+from src.models import OpenAIModel
+from src.tools.calculator import CalculatorTool
+from src.tools.web_search import WebSearchTool
 
 
 async def main():
@@ -29,16 +30,16 @@ async def main():
             "Please set it in a .env file or in your environment."
         )
 
-    # Create LLM
-    llm = OpenAILLM(
+    # Create language model
+    model = OpenAIModel(
         api_key=api_key,
         model="gpt-4o",  # You can change this to any supported model
     )
 
     # Create memory
     memory = BufferMemory(
-        dimension=1536,  # OpenAILLM embeddings dimension
-        max_size=100,    # Maximum number of items to store
+        dimension=1536,  # OpenAIModel embeddings dimension
+        max_size=100,  # Maximum number of items to store
     )
 
     # Create tools
@@ -53,7 +54,7 @@ async def main():
     # Create agent
     orchestrator.create_agent(
         agent_id="simple_agent",
-        llm=llm,
+        model=model,
         buffer_memory=memory,
         tools=tools,
         system_message=(
