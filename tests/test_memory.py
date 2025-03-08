@@ -1,7 +1,7 @@
 """
-Unit tests for the memory module.
+Test memory implementations
 
-This module contains tests for the memory implementations in the agent framework.
+This module contains tests for the memory implementations in the muxi framework.
 """
 
 import os

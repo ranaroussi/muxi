@@ -1,6 +1,6 @@
 # Strategic Roadmap
 
-This document outlines the high-level strategic vision and planned future development of the AI Agent Framework. For detailed developer tasks and implementation checkboxes, see the `DEVELOPER_TASKS.md` file in the project root.
+This document outlines the high-level strategic vision and planned future development of the muxi framework. For detailed developer tasks and implementation checkboxes, see the `NEXT_STEPS.md` file in the project root.
 
 ## Short-term Goals
 

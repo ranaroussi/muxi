@@ -1,5 +1,5 @@
 """
-CLI module for the AI Agent Framework.
+CLI module for the MUXI Framework.
 
 This module provides a command-line interface for interacting with agents.
 """

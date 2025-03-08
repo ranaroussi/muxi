@@ -1,5 +1,5 @@
 """
-Language model configuration for the AI Agent Framework.
+Language model configuration for the MUXI Framework.
 
 This module provides model-related configuration settings.
 """

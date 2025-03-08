@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Example WebSocket client for the AI Agent Framework.
+Example WebSocket client for the MUXI Framework.
 
 This script demonstrates how to use the WebSocket API to communicate with agents
 in real-time.
@@ -15,7 +15,7 @@ import websockets
 
 
 class WebSocketClient:
-    """Simple WebSocket client for interacting with the AI Agent Framework."""
+    """Simple WebSocket client for interacting with the MUXI Framework."""
 
     def __init__(self, base_url="ws://localhost:8000"):
         """
@@ -42,10 +42,7 @@ class WebSocketClient:
             agent_id: ID of the agent to subscribe to
         """
         self.agent_id = agent_id
-        await self.ws.send(json.dumps({
-            "type": "subscribe",
-            "agent_id": agent_id
-        }))
+        await self.ws.send(json.dumps({"type": "subscribe", "agent_id": agent_id}))
         response = await self.ws.recv()
         return json.loads(response)
 
@@ -60,11 +57,9 @@ class WebSocketClient:
         if not agent_id and not self.agent_id:
             raise ValueError("No agent specified and not subscribed to any agent")
 
-        await self.ws.send(json.dumps({
-            "type": "chat",
-            "message": message,
-            "agent_id": agent_id or self.agent_id
-        }))
+        await self.ws.send(
+            json.dumps({"type": "chat", "message": message, "agent_id": agent_id or self.agent_id})
+        )
 
     async def receive_messages(self):
         """
@@ -144,16 +139,13 @@ async def main():
     """Run the example WebSocket client."""
     # Parse command line arguments
     import argparse
+
     parser = argparse.ArgumentParser(description="WebSocket client example")
     parser.add_argument(
-        "--url",
-        default="ws://localhost:8000",
-        help="WebSocket URL (default: ws://localhost:8000)"
+        "--url", default="ws://localhost:8000", help="WebSocket URL (default: ws://localhost:8000)"
     )
     parser.add_argument(
-        "--agent",
-        default="my_agent",
-        help="Agent ID to connect to (default: my_agent)"
+        "--agent", default="my_agent", help="Agent ID to connect to (default: my_agent)"
     )
     args = parser.parse_args()
 

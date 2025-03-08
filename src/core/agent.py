@@ -1,5 +1,5 @@
 """
-Agent implementation for the AI Agent Framework.
+Agent implementation for the MUXI Framework.
 
 This module provides the Agent class, which is the main interface for users
 of the framework. It combines the language model, memory, and tools to create a

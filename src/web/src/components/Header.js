@@ -14,7 +14,7 @@ function Header() {
     if (path.startsWith('/agents/')) return 'Agent Details';
     if (path.startsWith('/chat')) return 'Chat';
     if (path === '/settings') return 'Settings';
-    return 'AI Agent Framework';
+    return 'MUXI Framework';
   };
 
   return (

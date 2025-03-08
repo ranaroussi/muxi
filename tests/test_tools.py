@@ -1,12 +1,12 @@
 """
-Unit tests for the tools module.
+Test tools implementations
 
-This module contains tests for the tools implemented in the agent framework.
+This module contains tests for the tools implemented in the muxi framework.
 """
 
-import unittest
 import asyncio
-from unittest.mock import patch, MagicMock
+import unittest
+from unittest.mock import MagicMock, patch
 
 from src.tools.calculator import Calculator
 from src.tools.web_search import WebSearch
@@ -35,7 +35,7 @@ class TestCalculator(unittest.TestCase):
             ("10 // 3", "3"),
             ("10 % 3", "1"),
             ("-5", "-5"),
-            ("+5", "5")
+            ("+5", "5"),
         ]
 
         for expression, expected in test_cases:
@@ -51,7 +51,7 @@ class TestCalculator(unittest.TestCase):
             ("cos(0)", "1"),
             ("abs(-5)", "5"),
             ("round(3.7)", "4"),
-            ("pi", str(3.14159).rstrip('0').rstrip('.'))
+            ("pi", str(3.14159).rstrip("0").rstrip(".")),
         ]
 
         for expression, expected in test_cases:
@@ -67,7 +67,7 @@ class TestCalculator(unittest.TestCase):
             "print('hello')",
             "def func(): pass",
             "1 + a",
-            "unknown_func(5)"
+            "unknown_func(5)",
         ]
 
         for expression in test_cases:
@@ -89,10 +89,7 @@ class TestWebSearch(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         # Create the WebSearch with direct parameters
-        self.web_search = WebSearch(
-            api_key="fake_api_key",
-            search_engine_id="fake_engine_id"
-        )
+        self.web_search = WebSearch(api_key="fake_api_key", search_engine_id="fake_engine_id")
 
     def test_name_and_description(self):
         """Test that the name and description properties are set correctly."""

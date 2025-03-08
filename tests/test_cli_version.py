@@ -2,17 +2,18 @@
 Test the CLI version flag functionality.
 """
 
-import unittest
-from unittest.mock import patch, MagicMock
 import io
+import unittest
+from unittest.mock import MagicMock, patch
+
 from src.cli.app import parse_args, run_cli_async
 
 
 class TestCLIVersionParsing(unittest.TestCase):
     """Test the CLI version flag parsing."""
 
-    @patch('sys.argv', ['cli.py', '--version'])
-    @patch('src.utils.get_version')
+    @patch("sys.argv", ["cli.py", "--version"])
+    @patch("src.utils.get_version")
     def test_version_flag_parsing(self, mock_get_version):
         """Test that the --version flag is properly parsed."""
         mock_get_version.return_value = "0.0.1"
@@ -23,10 +24,10 @@ class TestCLIVersionParsing(unittest.TestCase):
 class TestCLIVersionAsync(unittest.IsolatedAsyncioTestCase):
     """Test the CLI version flag async functionality."""
 
-    @patch('asyncio.run')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    @patch('src.utils.get_version')
-    @patch('src.cli.app.parse_args')
+    @patch("asyncio.run")
+    @patch("sys.stdout", new_callable=io.StringIO)
+    @patch("src.utils.get_version")
+    @patch("src.cli.app.parse_args")
     async def test_version_flag_output(
         self, mock_parse_args, mock_get_version, mock_stdout, mock_run
     ):
@@ -43,7 +44,7 @@ class TestCLIVersionAsync(unittest.IsolatedAsyncioTestCase):
 
         # Verify that we show the version information
         output = mock_stdout.getvalue()
-        self.assertIn("AI Agent Framework version", output)
+        self.assertIn("MUXI Framework version", output)
 
         # Remove ANSI color codes and check for version
         clean_output = output.replace("\x1b[1;36m", "")
@@ -55,5 +56,5 @@ class TestCLIVersionAsync(unittest.IsolatedAsyncioTestCase):
         mock_run.assert_not_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

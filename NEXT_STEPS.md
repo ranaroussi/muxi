@@ -4,7 +4,7 @@ This document provides a detailed task tracker for developers working on the MUX
 
 ## Completed Work
 
-Core components of the AI agent framework now implemented:
+Core components of the muxi framework now implemented:
 
 1. **Modern Control Protocol (MCP)**: Standardized communication with LLMs
 2. **Memory System**:

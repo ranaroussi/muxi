@@ -1,13 +1,13 @@
 """
-Memobase: Multi-user memory system for AI Agent Framework.
+Memobase: Multi-user memory system for MUXI Framework.
 
 This module provides a centralized memory manager that supports multiple users
 with PostgreSQL/PGVector for memory storage.
 """
 
-from typing import Dict, List, Any, Optional
 import asyncio
 import time
+from typing import Any, Dict, List, Optional
 
 from src.memory.long_term import LongTermMemory
 
@@ -21,11 +21,7 @@ class Memobase:
     users while providing a unified interface for memory operations.
     """
 
-    def __init__(
-        self,
-        long_term_memory: LongTermMemory,
-        default_user_id: int = 0
-    ):
+    def __init__(self, long_term_memory: LongTermMemory, default_user_id: int = 0):
         """
         Initialize the Memobase memory manager.
 
@@ -42,7 +38,7 @@ class Memobase:
         content: str,
         embedding: Optional[List[float]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        user_id: Optional[int] = None
+        user_id: Optional[int] = None,
     ) -> int:
         """
         Add content to memory for a specific user.
@@ -75,10 +71,7 @@ class Memobase:
             self.long_term_memory._ensure_collection_exists(None, collection)
         except Exception:
             # If calling with None session fails, create collection properly
-            self.long_term_memory.create_collection(
-                collection,
-                f"Memory for user {user_id}"
-            )
+            self.long_term_memory.create_collection(collection, f"Memory for user {user_id}")
 
         # Add to long-term memory
         memory_id = await asyncio.to_thread(
@@ -86,7 +79,7 @@ class Memobase:
             text=content,
             embedding=embedding,
             metadata=metadata,
-            collection=collection
+            collection=collection,
         )
 
         return memory_id
@@ -97,7 +90,7 @@ class Memobase:
         query_embedding: Optional[List[float]] = None,
         limit: int = 5,
         user_id: Optional[int] = None,
-        additional_filter: Optional[Dict[str, Any]] = None
+        additional_filter: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Search for relevant content in memory for a specific user.
@@ -135,20 +128,22 @@ class Memobase:
             query_embedding=query_embedding,
             filter_metadata=filter_metadata,
             k=limit,
-            collection=collection
+            collection=collection,
         )
 
         # Convert results to standard format
         results = []
         for distance, memory in search_results:
-            results.append({
-                "content": memory.get("text", ""),
-                "metadata": memory.get("meta_data", {}),
-                "distance": distance,
-                "source": "memobase",
-                "id": memory.get("id"),
-                "created_at": memory.get("created_at")
-            })
+            results.append(
+                {
+                    "content": memory.get("text", ""),
+                    "metadata": memory.get("meta_data", {}),
+                    "distance": distance,
+                    "source": "memobase",
+                    "id": memory.get("id"),
+                    "created_at": memory.get("created_at"),
+                }
+            )
 
         return results
 
@@ -171,10 +166,7 @@ class Memobase:
         except Exception:
             pass  # Collection might not exist
 
-        self.long_term_memory.create_collection(
-            collection,
-            f"Memory collection for user {user_id}"
-        )
+        self.long_term_memory.create_collection(collection, f"Memory collection for user {user_id}")
 
     def get_user_memories(
         self,
@@ -182,7 +174,7 @@ class Memobase:
         limit: int = 10,
         offset: int = 0,
         sort_by: str = "created_at",
-        ascending: bool = False
+        ascending: bool = False,
     ) -> List[Dict[str, Any]]:
         """
         Get recent memories for a specific user.
@@ -204,10 +196,7 @@ class Memobase:
         collection = f"user_{user_id}"
 
         # Get memories from the collection
-        memories = self.long_term_memory.get_recent_memories(
-            collection=collection,
-            limit=limit
-        )
+        memories = self.long_term_memory.get_recent_memories(collection=collection, limit=limit)
 
         return [
             {
@@ -215,7 +204,7 @@ class Memobase:
                 "metadata": memory.get("meta_data", {}),
                 "id": memory.get("id"),
                 "created_at": memory.get("created_at"),
-                "updated_at": memory.get("updated_at")
+                "updated_at": memory.get("updated_at"),
             }
             for memory in memories
         ]

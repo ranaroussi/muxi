@@ -1,7 +1,7 @@
 """
-Configuration for the AI Agent Framework.
+Configuration for the MUXI Framework.
 
-This module provides configuration settings for the AI Agent Framework.
+This module provides configuration settings for the MUXI Framework.
 """
 
 import os
@@ -17,7 +17,7 @@ from src.config.tools import ToolsConfig, tools_config
 
 class Config(BaseModel):
     """
-    Main configuration class for the AI Agent Framework.
+    Main configuration class for the MUXI Framework.
 
     This class combines all configuration settings into a single object.
     """

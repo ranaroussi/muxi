@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """
-Test runner for the AI Agent Framework.
+Test runner for the MUXI Framework.
 
 This script runs all unit tests in the tests directory.
 """
 
-import unittest
 import os
 import sys
+import unittest
 
 
 def discover_and_run_tests():
@@ -18,14 +18,14 @@ def discover_and_run_tests():
         True if all tests pass, False otherwise.
     """
     # Ensure the src directory is in the path
-    sys.path.insert(0, os.path.abspath('.'))
+    sys.path.insert(0, os.path.abspath("."))
 
     # Create a test loader
     loader = unittest.TestLoader()
 
     # Discover all tests in the tests directory
-    start_dir = 'tests'
-    suite = loader.discover(start_dir, pattern='test_*.py')
+    start_dir = "tests"
+    suite = loader.discover(start_dir, pattern="test_*.py")
 
     # Create a test runner
     runner = unittest.TextTestRunner(verbosity=2)
@@ -37,8 +37,8 @@ def discover_and_run_tests():
     return result.wasSuccessful()
 
 
-if __name__ == '__main__':
-    print("Running AI Agent Framework tests...")
+if __name__ == "__main__":
+    print("Running MUXI Framework tests...")
     success = discover_and_run_tests()
 
     if success:

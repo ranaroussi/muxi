@@ -1,8 +1,8 @@
 """
-API server for the AI Agent Framework.
+API server for the MUXI Framework.
 
 This module provides a FastAPI-based API server for interacting with
-agents created with the AI Agent Framework.
+agents created with the MUXI Framework.
 """
 
 import logging
@@ -161,7 +161,7 @@ class ToolListResponse(BaseModel):
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
-        title="AI Agent Framework API",
+        title="MUXI Framework API",
         description="API for interacting with AI agents",
         version="0.1.0",
     )
@@ -200,11 +200,11 @@ def create_app() -> FastAPI:
     @app.get("/api", tags=["Health"])
     async def api_root():
         """Health check endpoint."""
-        return {"status": "healthy", "message": "AI Agent Framework API"}
+        return {"status": "healthy", "message": "MUXI Framework API"}
 
     @app.get("/version", tags=["Health"])
     async def version():
-        """Get the current version of the AI Agent Framework."""
+        """Get the current version of the MUXI Framework."""
         return {"version": get_version()}
 
     # Original root route now at /api
@@ -216,7 +216,7 @@ def create_app() -> FastAPI:
             index_path = os.path.join(web_build_dir, "index.html")
             return FileResponse(index_path)
         # Otherwise return API status
-        return {"status": "healthy", "message": "AI Agent Framework API"}
+        return {"status": "healthy", "message": "MUXI Framework API"}
 
     @app.post("/agents", response_model=Dict[str, str], tags=["Agents"])
     async def create_agent(request: AgentRequest):

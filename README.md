@@ -21,8 +21,8 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ai-agent-framework.git
-cd ai-agent-framework
+git clone https://github.com/yourusername/muxi.git
+cd muxi
 
 # Install dependencies
 pip install -r requirements.txt

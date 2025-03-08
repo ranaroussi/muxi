@@ -1,5 +1,5 @@
 """
-ID generation utilities for the AI Agent Framework.
+ID generation utilities for the MUXI Framework.
 
 This module provides functions for generating Nano IDs consistently
 across the application.

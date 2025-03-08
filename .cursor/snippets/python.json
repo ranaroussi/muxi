@@ -23,7 +23,7 @@
       "response = orchestrator.chat(\"${1:assistant}\", \"${4:Hello, can you help me?}\")",
       "print(response)"
     ],
-    "description": "Initialize an AI agent with the framework"
+    "description": "Initialize a muxi agent"
   },
   "Custom Tool Creation": {
     "prefix": "aitool",

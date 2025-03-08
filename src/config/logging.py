@@ -1,24 +1,21 @@
 """
-Logging configuration for the AI Agent Framework.
+Logging configuration for the MUXI Framework.
 
 This module provides logging-related configuration settings.
 """
 
 import os
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
 class LoggingConfig(BaseModel):
     """Logging configuration settings."""
 
-    level: str = Field(
-        default_factory=lambda: os.getenv("LOG_LEVEL", "INFO")
-    )
+    level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))
 
-    file: Optional[str] = Field(
-        default_factory=lambda: os.getenv("LOG_FILE")
-    )
+    file: Optional[str] = Field(default_factory=lambda: os.getenv("LOG_FILE"))
 
     format: str = Field(
         default_factory=lambda: os.getenv(
@@ -26,21 +23,15 @@ class LoggingConfig(BaseModel):
             "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
             "<level>{level: <8}</level> | "
             "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-            "<level>{message}</level>"
+            "<level>{message}</level>",
         )
     )
 
-    rotation: str = Field(
-        default_factory=lambda: os.getenv("LOG_ROTATION", "10 MB")
-    )
+    rotation: str = Field(default_factory=lambda: os.getenv("LOG_ROTATION", "10 MB"))
 
-    retention: str = Field(
-        default_factory=lambda: os.getenv("LOG_RETENTION", "1 week")
-    )
+    retention: str = Field(default_factory=lambda: os.getenv("LOG_RETENTION", "1 week"))
 
-    compression: str = Field(
-        default_factory=lambda: os.getenv("LOG_COMPRESSION", "zip")
-    )
+    compression: str = Field(default_factory=lambda: os.getenv("LOG_COMPRESSION", "zip"))
 
 
 # Create a global logging config instance
@@ -49,18 +40,15 @@ logging_config = LoggingConfig()
 
 def configure_logging():
     """Configure logging based on the configuration."""
-    from loguru import logger
     import sys
+
+    from loguru import logger
 
     # Remove default handler
     logger.remove()
 
     # Add console handler
-    logger.add(
-        sink=sys.stdout,
-        level=logging_config.level,
-        format=logging_config.format
-    )
+    logger.add(sink=sys.stdout, level=logging_config.level, format=logging_config.format)
 
     # Add file handler if configured
     if logging_config.file:
@@ -76,5 +64,5 @@ def configure_logging():
             retention=logging_config.retention,
             compression=logging_config.compression,
             format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | "
-                   "{name}:{function}:{line} - {message}"
+            "{name}:{function}:{line} - {message}",
         )

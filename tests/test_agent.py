@@ -1,7 +1,7 @@
 """
-Unit tests for the agent module.
+Test Agent class
 
-This module contains tests for the Agent class in the agent framework.
+This module contains tests for the Agent class in the muxi framework.
 """
 
 import asyncio

@@ -2,7 +2,7 @@
 Unit tests for the Agent class with Memobase integration.
 
 This module contains tests for the Agent class with multi-user memory support
-via Memobase in the AI Agent Framework.
+via Memobase in the MUXI Framework.
 """
 
 import unittest

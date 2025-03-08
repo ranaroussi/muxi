@@ -1,8 +1,8 @@
 """
-Simple example of using the AI Agent Framework.
+Simple example of using the MUXI Framework.
 
 This script demonstrates how to create and use a simple agent with the
-AI Agent Framework.
+MUXI Framework.
 """
 
 import asyncio

@@ -1,7 +1,7 @@
 """
-Unit tests for the MCP (Modern Control Protocol) module.
+Test Modern Control Protocol
 
-This module contains tests for the MCP implementation in the agent framework.
+This module contains tests for the MCP implementation in the muxi framework.
 """
 
 import asyncio

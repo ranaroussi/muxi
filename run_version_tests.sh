@@ -2,7 +2,7 @@
 
 # Run version tests
 
-echo "Running AI Agent Framework version tests..."
+echo "Running MUXI Framework version tests..."
 echo "============================================="
 
 # Change to the project root directory

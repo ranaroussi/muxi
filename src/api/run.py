@@ -3,43 +3,28 @@
 Run script for the API server.
 """
 
+import argparse
+import logging
 import os
 import sys
-import logging
-import argparse
+
 import uvicorn
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 
 # Add the project root to the path so we can import from src
-sys.path.insert(0, os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../..")
-))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="AI Agent Framework API Server"
-    )
+    parser = argparse.ArgumentParser(description="MUXI Framework API Server")
     parser.add_argument(
-        "--host",
-        type=str,
-        default="0.0.0.0",
-        help="Host to bind to (default: 0.0.0.0)"
+        "--host", type=str, default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)"
     )
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=5050,
-        help="Port to bind to (default: 5050)"
-    )
-    parser.add_argument(
-        "--reload",
-        action="store_true",
-        help="Enable auto-reload for development"
-    )
+    parser.add_argument("--port", type=int, default=5050, help="Port to bind to (default: 5050)")
+    parser.add_argument("--reload", action="store_true", help="Enable auto-reload for development")
     return parser.parse_args()
 
 
@@ -58,10 +43,4 @@ if __name__ == "__main__":
         print("Auto-reload enabled")
 
     # Run the API server with specified options
-    uvicorn.run(
-        app,
-        host=args.host,
-        port=args.port,
-        log_level="debug",
-        reload=args.reload
-    )
+    uvicorn.run(app, host=args.host, port=args.port, log_level="debug", reload=args.reload)

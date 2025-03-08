@@ -1,32 +1,33 @@
 """
-Command-line interface for the AI Agent Framework.
+Command-line interface for the MUXI Framework.
 
 This module provides a modern command-line interface using Click
-for interacting with the AI Agent Framework.
+for interacting with the MUXI Framework.
 """
 
-import click
 import asyncio
 import sys
 from typing import Optional
 
-from src.utils import get_version
+import click
+
 from src.cli.app import chat_loop, create_agent_from_config
 from src.core.orchestrator import Orchestrator
+from src.utils import get_version
 
 
 @click.group()
 @click.version_option(get_version(), prog_name="muxi")
 def cli_main():
-    """AI Agent Framework command-line interface."""
+    """MUXI Framework command-line interface."""
     pass
 
 
 @cli_main.command()
-@click.option("--agent-id", default="cli_agent",
-              help="ID for the agent (default: cli_agent)")
-@click.option("--no-config", is_flag=True,
-              help="Don't use configuration file, use defaults instead")
+@click.option("--agent-id", default="cli_agent", help="ID for the agent (default: cli_agent)")
+@click.option(
+    "--no-config", is_flag=True, help="Don't use configuration file, use defaults instead"
+)
 def chat(agent_id: str, no_config: bool):
     """Start an interactive chat session with an agent."""
     # Create orchestrator
@@ -46,12 +47,9 @@ def chat(agent_id: str, no_config: bool):
 
 
 @cli_main.command()
-@click.option("--host", default="0.0.0.0",
-              help="Host to bind the API server to")
-@click.option("--port", default=5050, type=int,
-              help="Port to bind the API server to")
-@click.option("--reload", is_flag=True,
-              help="Enable auto-reload for development")
+@click.option("--host", default="0.0.0.0", help="Host to bind the API server to")
+@click.option("--port", default=5050, type=int, help="Port to bind the API server to")
+@click.option("--reload", is_flag=True, help="Enable auto-reload for development")
 def api(host: str, port: int, reload: bool):
     """Run the API server."""
     from src.api.app import start_api
@@ -64,6 +62,7 @@ def api(host: str, port: int, reload: bool):
 def run():
     """Run both the API server and web UI."""
     from src.__main__ import main
+
     main()
 
 

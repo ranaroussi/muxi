@@ -51,7 +51,7 @@ function Layout() {
         textAlign="right"
       >
         <Text fontSize="sm" color="gray.500">
-          AI Agent Framework {version && `v${version}`}
+          MUXI Framework {version && `v${version}`}
         </Text>
       </Box>
     </Flex>

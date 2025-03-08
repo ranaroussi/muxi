@@ -9,11 +9,11 @@ This is useful for development, testing, and containerized deployments
 where direct module execution is preferred over CLI commands.
 """
 
+import logging
+import os
+import socket
 import subprocess
 import sys
-import os
-import logging
-import socket
 import threading
 
 # Configure logging
@@ -27,7 +27,7 @@ logger = logging.getLogger("run")
 def is_port_in_use(port):
     """Check if a port is in use."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
+        return s.connect_ex(("localhost", port)) == 0
 
 
 def run_api_server():
@@ -38,12 +38,12 @@ def run_api_server():
             msg = "Port 5050 is already in use. API server cannot start."
             logger.error(msg)
             print(f"Error: {msg}")
-            print("Please stop any other processes using port 5050 "
-                  "and try again.")
+            print("Please stop any other processes using port 5050 " "and try again.")
             return False
 
         logger.info("Starting API server on port 5050...")
         from src.api.app import start_api
+
         # Running directly in the main thread - fixes the signal handling issue
         start_api(host="0.0.0.0", port=5050, reload=True)
         return True
@@ -97,8 +97,8 @@ def run_web_ui():
 
 def main():
     """Run both the API server and web UI."""
-    print("Starting AI Agent Framework...")
-    logger.info("Starting AI Agent Framework")
+    print("Starting MUXI Framework...")
+    logger.info("Starting MUXI Framework")
 
     # Modified approach: Start web UI in a thread, API server in main thread
 
@@ -124,6 +124,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error starting servers: {str(e)}")
         import traceback
+
         traceback.print_exc()
         print("\nTroubleshooting tips:")
         print("1. Check if port 5050 is already in use by another process")

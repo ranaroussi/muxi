@@ -14,7 +14,7 @@ Tools are specialized functions that agents can use to:
 
 ## Tools vs MCP: Understanding the Distinction
 
-It's important to understand how tools relate to the Modern Control Protocol (MCP) in the agent framework:
+It's important to understand how tools relate to the Modern Control Protocol (MCP) in the muxi framework:
 
 ### Tools are Functional Extensions, Not the Protocol
 
@@ -24,7 +24,7 @@ It's important to understand how tools relate to the Modern Control Protocol (MC
 
 ### How Tools and MCP Work Together
 
-When a tool is used in the agent framework, the process follows this flow:
+When a tool is used in the muxi framework, the process follows this flow:
 
 1. The LLM (not your application code) decides a tool is needed to answer a query
 2. The LLM sends a tool call request formatted according to the MCP standard

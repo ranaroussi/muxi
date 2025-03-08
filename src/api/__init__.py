@@ -1,5 +1,5 @@
 """
-API module for the AI Agent Framework.
+API module for the MUXI Framework.
 
 This module provides a REST API for interacting with agents.
 """

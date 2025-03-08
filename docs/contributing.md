@@ -26,13 +26,13 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
 2. Clone your fork locally:
 
    ```bash
-   git clone https://github.com/YOUR-USERNAME/ai-agent-framework.git
-   cd ai-agent-framework
+   git clone https://github.com/YOUR-USERNAME/muxi.git
+   cd muxi
    ```
 3. Add the original repository as an upstream remote:
 
    ```bash
-   git remote add upstream https://github.com/ORIGINAL-OWNER/ai-agent-framework.git
+   git remote add upstream https://github.com/ORIGINAL-OWNER/muxi.git
    ```
 4. Create a new branch for your changes:
 
@@ -226,7 +226,7 @@ Documentation is critical to the success of the project. When contributing:
 
 Join our community channels to get help, discuss features, or connect with other contributors:
 
-- [GitHub Discussions](https://github.com/ORIGINAL-OWNER/ai-agent-framework/discussions)
+- [GitHub Discussions](https://github.com/ORIGINAL-OWNER/muxi/discussions)
 - [Discord Server](#) (if applicable)
 - [Community Forum](#) (if applicable)
 

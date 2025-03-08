@@ -1,12 +1,12 @@
 """
-Base tool class for the agent framework.
+Base tool class for the muxi framework.
 
 This module provides the abstract base class for tools that can be used by
 agents.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class BaseTool(ABC):
@@ -78,9 +78,7 @@ class ToolRegistry:
             ValueError: If a tool with the same name is already registered.
         """
         if tool.name in self._tools:
-            raise ValueError(
-                f"Tool with name '{tool.name}' already registered"
-            )
+            raise ValueError(f"Tool with name '{tool.name}' already registered")
         self._tools[tool.name] = tool
 
     def get(self, name: str) -> Optional[BaseTool]:
@@ -115,10 +113,7 @@ class ToolRegistry:
         """
         tools = []
         for tool in self._tools.values():
-            tools.append({
-                "name": tool.name,
-                "description": tool.description
-            })
+            tools.append({"name": tool.name, "description": tool.description})
         return {"tools": tools}
 
 
@@ -173,5 +168,3 @@ def get_tools_schema() -> Dict[str, Any]:
         A schema describing all registered tools.
     """
     return tool_registry.get_schema()
-
-

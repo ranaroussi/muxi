@@ -1,19 +1,19 @@
 """
-WebSocket implementation for the AI Agent Framework.
+WebSocket implementation for the MUXI Framework.
 
 This module provides WebSocket endpoints for real-time interaction with
-agents created with the AI Agent Framework.
+agents created with the MUXI Framework.
 """
 
 import asyncio
 import json
+import threading
 import time
 import uuid
-from typing import Dict, Set, Any, Optional
-import threading
+from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional, Set
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from contextlib import asynccontextmanager
 from loguru import logger
 
 from src.core.orchestrator import Orchestrator
@@ -61,9 +61,7 @@ async def check_connection_timeouts():
             # Find connections that haven't had activity in 2 minutes
             for conn_id, last_activity in connection_last_activity.items():
                 if current_time - last_activity > 120:  # 2 minutes timeout
-                    logger.info(
-                        f"Connection {conn_id} timed out after 2 minutes of inactivity"
-                    )
+                    logger.info(f"Connection {conn_id} timed out after 2 minutes of inactivity")
                     connections_to_close.append(conn_id)
 
             # Close timed out connections
@@ -74,9 +72,7 @@ async def check_connection_timeouts():
                             code=1000, reason="Connection timeout"
                         )
                     except Exception as e:
-                        logger.error(
-                            f"Error closing timed out connection {conn_id}: {str(e)}"
-                        )
+                        logger.error(f"Error closing timed out connection {conn_id}: {str(e)}")
 
                     # Clean up connection tracking
                     del connected_websockets[conn_id]
@@ -124,7 +120,7 @@ async def handle_websocket(websocket: WebSocket):
             {
                 "type": "connected",
                 "connection_id": connection_id,
-                "message": "Connected to AI Agent Framework",
+                "message": "Connected to MUXI Framework",
             }
         )
 
@@ -142,17 +138,13 @@ async def handle_websocket(websocket: WebSocket):
                 # Handle different message types
                 if message_type == "ping":
                     # Ping message to keep connection alive
-                    await websocket.send_json(
-                        {"type": "pong", "timestamp": time.time()}
-                    )
+                    await websocket.send_json({"type": "pong", "timestamp": time.time()})
 
                 elif message_type == "set_user":
                     # Set user ID for this connection
                     user_id = message.get("user_id", 0)
                     connection_user_id[connection_id] = int(user_id)
-                    logger.info(
-                        f"Set user ID for connection {connection_id}: {user_id}"
-                    )
+                    logger.info(f"Set user ID for connection {connection_id}: {user_id}")
                     await websocket.send_json({"type": "user_set", "user_id": user_id})
 
                 elif message_type == "chat":
@@ -194,9 +186,7 @@ async def handle_websocket(websocket: WebSocket):
             except json.JSONDecodeError:
                 # Invalid JSON
                 logger.warning(f"Invalid JSON message: {message_text}")
-                await websocket.send_json(
-                    {"type": "error", "message": "Invalid JSON message"}
-                )
+                await websocket.send_json({"type": "error", "message": "Invalid JSON message"})
 
             except Exception as e:
                 # Other errors
@@ -304,9 +294,7 @@ async def handle_chat_message(
         # Get the agent
         agent = await get_agent(agent_id)
         if not agent:
-            await websocket.send_json(
-                {"type": "error", "message": f"Agent '{agent_id}' not found"}
-            )
+            await websocket.send_json({"type": "error", "message": f"Agent '{agent_id}' not found"})
             return
 
         # Send thinking message
@@ -343,9 +331,7 @@ async def handle_chat_message(
                             }
                         )
                     except Exception as e:
-                        logger.error(
-                            f"Error broadcasting message to {conn_id}: {str(e)}"
-                        )
+                        logger.error(f"Error broadcasting message to {conn_id}: {str(e)}")
 
     except Exception as e:
         logger.error(f"Error processing chat message: {str(e)}")
@@ -378,9 +364,7 @@ async def handle_memory_search(
         # Get the agent
         agent = await get_agent(agent_id)
         if not agent:
-            await websocket.send_json(
-                {"type": "error", "message": f"Agent '{agent_id}' not found"}
-            )
+            await websocket.send_json({"type": "error", "message": f"Agent '{agent_id}' not found"})
             return
 
         # Search memory
@@ -432,30 +416,22 @@ async def handle_memory_search(
 
     except Exception as e:
         logger.error(f"Error searching memory: {str(e)}")
-        await websocket.send_json(
-            {"type": "error", "message": f"Error searching memory: {str(e)}"}
-        )
+        await websocket.send_json({"type": "error", "message": f"Error searching memory: {str(e)}"})
 
 
-async def handle_subscription(
-    connection_id: str, websocket: WebSocket, message: Dict[str, Any]
-):
+async def handle_subscription(connection_id: str, websocket: WebSocket, message: Dict[str, Any]):
     """Handle a subscription request from a client."""
     agent_id = message.get("agent_id")
 
     if not agent_id:
-        await websocket.send_json(
-            {"type": "error", "message": "Missing required field: agent_id"}
-        )
+        await websocket.send_json({"type": "error", "message": "Missing required field: agent_id"})
         return
 
     try:
         # Check if agent exists
         agent = await get_agent(agent_id)
         if not agent:
-            await websocket.send_json(
-                {"type": "error", "message": f"Agent '{agent_id}' not found"}
-            )
+            await websocket.send_json({"type": "error", "message": f"Agent '{agent_id}' not found"})
             return
 
         # Add this connection to the agent's subscriptions
@@ -482,24 +458,17 @@ async def handle_subscription(
         )
 
 
-async def handle_unsubscription(
-    connection_id: str, websocket: WebSocket, message: Dict[str, Any]
-):
+async def handle_unsubscription(connection_id: str, websocket: WebSocket, message: Dict[str, Any]):
     """Handle an unsubscription request from a client."""
     agent_id = message.get("agent_id")
 
     if not agent_id:
-        await websocket.send_json(
-            {"type": "error", "message": "Missing required field: agent_id"}
-        )
+        await websocket.send_json({"type": "error", "message": "Missing required field: agent_id"})
         return
 
     try:
         # Remove this connection from the agent's subscriptions
-        if (
-            agent_id in agent_connections
-            and connection_id in agent_connections[agent_id]
-        ):
+        if agent_id in agent_connections and connection_id in agent_connections[agent_id]:
             agent_connections[agent_id].remove(connection_id)
 
             # Clean up empty agent connections
@@ -515,9 +484,7 @@ async def handle_unsubscription(
                 }
             )
 
-            logger.info(
-                f"Connection {connection_id} unsubscribed from agent {agent_id}"
-            )
+            logger.info(f"Connection {connection_id} unsubscribed from agent {agent_id}")
         else:
             await websocket.send_json(
                 {"type": "warning", "message": f"Not subscribed to agent {agent_id}"}

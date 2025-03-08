@@ -1,5 +1,5 @@
 """
-Language model module for the AI Agent Framework.
+Language model module for the MUXI Framework.
 
 This module contains implementations of various language model providers.
 """

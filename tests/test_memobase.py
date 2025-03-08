@@ -1,15 +1,15 @@
 """
 Unit tests for the Memobase module.
 
-This module contains tests for the Memobase class in the AI Agent Framework.
+This module contains tests for the Memobase class in the MUXI Framework.
 """
 
+import time
 import unittest
 from unittest.mock import MagicMock, patch
-import time
 
-from src.memory.memobase import Memobase
 from src.memory.long_term import LongTermMemory
+from src.memory.memobase import Memobase
 from tests.utils.async_test import async_test
 
 
@@ -43,9 +43,7 @@ class TestMemobase(unittest.TestCase):
         ]
 
         # Create Memobase with mock LongTermMemory
-        self.memobase = Memobase(
-            long_term_memory=self.mock_long_term_memory, default_user_id=0
-        )
+        self.memobase = Memobase(long_term_memory=self.mock_long_term_memory, default_user_id=0)
 
     @async_test
     @patch("asyncio.to_thread")
@@ -146,9 +144,7 @@ class TestMemobase(unittest.TestCase):
         ]
 
         # Search with additional filter
-        await self.memobase.search(
-            query="test", user_id=123, additional_filter={"type": "note"}
-        )
+        await self.memobase.search(query="test", user_id=123, additional_filter={"type": "note"})
 
         # Verify the filter includes both user_id and additional filter
         args, kwargs = mock_to_thread.call_args
@@ -182,9 +178,7 @@ class TestMemobase(unittest.TestCase):
     def test_get_user_memories(self):
         """Test getting all memories for a user."""
         # Get memories
-        memories = self.memobase.get_user_memories(
-            user_id=123, limit=10, sort_by="created_at"
-        )
+        memories = self.memobase.get_user_memories(user_id=123, limit=10, sort_by="created_at")
 
         # Verify get_recent_memories was called with the right arguments
         self.mock_long_term_memory.get_recent_memories.assert_called_with(

@@ -77,7 +77,7 @@ function Settings() {
                 placeholder="Enter API URL"
               />
               <Text fontSize="sm" color="gray.500" mt={1}>
-                URL of the AI Agent Framework API server
+                URL of the MUXI Framework API server
               </Text>
             </FormControl>
 
@@ -173,9 +173,9 @@ function Settings() {
 
       <Box mt={8} p={4} borderRadius="md" bg="gray.50">
         <Heading size="sm" mb={2}>About</Heading>
-        <Text fontSize="sm">AI Agent Framework Dashboard v0.1.0</Text>
+        <Text fontSize="sm">MUXI Framework Dashboard v0.1.0</Text>
         <Text fontSize="sm" color="gray.500">
-          © 2023 AI Agent Framework
+          © 2023 MUXI Framework
         </Text>
       </Box>
     </Box>

@@ -1,8 +1,8 @@
 """
-Command-line interface for the AI Agent Framework.
+Command-line interface for the MUXI Framework.
 
 This module provides a rich command-line interface for interacting with
-agents created with the AI Agent Framework.
+agents created with the MUXI Framework.
 """
 
 import argparse
@@ -89,7 +89,7 @@ async def chat_loop(orchestrator: Orchestrator, agent_id: str) -> None:
         orchestrator: The orchestrator containing the agent.
         agent_id: The ID of the agent to chat with.
     """
-    welcome_text = f"""# AI Agent Framework CLI
+    welcome_text = f"""# MUXI Framework CLI
 
 You are now chatting with an AI agent ({agent_id}).
 Type `/help` for available commands or `/exit` to quit.
@@ -200,7 +200,7 @@ Type `/help` for available commands or `/exit` to quit.
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="AI Agent Framework CLI")
+    parser = argparse.ArgumentParser(description="MUXI Framework CLI")
     parser.add_argument(
         "--agent-id", type=str, default="cli_agent", help="ID for the agent (default: cli_agent)"
     )
@@ -220,7 +220,7 @@ async def run_cli_async() -> None:
 
     # Show version and exit if requested
     if args.version:
-        version_str = f"AI Agent Framework version [bold]{get_version()}[/bold]"
+        version_str = f"MUXI Framework version [bold]{get_version()}[/bold]"
         console.print(version_str)
         return
 
