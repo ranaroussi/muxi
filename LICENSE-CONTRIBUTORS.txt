@@ -1,4 +1,4 @@
-# Contributor License Agreement (CLA)
+Contributor License Agreement (CLA)
 
 By submitting a pull request to the MUXI AI Agent Framework, you agree:
 
