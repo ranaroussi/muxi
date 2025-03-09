@@ -1,5 +1,5 @@
 """
-Test Modern Control Protocol
+Test Model Context Protocol
 
 This module contains tests for the MCP implementation in the muxi framework.
 """

@@ -40,7 +40,7 @@ Agents are the intelligent entities that process information and produce respons
 - Processes messages according to its system instructions
 - Can be specialized for particular tasks or domains
 
-### 4. Modern Control Protocol (MCP)
+### 4. Model Context Protocol (MCP)
 The MCP is a standardized communication layer between agents and LLMs that:
 
 - Provides a consistent interface regardless of the underlying LLM provider

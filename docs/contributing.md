@@ -141,9 +141,9 @@ from src.module import local_import           # Local imports last
 - Use proper type annotations
 - Format code with prettier
 
-### MCP (Modern Control Protocol) Guidelines
+### MCP (Model Context Protocol) Guidelines
 
-When working with the Modern Control Protocol:
+When working with the Model Context Protocol:
 
 - Follow the official MCP specification
 - Implement proper tool call handling

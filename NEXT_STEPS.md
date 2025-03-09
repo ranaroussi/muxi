@@ -6,7 +6,7 @@ This document provides a detailed task tracker for developers working on the MUX
 
 Core components of the muxi framework now implemented:
 
-1. **Modern Control Protocol (MCP)**: Standardized communication with LLMs
+1. **Model Context Protocol (MCP)**: Standardized communication with LLMs
 2. **Memory System**:
    - Buffer memory using FAISS for short-term context
    - Long-term memory using PostgreSQL with pgvector

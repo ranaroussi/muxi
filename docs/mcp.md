@@ -1,6 +1,6 @@
-# Modern Control Protocol (MCP)
+# Model Context Protocol (MCP)
 
-The Modern Control Protocol (MCP) is a standardized format for communication between applications and Large Language Models. It provides a structured way to send prompts, receive responses, and process tool calls.
+The Model Context Protocol (MCP) is a standardized format for communication between applications and Large Language Models. It provides a structured way to send prompts, receive responses, and process tool calls.
 
 ## What is MCP?
 
@@ -17,7 +17,7 @@ One common source of confusion is the relationship between MCP and tools. Let's 
 
 ### MCP is a Communication Protocol, Not the Tools
 
-- **MCP (Modern Control Protocol)**: A standardized message format and communication protocol for interacting with language models. It's the "language" your application uses to talk to models like GPT-4 or Claude.
+- **MCP (Model Context Protocol)**: A standardized message format and communication protocol for interacting with language models. It's the "language" your application uses to talk to models like GPT-4 or Claude.
 
 - **Tools**: Specific capabilities that extend what your agent can do (like web search, calculations, database queries, etc.). Each tool has its own functionality that executes in your application environment.
 

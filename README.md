@@ -8,7 +8,7 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 ## Features
 
 - **Multi-Agent Orchestration**: Create and manage multiple AI agents with different capabilities
-- **Standardized LLM Communication**: Modern Control Protocol (MCP) for consistent interaction with various LLM providers
+- **Standardized LLM Communication**: Model Context Protocol (MCP) for consistent interaction with various LLM providers
 - **Memory Systems**: Short-term buffer memory and long-term persistent memory for agents
 - **Multi-User Support**: Memobase provides user-specific memory partitioning for multi-tenant applications
 - **Tool Integration**: Extensible tool system with built-in utilities and custom tool support
@@ -230,7 +230,7 @@ Comprehensive documentation is available in the `docs` directory:
 - [Orchestrator Documentation](docs/orchestrator.md)
 - [Memory Systems](docs/memory.md)
 - [Tool System](docs/tools.md)
-- [Modern Control Protocol (MCP)](docs/mcp.md)
+- [Model Context Protocol (MCP)](docs/mcp.md)
 
 ### Concepts
 - [Agents vs Tools](docs/agents_vs_tools.md)
@@ -248,11 +248,11 @@ Comprehensive documentation is available in the `docs` directory:
 
 ## License
 
-### Pre-1.0 License: 
+### Pre-1.0 License:
 
 Licensed under the [CC BY-NC-ND 4.0](LICENSE.txt) license.
 
-- Use as-is, non-commercially, with credit to the original project. 
+- Use as-is, non-commercially, with credit to the original project.
 - No modifications or distribution allowed.
 
 ### Post-v1.0

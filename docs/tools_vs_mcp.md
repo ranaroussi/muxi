@@ -11,7 +11,7 @@ Internal tools are native implementations within the framework that provide spec
 - Managed by the framework's tool registry
 
 ### MCP Servers
-MCP (Modern Control Protocol) Servers are external services that expose capabilities via a standardized API. They:
+MCP (Model Context Protocol) Servers are external services that expose capabilities via a standardized API. They:
 - Run as separate services (potentially on different machines)
 - Communicate via HTTP/WebSocket
 - Follow the MCP specification for request/response formats

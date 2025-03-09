@@ -1,8 +1,8 @@
 """
-Modern Control Protocol (MCP) implementation.
+Model Context Protocol (MCP) implementation.
 
 This module provides functionality for communicating with language models using the
-Modern Control Protocol (MCP) as defined at https://modelcontextprotocol.io/.
+Model Context Protocol (MCP) as defined at https://modelcontextprotocol.io/.
 """
 
 from dataclasses import dataclass
@@ -24,7 +24,7 @@ class MCPToolCall:
 
 class MCPMessage:
     """
-    Represents a message in the Modern Control Protocol.
+    Represents a message in the Model Context Protocol.
     """
 
     def __init__(
@@ -159,7 +159,7 @@ class MCPContext:
 
 class MCPHandler:
     """
-    Handles communication with LLMs using the Modern Control Protocol.
+    Handles communication with LLMs using the Model Context Protocol.
     """
 
     def __init__(self, model: BaseModel, tool_handlers: Optional[Dict[str, Callable]] = None):
