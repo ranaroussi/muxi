@@ -95,3 +95,4 @@ We welcome community input on prioritization of these roadmap items. Please open
 - Complete documentation
 - Docker distribution with MCP servers
 - Comprehensive tool ecosystem
+- Re-license the a [modified Apache 2.0](/LICENSE-FUTURE.txt) (internal commercial use OK, no commercial distribution)
