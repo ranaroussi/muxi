@@ -1,9 +1,7 @@
-Contributor License Agreement (CLA)
+# Contributor License Agreement (CLA)
 
 By submitting a pull request to the MUXI AI Agent Framework, you agree:
+
 1. To license your contribution under CC BY-NC-ND 4.0, matching the current project license.
 2. To grant Ran Aroussi, the project owner, irrevocable permission to relicense your contribution under the Apache 2.0 License at version 1.0 or later.
 3. That your contribution is original or properly licensed for this use.
-
-Sign: ____________________
-Date: ____________________
