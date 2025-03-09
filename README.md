@@ -245,6 +245,16 @@ Comprehensive documentation is available in the `docs` directory:
 ## Contributing
 
 **Contributions are welcome!** Please read our [Contributing Guide](docs/contributing.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
+
 ## License
 
-This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE.txt) file for details.
+### Pre-1.0 License: 
+
+Licensed under the [CC BY-NC-ND 4.0](LICENSE.txt) license.
+
+- Use as-is, non-commercially, with credit to the original project. 
+- No modifications or distribution allowed.
+
+### Post-v1.0
+
+Switches to a [modified Apache 2.0](LICENSE-FUTURE.txt) (internal commercial use OK, no commercial distribution).
