@@ -2,6 +2,9 @@
 
 Thank you for your interest in contributing to the MUXI Framework! This guide will help you start contributing to the project, whether you're fixing bugs, adding new features, improving documentation, or reporting issues.
 
+> [!IMPORTANT]
+> By contributing, you license your work under CC BY-NC-ND 4.0 and grant the owner of this project permission to relicense it under a modified Apache 2.0 post-v1.0
+
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
