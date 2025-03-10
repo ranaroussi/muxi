@@ -10,7 +10,7 @@ on:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,12 +21,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Build and deploy Jekyll site
-        uses: helaili/jekyll-action@v2
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          jekyll_src: 'docs'
-          target_branch: 'gh-pages'
+          ruby-version: '3.2'
+
+      - name: Build Jekyll site
+        run: |
+          cd docs
+          rm -f Gemfile Gemfile.lock
+          echo 'source "https://rubygems.org"' > Gemfile
+          echo 'gem "jekyll", "~> 4.2.0"' >> Gemfile
+          echo 'gem "jekyll-remote-theme", "~> 0.4.3"' >> Gemfile
+          echo 'gem "jekyll-seo-tag", "~> 2.7.1"' >> Gemfile
+          echo 'gem "jekyll-github-metadata", "~> 2.15.0"' >> Gemfile
+          echo 'gem "jekyll-include-cache", "~> 0.2.1"' >> Gemfile
+          echo 'gem "ffi", "< 1.16.0"' >> Gemfile
+          echo 'gem "webrick", "~> 1.7"' >> Gemfile
+          gem install bundler -v 2.3.26
+          bundle install
+          bundle exec jekyll build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_site
+          publish_branch: gh-pages
