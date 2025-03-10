@@ -40,14 +40,13 @@ jobs:
       - name: Install dependencies
         run: |
           cd docs
-          gem install bundler -v "~> 2.3"
-          rm -f Gemfile.lock || true
-          bundle init || true
-          bundle add jekyll || true
-          echo "gem 'jekyll-remote-theme'" >> Gemfile
-          echo "gem 'jekyll-seo-tag'" >> Gemfile
-          echo "gem 'jekyll-github-metadata'" >> Gemfile
-          echo "gem 'jekyll-include-cache'" >> Gemfile
+          rm -f Gemfile Gemfile.lock || true
+          echo "source 'https://rubygems.org'" > Gemfile
+          echo "gem 'jekyll', '~> 4.3.2'" >> Gemfile
+          echo "gem 'jekyll-remote-theme', '~> 0.4.3'" >> Gemfile
+          echo "gem 'jekyll-seo-tag', '~> 2.8.0'" >> Gemfile
+          echo "gem 'jekyll-github-metadata', '~> 2.16.0'" >> Gemfile
+          echo "gem 'jekyll-include-cache', '~> 0.2.1'" >> Gemfile
           bundle install --jobs 4 --retry 3
 
       - name: Update documentation frontmatter
