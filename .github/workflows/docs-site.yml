@@ -24,7 +24,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.0'  # Using Ruby 3.0 which has better compatibility with Jekyll
 
       - name: Build Jekyll site
         run: |
@@ -36,11 +36,14 @@ jobs:
           echo 'gem "jekyll-seo-tag", "~> 2.7.1"' >> Gemfile
           echo 'gem "jekyll-github-metadata", "~> 2.15.0"' >> Gemfile
           echo 'gem "jekyll-include-cache", "~> 0.2.1"' >> Gemfile
-          echo 'gem "ffi", "< 1.16.0"' >> Gemfile
+          echo 'gem "rake", "~> 13.0"' >> Gemfile
           echo 'gem "webrick", "~> 1.7"' >> Gemfile
           gem install bundler -v 2.3.26
+          gem install rake
+          bundle config set --local path 'vendor/bundle'
           bundle install
-          bundle exec jekyll build
+          bundle exec rake --trace || true
+          bundle exec jekyll build --trace
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
