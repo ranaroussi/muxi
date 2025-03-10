@@ -89,7 +89,7 @@ exclude:
 
 # Plugins
 plugins:
-  - jekyll-seo-tag
   - jekyll-github-metadata
   - jekyll-include-cache
   - jekyll-remote-theme
+  # - jekyll-seo-tag
