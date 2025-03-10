@@ -1,0 +1,53 @@
+# Sample workflow for building and deploying a Jekyll site to GitHub Pages
+name: Deploy Jekyll site to Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'  # Using Ruby 3.0 which has better compatibility with Jekyll
+
+      - name: Build Jekyll site
+        run: |
+          cd docs
+          rm -f Gemfile Gemfile.lock
+          echo 'source "https://rubygems.org"' > Gemfile
+          echo 'gem "jekyll", "~> 4.2.0"' >> Gemfile
+          echo 'gem "jekyll-remote-theme", "~> 0.4.3"' >> Gemfile
+          echo 'gem "jekyll-seo-tag", "~> 2.7.1"' >> Gemfile
+          echo 'gem "jekyll-github-metadata", "~> 2.15.0"' >> Gemfile
+          echo 'gem "jekyll-include-cache", "~> 0.2.1"' >> Gemfile
+          echo 'gem "rake", "~> 13.0"' >> Gemfile
+          echo 'gem "webrick", "~> 1.7"' >> Gemfile
+          gem install bundler -v 2.3.26
+          gem install rake
+          bundle config set --local path 'vendor/bundle'
+          bundle install
+          bundle exec rake --trace || true
+          bundle exec jekyll build --trace
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/_site
+          publish_branch: gh-pages
