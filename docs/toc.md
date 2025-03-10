@@ -4,7 +4,7 @@ This document outlines the recommended structure for the MUXI documentation webs
 
 ## 1. Getting Started
 - [x] [Introduction & Overview](overview.md)
-- [ ] Quick Start Guide
+- [x] [Quick Start Guide](quickstart.md)
 - [x] [Architecture Overview](architecture.md)
 - [ ] Installation & Setup
 
