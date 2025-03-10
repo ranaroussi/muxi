@@ -13,7 +13,7 @@ The MUXI framework consists of several core components that work together to pro
 ## Architecture Diagram
 
 ```mermaid
-%%{init: {"theme":"dark", "flowchart": {"defaultRenderer": "elk"}} }%%
+%%{init: {"theme":"light", "flowchart": {"defaultRenderer": "elk"}} }%%
 flowchart TB
     subgraph MS["Memory"]
         Buffer["FAISS (ST)"]

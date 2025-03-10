@@ -6,7 +6,7 @@ repository: ranaroussi/muxi
 
 # Theme settings
 remote_theme: just-the-docs/just-the-docs
-color_scheme: dark
+color_scheme: light
 # logo: "/assets/images/logo.webp"
 aux_links_new_tab: true
 heading_anchors: true
