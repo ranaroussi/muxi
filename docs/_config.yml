@@ -2,6 +2,7 @@
 title: MUXI Framework
 description: An extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration
 url: https://ranaroussi.github.io/muxi
+baseurl: "/muxi"
 repository: ranaroussi/muxi
 
 # Theme settings

@@ -41,9 +41,10 @@ jobs:
           gem install bundler -v 2.3.26
           gem install rake
           bundle config set --local path 'vendor/bundle'
+
           bundle install
           bundle exec rake --trace || true
-          bundle exec jekyll build --trace
+          bundle exec jekyll build --trace --baseurl "/muxi"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
