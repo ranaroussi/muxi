@@ -28,6 +28,14 @@ ENV/
 .env/
 .python-version
 
+# Jekyll / Documentation
+docs/_site/
+docs/.sass-cache/
+docs/.jekyll-cache/
+docs/.jekyll-metadata
+docs/Gemfile.lock
+.jekyll-cache/
+
 # Logs
 logs/
 *.log

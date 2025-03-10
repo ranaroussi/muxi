@@ -34,25 +34,26 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.1'
           bundler-cache: true
 
       - name: Install dependencies
         run: |
           cd docs
-          gem install bundler
+          gem install bundler -v "~> 2.3"
+          rm -f Gemfile.lock || true
           bundle init || true
           bundle add jekyll || true
           echo "gem 'jekyll-remote-theme'" >> Gemfile
           echo "gem 'jekyll-seo-tag'" >> Gemfile
           echo "gem 'jekyll-github-metadata'" >> Gemfile
           echo "gem 'jekyll-include-cache'" >> Gemfile
-          bundle install
+          bundle install --jobs 4 --retry 3
 
       - name: Update documentation frontmatter
         run: |
-          chmod +x scripts/update_docs_frontmatter.sh
-          ./scripts/update_docs_frontmatter.sh
+          chmod +x scripts/update_docs_frontmatter.sh || echo "No frontmatter script found"
+          [ -f scripts/update_docs_frontmatter.sh ] && ./scripts/update_docs_frontmatter.sh || echo "Skipping frontmatter update"
 
       - name: Build with Jekyll
         run: |
