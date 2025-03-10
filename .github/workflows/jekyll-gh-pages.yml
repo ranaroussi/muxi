@@ -33,7 +33,7 @@ jobs:
           echo 'source "https://rubygems.org"' > Gemfile
           echo 'gem "jekyll", "~> 4.2.0"' >> Gemfile
           echo 'gem "jekyll-remote-theme", "~> 0.4.3"' >> Gemfile
-          echo 'gem "jekyll-seo-tag", "~> 2.7.1"' >> Gemfile
+          # echo 'gem "jekyll-seo-tag", "~> 2.7.1"' >> Gemfile
           echo 'gem "jekyll-github-metadata", "~> 2.15.0"' >> Gemfile
           echo 'gem "jekyll-include-cache", "~> 0.2.1"' >> Gemfile
           echo 'gem "rake", "~> 13.0"' >> Gemfile
