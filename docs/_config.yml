@@ -92,4 +92,3 @@ plugins:
   - jekyll-github-metadata
   - jekyll-include-cache
   - jekyll-remote-theme
-  # - jekyll-seo-tag
