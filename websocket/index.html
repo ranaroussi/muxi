@@ -1,0 +1,993 @@
+<!DOCTYPE html> <html lang="en-US"> <head> <meta charset="UTF-8"> <meta http-equiv="X-UA-Compatible" content="IE=Edge"> <link rel="stylesheet" href="/assets/css/just-the-docs-default.css"> <link rel="stylesheet" href="/assets/css/just-the-docs-head-nav.css" id="jtd-head-nav-stylesheet"> <style id="jtd-nav-activation"> .site-nav > ul.nav-list:first-child > li > a, .site-nav > ul.nav-list:first-child > li > ul > li:not(:nth-child(4)) > a, .site-nav > ul.nav-list:first-child > li > ul > li > ul > li a { background-image: none; } .site-nav > ul.nav-list:not(:first-child) a, .site-nav li.external a { background-image: none; } .site-nav > ul.nav-list:first-child > li:nth-child(4) > ul > li:nth-child(4) > a { font-weight: 600; text-decoration: none; }.site-nav > ul.nav-list:first-child > li:nth-child(4) > button svg, .site-nav > ul.nav-list:first-child > li:nth-child(4) > ul > li:nth-child(4) > button svg { transform: rotate(-90deg); }.site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(4) > ul.nav-list, .site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(4) > ul.nav-list > li.nav-list-item:nth-child(4) > ul.nav-list { display: block; } </style> <script src="/assets/js/vendor/lunr.min.js"></script> <script src="/assets/js/just-the-docs.js"></script> <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Begin Jekyll SEO tag v2.7.1 --> <title>WebSocket | MUXI Framework</title> <meta name="generator" content="Jekyll v4.2.2" /> <meta property="og:title" content="WebSocket" /> <meta property="og:locale" content="en_US" /> <meta name="description" content="An extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration" /> <meta property="og:description" content="An extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration" /> <link rel="canonical" href="https://ranaroussi.github.io/muxi/websocket/" /> <meta property="og:url" content="https://ranaroussi.github.io/muxi/websocket/" /> <meta property="og:site_name" content="MUXI Framework" /> <meta name="twitter:card" content="summary" /> <meta property="twitter:title" content="WebSocket" /> <script type="application/ld+json"> {"description":"An extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration","headline":"WebSocket","url":"https://ranaroussi.github.io/muxi/websocket/","@type":"WebPage","@context":"https://schema.org"}</script> <!-- End Jekyll SEO tag --> <script src="https://cdn.jsdelivr.net/npm/mermaid@9.3.0/dist/mermaid.min.js"></script> <script>window.addEventListener("load", function() { mermaid.initialize({ startOnLoad: true }); });</script> <style> .mermaid { text-align: center; margin: 2rem auto; max-width: 100%; padding: 1rem; } body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; } .site-logo { width: 40px; height: 40px; padding-right: 10px; } .site-header { display: flex; align-items: center; height: 60px; } .site-header .site-title { display: flex; align-items: center; font-weight: 700; } .site-header .site-title:hover { background-image: none; } </style> <!-- Favicon links --> <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png"> <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png"> <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png"> <link rel="manifest" href="/assets/images/site.webmanifest"> <link rel="shortcut icon" href="/assets/images/favicon.ico"> </head> <body> <a class="skip-to-main" href="#main-content">Skip to main content</a> <svg xmlns="http://www.w3.org/2000/svg" class="d-none"> <symbol id="svg-link" viewBox="0 0 24 24"> <title>Link</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link"> <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path> </svg> </symbol> <symbol id="svg-menu" viewBox="0 0 24 24"> <title>Menu</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"> <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line> </svg> </symbol> <symbol id="svg-arrow-right" viewBox="0 0 24 24"> <title>Expand</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"> <polyline points="9 18 15 12 9 6"></polyline> </svg> </symbol> <!-- Feather. MIT License: https://github.com/feathericons/feather/blob/master/LICENSE --> <symbol id="svg-external-link" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"> <title id="svg-external-link-title">(external link)</title> <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line> </symbol> <symbol id="svg-doc" viewBox="0 0 24 24"> <title>Document</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"> <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline> </svg> </symbol> <symbol id="svg-search" viewBox="0 0 24 24"> <title>Search</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"> <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line> </svg> </symbol> <!-- Bootstrap Icons. MIT License: https://github.com/twbs/icons/blob/main/LICENSE.md --> <symbol id="svg-copy" viewBox="0 0 16 16"> <title>Copy</title> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/> </svg> </symbol> <symbol id="svg-copied" viewBox="0 0 16 16"> <title>Copied</title> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-check-fill" viewBox="0 0 16 16"> <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3Zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3Z"/> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5v-1Zm6.854 7.354-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708Z"/> </svg> </symbol> </svg> <div class="side-bar"> <div class="site-header" role="banner"> <a href="/" class="site-title lh-tight"> MUXI Framework </a> <button id="menu-button" class="site-button btn-reset" aria-label="Toggle menu" aria-pressed="false"> <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><use xlink:href="#svg-menu"></use></svg> </button> </div> <nav aria-label="Main" id="site-nav" class="site-nav"> <ul class="nav-list"><li class="nav-list-item"><a href="/" class="nav-list-link">Home</a></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="toggle items in Getting Started category" aria-pressed="false"> <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg> </button><a href="/getting-started/" class="nav-list-link">Getting Started</a><ul class="nav-list"><li class="nav-list-item"><a href="/overview/" class="nav-list-link">Introduction</a></li><li class="nav-list-item"><a href="/quickstart/" class="nav-list-link">Quickstart Guide</a></li><li class="nav-list-item"><a href="/architecture/" class="nav-list-link">Architecture</a></li></ul></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="toggle items in Core Concepts category" aria-pressed="false"> <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg> </button><a href="/core-concepts/" class="nav-list-link">Core Concepts</a><ul class="nav-list"><li class="nav-list-item"><a href="/agents/" class="nav-list-link">Agents</a></li><li class="nav-list-item"><a href="/orchestrator/" class="nav-list-link">Orchestrator</a></li><li class="nav-list-item"><a href="/memory/" class="nav-list-link">Memory</a></li><li class="nav-list-item"><a href="/tools/" class="nav-list-link">Tools</a></li><li class="nav-list-item"><a href="/models/" class="nav-list-link">LLM Models</a></li><li class="nav-list-item"><a href="/mcp/" class="nav-list-link">MCPs</a></li></ul></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="toggle items in User Interfaces category" aria-pressed="false"> <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg> </button><a href="/user-interfaces/" class="nav-list-link">User Interfaces</a><ul class="nav-list"><li class="nav-list-item"><a href="/cli/" class="nav-list-link">CLI</a></li><li class="nav-list-item"><a href="/webapp/" class="nav-list-link">Webapp</a></li><li class="nav-list-item"><a href="/api/" class="nav-list-link">API</a></li><li class="nav-list-item"><a href="/websocket/" class="nav-list-link">WebSocket</a></li></ul></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="toggle items in Resources category" aria-pressed="false"> <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg> </button><a href="/resources/" class="nav-list-link">Resources</a><ul class="nav-list"><li class="nav-list-item"><a href="/agents-vs-tools/" class="nav-list-link">Agents vs Tools</a></li><li class="nav-list-item"><a href="/tools-vs-mcp/" class="nav-list-link">Tools vs MCP</a></li><li class="nav-list-item"><a href="/roadmap/" class="nav-list-link">Development Roadmap</a></li><li class="nav-list-item"><a href="/toc/" class="nav-list-link">Documentation Progress</a></li><li class="nav-list-item"><a href="/contributing/" class="nav-list-link">Contributing to MUXI</a></li></ul></li></ul> <ul class="nav-list"><li class="nav-list-item external"> <a href="https://github.com/ranaroussi/muxi" class="nav-list-link external" target="_blank" rel="noopener noreferrer" > MUXI on GitHub <svg viewBox="0 0 24 24" aria-labelledby="svg-external-link-title"><use xlink:href="#svg-external-link"></use></svg> </a> </li></ul> </nav> <footer class="site-footer"> This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll. </footer> </div> <div class="main" id="top"> <div id="main-header" class="main-header"> <div class="search" role="search"> <div class="search-input-wrap"> <input type="text" id="search-input" class="search-input" tabindex="0" placeholder="Search MUXI Framework" aria-label="Search MUXI Framework" autocomplete="off"> <label for="search-input" class="search-label"><svg viewBox="0 0 24 24" class="search-icon"><use xlink:href="#svg-search"></use></svg></label> </div> <div id="search-results" class="search-results"></div> </div> <nav aria-label="Auxiliary" class="aux-nav"> <ul class="aux-nav-list"> <li class="aux-nav-list-item"> <a href="https://github.com/ranaroussi/muxi" class="site-button" target="_blank" rel="noopener noreferrer" > MUXI on GitHub </a> </li> </ul> </nav> </div> <div class="main-content-wrap"> <nav aria-label="Breadcrumb" class="breadcrumb-nav"> <ol class="breadcrumb-nav-list"> <li class="breadcrumb-nav-list-item"><a href="/user-interfaces/">User Interfaces</a></li> <li class="breadcrumb-nav-list-item"><span>WebSocket</span></li> </ol> </nav> <div id="main-content" class="main-content"> <main> <h1 id="websocket-communication"> <a href="#websocket-communication" class="anchor-heading" aria-labelledby="websocket-communication"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> WebSocket Communication </h1> <p>WebSockets provide real-time, bidirectional communication between clients and the MUXI Framework. This guide explains how to implement, use, and troubleshoot WebSocket connections for interactive agent communication.</p> <h2 id="what-is-websocket-support"> <a href="#what-is-websocket-support" class="anchor-heading" aria-labelledby="what-is-websocket-support"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> What is WebSocket Support? </h2> <p>WebSocket support in the MUXI Framework:</p> <ul> <li>Enables real-time communication with agents</li> <li>Provides immediate responses as they’re generated</li> <li>Supports subscription to specific agents</li> <li>Allows for streaming responses from LLMs</li> <li>Facilitates tool execution updates</li> <li>Supports multi-user interactions with user-specific memory</li> </ul> <h2 id="server-side-implementation"> <a href="#server-side-implementation" class="anchor-heading" aria-labelledby="server-side-implementation"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Server-side Implementation </h2> <h3 id="basic-websocket-server"> <a href="#basic-websocket-server" class="anchor-heading" aria-labelledby="basic-websocket-server"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Basic WebSocket Server </h3> <p>The framework includes a WebSocket server implementation:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># src/api/websocket.py
+</span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">WebSocketDisconnect</span>
+<span class="kn">from</span> <span class="nn">src.core.orchestrator</span> <span class="kn">import</span> <span class="n">Orchestrator</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="p">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c1"># Shared orchestrator instance
+</span><span class="n">_orchestrator</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="k">def</span> <span class="nf">set_orchestrator</span><span class="p">(</span><span class="n">orchestrator</span><span class="p">):</span>
+    <span class="s">"""Set the shared orchestrator instance."""</span>
+    <span class="k">global</span> <span class="n">_orchestrator</span>
+    <span class="n">_orchestrator</span> <span class="o">=</span> <span class="n">orchestrator</span>
+
+<span class="k">def</span> <span class="nf">get_orchestrator</span><span class="p">():</span>
+    <span class="s">"""Get the shared orchestrator instance."""</span>
+    <span class="k">global</span> <span class="n">_orchestrator</span>
+    <span class="k">return</span> <span class="n">_orchestrator</span>
+
+<span class="k">class</span> <span class="nc">WebSocketManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">active_connections</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="s">"""Connect a new client."""</span>
+        <span class="k">await</span> <span class="n">websocket</span><span class="p">.</span><span class="n">accept</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">active_connections</span><span class="p">[</span><span class="n">client_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">websocket</span>
+        <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s"> connected"</span><span class="p">)</span>
+
+        <span class="c1"># Send connection confirmation
+</span>        <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s">"type"</span><span class="p">:</span> <span class="s">"connected"</span><span class="p">,</span>
+            <span class="s">"client_id"</span><span class="p">:</span> <span class="n">client_id</span>
+        <span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="s">"""Disconnect a client."""</span>
+        <span class="k">if</span> <span class="n">client_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">active_connections</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="p">.</span><span class="n">active_connections</span><span class="p">[</span><span class="n">client_id</span><span class="p">]</span>
+
+        <span class="c1"># Remove client from agent subscriptions
+</span>        <span class="k">for</span> <span class="n">agent_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">client_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">[</span><span class="n">agent_id</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">[</span><span class="n">agent_id</span><span class="p">].</span><span class="n">remove</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+
+            <span class="c1"># Clean up empty agent subscriptions
+</span>            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">[</span><span class="n">agent_id</span><span class="p">]:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">[</span><span class="n">agent_id</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s"> disconnected"</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">send_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="s">"""Send JSON data to a websocket."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">websocket</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Error sending message: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">broadcast_to_agent_subscribers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="s">"""Send a message to all subscribers of an agent."""</span>
+        <span class="k">if</span> <span class="n">agent_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">client_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">[</span><span class="n">agent_id</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">client_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">active_connections</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">active_connections</span><span class="p">[</span><span class="n">client_id</span><span class="p">],</span> <span class="n">message</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">subscribe_to_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="s">"""Subscribe a client to an agent's messages."""</span>
+        <span class="c1"># Initialize agent subscribers list if needed
+</span>        <span class="k">if</span> <span class="n">agent_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">[</span><span class="n">agent_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="c1"># Add client to subscribers
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">agent_subscribers</span><span class="p">[</span><span class="n">agent_id</span><span class="p">].</span><span class="n">add</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+
+        <span class="c1"># Get the client's websocket
+</span>        <span class="n">websocket</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">active_connections</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">websocket</span><span class="p">:</span>
+            <span class="c1"># Confirm subscription
+</span>            <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                <span class="s">"type"</span><span class="p">:</span> <span class="s">"subscribed"</span><span class="p">,</span>
+                <span class="s">"agent_id"</span><span class="p">:</span> <span class="n">agent_id</span>
+            <span class="p">})</span>
+
+        <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Client </span><span class="si">{</span><span class="n">client_id</span><span class="si">}</span><span class="s"> subscribed to agent </span><span class="si">{</span><span class="n">agent_id</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+<span class="c1"># Create a singleton manager
+</span><span class="n">manager</span> <span class="o">=</span> <span class="n">WebSocketManager</span><span class="p">()</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">websocket_endpoint</span><span class="p">(</span><span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="s">"""Handle WebSocket connections."""</span>
+    <span class="k">if</span> <span class="n">client_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">client_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"client_</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="n">websocket</span><span class="p">)</span><span class="si">}</span><span class="s">"</span>
+
+    <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="n">client_id</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c1"># Receive and parse message
+</span>            <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">websocket</span><span class="p">.</span><span class="n">receive_json</span><span class="p">()</span>
+            <span class="n">message_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"type"</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">message_type</span> <span class="o">==</span> <span class="s">"ping"</span><span class="p">:</span>
+                <span class="c1"># Respond to ping with pong
+</span>                <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span><span class="s">"type"</span><span class="p">:</span> <span class="s">"ping"</span><span class="p">})</span>
+
+            <span class="k">elif</span> <span class="n">message_type</span> <span class="o">==</span> <span class="s">"subscribe"</span><span class="p">:</span>
+                <span class="c1"># Subscribe to an agent
+</span>                <span class="n">agent_id</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"agent_id"</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">agent_id</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="s">"type"</span><span class="p">:</span> <span class="s">"error"</span><span class="p">,</span>
+                        <span class="s">"message"</span><span class="p">:</span> <span class="s">"No agent_id provided for subscription"</span>
+                    <span class="p">})</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Check if agent exists
+</span>                <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">get_orchestrator</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">orchestrator</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">has_agent</span><span class="p">(</span><span class="n">agent_id</span><span class="p">):</span>
+                    <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="s">"type"</span><span class="p">:</span> <span class="s">"error"</span><span class="p">,</span>
+                        <span class="s">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s">"No agent with ID '</span><span class="si">{</span><span class="n">agent_id</span><span class="si">}</span><span class="s">' exists"</span>
+                    <span class="p">})</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Subscribe to the agent
+</span>                <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">subscribe_to_agent</span><span class="p">(</span><span class="n">client_id</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">message_type</span> <span class="o">==</span> <span class="s">"chat"</span><span class="p">:</span>
+                <span class="c1"># Process a chat message
+</span>                <span class="n">agent_id</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"agent_id"</span><span class="p">)</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"message"</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">message</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="s">"type"</span><span class="p">:</span> <span class="s">"error"</span><span class="p">,</span>
+                        <span class="s">"message"</span><span class="p">:</span> <span class="s">"No message provided"</span>
+                    <span class="p">})</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Get the orchestrator
+</span>                <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">get_orchestrator</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">orchestrator</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="s">"type"</span><span class="p">:</span> <span class="s">"error"</span><span class="p">,</span>
+                        <span class="s">"message"</span><span class="p">:</span> <span class="s">"Orchestrator not available"</span>
+                    <span class="p">})</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Notify that processing has started
+</span>                <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s">"type"</span><span class="p">:</span> <span class="s">"agent_thinking"</span><span class="p">,</span>
+                    <span class="s">"agent_id"</span><span class="p">:</span> <span class="n">agent_id</span>
+                <span class="p">})</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Process the message
+</span>                    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">agent_id</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+                    <span class="c1"># Send the response
+</span>                    <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="s">"type"</span><span class="p">:</span> <span class="s">"response"</span><span class="p">,</span>
+                        <span class="s">"agent_id"</span><span class="p">:</span> <span class="n">agent_id</span><span class="p">,</span>
+                        <span class="s">"message"</span><span class="p">:</span> <span class="n">response</span>
+                    <span class="p">})</span>
+
+                    <span class="c1"># Notify that processing is complete
+</span>                    <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="s">"type"</span><span class="p">:</span> <span class="s">"agent_done"</span><span class="p">,</span>
+                        <span class="s">"agent_id"</span><span class="p">:</span> <span class="n">agent_id</span>
+                    <span class="p">})</span>
+                <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Error processing message: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+                    <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                        <span class="s">"type"</span><span class="p">:</span> <span class="s">"error"</span><span class="p">,</span>
+                        <span class="s">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s">"Error processing message: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span>
+                    <span class="p">})</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Unknown message type
+</span>                <span class="k">await</span> <span class="n">manager</span><span class="p">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s">"type"</span><span class="p">:</span> <span class="s">"error"</span><span class="p">,</span>
+                    <span class="s">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s">"Unknown message type: </span><span class="si">{</span><span class="n">message_type</span><span class="si">}</span><span class="s">"</span>
+                <span class="p">})</span>
+
+    <span class="k">except</span> <span class="n">WebSocketDisconnect</span><span class="p">:</span>
+        <span class="n">manager</span><span class="p">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"WebSocket error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+        <span class="n">manager</span><span class="p">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+</code></pre></div></div> <h3 id="integrating-with-fastapi"> <a href="#integrating-with-fastapi" class="anchor-heading" aria-labelledby="integrating-with-fastapi"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Integrating with FastAPI </h3> <p>To integrate the WebSocket server with FastAPI:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># src/api/app.py
+</span><span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">Depends</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">src.core.orchestrator</span> <span class="kn">import</span> <span class="n">Orchestrator</span>
+<span class="kn">from</span> <span class="nn">src.api.websocket</span> <span class="kn">import</span> <span class="n">websocket_endpoint</span><span class="p">,</span> <span class="n">set_orchestrator</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s">"MUXI Framework API"</span><span class="p">)</span>
+
+<span class="c1"># Create orchestrator
+</span><span class="n">orchestrator</span> <span class="o">=</span> <span class="n">Orchestrator</span><span class="p">()</span>
+
+<span class="c1"># Share orchestrator with websocket module
+</span><span class="n">set_orchestrator</span><span class="p">(</span><span class="n">orchestrator</span><span class="p">)</span>
+
+<span class="c1"># Define WebSocket endpoint
+</span><span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">websocket</span><span class="p">(</span><span class="s">"/ws"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">websocket_route</span><span class="p">(</span><span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">):</span>
+    <span class="n">client_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="p">.</span><span class="n">uuid4</span><span class="p">())</span>
+    <span class="k">await</span> <span class="n">websocket_endpoint</span><span class="p">(</span><span class="n">websocket</span><span class="p">,</span> <span class="n">client_id</span><span class="p">)</span>
+</code></pre></div></div> <h2 id="client-side-implementation"> <a href="#client-side-implementation" class="anchor-heading" aria-labelledby="client-side-implementation"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Client-side Implementation </h2> <h3 id="javascript-client"> <a href="#javascript-client" class="anchor-heading" aria-labelledby="javascript-client"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> JavaScript Client </h3> <p>Here’s a basic JavaScript WebSocket client:</p> <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">AgentWebSocketClient</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">url</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">ws://localhost:5050/ws</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">url</span> <span class="o">=</span> <span class="nx">url</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">connected</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">maxReconnectAttempts</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">reconnectDelay</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">messageCallbacks</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="dl">'</span><span class="s1">connected</span><span class="dl">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="dl">'</span><span class="s1">subscribed</span><span class="dl">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="dl">'</span><span class="s1">response</span><span class="dl">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="dl">'</span><span class="s1">agent_thinking</span><span class="dl">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="dl">'</span><span class="s1">agent_done</span><span class="dl">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="dl">'</span><span class="s1">ping</span><span class="dl">'</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">};</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">connectSocket</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nx">connectSocket</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocket</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">onopen</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket connected</span><span class="dl">'</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">connected</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+            <span class="c1">// Start ping interval to keep connection alive</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">pingInterval</span> <span class="o">=</span> <span class="nx">setInterval</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">connected</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">sendPing</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">},</span> <span class="mi">30000</span><span class="p">);</span>
+        <span class="p">};</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">onmessage</span> <span class="o">=</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Received:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+
+            <span class="c1">// Call registered callbacks for this message type</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">messageCallbacks</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="p">])</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">messageCallbacks</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">callback</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                    <span class="k">try</span> <span class="p">{</span>
+                        <span class="nx">callback</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error in callback:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">e</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">});</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">onclose</span> <span class="o">=</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">connected</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="nx">clearInterval</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">pingInterval</span><span class="p">);</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket disconnected:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">code</span><span class="p">,</span> <span class="nx">event</span><span class="p">.</span><span class="nx">reason</span><span class="p">);</span>
+
+            <span class="c1">// Attempt to reconnect</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">maxReconnectAttempts</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span><span class="o">++</span><span class="p">;</span>
+                <span class="kd">const</span> <span class="nx">delay</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">reconnectDelay</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span><span class="p">;</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">`Reconnecting in </span><span class="p">${</span><span class="nx">delay</span><span class="p">}</span><span class="s2">ms (attempt </span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span><span class="p">}</span><span class="s2">/</span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">maxReconnectAttempts</span><span class="p">}</span><span class="s2">)...`</span><span class="p">);</span>
+
+                <span class="nx">setTimeout</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                    <span class="k">this</span><span class="p">.</span><span class="nx">connectSocket</span><span class="p">();</span>
+                <span class="p">},</span> <span class="nx">delay</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Max reconnect attempts reached</span><span class="dl">'</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">onerror</span> <span class="o">=</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket error:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+        <span class="p">};</span>
+    <span class="p">}</span>
+
+    <span class="nx">sendMessage</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">connected</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Cannot send message: WebSocket not connected</span><span class="dl">'</span><span class="p">);</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error sending message:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">e</span><span class="p">);</span>
+            <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="nx">sendPing</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">ping</span><span class="dl">'</span> <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="nx">subscribeToAgent</span><span class="p">(</span><span class="nx">agentId</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">({</span>
+            <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">subscribe</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="nx">sendChatMessage</span><span class="p">(</span><span class="nx">agentId</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">({</span>
+            <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">chat</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span><span class="p">,</span>
+            <span class="na">message</span><span class="p">:</span> <span class="nx">message</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="nx">on</span><span class="p">(</span><span class="nx">messageType</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">messageCallbacks</span><span class="p">[</span><span class="nx">messageType</span><span class="p">])</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">messageCallbacks</span><span class="p">[</span><span class="nx">messageType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+        <span class="p">}</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">messageCallbacks</span><span class="p">[</span><span class="nx">messageType</span><span class="p">].</span><span class="nx">push</span><span class="p">(</span><span class="nx">callback</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">close</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">clearInterval</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">pingInterval</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="nx">searchMemory</span><span class="p">(</span><span class="nx">agentId</span><span class="p">,</span> <span class="nx">query</span><span class="p">,</span> <span class="nx">limit</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">useLongTerm</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">connected</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket is not connected</span><span class="dl">'</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">({</span>
+            <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">search_memory</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span><span class="p">,</span>
+            <span class="na">query</span><span class="p">:</span> <span class="nx">query</span><span class="p">,</span>
+            <span class="na">limit</span><span class="p">:</span> <span class="nx">limit</span><span class="p">,</span>
+            <span class="na">use_long_term</span><span class="p">:</span> <span class="nx">useLongTerm</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="nx">clearMemory</span><span class="p">(</span><span class="nx">agentId</span><span class="p">,</span> <span class="nx">clearLongTerm</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">connected</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket is not connected</span><span class="dl">'</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">({</span>
+            <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">clear_memory</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span><span class="p">,</span>
+            <span class="na">clear_long_term</span><span class="p">:</span> <span class="nx">clearLongTerm</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Usage example</span>
+<span class="kd">const</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AgentWebSocketClient</span><span class="p">(</span><span class="dl">'</span><span class="s1">ws://localhost:5050/ws</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="nx">client</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">connected</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Connected with client ID:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">client_id</span><span class="p">);</span>
+        <span class="nx">client</span><span class="p">.</span><span class="nx">subscribeToAgent</span><span class="p">(</span><span class="dl">'</span><span class="s1">my_agent</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">subscribed</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Subscribed to agent:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">agent_id</span><span class="p">);</span>
+        <span class="nx">client</span><span class="p">.</span><span class="nx">sendChatMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">my_agent</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">Hello, agent!</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">agent_thinking</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Agent is thinking...</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">response</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Agent response:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">agent_done</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Agent completed processing</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+    <span class="p">});</span>
+</code></pre></div></div> <h3 id="python-client"> <a href="#python-client" class="anchor-heading" aria-labelledby="python-client"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Python Client </h3> <p>Here’s a Python WebSocket client using <code class="language-plaintext highlighter-rouge">websockets</code>:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">websockets</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logging</span><span class="p">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="p">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="p">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">AgentWebSocketClient</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s">"ws://localhost:5050/ws"</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">websocket</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">client_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="p">.</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">current_agent_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">reconnect_attempts</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">max_reconnect_attempts</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">callbacks</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">"connected"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">"subscribed"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">"response"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">"agent_thinking"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">"agent_done"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">"error"</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">"ping"</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""Connect to the WebSocket server."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">websocket</span> <span class="o">=</span> <span class="k">await</span> <span class="n">websockets</span><span class="p">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">url</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="s">"Connected to WebSocket server"</span><span class="p">)</span>
+
+            <span class="c1"># Start listener
+</span>            <span class="n">asyncio</span><span class="p">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_listen</span><span class="p">())</span>
+
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Connection error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_listen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""Listen for messages from the server."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="p">.</span><span class="n">connected</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">websocket</span><span class="p">.</span><span class="n">recv</span><span class="p">()</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">loads</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="p">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s">"Received: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+
+                    <span class="c1"># Execute callbacks for this message type
+</span>                    <span class="n">message_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"type"</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">message_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">callbacks</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">callback</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">callbacks</span><span class="p">[</span><span class="n">message_type</span><span class="p">]:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">await</span> <span class="n">callback</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Error in callback: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">websockets</span><span class="p">.</span><span class="n">ConnectionClosed</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="p">.</span><span class="n">warning</span><span class="p">(</span><span class="s">"Connection closed"</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="p">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">_try_reconnect</span><span class="p">()</span>
+                    <span class="k">break</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Listener error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_try_reconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""Try to reconnect to the server."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">reconnect_attempts</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="p">.</span><span class="n">max_reconnect_attempts</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="s">"Max reconnect attempts reached"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="p">.</span><span class="n">reconnect_attempts</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">delay</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">reconnect_attempts</span>
+        <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Reconnecting in </span><span class="si">{</span><span class="n">delay</span><span class="si">}</span><span class="s">s (attempt </span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">reconnect_attempts</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">max_reconnect_attempts</span><span class="si">}</span><span class="s">)..."</span><span class="p">)</span>
+
+        <span class="k">await</span> <span class="n">asyncio</span><span class="p">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+
+        <span class="n">success</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">success</span> <span class="ow">and</span> <span class="bp">self</span><span class="p">.</span><span class="n">current_agent_id</span><span class="p">:</span>
+            <span class="c1"># Resubscribe to the previous agent
+</span>            <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">subscribe_to_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">current_agent_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">success</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">send_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="s">"""Send JSON data to the server."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">connected</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="s">"Cannot send message: not connected"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">websocket</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Send error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">send_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""Send a ping message to keep the connection alive."""</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">send_json</span><span class="p">({</span><span class="s">"type"</span><span class="p">:</span> <span class="s">"ping"</span><span class="p">})</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">subscribe_to_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">):</span>
+        <span class="s">"""Subscribe to an agent's messages."""</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">current_agent_id</span> <span class="o">=</span> <span class="n">agent_id</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">send_json</span><span class="p">({</span>
+            <span class="s">"type"</span><span class="p">:</span> <span class="s">"subscribe"</span><span class="p">,</span>
+            <span class="s">"agent_id"</span><span class="p">:</span> <span class="n">agent_id</span>
+        <span class="p">})</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">send_chat_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">agent_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="s">"""Send a chat message to an agent."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">agent_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">current_agent_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="s">"No agent ID specified"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">send_json</span><span class="p">({</span>
+            <span class="s">"type"</span><span class="p">:</span> <span class="s">"chat"</span><span class="p">,</span>
+            <span class="s">"agent_id"</span><span class="p">:</span> <span class="n">agent_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="p">.</span><span class="n">current_agent_id</span><span class="p">,</span>
+            <span class="s">"message"</span><span class="p">:</span> <span class="n">message</span>
+        <span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_type</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+        <span class="s">"""Register a callback for a message type."""</span>
+        <span class="k">if</span> <span class="n">message_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">callbacks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">callbacks</span><span class="p">[</span><span class="n">message_type</span><span class="p">].</span><span class="n">append</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""Close the WebSocket connection."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">websocket</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">websocket</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="s">"Connection closed"</span><span class="p">)</span>
+
+<span class="c1"># Usage example
+</span><span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">AgentWebSocketClient</span><span class="p">()</span>
+
+    <span class="c1"># Register callbacks
+</span>    <span class="n">client</span><span class="p">.</span><span class="n">on</span><span class="p">(</span><span class="s">"connected"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Connected with client ID: </span><span class="si">{</span><span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'client_id'</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">))</span>
+    <span class="n">client</span><span class="p">.</span><span class="n">on</span><span class="p">(</span><span class="s">"subscribed"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Subscribed to agent: </span><span class="si">{</span><span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'agent_id'</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">))</span>
+    <span class="n">client</span><span class="p">.</span><span class="n">on</span><span class="p">(</span><span class="s">"response"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">logger</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s">"Agent response: </span><span class="si">{</span><span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'message'</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">))</span>
+    <span class="n">client</span><span class="p">.</span><span class="n">on</span><span class="p">(</span><span class="s">"error"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Error: </span><span class="si">{</span><span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'message'</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">))</span>
+
+    <span class="c1"># Define chat callback
+</span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_response</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"</span><span class="se">\n</span><span class="s">Agent: </span><span class="si">{</span><span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'message'</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
+
+    <span class="n">client</span><span class="p">.</span><span class="n">on</span><span class="p">(</span><span class="s">"response"</span><span class="p">,</span> <span class="n">on_response</span><span class="p">)</span>
+
+    <span class="c1"># Connect and subscribe
+</span>    <span class="k">await</span> <span class="n">client</span><span class="p">.</span><span class="n">connect</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">client</span><span class="p">.</span><span class="n">subscribe_to_agent</span><span class="p">(</span><span class="s">"my_agent"</span><span class="p">)</span>
+
+    <span class="c1"># Chat loop
+</span>    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">You: "</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">message</span><span class="p">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s">"exit"</span><span class="p">,</span> <span class="s">"quit"</span><span class="p">,</span> <span class="s">"bye"</span><span class="p">]:</span>
+                <span class="k">break</span>
+
+            <span class="k">await</span> <span class="n">client</span><span class="p">.</span><span class="n">send_chat_message</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">client</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">asyncio</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</code></pre></div></div> <h2 id="message-types"> <a href="#message-types" class="anchor-heading" aria-labelledby="message-types"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Message Types </h2> <p>The WebSocket protocol supports several message types:</p> <h3 id="client-to-server"> <a href="#client-to-server" class="anchor-heading" aria-labelledby="client-to-server"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Client to Server </h3> <ol> <li><strong>subscribe</strong> <ul> <li>Subscribe to an agent’s messages</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">agent_id</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"subscribe"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_agent"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>chat</strong> <ul> <li>Send a message to an agent</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">agent_id</code>, <code class="language-plaintext highlighter-rouge">message</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chat"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_agent"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What's the weather like today?"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>ping</strong> <ul> <li>Keep the connection alive</li> <li>No additional parameters</li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ping"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>set_user</strong> <ul> <li>Set the user ID for this connection</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">user_id</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"set_user"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"user_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>search_memory</strong> <ul> <li>Search agent memory for a query</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">agent_id</code>, <code class="language-plaintext highlighter-rouge">query</code>, <code class="language-plaintext highlighter-rouge">limit</code>, <code class="language-plaintext highlighter-rouge">use_long_term</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"search_memory"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_agent"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What did we discuss yesterday?"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"limit"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"use_long_term"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>clear_memory</strong> <ul> <li>Clear agent memory for a specific user</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">agent_id</code>, <code class="language-plaintext highlighter-rouge">clear_long_term</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"clear_memory"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_agent"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"clear_long_term"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> </ol> <h3 id="server-to-client"> <a href="#server-to-client" class="anchor-heading" aria-labelledby="server-to-client"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Server to Client </h3> <ol> <li><strong>connected</strong> <ul> <li>Confirms successful connection establishment</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">client_id</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"connected"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"client_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"client_123"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>subscribed</strong> <ul> <li>Confirms successful agent subscription</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">agent_id</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"subscribed"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_agent"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>response</strong> <ul> <li>A response from an agent</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">agent_id</code>, <code class="language-plaintext highlighter-rouge">message</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"response"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_agent"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The weather in New York is sunny today."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>agent_thinking</strong> <ul> <li>Indicates the agent is processing</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">agent_id</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"agent_thinking"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_agent"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>agent_done</strong> <ul> <li>Indicates the agent has finished processing</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">agent_id</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"agent_done"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_agent"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>error</strong> <ul> <li>An error message</li> <li>Parameters: <code class="language-plaintext highlighter-rouge">message</code></li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"error"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No agent with ID 'unknown_agent' exists"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> <li><strong>ping</strong> <ul> <li>Heartbeat to keep the connection alive</li> <li>No additional parameters</li> </ul> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ping"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div> </div> </li> </ol> <h2 id="websocket-message-types"> <a href="#websocket-message-types" class="anchor-heading" aria-labelledby="websocket-message-types"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> WebSocket Message Types </h2> <h3 id="client-to-server-messages"> <a href="#client-to-server-messages" class="anchor-heading" aria-labelledby="client-to-server-messages"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Client to Server Messages </h3> <p>The client can send these message types to the server:</p> <h4 id="1-connect"> <a href="#1-connect" class="anchor-heading" aria-labelledby="1-connect"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 1. Connect </h4> <p>When a WebSocket connects, the server automatically assigns a connection ID and sends a welcome message. No special message is needed from the client.</p> <h4 id="2-set-user-id"> <a href="#2-set-user-id" class="anchor-heading" aria-labelledby="2-set-user-id"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 2. Set User ID </h4> <p>Set the user ID for this connection. This is used for multi-user agents to maintain separate memory contexts per user.</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"set_user"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"user_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <p>Response:</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user_set"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"user_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h4 id="3-subscribe-to-agent"> <a href="#3-subscribe-to-agent" class="anchor-heading" aria-labelledby="3-subscribe-to-agent"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 3. Subscribe to Agent </h4> <p>Subscribe to a specific agent to receive messages and updates.</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"subscribe"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <p>Response:</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"subscribed"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Successfully subscribed to agent assistant"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h4 id="4-unsubscribe-from-agent"> <a href="#4-unsubscribe-from-agent" class="anchor-heading" aria-labelledby="4-unsubscribe-from-agent"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 4. Unsubscribe from Agent </h4> <p>Unsubscribe from a specific agent.</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unsubscribe"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <p>Response:</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unsubscribed"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Successfully unsubscribed from agent assistant"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h4 id="5-send-chat-message"> <a href="#5-send-chat-message" class="anchor-heading" aria-labelledby="5-send-chat-message"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 5. Send Chat Message </h4> <p>Send a message to an agent. The user_id is automatically set to the one specified with the “set_user” message.</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chat"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello, can you help me with a question?"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h4 id="6-search-memory"> <a href="#6-search-memory" class="anchor-heading" aria-labelledby="6-search-memory"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 6. Search Memory </h4> <p>Search an agent’s memory for relevant information. The user_id is automatically set to the one specified with the “set_user” message.</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"search_memory"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What did we discuss yesterday?"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"limit"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"use_long_term"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h4 id="7-keep-alive-ping"> <a href="#7-keep-alive-ping" class="anchor-heading" aria-labelledby="7-keep-alive-ping"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 7. Keep-alive Ping </h4> <p>Send a ping to keep the connection alive.</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ping"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h3 id="server-to-client-messages"> <a href="#server-to-client-messages" class="anchor-heading" aria-labelledby="server-to-client-messages"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Server to Client Messages </h3> <p>The server can send these message types to the client:</p> <h2 id="client-implementation-examples"> <a href="#client-implementation-examples" class="anchor-heading" aria-labelledby="client-implementation-examples"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Client Implementation Examples </h2> <h3 id="browser-implementation"> <a href="#browser-implementation" class="anchor-heading" aria-labelledby="browser-implementation"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Browser Implementation </h3> <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">AgentWebSocket</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">url</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">ws://localhost:5050/ws</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">url</span> <span class="o">=</span> <span class="nx">url</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="dl">'</span><span class="s1">message</span><span class="dl">'</span><span class="p">:</span> <span class="p">[],</span>
+      <span class="dl">'</span><span class="s1">thinking</span><span class="dl">'</span><span class="p">:</span> <span class="p">[],</span>
+      <span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">};</span>
+
+    <span class="c1">// Reconnection settings</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">maxReconnectAttempts</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">reconnectDelay</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+
+    <span class="c1">// User settings</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">userId</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">connect</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocket</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
+
+      <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">onopen</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket connected</span><span class="dl">'</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">resolve</span><span class="p">();</span>
+
+        <span class="c1">// Set user ID if available</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">userId</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">setUserId</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">userId</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">};</span>
+
+      <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">onclose</span> <span class="o">=</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">`WebSocket closed: </span><span class="p">${</span><span class="nx">event</span><span class="p">.</span><span class="nx">code</span><span class="p">}</span><span class="s2"> </span><span class="p">${</span><span class="nx">event</span><span class="p">.</span><span class="nx">reason</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+        <span class="c1">// Attempt to reconnect</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">maxReconnectAttempts</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span><span class="o">++</span><span class="p">;</span>
+          <span class="kd">const</span> <span class="nx">delay</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">reconnectDelay</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">`Reconnecting in </span><span class="p">${</span><span class="nx">delay</span><span class="p">}</span><span class="s2">ms (attempt </span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">reconnectAttempts</span><span class="p">}</span><span class="s2">)`</span><span class="p">);</span>
+
+          <span class="nx">setTimeout</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">connect</span><span class="p">().</span><span class="k">catch</span><span class="p">(</span><span class="nx">err</span> <span class="o">=&gt;</span> <span class="p">{</span>
+              <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Reconnection failed:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+            <span class="p">});</span>
+          <span class="p">},</span> <span class="nx">delay</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">};</span>
+
+      <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">onerror</span> <span class="o">=</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket error:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+        <span class="nx">reject</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+      <span class="p">};</span>
+
+      <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">onmessage</span> <span class="o">=</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+          <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Received:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+
+          <span class="c1">// Call appropriate handlers</span>
+          <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="p">])</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">handler</span> <span class="o">=&gt;</span> <span class="nx">handler</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+          <span class="p">}</span>
+
+          <span class="c1">// Call general message handlers</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="dl">'</span><span class="s1">*</span><span class="dl">'</span><span class="p">]?.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">handler</span> <span class="o">=&gt;</span> <span class="nx">handler</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error parsing message:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">};</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">setUserId</span><span class="p">(</span><span class="nx">userId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">userId</span> <span class="o">=</span> <span class="nx">userId</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">send</span><span class="p">({</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">set_user</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">user_id</span><span class="p">:</span> <span class="nx">userId</span>
+      <span class="p">});</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="nx">subscribe</span><span class="p">(</span><span class="nx">agentId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket is not connected</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">send</span><span class="p">({</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">subscribe</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">unsubscribe</span><span class="p">(</span><span class="nx">agentId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket is not connected</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">send</span><span class="p">({</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">unsubscribe</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">sendMessage</span><span class="p">(</span><span class="nx">agentId</span><span class="p">,</span> <span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket is not connected</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">send</span><span class="p">({</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">chat</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span><span class="p">,</span>
+      <span class="na">message</span><span class="p">:</span> <span class="nx">message</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">searchMemory</span><span class="p">(</span><span class="nx">agentId</span><span class="p">,</span> <span class="nx">query</span><span class="p">,</span> <span class="nx">limit</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">useLongTerm</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket is not connected</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">send</span><span class="p">({</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">search_memory</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span><span class="p">,</span>
+      <span class="na">query</span><span class="p">:</span> <span class="nx">query</span><span class="p">,</span>
+      <span class="na">limit</span><span class="p">:</span> <span class="nx">limit</span><span class="p">,</span>
+      <span class="na">use_long_term</span><span class="p">:</span> <span class="nx">useLongTerm</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">clearMemory</span><span class="p">(</span><span class="nx">agentId</span><span class="p">,</span> <span class="nx">clearLongTerm</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket is not connected</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">send</span><span class="p">({</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">clear_memory</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">agent_id</span><span class="p">:</span> <span class="nx">agentId</span><span class="p">,</span>
+      <span class="na">clear_long_term</span><span class="p">:</span> <span class="nx">clearLongTerm</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">send</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isConnected</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">WebSocket is not connected</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="nx">on</span><span class="p">(</span><span class="nx">eventType</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="nx">eventType</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="nx">eventType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="nx">eventType</span><span class="p">].</span><span class="nx">push</span><span class="p">(</span><span class="nx">callback</span><span class="p">);</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">off</span><span class="p">(</span><span class="nx">eventType</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="nx">eventType</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="nx">eventType</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">messageHandlers</span><span class="p">[</span><span class="nx">eventType</span><span class="p">]</span>
+        <span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">handler</span> <span class="o">=&gt;</span> <span class="nx">handler</span> <span class="o">!==</span> <span class="nx">callback</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">close</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Usage example</span>
+<span class="kd">const</span> <span class="nx">ws</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AgentWebSocket</span><span class="p">(</span><span class="dl">'</span><span class="s1">ws://localhost:5050/ws</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="c1">// Set handlers</span>
+<span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">message</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Agent response:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">content</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">thinking</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Agent is thinking...</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// Connect and interact</span>
+<span class="k">async</span> <span class="kd">function</span> <span class="nx">startChat</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="k">await</span> <span class="nx">ws</span><span class="p">.</span><span class="nx">connect</span><span class="p">();</span>
+
+    <span class="c1">// Set user ID for multi-user support</span>
+    <span class="nx">ws</span><span class="p">.</span><span class="nx">setUserId</span><span class="p">(</span><span class="mi">123</span><span class="p">);</span>
+
+    <span class="c1">// Subscribe to an agent</span>
+    <span class="nx">ws</span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="dl">'</span><span class="s1">multi_user_agent</span><span class="dl">'</span><span class="p">);</span>
+
+    <span class="c1">// Send a message</span>
+    <span class="nx">ws</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">multi_user_agent</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">Hello, my name is John.</span><span class="dl">'</span><span class="p">);</span>
+
+    <span class="c1">// Later, search memory</span>
+    <span class="nx">ws</span><span class="p">.</span><span class="nx">searchMemory</span><span class="p">(</span><span class="dl">'</span><span class="s1">multi_user_agent</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">What is my name?</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Failed to connect:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">startChat</span><span class="p">();</span>
+</code></pre></div></div> <h2 id="multi-user-interaction-example"> <a href="#multi-user-interaction-example" class="anchor-heading" aria-labelledby="multi-user-interaction-example"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Multi-User Interaction Example </h2> <p>This example demonstrates how to create a simple chat interface that supports multiple users with separate memory contexts:</p> <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Set up the form</span>
+<span class="kd">const</span> <span class="nx">userIdInput</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">user-id</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">agentIdInput</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">agent-id</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">messageInput</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">message</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">sendButton</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">send-button</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">chatMessages</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">chat-messages</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="kd">let</span> <span class="nx">currentUserId</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">ws</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AgentWebSocket</span><span class="p">(</span><span class="dl">'</span><span class="s1">ws://localhost:5050/ws</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="c1">// Update user ID when changed</span>
+<span class="nx">userIdInput</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">change</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">currentUserId</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">userIdInput</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+
+  <span class="c1">// Update WebSocket user ID</span>
+  <span class="nx">ws</span><span class="p">.</span><span class="nx">setUserId</span><span class="p">(</span><span class="nx">currentUserId</span><span class="p">);</span>
+
+  <span class="c1">// Add system message</span>
+  <span class="nx">addMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">system</span><span class="dl">'</span><span class="p">,</span> <span class="s2">`Switched to user ID: </span><span class="p">${</span><span class="nx">currentUserId</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// Send message when button is clicked</span>
+<span class="nx">sendButton</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">click</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">agentId</span> <span class="o">=</span> <span class="nx">agentIdInput</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="nx">messageInput</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">message</span><span class="p">.</span><span class="nx">trim</span><span class="p">())</span> <span class="k">return</span><span class="p">;</span>
+
+  <span class="c1">// Add user message to chat</span>
+  <span class="nx">addMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">,</span> <span class="nx">message</span><span class="p">);</span>
+
+  <span class="c1">// Clear input</span>
+  <span class="nx">messageInput</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">''</span><span class="p">;</span>
+
+  <span class="c1">// Send via WebSocket</span>
+  <span class="nx">ws</span><span class="p">.</span><span class="nx">sendMessage</span><span class="p">(</span><span class="nx">agentId</span><span class="p">,</span> <span class="nx">message</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// Add message to chat UI</span>
+<span class="kd">function</span> <span class="nx">addMessage</span><span class="p">(</span><span class="nx">role</span><span class="p">,</span> <span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">messageEl</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">div</span><span class="dl">'</span><span class="p">);</span>
+  <span class="nx">messageEl</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="s2">`message </span><span class="p">${</span><span class="nx">role</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+
+  <span class="c1">// Add user ID for user messages</span>
+  <span class="kd">const</span> <span class="nx">header</span> <span class="o">=</span> <span class="nx">role</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">user</span><span class="dl">'</span>
+    <span class="p">?</span> <span class="s2">`User (ID: </span><span class="p">${</span><span class="nx">currentUserId</span><span class="p">}</span><span class="s2">)`</span>
+    <span class="p">:</span> <span class="nx">role</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">assistant</span><span class="dl">'</span>
+      <span class="p">?</span> <span class="dl">'</span><span class="s1">Assistant</span><span class="dl">'</span>
+      <span class="p">:</span> <span class="dl">'</span><span class="s1">System</span><span class="dl">'</span><span class="p">;</span>
+
+  <span class="nx">messageEl</span><span class="p">.</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s2">`
+    &lt;div class="message-header"&gt;</span><span class="p">${</span><span class="nx">header</span><span class="p">}</span><span class="s2">&lt;/div&gt;
+    &lt;div class="message-content"&gt;</span><span class="p">${</span><span class="nx">text</span><span class="p">}</span><span class="s2">&lt;/div&gt;
+  `</span><span class="p">;</span>
+
+  <span class="nx">chatMessages</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">messageEl</span><span class="p">);</span>
+  <span class="nx">chatMessages</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="nx">chatMessages</span><span class="p">.</span><span class="nx">scrollHeight</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Set up WebSocket</span>
+<span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">message</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">addMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">assistant</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">content</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">thinking</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">addMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">system</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">Assistant is thinking...</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">ws</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">addMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">system</span><span class="dl">'</span><span class="p">,</span> <span class="s2">`Error: </span><span class="p">${</span><span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// Connect and subscribe</span>
+<span class="k">async</span> <span class="kd">function</span> <span class="nx">initChat</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="k">await</span> <span class="nx">ws</span><span class="p">.</span><span class="nx">connect</span><span class="p">();</span>
+    <span class="nx">addMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">system</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">Connected to server</span><span class="dl">'</span><span class="p">);</span>
+
+    <span class="c1">// Set initial user ID</span>
+    <span class="nx">ws</span><span class="p">.</span><span class="nx">setUserId</span><span class="p">(</span><span class="nx">currentUserId</span><span class="p">);</span>
+
+    <span class="c1">// Subscribe to default agent</span>
+    <span class="kd">const</span> <span class="nx">defaultAgent</span> <span class="o">=</span> <span class="nx">agentIdInput</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+    <span class="nx">ws</span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="nx">defaultAgent</span><span class="p">);</span>
+    <span class="nx">addMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">system</span><span class="dl">'</span><span class="p">,</span> <span class="s2">`Subscribed to agent: </span><span class="p">${</span><span class="nx">defaultAgent</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">addMessage</span><span class="p">(</span><span class="dl">'</span><span class="s1">system</span><span class="dl">'</span><span class="p">,</span> <span class="s2">`Connection error: </span><span class="p">${</span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">initChat</span><span class="p">();</span>
+</code></pre></div></div> <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- HTML for the multi-user chat interface --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"chat-container"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"chat-header"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"user-selector"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"user-id"</span><span class="nt">&gt;</span>User ID:<span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"number"</span> <span class="na">id=</span><span class="s">"user-id"</span> <span class="na">value=</span><span class="s">"0"</span> <span class="na">min=</span><span class="s">"0"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"agent-selector"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"agent-id"</span><span class="nt">&gt;</span>Agent:<span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">id=</span><span class="s">"agent-id"</span> <span class="na">value=</span><span class="s">"multi_user_agent"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"chat-messages"</span> <span class="na">class=</span><span class="s">"chat-messages"</span><span class="nt">&gt;&lt;/div&gt;</span>
+
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"chat-input"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">id=</span><span class="s">"message"</span> <span class="na">placeholder=</span><span class="s">"Type your message..."</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"send-button"</span><span class="nt">&gt;</span>Send<span class="nt">&lt;/button&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div> <h2 id="best-practices"> <a href="#best-practices" class="anchor-heading" aria-labelledby="best-practices"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Best Practices </h2> <ol> <li> <p><strong>Error Handling</strong>: Implement comprehensive error handling for all WebSocket operations</p> </li> <li> <p><strong>Reconnection Logic</strong>: Include automatic reconnection in clients to handle network interruptions</p> </li> <li> <p><strong>Message Validation</strong>: Validate all incoming messages before processing</p> </li> <li> <p><strong>Connection Management</strong>: Properly manage connection lifecycles to prevent resource leaks</p> </li> <li> <p><strong>Load Balancing</strong>: For production deployments, consider load balancing WebSocket connections</p> </li> <li> <p><strong>Security</strong>: Implement proper authentication and authorization for WebSocket connections</p> </li> <li> <p><strong>Logging</strong>: Add detailed logging for debugging connection issues</p> </li> </ol> <h2 id="troubleshooting"> <a href="#troubleshooting" class="anchor-heading" aria-labelledby="troubleshooting"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Troubleshooting </h2> <h3 id="connection-issues"> <a href="#connection-issues" class="anchor-heading" aria-labelledby="connection-issues"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Connection Issues </h3> <ul> <li>Check if the WebSocket server is running and accessible</li> <li>Verify network connectivity between client and server</li> <li>Ensure the correct WebSocket URL is being used</li> <li>Check for firewall or proxy settings that might block WebSocket connections</li> </ul> <h3 id="message-processing-errors"> <a href="#message-processing-errors" class="anchor-heading" aria-labelledby="message-processing-errors"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Message Processing Errors </h3> <ul> <li>Validate message format on both client and server</li> <li>Check for proper JSON formatting in messages</li> <li>Verify that required fields are present in messages</li> <li>Ensure agent IDs exist before attempting to subscribe or send messages</li> </ul> <h3 id="performance-issues"> <a href="#performance-issues" class="anchor-heading" aria-labelledby="performance-issues"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Performance Issues </h3> <ul> <li>Monitor WebSocket connection count and resource usage</li> <li>Implement connection limits to prevent server overload</li> <li>Consider using message queues for high-load scenarios</li> <li>Optimize message size and frequency</li> </ul> <h2 id="next-steps"> <a href="#next-steps" class="anchor-heading" aria-labelledby="next-steps"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Next Steps </h2> <p>After implementing WebSocket support, you might want to explore:</p> <ul> <li>Creating <a href="./agent">agents</a> that can utilize WebSocket connections</li> <li>Setting up <a href="./tools">tool systems</a> that send real-time progress updates</li> <li>Implementing <a href="./mcp">MCP features</a> for structured communication</li> <li>Enhancing <a href="./memory">memory systems</a> with real-time updates</li> </ul> </main> <hr> <footer> <p><a href="#top" id="back-to-top">Back to top</a></p> <p class="text-small text-grey-dk-100 mb-0">Copyright &copy; 2025 Ran Aroussi.<br>Licensed under Creative's Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0) license.</p> </footer> </div> </div> <div class="search-overlay"></div> </div> <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.6/dist/mermaid.min.js"></script> <script> var config = {} ; mermaid.initialize(config); window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid')); </script> </body> </html>
