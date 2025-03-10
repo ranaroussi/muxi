@@ -1,3 +1,11 @@
+---
+layout: default
+title: Tools vs MCP
+parent: Resources
+has_children: false
+nav_order: 2
+permalink: /tools-vs-mcp/
+---
 # Tools versus MCP Servers
 
 This document outlines the key differences, trade-offs, and use cases for using internal Tools versus external MCP Servers in the MUXI Framework.

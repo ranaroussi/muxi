@@ -1,3 +1,11 @@
+---
+layout: default
+title: CLI
+parent: User Interfaces
+has_children: false
+nav_order: 1
+permalink: /cli/
+---
 # Command Line Interface (CLI)
 
 The MUXI Framework includes a powerful command-line interface (CLI) that allows you to interact with AI agents directly from your terminal. This document covers how to set up and use the CLI effectively.

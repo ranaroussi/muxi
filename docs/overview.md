@@ -1,3 +1,11 @@
+---
+layout: default
+title: Introduction
+parent: Getting Started
+has_children: false
+nav_order: 1
+permalink: /overview/
+---
 # MUXI Framework Overview
 
 ## Introduction

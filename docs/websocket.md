@@ -1,3 +1,11 @@
+---
+layout: default
+title: WebSocket
+parent: User Interfaces
+has_children: false
+nav_order: 4
+permalink: /websocket/
+---
 # WebSocket Communication
 
 WebSockets provide real-time, bidirectional communication between clients and the MUXI Framework. This guide explains how to implement, use, and troubleshoot WebSocket connections for interactive agent communication.
@@ -1263,7 +1271,7 @@ initChat();
 
 After implementing WebSocket support, you might want to explore:
 
-- Creating [agents](./agent.md) that can utilize WebSocket connections
-- Setting up [tool systems](./tools.md) that send real-time progress updates
-- Implementing [MCP features](./mcp.md) for structured communication
-- Enhancing [memory systems](./memory.md) with real-time updates
+- Creating [agents](./agent) that can utilize WebSocket connections
+- Setting up [tool systems](./tools) that send real-time progress updates
+- Implementing [MCP features](./mcp) for structured communication
+- Enhancing [memory systems](./memory) with real-time updates

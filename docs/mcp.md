@@ -1,3 +1,11 @@
+---
+layout: default
+title: MCPs
+parent: Core Concepts
+has_children: false
+nav_order: 8
+permalink: /mcp/
+---
 # Model Context Protocol (MCP)
 
 The Model Context Protocol (MCP) is a standardized format for communication between applications and Large Language Models. It provides a structured way to send prompts, receive responses, and process tool calls.
@@ -5,6 +13,7 @@ The Model Context Protocol (MCP) is a standardized format for communication betw
 ## What is MCP?
 
 MCP is a protocol that:
+
 - Standardizes the format of messages sent to and received from language models
 - Enables structured tool calling by language models
 - Provides a consistent interface across different language model providers
@@ -530,7 +539,7 @@ async def handle_websocket(websocket, path):
 
 After understanding MCP, you might want to explore:
 
-- Creating [agents](./agent.md) that leverage MCP for structured communication
-- Implementing custom [tools](./tools.md) that integrate with the MCP format
-- Setting up [WebSocket connections](./websocket.md) for real-time MCP communication
-- Understanding [memory systems](./memory.md) and how they store MCP messages
+- Creating [agents](./agent) that leverage MCP for structured communication
+- Implementing custom [tools](./tools) that integrate with the MCP format
+- Setting up [WebSocket connections](./websocket) for real-time MCP communication
+- Understanding [memory systems](./memory) and how they store MCP messages

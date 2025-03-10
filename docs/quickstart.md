@@ -1,3 +1,11 @@
+---
+layout: default
+title: Quickstart Guide
+parent: Getting Started
+has_children: false
+nav_order: 2
+permalink: /quickstart/
+---
 # Quick Start Guide
 
 This guide will help you quickly set up and start using MUXI for building AI agents.
@@ -161,7 +169,7 @@ curl -X POST http://localhost:5050/chat/agent \
 
 Now that you've set up MUXI and created your first agents, check out these resources to learn more:
 
-- [Architecture Overview](architecture.md) to understand how MUXI components fit together
-- [Agent Guide](agent.md) for details on agent capabilities and configuration
-- [Memory Systems](memory.md) to learn about different memory options
-- [Tools Overview](tools.md) to extend your agents with additional capabilities
+- [Architecture Overview](architecture) to understand how MUXI components fit together
+- [Agent Guide](agent) for details on agent capabilities and configuration
+- [Memory Systems](memory) to learn about different memory options
+- [Tools Overview](tools) to extend your agents with additional capabilities

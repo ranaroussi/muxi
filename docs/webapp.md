@@ -1,3 +1,11 @@
+---
+layout: default
+title: Webapp
+parent: User Interfaces
+has_children: false
+nav_order: 2
+permalink: /webapp/
+---
 # MUXI Framework Dashboard
 
 A modern web dashboard for interacting with the MUXI Framework.

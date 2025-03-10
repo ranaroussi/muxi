@@ -1,4 +1,13 @@
-# Orchestrator
+---
+layout: default
+title: Orchestrator
+parent: Core Concepts
+has_children: false
+nav_order: 2
+permalink: /orchestrator/
+---
+
+# The Orchestrator
 
 The Orchestrator is a central component of the MUXI Framework responsible for managing multiple agents and coordinating their interactions. It serves as the control center for agent creation, access, and communication.
 
@@ -328,7 +337,7 @@ persistent_orchestrator = PersistentOrchestrator()
 
 After setting up your Orchestrator and agents, you might want to explore:
 
-- Implementing [custom tools](./tools.md) for specialized agent capabilities
-- Setting up [memory systems](./memory.md) for improved agent recall
-- Creating a [WebSocket connection](./websocket.md) for real-time agent interaction
-- Exploring [MCP features](./mcp.md) for advanced LLM control
+- Implementing [custom tools](./tools) for specialized agent capabilities
+- Setting up [memory systems](./memory) for improved agent recall
+- Creating a [WebSocket connection](./websocket) for real-time agent interaction
+- Exploring [MCP features](./mcp) for advanced LLM control

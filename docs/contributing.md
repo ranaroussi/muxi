@@ -1,3 +1,11 @@
+---
+layout: default
+title: Contributing to MUXI
+parent: Resources
+has_children: false
+nav_order: 4
+permalink: /contributing/
+---
 # Contributing to the MUXI Framework
 
 Thank you for your interest in contributing to the MUXI Framework! This guide will help you start contributing to the project, whether you're fixing bugs, adding new features, improving documentation, or reporting issues.
@@ -225,7 +233,7 @@ Documentation is critical to the success of the project. When contributing:
 
 ## Contributor License Agreement
 
-That we do not have any potential problems later, it is sadly necessary to sign a [Contributor License Agreement](../CONTRIBUTOR_LICENSE_AGREEMENT.md). That can be done literally with the push of a button.
+That we do not have any potential problems later, it is sadly necessary to sign a [Contributor License Agreement](https://github.com/ranaroussi/muxi/blob/main/CONTRIBUTOR_LICENSE_AGREEMENT.md). That can be done literally with the push of a button.
 
 Once a pull request is opened, an automated bot will promptly leave a comment requesting the agreement to be signed. The pull request can only be merged once the signature is obtained.
 

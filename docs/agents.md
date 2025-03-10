@@ -1,4 +1,13 @@
-# Agent
+---
+layout: default
+title: Agents
+parent: Core Concepts
+has_children: false
+nav_order: 1
+permalink: /agents/
+---
+
+# Agents Overview
 
 Agents are the core component of the MUXI Framework. An agent combines a language model, memory systems, and tools to create an intelligent assistant that can understand and respond to user requests.
 
@@ -367,7 +376,7 @@ user2_followup = await orchestrator.chat("customer_service", "Thanks for the inf
 
 After creating your agent, you might want to:
 
-- Add [custom tools](./tools.md) to extend its capabilities
-- Configure [memory systems](./memory.md) for better recall
-- Implement [multi-agent collaboration](./orchestrator.md) for complex tasks
-- Connect to the [WebSocket server](./websocket.md) for real-time interaction
+- Add [custom tools](./tools) to extend its capabilities
+- Configure [memory systems](./memory) for better recall
+- Implement [multi-agent collaboration](./orchestrator) for complex tasks
+- Connect to the [WebSocket server](./websocket) for real-time interaction

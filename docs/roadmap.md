@@ -1,6 +1,14 @@
-# Strategic Roadmap
+---
+layout: default
+title: Development Roadmap
+parent: Resources
+has_children: false
+nav_order: 3
+permalink: /roadmap/
+---
+# Development Roadmap
 
-This document outlines the high-level strategic vision and planned future development of the muxi framework. For detailed developer tasks and implementation checkboxes, see the `NEXT_STEPS.md` file in the project root.
+This document outlines the high-level strategic vision and planned future development of the muxi framework. For detailed developer tasks and implementation checkboxes, see the `NEXT_STEPS` file in the project root.
 
 ## Short-term Goals
 
@@ -95,4 +103,4 @@ We welcome community input on prioritization of these roadmap items. Please open
 - Complete documentation
 - Docker distribution with MCP servers
 - Comprehensive tool ecosystem
-- Re-license the a [modified Apache 2.0](/LICENSE-FUTURE.txt) (internal commercial use OK, no commercial distribution)
+- Adopt a more permissive open-source license

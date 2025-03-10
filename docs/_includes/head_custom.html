@@ -1,0 +1,40 @@
+<script src="https://cdn.jsdelivr.net/npm/mermaid@9.3.0/dist/mermaid.min.js"></script>
+<script>window.addEventListener("load", function() { mermaid.initialize({ startOnLoad: true }); });</script>
+<style>
+  .mermaid {
+    text-align: center;
+    margin: 2rem auto;
+    max-width: 100%;
+    padding: 1rem;
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .site-logo {
+    width: 40px;
+    height: 40px;
+    padding-right: 10px;
+  }
+
+  .site-header {
+    display: flex;
+    align-items: center;
+    height: 60px;
+  }
+  .site-header .site-title {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+  }
+  .site-header .site-title:hover {
+    background-image: none;
+  }
+</style>
+
+<!-- Favicon links -->
+<link rel="apple-touch-icon" sizes="180x180" href="{{ '/assets/images/apple-touch-icon.png' | relative_url }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ '/assets/images/favicon-32x32.png' | relative_url }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ '/assets/images/favicon-16x16.png' | relative_url }}">
+<link rel="manifest" href="{{ '/assets/images/site.webmanifest' | relative_url }}">
+<link rel="shortcut icon" href="{{ '/assets/images/favicon.ico' | relative_url }}">

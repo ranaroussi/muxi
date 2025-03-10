@@ -1,3 +1,11 @@
+---
+layout: default
+title: API
+parent: User Interfaces
+has_children: false
+nav_order: 3
+permalink: /api/
+---
 # REST API
 
 The MUXI Framework provides a comprehensive REST API for interacting with agents, managing tools, and accessing memory. This guide explains the available endpoints and how to use them.
@@ -1098,7 +1106,7 @@ tail -f logs/api.log
 
 After understanding the REST API, you might want to explore:
 
-- Setting up [WebSocket connections](./websocket.md) for real-time communication
-- Creating custom [agents](./agent.md) via the API
-- Implementing [tools](./tools.md) and registering them via the API
-- Exploring [MCP features](./mcp.md) for advanced message handling
+- Setting up [WebSocket connections](./websocket) for real-time communication
+- Creating custom [agents](./agent) via the API
+- Implementing [tools](./tools) and registering them via the API
+- Exploring [MCP features](./mcp) for advanced message handling

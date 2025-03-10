@@ -1,70 +1,47 @@
-# MUXI Framework Documentation
+---
+layout: home
+title: Home
+nav_order: 0
+permalink: /
+---
 
-This document outlines the recommended structure for the MUXI documentation website. It serves as a roadmap for contributors and users to understand how documentation is organized within the project. The structure is designed to provide a logical progression from basic concepts to advanced topics, making it easier for new users to get started while offering comprehensive references for experienced developers.
+# MUXI - AI Agent Framework
 
-## 1. Getting Started
-- [Introduction & Overview](overview.md)
-- [Quick Start Guide](quickstart.md)
-- [Architecture Overview](architecture.md)
-- Installation & Setup
+MUXI is an extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration.
 
-## 2. Core Concepts
-- **Agents & Orchestration**
-  - [Agent Guide](agent.md)
-  - [Orchestrator Documentation](orchestrator.md)
-  - [Agents vs Tools](agents_vs_tools.md)
-- **Memory**
-  - [Memory Overview](memory.md)
-  - Memory Types (Buffer, Long-term, Memobase)
-  - Multi-User Memory Management
-- **Tools**
-  - [Tool Overview](tools.md)
-  - Creating Custom Tools
-  - [Tools vs MCP](tools_vs_mcp.md)
-- **MCP**
-  - [MCP Guide](mcp.md)
-  - LLM Provider Integration
+{: .warning }
+> This project is a work in progress and is not even close to being ready for production use. The framework is actively being developed and new features are being added. Please refer to the [roadmap](roadmap) for detailed information about the current state of the project and where it's headed.
 
-## 3. User Interfaces
-- **Command Line Interface**
-  - [CLI Documentation](cli.md)
-  - Commands Reference
-  - Chat Sessions
-  - Server Management
-- **Web Dashboard**
-  - [Dashboard Documentation](webapp.md)
-  - Features & Navigation
-  - Agent Management
-  - Chat Interface
-- **REST API**
-  - [API Documentation](api.md)
-  - Endpoints Reference
-  - Authentication
-  - Error Handling
-- **WebSocket Interface**
-  - [WebSocket Documentation](websocket.md)
-  - Real-time Communication
-  - Message Types
-  - Connection Management
+## Features
 
-## 4. Advanced Topics
-- **Multi-Agent Orchestration**
-  - Overview
-  - Collaboration Patterns
-  - Message Routing
-- **Multi-User Support**
-  - Overview
-  - User Management
-  - Memory Partitioning
+- **Multi-Agent Orchestration**: Create and manage multiple AI agents with different capabilities
+- **Standardized LLM Communication**: Model Context Protocol (MCP) for consistent interaction with various LLM providers
+- **Memory Systems**: Short-term buffer memory and long-term persistent memory for agents
+- **Multi-User Support**: Memobase provides user-specific memory partitioning for multi-tenant applications
+- **Tool Integration**: Extensible tool system with built-in utilities and custom tool support
+- **Real-Time Communication**: WebSocket support for instant messaging and streaming responses
+- **REST API**: Comprehensive API for managing agents, tools, and conversations
+- **Command Line Interface**: Rich terminal-based interface for creating and interacting with agents
 
-## 5. Reference
-- API Reference
-- Configuration Options
-- Message Formats
-- Troubleshooting Guide
+## Getting Started
 
-## 6. Resources
-- [Contributing to MUXI](contributing.md)
-- [Roadmap](roadmap.md)
-- License Information
-- Example Projects
+The easiest way to get started with MUXI is to follow our [Quickstart Guide](quickstart).
+
+## Documentation
+
+The documentation is organized into the following sections:
+
+1. [Getting Started](getting-started) - Introduction to the framework and basic concepts
+2. [Core Concepts](core-concepts) - Detailed explanations of the core components
+3. [User Interfaces](user-interfaces) - Learn about the different ways to interact with the framework
+4. [Resources](resources) - Additional resources for contributors and users
+
+## Architecture
+
+![Architecture Diagram](https://www.mermaidchart.com/raw/12634479-a45c-48c0-bcec-d901cd7d62eb?theme=light&version=v0.1&format=svg)
+
+## License
+
+This project is licensed under a dual licensing model to balance open-source collaboration with sustainable business practices.
+
+During the development phase, the software is licensed under the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0)** license.

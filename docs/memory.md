@@ -1,3 +1,11 @@
+---
+layout: default
+title: Memory
+parent: Core Concepts
+has_children: false
+nav_order: 4
+permalink: /memory/
+---
 # Memory Systems
 
 Memory is a crucial component of the MUXI Framework that allows agents to retain information over time. The framework provides three complementary memory systems:
@@ -533,7 +541,7 @@ class MemoryExtractor:
 
 After implementing memory systems, you might want to explore:
 
-- Creating [custom tools](./tools.md) that can access and manipulate memory
-- Setting up [WebSocket connections](./websocket.md) for real-time memory updates
-- Implementing advanced [MCP features](./mcp.md) to better control how the LLM uses memory
-- Developing [agent collaboration](./orchestrator.md) methods that share memory between agents
+- Creating [custom tools](./tools) that can access and manipulate memory
+- Setting up [WebSocket connections](./websocket) for real-time memory updates
+- Implementing advanced [MCP features](./mcp) to better control how the LLM uses memory
+- Developing [agent collaboration](./orchestrator) methods that share memory between agents

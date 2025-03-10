@@ -1,3 +1,11 @@
+---
+layout: default
+title: Tools
+parent: Core Concepts
+has_children: false
+nav_order: 5
+permalink: /tools/
+---
 # Tools
 
 Tools extend the capabilities of AI agents by enabling them to perform specific actions or retrieve information beyond their training data.
@@ -37,7 +45,7 @@ When a tool is used in the muxi framework, the process follows this flow:
 
 This clarifies that tools are the actual functionality that gets executed, while MCP is just the communication protocol that enables the LLM to request tool execution and receive results.
 
-For a more detailed explanation of this relationship, see the [MCP documentation](mcp.md).
+For a more detailed explanation of this relationship, see the [MCP documentation](mcp).
 
 ## Built-in Tools
 
@@ -557,7 +565,7 @@ class RobustTool(BaseTool):
 
 After implementing tools, you might want to explore:
 
-- Creating [agents](./agent.md) that can effectively use your tools
-- Setting up [memory systems](./memory.md) to retain information across tool executions
-- Implementing [WebSocket support](./websocket.md) for real-time tool execution updates
-- Exploring [orchestrator features](./orchestrator.md) for coordinating multiple tools and agents
+- Creating [agents](./agent) that can effectively use your tools
+- Setting up [memory systems](./memory) to retain information across tool executions
+- Implementing [WebSocket support](./websocket) for real-time tool execution updates
+- Exploring [orchestrator features](./orchestrator) for coordinating multiple tools and agents

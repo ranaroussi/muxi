@@ -1,3 +1,11 @@
+---
+layout: default
+title: Agents vs Tools
+parent: Resources
+has_children: false
+nav_order: 1
+permalink: /agents-vs-tools/
+---
 # Agents versus Tools: Why Use Multiple Agents?
 
 In the MUXI Framework, you have two primary approaches to building intelligent systems:
