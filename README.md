@@ -242,19 +242,20 @@ Comprehensive documentation is available in the `docs` directory:
 - [REST API Documentation](docs/api.md)
 - [WebSocket Implementation](docs/websocket.md)
 
+
+## License
+
+This project is licensed under a dual licensing model to balance open-source collaboration with sustainable business practices.
+
+### Development Phase (Pre-Version 1.0)
+
+During the development phase, the software is licensed under the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0)** license. This license prohibits commercial use, derivative works, and redistribution to ensure the integrity of the development process and to avoid fragmentation of the project before it reaches maturity.
+
+### After Version 1.0 Release
+
+When the project reaches version 1.0, it will adopt a more permissive open-source license that permits free use for non-commercial and internal commercial purposes, with the possibility of a commercial license for specific use cases.
+
 ## Contributing
 
 **Contributions are welcome!** Please read our [Contributing Guide](docs/contributing.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
 
-## License
-
-### Pre-1.0 License:
-
-Licensed under the [CC BY-NC-ND 4.0](LICENSE.txt) license.
-
-- Use as-is, non-commercially, with credit to the original project.
-- No modifications or distribution allowed.
-
-### Post-v1.0
-
-Switches to a [modified Apache 2.0](LICENSE-FUTURE.txt) (internal commercial use OK, no commercial distribution).

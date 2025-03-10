@@ -2,9 +2,6 @@
 
 Thank you for your interest in contributing to the MUXI Framework! This guide will help you start contributing to the project, whether you're fixing bugs, adding new features, improving documentation, or reporting issues.
 
-> [!IMPORTANT]
-> By contributing, you license your work under CC BY-NC-ND 4.0 and grant the owner of this project permission to relicense it under a modified Apache 2.0 post-v1.0
-
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
@@ -18,6 +15,7 @@ Thank you for your interest in contributing to the MUXI Framework! This guide wi
 - [Documentation](#documentation)
 - [Testing](#testing)
 - [Community](#community)
+- [Contributor License Agreement](#contributor-license-agreement)
 
 ## Code of Conduct
 
@@ -169,7 +167,7 @@ When working with the Model Context Protocol:
 
    [optional footer]
    ```
-   Types include: feat, fix, docs, style, refactor, test, chore
+   Types include: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 5. Push your changes to your fork:
 
    ```bash
@@ -225,13 +223,11 @@ Documentation is critical to the success of the project. When contributing:
 - Aim for high test coverage, especially for business logic
 - Test both happy paths and error cases
 
-## Community
+## Contributor License Agreement
 
-Join our community channels to get help, discuss features, or connect with other contributors:
+That we do not have any potential problems later, it is sadly necessary to sign a [Contributor License Agreement](../CONTRIBUTOR_LICENSE_AGREEMENT.md). That can be done literally with the push of a button.
 
-- [GitHub Discussions](https://github.com/ranaroussi/muxi/discussions)
-- [Discord Server](#) (if applicable)
-- [Community Forum](#) (if applicable)
+Once a pull request is opened, an automated bot will promptly leave a comment requesting the agreement to be signed. The pull request can only be merged once the signature is obtained.
 
 ---
 
