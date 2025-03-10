@@ -1,4 +1,4 @@
-# MUXI Framework Documentation Structure
+# MUXI Framework Documentation
 
 This document outlines the recommended structure for the MUXI documentation website. It serves as a roadmap for contributors and users to understand how documentation is organized within the project. The structure is designed to provide a logical progression from basic concepts to advanced topics, making it easier for new users to get started while offering comprehensive references for experienced developers.
 
