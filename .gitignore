@@ -85,6 +85,7 @@ Thumbs.db
 dist/
 build/
 out/
+docs/_site
 .output/
 coverage/
 *.tsbuildinfo
