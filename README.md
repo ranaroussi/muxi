@@ -59,13 +59,13 @@ orchestrator.create_agent(
 )
 
 # Create an agent with multi-user support
-long_term_memory = LongTermMemory()
-memobase = Memobase(long_term_memory=long_term_memory)
+# Memobase extends LongTermMemory with multi-user capabilities
+memobase = Memobase(long_term_memory=LongTermMemory())
 orchestrator.create_agent(
     agent_id="multi_user_assistant",
     model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
-    memobase=memobase,
+    long_term_memory=memobase,  # Pass Memobase as long_term_memory
     system_message="You are a helpful assistant that supports multiple users."
 )
 

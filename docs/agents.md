@@ -73,7 +73,7 @@ async def create_agent():
         agent_id="multi_user_agent",
         model=model,
         buffer_memory=BufferMemory(),
-        memobase=memobase,
+        long_term_memory=memobase,  # Pass Memobase as long_term_memory
         tools=tools,
         system_message="You are a helpful AI assistant that remembers user preferences."
     )
@@ -145,8 +145,7 @@ When creating an agent, you can configure various parameters:
 - **agent_id** (required): A unique identifier for the agent
 - **model** (required): The language model provider to use (e.g., OpenAIModel, AnthropicModel)
 - **buffer_memory**: Short-term memory for the current conversation
-- **long_term_memory**: Persistent memory for storing information across sessions
-- **memobase**: Multi-user memory manager for user-specific contexts
+- **long_term_memory**: Persistent memory for storing information across sessions. Can be a LongTermMemory or Memobase instance for multi-user support.
 - **tools**: A list of tools the agent can use
 - **system_message**: Instructions that define the agent's behavior
 - **set_as_default**: Whether to set this as the default agent for the orchestrator
@@ -307,14 +306,14 @@ from src.memory.memobase import Memobase
 from src.memory.long_term import LongTermMemory
 
 # Create a multi-user agent
-long_term_memory = LongTermMemory()
-memobase = Memobase(long_term_memory=long_term_memory)
+# Memobase extends LongTermMemory with multi-user capabilities
+memobase = Memobase(long_term_memory=LongTermMemory())
 
 orchestrator.create_agent(
     agent_id="customer_service",
     model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
-    memobase=memobase,
+    long_term_memory=memobase,  # Pass Memobase as long_term_memory
     system_message="""
     You are a customer service assistant that helps different customers.
     Maintain a personalized conversation with each user.

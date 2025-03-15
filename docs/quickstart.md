@@ -68,7 +68,7 @@ orchestrator.create_agent(
     agent_id="multi_user_assistant",
     model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
-    memobase=memobase,
+    long_term_memory=memobase,
     system_message="You are a helpful assistant that supports multiple users."
 )
 

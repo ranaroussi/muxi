@@ -303,6 +303,7 @@ from src.memory.memobase import Memobase
 
 # Initialize memory systems
 buffer_memory = BufferMemory()
+# Create a Memobase instance which extends LongTermMemory with multi-user capabilities
 long_term_memory = LongTermMemory(
     connection_string="postgresql://user:password@localhost:5432/ai_agent_db"
 )
@@ -314,7 +315,7 @@ orchestrator.create_agent(
     agent_id="multi_user_agent",
     model=OpenAIModel(model="gpt-4o"),
     buffer_memory=buffer_memory,
-    memobase=memobase,
+    long_term_memory=memobase,  # Pass Memobase as long_term_memory
     system_message="You are an assistant that remembers information about different users."
 )
 

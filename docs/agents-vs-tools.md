@@ -105,7 +105,7 @@ memobase = Memobase(long_term_memory=long_term_memory)
 
 orchestrator.create_agent(
     agent_id="personal_assistant",
-    memobase=memobase,
+    long_term_memory=memobase,  # Pass Memobase as long_term_memory
     system_message="You are a personal assistant that remembers user preferences."
 )
 
