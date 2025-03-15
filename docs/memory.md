@@ -648,14 +648,6 @@ class MemoryExtractor:
 - **Slow Queries**: Add appropriate indexes to the vector database
 - **Embedding Generation Errors**: Verify API keys and model availability for embedding generation
 
-## Next Steps
-
-After implementing memory systems, you might want to explore:
-
-- Creating [custom tools](./tools) that can access and manipulate memory
-- Setting up [WebSocket connections](./websocket) for real-time memory updates
-- Implementing advanced [MCP features](./mcp) to better control how the LLM uses memory
-- Developing [agent collaboration](./orchestrator) methods that share memory between agents
 
 ## Database Structure
 
@@ -767,3 +759,12 @@ The database schema is managed through migrations that:
 5. Enforce referential integrity through foreign key constraints
 
 This database structure provides a solid foundation for the memory systems within MUXI, enabling efficient retrieval of user-specific information, rich metadata storage, and vector similarity search for semantic understanding.
+
+## Next Steps
+
+After implementing memory systems, you might want to explore:
+
+- Creating [custom tools](./tools) that can access and manipulate memory
+- Setting up [WebSocket connections](./websocket) for real-time memory updates
+- Implementing advanced [MCP features](./mcp) to better control how the LLM uses memory
+- Developing [agent collaboration](./orchestrator) methods that share memory between agents
