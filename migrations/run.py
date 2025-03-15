@@ -5,7 +5,7 @@ Migration Utility
 A simple database migration utility for managing database schema changes.
 
 Usage:
-    python src/memory/migrations/run.py [create|up|down|remove] [name]
+    python migrations/run.py [create|up|down|remove] [name]
 """
 
 import os
@@ -23,9 +23,8 @@ import psycopg2
 class MigrationUtility:
     def __init__(self):
         # Set up paths
-        self.base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        self.migrations_dir = os.path.join(self.base_dir, 'memory', 'migrations')
-        self.root_dir = os.path.dirname(self.base_dir)  # Go up one more level to get to the root
+        self.migrations_dir = os.path.dirname(os.path.abspath(__file__))
+        self.root_dir = os.path.dirname(self.migrations_dir)  # Go up one level to get to the root
 
         # Ensure migrations directory exists
         if not os.path.exists(self.migrations_dir):
@@ -398,7 +397,7 @@ def down() -> str:
 def main():
     """Main entry point for the migration utility."""
     if len(sys.argv) < 2:
-        print("Usage: python src/memory/migrations/run.py [create|up|down|remove] [name]")
+        print("Usage: python migrations/run.py [create|up|down|remove] [name]")
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -407,7 +406,7 @@ def main():
     if command == "create":
         if len(sys.argv) < 3:
             print("Error: Migration name is required for 'create' command.")
-            print("Usage: python src/memory/migrations/run.py create [name]")
+            print("Usage: python migrations/run.py create [name]")
             sys.exit(1)
         utility.create(sys.argv[2])
     elif command == "up":
@@ -417,7 +416,7 @@ def main():
     elif command == "remove":
         if len(sys.argv) < 3:
             print("Error: Migration name is required for 'remove' command.")
-            print("Usage: python src/memory/migrations/run.py remove [name]")
+            print("Usage: python migrations/run.py remove [name]")
             sys.exit(1)
         utility.remove(sys.argv[2])
     else:
