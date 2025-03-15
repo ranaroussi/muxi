@@ -656,3 +656,114 @@ After implementing memory systems, you might want to explore:
 - Setting up [WebSocket connections](./websocket) for real-time memory updates
 - Implementing advanced [MCP features](./mcp) to better control how the LLM uses memory
 - Developing [agent collaboration](./orchestrator) methods that share memory between agents
+
+## Database Structure
+
+The memory systems in MUXI are backed by a robust PostgreSQL database schema optimized for efficient storage and retrieval of vector embeddings and user-specific data.
+
+### Core Tables
+
+The database is structured around these key tables:
+
+#### Users Table
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    user_id CHAR(21) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+- `id`: Internal primary key
+- `user_id`: Public-facing NanoID (CHAR(21))
+- Timestamps for tracking creation and updates
+
+#### Collections Table
+```sql
+CREATE TABLE collections (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    collection_id CHAR(21) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+- Stores memory collections that can be organized by topic or purpose
+- Associated with specific users via foreign key
+- Contains metadata about the collection (name, description)
+
+#### Memories Table
+```sql
+CREATE TABLE memories (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    memory_id CHAR(21) NOT NULL UNIQUE,
+    collection_id INTEGER REFERENCES collections(id) ON DELETE SET NULL,
+    content TEXT NOT NULL,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    embedding vector(1536),
+    source VARCHAR(255),
+    type VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+- Core table for storing memory content and embeddings
+- `embedding` column uses PostgreSQL's pgvector extension for vector storage
+- `metadata` uses JSONB for flexible schema evolution
+- Associated with users and optionally with collections
+
+#### Credentials Table
+```sql
+CREATE TABLE credentials (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    credential_id CHAR(21) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    service VARCHAR(255) NOT NULL,
+    credentials JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+- Stores user credentials for MCP servers and external tools
+- Uses JSONB for flexible credential format storage
+- Secured with proper indexing and access controls
+
+### Indexing Strategy
+
+The database uses a comprehensive indexing strategy:
+
+1. **Primary Keys**: All tables have auto-incrementing primary keys for efficiency
+2. **Foreign Keys**: Proper relationships with CASCADE delete where appropriate
+3. **NanoID Indexes**: All `*_id` fields (user_id, memory_id, etc.) are indexed for direct lookups
+4. **Vector Indexes**: IVFFLAT indexes on vector columns for efficient similarity search:
+   ```sql
+   CREATE INDEX memories_embedding_idx
+   ON memories USING ivfflat (embedding vector_cosine_ops)
+   WITH (lists = 100);
+   ```
+5. **Timestamp Indexes**: All tables have indexes on created_at and updated_at for time-based queries
+6. **Composite Indexes**: For common query patterns (e.g., user_id + created_at)
+7. **JSONB Indexes**: GIN indexes on JSONB columns for efficient querying of JSON contents:
+   ```sql
+   CREATE INDEX idx_credentials_json ON credentials USING GIN (credentials);
+   ```
+
+### Schema Migrations
+
+The database schema is managed through migrations that:
+
+1. Track applied changes to ensure consistent schema across environments
+2. Support both forward (up) and backward (down) migrations for each change
+3. Encapsulate SQL in Python functions for better version control
+4. Create proper indexes for all query patterns
+5. Enforce referential integrity through foreign key constraints
+
+This database structure provides a solid foundation for the memory systems within MUXI, enabling efficient retrieval of user-specific information, rich metadata storage, and vector similarity search for semantic understanding.

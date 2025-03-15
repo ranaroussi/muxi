@@ -12,6 +12,8 @@ Core components of the muxi framework now implemented:
    - Long-term memory using PostgreSQL with pgvector
    - Memobase system for multi-user support with partitioned memories
    - Domain knowledge system for user-specific structured information
+   - Robust database schema with optimized tables and indexes
+   - Migration system for schema version control
 3. **Tool System**:
    - Base tool interface
    - Tool registry for managing tools
@@ -129,6 +131,7 @@ Things to do next to enhance the framework:
 ### 8. Stability and Performance
 
 - [x] Comprehensive error monitoring
+- [x] Database schema optimization and indexing
 - [ ] Load testing for concurrent connections
 - [ ] Benchmarking WebSocket message throughput
 - [ ] Connection pooling for database access
