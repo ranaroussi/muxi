@@ -12,11 +12,12 @@ This document outlines the high-level strategic vision and planned future develo
 
 ## Short-term Goals
 
-- Complete core agent functionality
-- Implement basic memory systems
-- Add essential built-in tools
-- Finalize REST API specification
-- Implement WebSocket communication
+- Complete core agent functionality ✅
+- Implement basic memory systems ✅
+- Add essential built-in tools ✅
+- Finalize REST API specification ✅
+- Implement WebSocket communication ✅
+- Add user-specific domain knowledge support ✅
 
 ## Medium-term Goals
 
@@ -54,8 +55,9 @@ Develop a comprehensive Docker image strategy:
 
 ### Memory System Enhancements
 
-- Implement vector database integration
-- Add support for structured knowledge storage
+- Implement vector database integration ✅
+- Add support for structured knowledge storage ✅
+- Add support for user-specific domain knowledge ✅
 - Develop memory pruning/summarization
 - Create memory visualization tools
 
@@ -86,17 +88,18 @@ We welcome community input on prioritization of these roadmap items. Please open
 
 ## Version Targets
 
-### v0.1.0 (Initial Release)
+### v0.1.0 (Initial Release) ✅
 - Basic agent functionality
 - Core memory systems
 - REST API and WebSocket support
 - Limited tool support
 
-### v0.2.0
-- Enhanced orchestration
-- Improved memory persistence
-- Additional built-in tools
-- Initial web dashboard
+### v0.2.0 (Current)
+- Enhanced orchestration ✅
+- Improved memory persistence ✅
+- User-specific domain knowledge ✅
+- Additional built-in tools ✅
+- Initial web dashboard ✅
 
 ### v1.0.0
 - Production-ready release

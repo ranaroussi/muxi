@@ -11,6 +11,7 @@ Core components of the muxi framework now implemented:
    - Buffer memory using FAISS for short-term context
    - Long-term memory using PostgreSQL with pgvector
    - Memobase system for multi-user support with partitioned memories
+   - Domain knowledge system for user-specific structured information
 3. **Tool System**:
    - Base tool interface
    - Tool registry for managing tools
@@ -147,6 +148,7 @@ Things to do next to enhance the framework:
 - [x] Update WebSocket handler for multi-user support
 - [x] Add memory clearing for specific users
 - [x] Comprehensive test coverage for multi-user features
+- [x] Implement domain knowledge for user-specific structured information
 - [ ] User authentication and authorization system
 - [ ] User preference management
 - [ ] User activity logging and analytics

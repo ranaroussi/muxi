@@ -11,6 +11,7 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 - **Standardized LLM Communication**: Model Context Protocol (MCP) for consistent interaction with various LLM providers
 - **Memory Systems**: Short-term buffer memory and long-term persistent memory for agents
 - **Multi-User Support**: Memobase provides user-specific memory partitioning for multi-tenant applications
+- **Domain Knowledge**: Store and retrieve user-specific structured information to personalize agent responses
 - **Tool Integration**: Extensible tool system with built-in utilities and custom tool support
 - **Real-Time Communication**: WebSocket support for instant messaging and streaming responses
 - **REST API**: Comprehensive API for managing agents, tools, and conversations
@@ -69,13 +70,25 @@ orchestrator.create_agent(
     system_message="You are a helpful assistant that supports multiple users."
 )
 
+# Add domain knowledge for a specific user
+user_id = 123
+knowledge = {
+    "name": "Alice",
+    "age": 30,
+    "location": {"city": "New York", "country": "USA"},
+    "interests": ["AI", "programming", "music"],
+    "family": {"spouse": "Bob", "children": ["Charlie", "Diana"]}
+}
+await memobase.add_user_domain_knowledge(user_id=user_id, knowledge=knowledge)
+
 # Chat with a regular agent
 response = orchestrator.chat("assistant", "Hello, can you help me with a Python question?")
 print(response)
 
 # Chat with a multi-user agent (specify user_id)
-response = orchestrator.chat("multi_user_assistant", "Remember that my name is Alice", user_id=123)
-print(response)
+# The agent will automatically enhance the message with domain knowledge
+response = orchestrator.chat("multi_user_assistant", "What are my interests?", user_id=123)
+print(response)  # The response will reference the user's interests from domain knowledge
 ```
 
 ## Using the Command Line Interface
@@ -229,6 +242,7 @@ Comprehensive documentation is available in the `docs` directory:
 - [Agent Guide](docs/agent.md)
 - [Orchestrator Documentation](docs/orchestrator.md)
 - [Memory Systems](docs/memory.md)
+- [Domain Knowledge](docs/domain_knowledge.md)
 - [Tool System](docs/tools.md)
 - [Model Context Protocol (MCP)](docs/mcp.md)
 
