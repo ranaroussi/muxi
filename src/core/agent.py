@@ -79,6 +79,104 @@ class Agent:
         # MCPHandler is mocked in tests
         # Test expects it called during process_message
 
+    async def _enhance_with_domain_knowledge(
+        self,
+        message: str,
+        user_id: Optional[int] = None
+    ) -> str:
+        """
+        Enhance a user message with relevant domain knowledge.
+
+        Args:
+            message: The original user message.
+            user_id: Optional user ID for multi-user support.
+
+        Returns:
+            Enhanced message with domain knowledge context.
+        """
+        # Only enhance if we have multi-user support and a user_id
+        if not (self.is_multi_user and user_id is not None):
+            return message
+
+        try:
+            # Get domain knowledge for the user
+            knowledge = await self.long_term_memory.get_user_domain_knowledge(user_id=user_id)
+
+            # If no knowledge found, return original message
+            if not knowledge:
+                return message
+
+            # Create context with user information
+            context = "Information about the user:\n"
+
+            # Add basic information if available
+            if "name" in knowledge:
+                context += f"- Name: {knowledge['name']}\n"
+
+            if "age" in knowledge:
+                context += f"- Age: {knowledge['age']}\n"
+
+            # Add location if available
+            if "location" in knowledge and isinstance(knowledge['location'], dict):
+                location = knowledge['location']
+                city = location.get('city', '')
+                country = location.get('country', '')
+                if city and country:
+                    context += f"- Location: {city}, {country}\n"
+                elif city:
+                    context += f"- Location: {city}\n"
+                elif country:
+                    context += f"- Location: {country}\n"
+
+            # Add interests if available
+            if "interests" in knowledge:
+                interests = knowledge['interests']
+                if isinstance(interests, list):
+                    context += f"- Interests: {', '.join(interests)}\n"
+                else:
+                    context += f"- Interests: {interests}\n"
+
+            # Add job if available
+            if "job" in knowledge:
+                context += f"- Job: {knowledge['job']}\n"
+
+            # Add family information if available
+            if "family" in knowledge and isinstance(knowledge['family'], dict):
+                family = knowledge['family']
+                if "spouse" in family:
+                    context += f"- Spouse: {family['spouse']}\n"
+                if "children" in family and isinstance(family['children'], list):
+                    children = family['children']
+                    child_str = ', '.join(children)
+                    context += f"- Children: {child_str}\n"
+
+            # Add preferences if available
+            if "preferences" in knowledge and isinstance(knowledge['preferences'], dict):
+                prefs = knowledge['preferences']
+                context += "- Preferences:\n"
+                for key, value in prefs.items():
+                    context += f"  - {key}: {value}\n"
+
+            # Include any other top-level keys that weren't specifically handled
+            excluded_keys = [
+                "name", "age", "location", "interests",
+                "job", "family", "preferences"
+            ]
+            for key, value in knowledge.items():
+                if key not in excluded_keys:
+                    # Skip complex objects for generic handling
+                    if not isinstance(value, (dict, list)):
+                        context += f"- {key}: {value}\n"
+
+            # Combine context with original message
+            enhanced_message = f"{context}\nUser message: {message}"
+            return enhanced_message
+
+        except Exception as e:
+            # If anything goes wrong, just return the original message
+            print(f"Error enhancing message with domain knowledge: {e}")
+            return message
+
     async def process_message(self, message: str, user_id: Optional[int] = None) -> MCPMessage:
         """
         Process a user message and generate a response.
@@ -104,8 +202,11 @@ class Agent:
                 user_id=user_id,
             )
 
+        # Enhance message with domain knowledge if available
+        enhanced_message = await self._enhance_with_domain_knowledge(message, user_id)
+
         # Generate response using LLM - needs to be awaited
-        response = await self.model.chat([{"role": "user", "content": message}])
+        response = await self.model.chat([{"role": "user", "content": enhanced_message}])
 
         # Create MCPHandler (this is what the test is checking for)
         handler = MCPHandler(self.model, self.tools)
