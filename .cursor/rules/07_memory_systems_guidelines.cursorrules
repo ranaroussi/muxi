@@ -99,3 +99,27 @@
 - Implement circuit breakers for external dependencies
 - Support horizontal scaling of memory systems
 - Document performance characteristics
+
+## Database Structure
+- Structure database around users as the central entity
+- Use separate tables for different memory types and collections
+- Store user credentials in a dedicated table with proper encryption
+- Use nanoid (CHAR(21)) for public-facing identifiers across all tables
+- Implement proper foreign key relationships with cascade deletes
+- Include created_at and updated_at timestamps on all tables
+- Index all columns used for filtering, sorting and joining
+- Use JSONB for flexible metadata storage with GIN indexes
+- Implement composite indexes for common query patterns (e.g., user_id + created_at)
+- Use the pgvector extension for embedding storage with IVFFLAT indexes
+- Set appropriate vector dimensions based on embedding models (e.g., 1536 for OpenAI)
+- Create separate indexes for timestamp columns to optimize time-based queries
+- Structure the core schema around these key tables:
+  - users (id, user_id, timestamps)
+  - collections (id, user_id, collection_id, name, description, timestamps)
+  - memories (id, user_id, memory_id, collection_id, content, metadata, embedding, timestamps)
+  - credentials (id, user_id, credential_id, name, service, credentials, timestamps)
+- Ensure all tables have appropriate indexes for their primary access patterns
+- Implement proper constraints to maintain data integrity
+- Use transactions for operations that affect multiple tables
+- Use PostgreSQL's JSONB features for flexible schema evolution
+- Implement proper migrations for all schema changes
