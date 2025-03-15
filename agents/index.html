@@ -44,8 +44,8 @@
         <span class="n">agent_id</span><span class="o">=</span><span class="s">"multi_user_agent"</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">buffer_memory</span><span class="o">=</span><span class="n">BufferMemory</span><span class="p">(),</span>
-        <span class="n">memobase</span><span class="o">=</span><span class="n">memobase</span><span class="p">,</span>
-        <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+        <span class="n">long_term_memory</span><span class="o">=</span><span class="n">memobase</span><span class="p">,</span>  <span class="c1"># Pass Memobase as long_term_memory
+</span>        <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
         <span class="n">system_message</span><span class="o">=</span><span class="s">"You are a helpful AI assistant that remembers user preferences."</span>
     <span class="p">)</span>
 
@@ -93,7 +93,7 @@ python <span class="nt">-m</span> src.cli.agent create my_agent <span class="nt"
 
 <span class="c"># Create a multi-user agent</span>
 python <span class="nt">-m</span> src.cli.agent create multi_user_agent <span class="nt">--system</span> <span class="s2">"You are a helpful AI assistant that remembers user preferences."</span> <span class="nt">--tools</span> web_search calculator <span class="nt">--multi-user</span>
-</code></pre></div></div> <h2 id="agent-parameters"> <a href="#agent-parameters" class="anchor-heading" aria-labelledby="agent-parameters"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Agent Parameters </h2> <p>When creating an agent, you can configure various parameters:</p> <ul> <li><strong>agent_id</strong> (required): A unique identifier for the agent</li> <li><strong>model</strong> (required): The language model provider to use (e.g., OpenAIModel, AnthropicModel)</li> <li><strong>buffer_memory</strong>: Short-term memory for the current conversation</li> <li><strong>long_term_memory</strong>: Persistent memory for storing information across sessions</li> <li><strong>memobase</strong>: Multi-user memory manager for user-specific contexts</li> <li><strong>tools</strong>: A list of tools the agent can use</li> <li><strong>system_message</strong>: Instructions that define the agent’s behavior</li> <li><strong>set_as_default</strong>: Whether to set this as the default agent for the orchestrator</li> <li><strong>multi_user_support</strong>: Whether to enable user-specific memory via Memobase</li> </ul> <h2 id="interacting-with-an-agent"> <a href="#interacting-with-an-agent" class="anchor-heading" aria-labelledby="interacting-with-an-agent"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Interacting with an Agent </h2> <p>Once you’ve created an agent, you can interact with it in several ways:</p> <h3 id="via-python-code-1"> <a href="#via-python-code-1" class="anchor-heading" aria-labelledby="via-python-code-1"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Via Python Code </h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Continue from previous example
+</code></pre></div></div> <h2 id="agent-parameters"> <a href="#agent-parameters" class="anchor-heading" aria-labelledby="agent-parameters"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Agent Parameters </h2> <p>When creating an agent, you can configure various parameters:</p> <ul> <li><strong>agent_id</strong> (required): A unique identifier for the agent</li> <li><strong>model</strong> (required): The language model provider to use (e.g., OpenAIModel, AnthropicModel)</li> <li><strong>buffer_memory</strong>: Short-term memory for the current conversation</li> <li><strong>long_term_memory</strong>: Persistent memory for storing information across sessions. Can be a LongTermMemory or Memobase instance for multi-user support.</li> <li><strong>tools</strong>: A list of tools the agent can use</li> <li><strong>system_message</strong>: Instructions that define the agent’s behavior</li> <li><strong>set_as_default</strong>: Whether to set this as the default agent for the orchestrator</li> <li><strong>multi_user_support</strong>: Whether to enable user-specific memory via Memobase</li> </ul> <h2 id="interacting-with-an-agent"> <a href="#interacting-with-an-agent" class="anchor-heading" aria-labelledby="interacting-with-an-agent"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Interacting with an Agent </h2> <p>Once you’ve created an agent, you can interact with it in several ways:</p> <h3 id="via-python-code-1"> <a href="#via-python-code-1" class="anchor-heading" aria-labelledby="via-python-code-1"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Via Python Code </h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Continue from previous example
 </span>
 <span class="c1"># Standard agent interaction
 </span><span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">agent_id</span><span class="p">,</span> <span class="s">"What's the population of Tokyo?"</span><span class="p">)</span>
@@ -208,15 +208,15 @@ You are an AI assistant specialized in helping with scientific research.
 <span class="kn">from</span> <span class="nn">src.memory.long_term</span> <span class="kn">import</span> <span class="n">LongTermMemory</span>
 
 <span class="c1"># Create a multi-user agent
-</span><span class="n">long_term_memory</span> <span class="o">=</span> <span class="n">LongTermMemory</span><span class="p">()</span>
-<span class="n">memobase</span> <span class="o">=</span> <span class="n">Memobase</span><span class="p">(</span><span class="n">long_term_memory</span><span class="o">=</span><span class="n">long_term_memory</span><span class="p">)</span>
+# Memobase extends LongTermMemory with multi-user capabilities
+</span><span class="n">memobase</span> <span class="o">=</span> <span class="n">Memobase</span><span class="p">(</span><span class="n">long_term_memory</span><span class="o">=</span><span class="n">LongTermMemory</span><span class="p">())</span>
 
 <span class="n">orchestrator</span><span class="p">.</span><span class="n">create_agent</span><span class="p">(</span>
     <span class="n">agent_id</span><span class="o">=</span><span class="s">"customer_service"</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="n">OpenAIModel</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"gpt-4o"</span><span class="p">),</span>
     <span class="n">buffer_memory</span><span class="o">=</span><span class="n">BufferMemory</span><span class="p">(),</span>
-    <span class="n">memobase</span><span class="o">=</span><span class="n">memobase</span><span class="p">,</span>
-    <span class="n">system_message</span><span class="o">=</span><span class="s">"""
+    <span class="n">long_term_memory</span><span class="o">=</span><span class="n">memobase</span><span class="p">,</span>  <span class="c1"># Pass Memobase as long_term_memory
+</span>    <span class="n">system_message</span><span class="o">=</span><span class="s">"""
     You are a customer service assistant that helps different customers.
     Maintain a personalized conversation with each user.
     Remember their preferences and previous interactions.
