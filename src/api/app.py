@@ -273,8 +273,7 @@ def create_app() -> FastAPI:
                 agent_id=request.agent_id,
                 model=model,
                 buffer_memory=buffer_memory,
-                long_term_memory=long_term_memory,
-                memobase=memobase,
+                long_term_memory=memobase if request.multi_user_support else long_term_memory,
                 tools=tools,
                 system_message=request.system_message,
             )

@@ -14,7 +14,6 @@ from src.core.mcp import MCPMessage
 from src.memory.base import BaseMemory
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
-from src.memory.memobase import Memobase
 from src.models.base import BaseModel
 from src.tools.base import BaseTool, ToolRegistry
 
@@ -41,7 +40,6 @@ class Orchestrator:
         memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
-        memobase: Optional[Memobase] = None,
         tools: Optional[List[BaseTool]] = None,
         system_message: Optional[str] = None,
         set_as_default: bool = False,
@@ -56,7 +54,7 @@ class Orchestrator:
                 (for backward compatibility).
             buffer_memory: Optional buffer memory for short-term context.
             long_term_memory: Optional long-term memory for persistent storage.
-            memobase: Optional Memobase instance for multi-user memory support.
+                Can be a LongTermMemory or Memobase instance for multi-user support.
             tools: Optional list of tools the agent can use.
             system_message: Optional system message to set agent's behavior.
             set_as_default: Whether to set this agent as the default.
@@ -78,7 +76,6 @@ class Orchestrator:
             model=model,
             buffer_memory=buffer_memory,
             long_term_memory=long_term_memory,
-            memobase=memobase,
             tools=tools_dict,
             system_message=system_message,
         )

@@ -55,7 +55,7 @@ class TestAgentWithMemobase(unittest.TestCase):
             name="test_agent",
             model=self.mock_model,
             buffer_memory=self.mock_buffer_memory,
-            memobase=self.mock_memobase,
+            long_term_memory=self.mock_memobase,
             tools=self.mock_tools,
         )
 

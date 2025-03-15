@@ -30,7 +30,6 @@ class Agent:
         memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
-        memobase: Optional[Memobase] = None,
         tools: Optional[Dict[str, BaseTool]] = None,
         system_message: Optional[str] = None,
         name: Optional[str] = None,
@@ -44,7 +43,7 @@ class Agent:
                 (for backward compatibility).
             buffer_memory: Optional buffer memory for short-term context.
             long_term_memory: Optional long-term memory for persistent storage.
-            memobase: Optional Memobase instance for multi-user memory support.
+                Can be a LongTermMemory or Memobase instance for multi-user support.
             tools: Optional dictionary of tools the agent can use.
             system_message: Optional system message to set agent's behavior.
             name: Optional name for the agent.
@@ -61,7 +60,10 @@ class Agent:
             self.memory = self.buffer_memory  # For backward compatibility
 
         self.long_term_memory = long_term_memory
-        self.memobase = memobase
+        # Check if long_term_memory is a Memobase instance
+        has_memory = self.long_term_memory is not None
+        is_memobase = isinstance(self.long_term_memory, Memobase)
+        self.is_multi_user = has_memory and is_memobase
 
         # Handle tools
         if isinstance(tools, dict):
@@ -94,9 +96,9 @@ class Agent:
         # Add message to memory systems
         self.memory.add(message, {"role": "user", "timestamp": timestamp})
 
-        # If using memobase, also store there with user context
-        if self.memobase and user_id is not None:
-            await self.memobase.add(
+        # If using Memobase, also store there with user context
+        if self.is_multi_user and user_id is not None:
+            await self.long_term_memory.add(
                 content=message,
                 metadata={"role": "user", "timestamp": timestamp},
                 user_id=user_id,
@@ -122,9 +124,9 @@ class Agent:
             # Process the message with the handler
             result = handler.process_message(assistant_message)
 
-            # Store assistant response in memobase if available
-            if self.memobase and user_id is not None:
-                await self.memobase.add(
+            # Store assistant response in Memobase if available
+            if self.is_multi_user and user_id is not None:
+                await self.long_term_memory.add(
                     content=result.content,
                     metadata={"role": "assistant", "timestamp": timestamp},
                     user_id=user_id,
@@ -132,11 +134,11 @@ class Agent:
 
             return result
 
-        # Store assistant response in memobase if available
+        # Store assistant response in Memobase if available
         response_content = response if isinstance(response, str) else "I'm a helpful assistant."
 
-        if self.memobase and user_id is not None:
-            await self.memobase.add(
+        if self.is_multi_user and user_id is not None:
+            await self.long_term_memory.add(
                 content=response_content,
                 metadata={"role": "assistant", "timestamp": timestamp},
                 user_id=user_id,
@@ -252,9 +254,9 @@ class Agent:
         Returns:
             A list of relevant memory items.
         """
-        # If memobase is available and user_id is provided, use it
-        if self.memobase and user_id is not None:
-            return await self.memobase.search(query=query, limit=k, user_id=user_id)
+        # If Memobase is available and user_id is provided, use it
+        if self.is_multi_user and user_id is not None:
+            return await self.long_term_memory.search(query=query, limit=k, user_id=user_id)
 
         # Otherwise, fall back to traditional memory search
         # Get embedding for query
@@ -359,9 +361,9 @@ class Agent:
             clear_long_term: Whether to clear long-term memory as well.
             user_id: Optional user ID for multi-user support.
         """
-        # If memobase is available and user_id is provided, use it
-        if self.memobase and user_id is not None:
-            self.memobase.clear_user_memory(user_id)
+        # If Memobase is available and user_id is provided, use it
+        if self.is_multi_user and user_id is not None:
+            self.long_term_memory.clear_user_memory(user_id)
             return
 
         # Otherwise, fall back to traditional memory clearing
