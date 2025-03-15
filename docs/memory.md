@@ -180,6 +180,7 @@ Memobase:
 - Maintains user context between sessions
 - Uses PostgreSQL/PGVector for efficient semantic search
 - Provides a simple interface for user-specific operations
+- Supports domain knowledge storage for user profiles
 
 ### Using Memobase
 
@@ -288,6 +289,115 @@ results = await memobase.search(
     user_id=123,
     additional_filter={"type": "user_info"}
 )
+```
+
+### Domain Knowledge Management
+
+Memobase provides specialized methods for managing user domain knowledge - structured information about users that can be used to personalize agent interactions.
+
+#### Adding Domain Knowledge
+
+```python
+# Add domain knowledge for a user
+await memobase.add_user_domain_knowledge(
+    user_id=123,
+    knowledge={
+        "name": "John Doe",
+        "age": 30,
+        "location": {"city": "New York", "country": "USA"},
+        "interests": ["programming", "AI", "music"],
+        "job": "Software Engineer",
+        "family": {
+            "spouse": "Jane Doe",
+            "children": ["Alice", "Bob"]
+        }
+    },
+    source="profile_setup",
+    importance=0.9  # High importance ensures this is prioritized in retrieval
+)
+```
+
+#### Retrieving Domain Knowledge
+
+```python
+# Get all domain knowledge for a user
+knowledge = await memobase.get_user_domain_knowledge(user_id=123)
+print(f"User name: {knowledge['name']}")
+print(f"User location: {knowledge['location']['city']}, {knowledge['location']['country']}")
+
+# Get specific domain knowledge keys
+profile = await memobase.get_user_domain_knowledge(
+    user_id=123,
+    keys=["name", "job"]
+)
+print(f"{profile['name']} works as a {profile['job']}")
+```
+
+#### Importing Domain Knowledge
+
+```python
+# Import from a dictionary
+user_data = {
+    "name": "John Doe",
+    "preferences": {
+        "theme": "dark",
+        "language": "English"
+    }
+}
+await memobase.import_user_domain_knowledge(
+    data_source=user_data,
+    user_id=123,
+    format="dict"
+)
+
+# Import from a JSON file
+await memobase.import_user_domain_knowledge(
+    data_source="user_profiles/john_doe.json",
+    user_id=123,
+    format="json",
+    source="profile_import"
+)
+```
+
+#### Clearing Domain Knowledge
+
+```python
+# Clear all domain knowledge for a user
+await memobase.clear_user_domain_knowledge(user_id=123)
+
+# Clear specific domain knowledge keys
+await memobase.clear_user_domain_knowledge(
+    user_id=123,
+    keys=["preferences", "location"]
+)
+```
+
+#### Using Domain Knowledge in Agent Interactions
+
+```python
+# When processing a user message, include relevant domain knowledge
+async def process_with_domain_knowledge(agent, message, user_id):
+    # Get user domain knowledge
+    knowledge = await agent.memobase.get_user_domain_knowledge(user_id)
+
+    # Create a context with user information
+    context = "Information about the user:\n"
+    if "name" in knowledge:
+        context += f"- Name: {knowledge['name']}\n"
+    if "location" in knowledge and isinstance(knowledge['location'], dict):
+        location = knowledge['location']
+        context += f"- Location: {location.get('city', '')}, {location.get('country', '')}\n"
+    if "interests" in knowledge:
+        interests = knowledge['interests']
+        if isinstance(interests, list):
+            context += f"- Interests: {', '.join(interests)}\n"
+
+    # Include the context in your prompt to the LLM
+    prompt = f"{context}\n\nUser message: {message}"
+
+    # Process with the enhanced context
+    response = await agent.process_message(prompt, user_id)
+    return response
 ```
 
 ## Integrating Memory with Agents
