@@ -295,11 +295,11 @@ Type `/help` for available commands or `/exit` to quit.
 
 Available Tools
 ┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Name         ┃ Description                                         ┃
+┃ Name         ┃ Description                                       ┃
 ┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ web_search   │ Search the web for information                      │
-│ calculator   │ Perform mathematical calculations                   │
-└──────────────┴─────────────────────────────────────────────────────┘
+│ web_search   │ Search the web for information                    │
+│ calculator   │ Perform mathematical calculations                 │
+└──────────────┴───────────────────────────────────────────────────┘
 
 You: Tell me about the MUXI Framework
 
@@ -318,11 +318,11 @@ You: /tools
 
 Available Tools
 ┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Name         ┃ Description                                         ┃
+┃ Name         ┃ Description                                       ┃
 ┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ web_search   │ Search the web for information                      │
-│ calculator   │ Perform mathematical calculations                   │
-└──────────────┴─────────────────────────────────────────────────────┘
+│ web_search   │ Search the web for information                    │
+│ calculator   │ Perform mathematical calculations                 │
+└──────────────┴───────────────────────────────────────────────────┘
 
 You: /exit
 
