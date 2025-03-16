@@ -37,6 +37,41 @@ This document outlines the high-level strategic vision and planned future develo
 
 ## Planned Features
 
+### Multi-Modal Agent Capabilities
+
+Transform agents into omni agents capable of handling various media types:
+
+- Image processing and understanding
+  - Support for image attachments in messages
+  - Integration with vision-capable models (GPT-4V, Claude 3, Gemini)
+  - Image preprocessing and optimization
+
+- Audio processing
+  - Audio file handling and transcription
+  - Streaming audio input/output capabilities
+  - Real-time speech-to-text and text-to-speech
+  - Support for voice conversations with agents
+
+- Document processing
+  - PDF, Word, and other document format support
+  - Text extraction and semantic understanding
+  - OCR for scanned documents
+
+- Video capabilities (long-term)
+  - Video file processing and frame extraction
+  - Streaming video support for real-time interactions
+  - Video content analysis and understanding
+
+- Media storage and retrieval system
+  - Efficient storage of media attachments
+  - Caching mechanisms for frequently accessed media
+  - Support for cloud storage integration (S3, etc.)
+
+- Unified streaming protocol
+  - Bi-directional streaming for audio/video
+  - WebRTC integration for real-time media communication
+  - WebSocket extensions for streaming media
+
 ### Docker Distribution
 
 Develop a comprehensive Docker image strategy:
@@ -145,3 +180,11 @@ We welcome community input on prioritization of these roadmap items. Please open
 - Advanced user authentication and authorization
 - Interactive MCP server generator ✅
 - Developer tooling for MCP server creation ✅
+- Initial multi-modal capabilities (image and audio support)
+
+### v1.5.0
+- Advanced multi-modal capabilities
+- Streaming audio support
+- Document processing capabilities
+- Media storage system enhancements
+- Expanded model provider integrations

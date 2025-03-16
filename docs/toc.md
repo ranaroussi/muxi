@@ -86,3 +86,10 @@ This document tracks the progress of the MUXI documentation. It shows which docu
 - [Testing Guide](testing.md)
 
 ## Components
+- [Orchestrator](orchestrator.md)
+- [Agents](agents.md)
+- [Memory Systems](memory.md)
+- [Domain Knowledge](domain_knowledge.md)
+- [Tool System](tools.md)
+- [Model Context Protocol (MCP)](mcp.md)
+- [Multi-Modal Capabilities](multi-modal.md)

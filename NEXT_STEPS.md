@@ -102,15 +102,6 @@ Things to do next to enhance the framework:
 ### 5. Advanced Features
 
 - [ ] Multi-agent collaboration: Enable agents to work together
-- [ ] Multi-modal support: Enable agents to process and generate different types of content
-  - [ ] Image understanding and analysis
-  - [ ] Audio transcription and generation
-  - [ ] Video content analysis
-  - [ ] Document parsing and extraction
-  - [ ] Multi-modal reasoning across different content types
-  - [ ] Implement vision capabilities with models like GPT-4V
-  - [ ] Add support for audio input/output with speech-to-text and text-to-speech
-  - [ ] Create standardized interfaces for multi-modal tool interactions
 - [ ] Planning and reasoning: Implement planning capabilities
 - [ ] Continuous learning: Update agent knowledge over time
 - [ ] Evaluation framework: Measure agent performance
@@ -119,7 +110,71 @@ Things to do next to enhance the framework:
 - [ ] Profile the code to identify performance bottlenecks
 - [ ] Optimize memory usage in high-traffic scenarios
 
-### 6. Deployment
+### 6. Multi-Modal Capabilities
+
+Transform agents into omni agents capable of handling various media types:
+
+#### Image Processing
+- [ ] Extend MCPMessage to support image attachments
+- [ ] Create image preprocessing pipeline
+  - [ ] Resize and optimize images for models
+  - [ ] Format conversion utilities
+  - [ ] Metadata extraction
+- [ ] Integrate with vision-capable models
+  - [ ] OpenAI GPT-4V
+  - [ ] Anthropic Claude 3
+  - [ ] Google Gemini
+  - [ ] Local models with vision capabilities
+- [ ] Update API endpoints to handle image uploads
+- [ ] Add WebSocket support for image sharing
+
+#### Audio Processing
+- [ ] Audio file handling and processing
+  - [ ] Support various audio formats (MP3, WAV, etc.)
+  - [ ] Audio normalization and enhancement
+- [ ] Speech-to-text integration
+  - [ ] OpenAI Whisper integration
+  - [ ] Other speech recognition options
+- [ ] Text-to-speech for agent responses
+  - [ ] Voice selection options
+  - [ ] Emotion/tone control
+- [ ] Streaming audio capabilities
+  - [ ] Design WebSocket protocol for audio streaming
+  - [ ] Implement real-time audio processing
+  - [ ] Create buffering mechanisms for smooth playback
+  - [ ] Develop audio session management
+
+#### Document Processing
+- [ ] PDF processing and text extraction
+- [ ] Support for Office documents (Word, Excel, etc.)
+- [ ] OCR for scanned documents
+- [ ] Document summarization tools
+- [ ] Semantic parsing of document structure
+
+#### Video Support (Long-term)
+- [ ] Video file processing
+- [ ] Frame extraction and analysis
+- [ ] Video content understanding
+- [ ] Streaming video protocol
+  - [ ] WebRTC integration
+  - [ ] Video compression and optimization
+  - [ ] Bandwidth management
+
+#### Media Storage System
+- [ ] Design efficient storage architecture for media files
+- [ ] Implement caching for frequently accessed media
+- [ ] Support cloud storage options (S3, GCS, etc.)
+- [ ] Create media reference system for conversations
+- [ ] Develop cleanup policies for temporary media
+
+#### Unified Media API
+- [ ] Standardize media handling across the framework
+- [ ] Create consistent interfaces for all media types
+- [ ] Design streaming protocols for real-time media
+- [ ] Implement media type detection and handling
+- [ ] Develop fallback mechanisms for unsupported media
+
+### 7. Deployment
 
 - [ ] Docker containerization
 - [ ] Kubernetes deployment
@@ -128,7 +183,7 @@ Things to do next to enhance the framework:
 - [ ] Continuous integration workflow with GitHub Actions or similar tools
 - [ ] Automatic version bumping for releases
 
-### 7. User Interfaces
+### 8. User Interfaces
 
 - [x] CLI interface
 - [x] Web dashboard
@@ -142,7 +197,7 @@ Things to do next to enhance the framework:
   - [x] Connection lifecycle management
   - [x] Error handling and recovery
 
-### 8. Stability and Performance
+### 9. Stability and Performance
 
 - [x] Comprehensive error monitoring
 - [x] Database schema optimization and indexing
@@ -160,7 +215,7 @@ Things to do next to enhance the framework:
   - [ ] Log visualization in web dashboard
   - [ ] Log filtering and search capabilities
 
-### 9. Multi-User Support
+### 10. Multi-User Support
 
 - [x] Implement Memobase for user-specific memory partitioning
 - [x] Add user_id parameter to API endpoints
@@ -172,7 +227,7 @@ Things to do next to enhance the framework:
 - [ ] User preference management
 - [ ] User activity logging and analytics
 
-### 10. Package Distribution
+### 11. Package Distribution
 
 - [ ] Create proper Python package for PyPI distribution
 - [ ] Versioning strategy
@@ -180,7 +235,7 @@ Things to do next to enhance the framework:
 - [ ] Package documentation
 - [ ] Installation guides
 
-### 11. Development Workflow
+### 12. Development Workflow
 
 - [ ] Set up pre-commit hooks to automatically run linters/formatters before committing
 - [ ] Implement comprehensive code review guidelines
