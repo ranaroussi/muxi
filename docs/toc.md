@@ -80,8 +80,9 @@ This document tracks the progress of the MUXI documentation. It shows which docu
 - [ ] License Information
 - [ ] Example Projects
 
-## Setup
+## Setup and Configuration
+- [Quick Start Guide](quick_start.md)
+- [Configuration Guide](configuration_guide.md)
+- [Testing Guide](testing.md)
 
-- [Installation Guide](/installation-guide/)
-- [Quick Start](/quick-start/)
-- [Configuration Guide](/configuration-guide/)
+## Components

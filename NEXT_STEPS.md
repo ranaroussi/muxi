@@ -7,6 +7,9 @@ This document provides a detailed task tracker for developers working on the MUX
 Core components of the muxi framework now implemented:
 
 1. **Model Context Protocol (MCP)**: Standardized communication with LLMs
+   - Fixed message handling to properly use role/content attributes
+   - Improved process_message and process_tool_call methods
+   - Standardized message structure for compatibility with all LLM providers
 2. **Memory System**:
    - Buffer memory using FAISS for short-term context
    - Long-term memory using PostgreSQL with pgvector
@@ -143,6 +146,8 @@ Things to do next to enhance the framework:
 
 - [x] Comprehensive error monitoring
 - [x] Database schema optimization and indexing
+- [x] Improved API key handling for tests
+- [x] Standardized environment variable loading
 - [ ] Load testing for concurrent connections
 - [ ] Benchmarking WebSocket message throughput
 - [ ] Connection pooling for database access
@@ -181,6 +186,7 @@ Things to do next to enhance the framework:
 - [ ] Implement comprehensive code review guidelines
 - [ ] Create contribution templates
 - [ ] Set up automated release pipeline
+- [x] Automated test environment setup to handle API key loading
 
 ## Contribution Guidelines
 

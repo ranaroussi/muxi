@@ -305,12 +305,14 @@ socket.onmessage = (event) => {
 
 ## Recent Improvements
 
-- **Multi-User Support**: Added Memobase for user-specific memory partitioning
+- **Multi-User Support**: Added Memobase for user-specific memory partitioned memory
 - **Memory Management**: Added endpoints for memory search and clearing, with support for user-specific operations
 - **Shared Orchestrator Instance**: Fixed issue with WebSocket and REST API using different orchestrator instances
 - **Enhanced Error Handling**: Improved error handling and reporting in WebSocket connections
 - **Message Serialization**: Fixed JSON serialization issues with MCPMessage objects
 - **Reliable Connection Management**: Implemented automatic reconnection and subscription recovery
+- **MCP Message Structure**: Improved message handling with standardized role/content attributes for better compatibility with various LLM providers
+- **Testing Environment**: Added utilities for consistent API key handling in tests
 - **Documentation**: Added comprehensive documentation for all components
 - **Test Coverage**: Added extensive test coverage for all API endpoints, especially multi-user functionality
 
@@ -335,6 +337,7 @@ Comprehensive documentation is available in the `docs` directory:
 ### Setup and Configuration
 - [Quick Start Guide](docs/quick_start.md)
 - [Configuration Guide](docs/configuration_guide.md)
+- [Testing Guide](docs/testing.md)
 
 ### Interfaces
 - [CLI Documentation](docs/cli.md)

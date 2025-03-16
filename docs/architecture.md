@@ -15,48 +15,60 @@ The MUXI framework consists of several core components that work together to pro
 ```mermaid
 %%{init: {"theme":"light", "flowchart": {"defaultRenderer": "elk"}} }%%
 flowchart TB
+    subgraph Interfaces["Interfaces"]
+        REST["REST&nbsp;API"]
+        WS["&nbsp;WebSocket&nbsp;"]
+        APP["&nbsp;Web&nbsp;App&nbsp;"]
+        CLI["&nbsp;CLI&nbsp;"]
+    end
     subgraph MS["Memory"]
-        Buffer["FAISS (ST)"]
-        PGSQL["PGVector (LT)"]
-        MBASE["Memobase<br>(user-aware)"]
+        Buffer["FAISS&nbsp;(ST)"]
+        PGSQL["PGVector&nbsp;(LT)"]
+        MBASE["Memobase"]
     end
     subgraph LE["LLM Engines"]
         LLM["Open AI"]
-        Anthropic["Anthropic"]
+        Grok["Anthropic"]
         Ollama["Ollama"]
     end
     subgraph Tools["Tools"]
-        BuiltIn["Built-in<br>Files, Search, etc."]
-        Custom["Custom<br>User Generated"]
+        BuiltIn["Built-in<br>Files,&nbsp;Search,&nbsp;etc."]
+        Custom["Custom<br>User&nbsp;Generated"]
     end
-    subgraph AIA["MUXI Framework"]
+    subgraph MUXI["<b><big>MUXI</big></b>"]
         Server["Server"]
         Orchestrator["Orchestrator"]
-        Agent["Agent 1"]
-        Agent2["Agent N"]
-        AgentN["Agent 2"]
-        MCP["MCP Handler"]
+        Agent["Agent&nbsp;1"]
+        Agent2["Agent&nbsp;N"]
+        AgentN["Agent&nbsp;2"]
+        MCP["MCP&nbsp;Handler"]
         MS
         LE
         Tools
     end
-    REST["REST API"] --> Server
-    WS["WebSocket"] --> Server
-    APP["Web App"] --> Server
-    CLI["CLI"] --> Server
-    Server -- Forwards Request --> Orchestrator
-    Orchestrator -- Manages --> Agent & Agent2 & AgentN
+    REST --> Server
+    WS --> Server
+    APP --> Server
+    CLI --> Server
+    Server -- &nbsp;Forwards Request&nbsp; --> Orchestrator
+    Orchestrator -- &nbsp;Routes&nbsp; --> Agent & Agent2 & AgentN
     Agent -- Uses --> LLM
-    Agent <-- Execute --> Tools
-    Agent -- Accesses --> MS
-    LLM <-- Communicates --> MCP
-    MCP <-- Executes --> Tools
-    PGSQL --- MBASE
+    Agent -- &nbsp; &nbsp; &nbsp;Execute&nbsp; &nbsp; &nbsp; --> Tools
+    Agent -- &nbsp;Accesses&nbsp; --> MS
+    LLM <-- &nbsp;Communicates&nbsp; --> MCP
+    LLM <-- &nbsp;Executes&nbsp; --> Tools
+    MCP -- &nbsp;Executes&nbsp; --> MCP2[MCP&nbsp;Servers]
+    PGSQL -- &nbsp;Profiles&nbsp; --- MBASE
 
-    classDef green fill:#bfb,stroke:#4f8f00,color:#000
-    class LLM,Server,Orchestrator,Agent,MCP green
-    classDef transparent fill:transparent
-    class AIA transparent
+    %% style APP fill:#ff6602,color:#fff,stroke:#e0085f
+    style LLM fill:#bfb,stroke:#4f8f00
+    style Server fill:#bfb,stroke:#4f8f00
+    style Orchestrator fill:#bfb,stroke:#4f8f00
+    style Agent fill:#bfb,stroke:#4f8f00
+    style MCP fill:#bfb,stroke:#4f8f00
+    style MUXI fill:#fff,stroke:#4f8f00,stroke-width:2px,stroke-dasharray:5
+    style MS fill:#fff,stroke:#808080,stroke-dasharray:5
+    style LE fill:#fff,stroke:#808080,stroke-dasharray:5
 ```
 
 ## Component Descriptions

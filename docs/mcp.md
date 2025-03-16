@@ -83,6 +83,83 @@ The complete flow of tool usage looks like this:
 
 This clarifies that MCP is not the tools themselves—it's just the standardized way to communicate about tools with the language model.
 
+## Message Structure
+
+The `MCPMessage` class is the core data structure used for communication in the MCP system. It represents a message in a conversation, with attributes for the sender role, content, and additional metadata.
+
+### Key Attributes
+
+A proper MCPMessage contains the following key attributes:
+
+- `role`: The role of the sender (e.g., "user", "assistant", "system", "function")
+- `content`: The actual content of the message
+- `name`: Optional name for function messages
+- `context`: Optional context information
+
+This structure ensures compatibility with various LLM providers like OpenAI, Anthropic, and others.
+
+### Example Usage
+
+```python
+from src.core.mcp import MCPMessage
+
+# Create a user message
+user_msg = MCPMessage(
+    role="user",
+    content="What's the weather like in New York?"
+)
+
+# Create an assistant response
+assistant_msg = MCPMessage(
+    role="assistant",
+    content="The weather in New York is currently sunny with a temperature of 72°F."
+)
+
+# Create a function message
+function_msg = MCPMessage(
+    role="function",
+    content="The current temperature is 72°F with clear skies.",
+    name="get_weather",
+    metadata={"location": "New York", "unit": "fahrenheit"}
+)
+```
+
+### Internal Processing
+
+When messages are processed, they are converted to a format suitable for the language model:
+
+```python
+def _context_to_model_messages(context):
+    """
+    Convert MCPContext to a list of messages for the language model.
+
+    This method processes each message in the context and extracts the
+    appropriate attributes (role, content, name, etc.) to create a
+    properly formatted message for the LLM.
+    """
+    model_messages = []
+
+    for message in context.messages:
+        # Create the base message with required attributes
+        model_message = {
+            "role": message.role,
+            "content": message.content
+        }
+
+        # Add optional attributes if present
+        if hasattr(message, "name") and message.name:
+            model_message["name"] = message.name
+
+        if hasattr(message, "context") and message.context:
+            model_message["context"] = message.context
+
+        model_messages.append(model_message)
+
+    return model_messages
+```
+
+This ensures that messages maintain proper structure throughout the system.
+
 ## MCP Message Structure
 
 The core of MCP is the message structure:
