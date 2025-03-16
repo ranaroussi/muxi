@@ -129,7 +129,30 @@
 
 <span class="c1"># Run the chat
 </span><span class="k">await</span> <span class="n">chat_with_tools</span><span class="p">()</span>
-</code></pre></div></div> <h2 id="mcp-with-different-language-model-providers"> <a href="#mcp-with-different-language-model-providers" class="anchor-heading" aria-labelledby="mcp-with-different-language-model-providers"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> MCP with Different Language Model Providers </h2> <p>The MCP standardizes interactions across different language model providers:</p> <h3 id="openai-implementation"> <a href="#openai-implementation" class="anchor-heading" aria-labelledby="openai-implementation"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> OpenAI Implementation </h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">src.mcp.message</span> <span class="kn">import</span> <span class="n">MCPMessage</span>
+</code></pre></div></div> <h2 id="creating-custom-mcp-servers"> <a href="#creating-custom-mcp-servers" class="anchor-heading" aria-labelledby="creating-custom-mcp-servers"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Creating Custom MCP Servers </h2> <p>The MUXI framework provides a convenient utility for creating custom MCP servers through a CLI wizard:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Generate a new MCP server with an interactive wizard</span>
+muxi create mcp-server
+
+<span class="c"># Specify output directory and optional name</span>
+muxi create mcp-server <span class="nt">--output-dir</span> ./my_servers <span class="nt">--name</span> MyCustomMCP
+</code></pre></div></div> <p>The wizard guides you through:</p> <ol> <li>Naming your MCP server</li> <li>Providing a description</li> <li>Adding custom tools with descriptions</li> <li>Generating all necessary boilerplate code</li> </ol> <h3 id="generated-project-structure"> <a href="#generated-project-structure" class="anchor-heading" aria-labelledby="generated-project-structure"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Generated Project Structure </h3> <p>The generator creates a complete MCP server project with the following structure:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>my_custom_mcp/
+├── __init__.py
+├── my_custom_mcp_server.py
+├── README.md
+├── setup.py
+├── tools/
+│   ├── __init__.py
+│   └── tool1.py
+├── tests/
+│   └── __init__.py
+└── examples/
+    └── example_client.py
+</code></pre></div></div> <p>This structure includes:</p> <ul> <li>A properly configured MCP server implementation</li> <li>Tool class templates</li> <li>Installation setup</li> <li>README documentation</li> <li>Example client code</li> </ul> <h3 id="using-the-generated-mcp-server"> <a href="#using-the-generated-mcp-server" class="anchor-heading" aria-labelledby="using-the-generated-mcp-server"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Using the Generated MCP Server </h3> <p>Once generated, you can install and run your custom MCP server:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Install in development mode</span>
+<span class="nb">cd </span>my_custom_mcp
+pip <span class="nb">install</span> <span class="nt">-e</span> <span class="nb">.</span>
+
+<span class="c"># Run the server</span>
+python <span class="nt">-m</span> my_custom_mcp.my_custom_mcp_server
+</code></pre></div></div> <p>The server will be available at <code class="language-plaintext highlighter-rouge">http://localhost:5001</code> by default.</p> <h2 id="language-model-providers"> <a href="#language-model-providers" class="anchor-heading" aria-labelledby="language-model-providers"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Language Model Providers </h2> <p>The MCP standardizes interactions across different language model providers:</p> <h3 id="openai-implementation"> <a href="#openai-implementation" class="anchor-heading" aria-labelledby="openai-implementation"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> OpenAI Implementation </h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">src.mcp.message</span> <span class="kn">import</span> <span class="n">MCPMessage</span>
 <span class="kn">from</span> <span class="nn">src.models.openai</span> <span class="kn">import</span> <span class="n">OpenAIModel</span>
 
 <span class="c1"># Create an OpenAI language model
