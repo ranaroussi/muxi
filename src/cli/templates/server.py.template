@@ -1,0 +1,64 @@
+"""
+{{server_class}} MCP Server
+
+This module implements an MCP server for {{server_name}}.
+"""
+
+import os
+from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI, HTTPException
+from muxi.mcp.server import MCPServer
+from muxi.mcp.protocol import ExecuteToolRequest
+
+{{tool_imports}}
+
+class {{server_class}}Server(MCPServer):
+    """
+    {{server_class}} MCP Server implementation.
+    """
+
+    def __init__(self):
+        """Initialize the {{server_class}} server."""
+        super().__init__(name="{{server_name}}")
+
+        # Register tools
+        self.tools = {
+{{tool_instances}}
+        }
+
+    async def execute_tool(self, request: ExecuteToolRequest) -> Dict[str, Any]:
+        """
+        Execute the requested tool.
+
+        Args:
+            request: The tool execution request.
+
+        Returns:
+            Dict[str, Any]: The tool result.
+
+        Raises:
+            HTTPException: If the tool is not found.
+        """
+        tool_name = request.name
+
+        if tool_name not in self.tools:
+            raise HTTPException(status_code=404, detail=f"Tool {tool_name} not found")
+
+        tool = self.tools[tool_name]
+        return await tool.execute(**request.parameters)
+
+
+def create_app() -> FastAPI:
+    """Create the FastAPI application."""
+    server = {{server_class}}Server()
+    return server.create_app()
+
+
+app = create_app()
+
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 5001))
+    uvicorn.run(app, host="0.0.0.0", port=port)

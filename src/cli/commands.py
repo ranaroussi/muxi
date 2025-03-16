@@ -91,5 +91,34 @@ def send(agent_id: str, message: str, user_id: Optional[str] = None):
     asyncio.run(send_message())
 
 
+@cli_main.group()
+def create():
+    """Create various MUXI resources."""
+    pass
+
+
+@create.command("mcp-server")
+@click.option("--output-dir", default="./mcp_servers", help="Directory to create the MCP server in")
+@click.option("--name", help="Name for the MCP server")
+def create_mcp_server(output_dir: str, name: Optional[str] = None):
+    """
+    Create a new MCP server through an interactive CLI wizard.
+
+    This command guides you through creating a custom MCP server with
+    a chat-like interface, generating all necessary boilerplate code.
+    """
+    from src.cli.mcp_generator import run_mcp_generator
+
+    try:
+        # Run the MCP server generator
+        run_mcp_generator(output_dir, name)
+        click.echo(f"\nMCP server created successfully in {output_dir}")
+    except KeyboardInterrupt:
+        click.echo("\nInterrupted. MCP server creation canceled.")
+    except Exception as e:
+        click.echo(f"\nError: {str(e)}", err=True)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     cli_main()

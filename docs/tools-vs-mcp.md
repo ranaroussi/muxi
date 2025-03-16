@@ -107,3 +107,65 @@ When offering this framework as a SaaS:
 Both approaches have their place in a well-designed AI agent system. The key is choosing the right approach for each specific capability based on performance needs, reusability requirements, and extension patterns.
 
 For a production system, a hybrid approach leveraging the strengths of both patterns will likely yield the best results.
+
+## Creating Custom MCP Servers
+
+The MUXI framework provides a built-in utility to help you create custom MCP servers quickly:
+
+```bash
+# Generate a new MCP server interactively
+muxi create mcp-server
+```
+
+This command launches an interactive wizard that guides you through:
+1. Naming your MCP server
+2. Adding a description
+3. Defining custom tools
+4. Generating all necessary code
+
+### Benefits of the Generator
+
+The MCP server generator:
+- Creates the proper file structure for an MCP server
+- Sets up FastAPI endpoints following the MCP specification
+- Generates tool template classes ready to be implemented
+- Creates a README with usage instructions
+- Configures installation files (setup.py)
+- Provides example client code
+
+### Customizing Generated Servers
+
+Once generated, you can implement your tool logic by editing the tool files in the `tools/` directory. Each tool includes a template with:
+- Proper class inheritance
+- Method signatures
+- Documentation placeholders
+- Example return values
+
+For example, a generated tool might look like:
+
+```python
+class WeatherTool(BaseTool):
+    """
+    Get weather information for a location.
+    """
+
+    name = "weather"
+    description = "Get weather information for a location"
+
+    def execute(self, location: str, units: str = "metric") -> Dict[str, Any]:
+        """
+        Execute the weather tool.
+
+        Args:
+            location: The location to get weather for
+            units: The units to use (metric or imperial)
+
+        Returns:
+            Dict[str, Any]: The weather information
+        """
+        # TODO: Implement your weather API call here
+
+        return {"result": f"Weather information for {location}"}
+```
+
+The generator significantly reduces the boilerplate needed to create MCP servers, making it easier to build and share custom capabilities.

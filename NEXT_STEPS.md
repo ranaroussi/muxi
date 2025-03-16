@@ -43,6 +43,10 @@ Core components of the muxi framework now implemented:
     - Resolved deprecation warnings for SQLAlchemy and FastAPI
     - Standardized line length configuration across linting tools
     - Improved VS Code integration with consistent formatting rules
+12. **Developer Tools**:
+    - MCP Server Generator with interactive CLI wizard
+    - Template-based code generation system
+    - Flattened template structure for simpler maintenance
 
 ## Todo List
 
@@ -180,3 +184,13 @@ Guidelines for contributing to the framework:
 3. **Testing**: Write tests for all new features
 4. **Pull Requests**: Create a pull request with a clear description of changes
 5. **Issues**: Use GitHub issues for bug reports and feature requests
+
+## 7. Developer Tools
+
+- [ ] Streamline plugin development
+- [ ] Add more diagnostic tools
+- [x] Create MCP Server Generator Tool
+  - [x] Interactive CLI wizard for creating MCP servers
+  - [x] Template-based code generation
+  - [ ] Built-in testing utilities
+  - [ ] Documentation generator

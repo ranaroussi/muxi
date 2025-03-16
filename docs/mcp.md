@@ -231,7 +231,66 @@ async def chat_with_tools():
 await chat_with_tools()
 ```
 
-## MCP with Different Language Model Providers
+## Creating Custom MCP Servers
+
+The MUXI framework provides a convenient utility for creating custom MCP servers through a CLI wizard:
+
+```bash
+# Generate a new MCP server with an interactive wizard
+muxi create mcp-server
+
+# Specify output directory and optional name
+muxi create mcp-server --output-dir ./my_servers --name MyCustomMCP
+```
+
+The wizard guides you through:
+1. Naming your MCP server
+2. Providing a description
+3. Adding custom tools with descriptions
+4. Generating all necessary boilerplate code
+
+### Generated Project Structure
+
+The generator creates a complete MCP server project with the following structure:
+
+```
+my_custom_mcp/
+├── __init__.py
+├── my_custom_mcp_server.py
+├── README.md
+├── setup.py
+├── tools/
+│   ├── __init__.py
+│   └── tool1.py
+├── tests/
+│   └── __init__.py
+└── examples/
+    └── example_client.py
+```
+
+This structure includes:
+- A properly configured MCP server implementation
+- Tool class templates
+- Installation setup
+- README documentation
+- Example client code
+
+### Using the Generated MCP Server
+
+Once generated, you can install and run your custom MCP server:
+
+```bash
+# Install in development mode
+cd my_custom_mcp
+pip install -e .
+
+# Run the server
+python -m my_custom_mcp.my_custom_mcp_server
+```
+
+The server will be available at `http://localhost:5001` by default.
+
+## Language Model Providers
 
 The MCP standardizes interactions across different language model providers:
 
