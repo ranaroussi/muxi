@@ -10,43 +10,47 @@ from pydantic import BaseModel, Field
 
 
 class RoutingConfig(BaseModel):
-    """Routing configuration settings."""
+    """
+    Configuration for the routing LLM.
 
-    # LLM provider to use for routing (e.g., "openai", "anthropic")
-    provider: str = Field(default_factory=lambda: os.getenv("ROUTING_LLM", "openai"))
+    This class defines the configuration parameters for the LLM used for
+    intelligent message routing between agents.
+    """
 
-    # Model name to use for routing
-    model: str = Field(default_factory=lambda: os.getenv("ROUTING_LLM_MODEL", "gpt-4o-mini"))
-
-    # Temperature for routing model (lower = more deterministic)
+    provider: str = Field(
+        default=os.getenv("ROUTING_LLM", "openai"),
+        description="The provider to use for routing decisions",
+    )
+    model: str = Field(
+        default=os.getenv("ROUTING_LLM_MODEL", "gpt-4o-mini"),
+        description="The model to use for routing decisions",
+    )
     temperature: float = Field(
-        default_factory=lambda: float(os.getenv("ROUTING_LLM_TEMPERATURE", "0.0"))
+        default=float(os.getenv("ROUTING_LLM_TEMPERATURE", "0.0")),
+        description="The temperature to use for routing decisions",
     )
-
-    # Max tokens to generate for routing responses
     max_tokens: int = Field(
-        default_factory=lambda: int(os.getenv("ROUTING_LLM_MAX_TOKENS", "256"))
+        default=int(os.getenv("ROUTING_LLM_MAX_TOKENS", "256")),
+        description="The maximum number of tokens to generate",
     )
-
-    # Whether to use caching for routing decisions (to reduce API calls)
     use_caching: bool = Field(
-        default_factory=lambda: os.getenv("ROUTING_USE_CACHING", "true").lower() == "true"
+        default=os.getenv("ROUTING_USE_CACHING", "true").lower() == "true",
+        description="Whether to cache routing decisions",
     )
-
-    # Time in seconds to cache routing decisions
     cache_ttl: int = Field(
-        default_factory=lambda: int(os.getenv("ROUTING_CACHE_TTL", "3600"))
+        default=int(os.getenv("ROUTING_CACHE_TTL", "3600")),
+        description="Time in seconds to cache routing decisions",
     )
-
-    # System prompt prefix for the routing model
     system_prompt: str = Field(
-        default_factory=lambda: os.getenv(
+        default=os.getenv(
             "ROUTING_SYSTEM_PROMPT",
-            "You are a message routing assistant. Your job is to determine which specialized agent "
-            "should handle a user message based on their descriptions and capabilities."
-        )
+            "You are a routing assistant that determines which agent should handle a user message. "
+            "Based on the user's message and the available agents' descriptions, select the most "
+            "appropriate agent to handle the request. Respond with just the agent ID.",
+        ),
+        description="System prompt for the routing LLM",
     )
 
 
-# Create a global routing config instance
+# Create a global instance of the routing configuration
 routing_config = RoutingConfig()

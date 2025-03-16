@@ -426,8 +426,34 @@ class Orchestrator:
                     f"Falling back to default agent."
                 )
             except Exception as e:
-                # If routing fails, log error
+                # If routing fails, log error but don't raise exception
                 logger.error(f"Agent routing failed: {str(e)}")
+                # Continue to fallbacks
+
+        # If we're here, routing failed or no routing model is available
+
+        # Try basic keyword matching if routing failed
+        try:
+            # For each agent, count the number of matching words between the message and description
+            scores = {}
+            message_words = set(message.lower().split())
+
+            for agent_id, description in self.agent_descriptions.items():
+                if description:
+                    # Count matching words between message and agent description
+                    description_words = set(description.lower().split())
+                    scores[agent_id] = len(message_words & description_words)
+
+            # Select the agent with the highest score, if any
+            if scores:
+                best_agent_id = max(scores.items(), key=lambda x: x[1])[0]
+                # Only use if there's at least one matching word
+                if scores[best_agent_id] > 0:
+                    logger.info(f"Selected agent '{best_agent_id}' using keyword matching")
+                    return best_agent_id
+        except Exception as e:
+            logger.error(f"Keyword matching failed: {str(e)}")
+            # Continue to fallbacks
 
         # Fallbacks in order: default agent, first agent
         if self.default_agent_id is not None:

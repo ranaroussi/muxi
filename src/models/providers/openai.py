@@ -201,7 +201,8 @@ class OpenAIModel(BaseModel):
         temp = temperature if temperature is not None else self.temperature
         max_tok = max_tokens if max_tokens is not None else self.max_tokens
 
-        response = await self.client.chat.completions.create(
+        # Use the client without await - the client handles async internally
+        response = self.client.chat.completions.create(
             model=self.model,
             messages=messages,
             temperature=temp,

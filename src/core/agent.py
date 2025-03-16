@@ -75,6 +75,9 @@ class Agent:
             "assist the user with their tasks."
         )
 
+        # Initialize MCPHandler
+        self.mcp_handler = MCPHandler(self.model, self.tools)
+
         # MCPHandler is mocked in tests
         # Test expects it called during process_message
 

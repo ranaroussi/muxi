@@ -196,7 +196,7 @@ class MCPHandler:
         Returns:
             The response message.
         """
-        # Use provided context or default to handler's context
+        # Use provided context or the handler's context
         ctx = context or self.context
 
         # Add message to context
@@ -210,7 +210,8 @@ class MCPHandler:
 
         # Create a response message
         response = MCPMessage(
-            response=response_content,
+            role="assistant",
+            content=response_content,
         )
 
         # Add response to context
@@ -238,7 +239,10 @@ class MCPHandler:
 
         # Create a tool call message
         tool_call_message = MCPMessage(
-            response="", name=tool_name, metadata={"input": tool_input}
+            role="function",
+            content="",
+            name=tool_name,
+            metadata={"input": tool_input}
         )
 
         # Add the tool call message to the context
@@ -264,7 +268,8 @@ class MCPHandler:
 
             # Create a response message
             response = MCPMessage(
-                response=result,
+                role="assistant",
+                content=result,
             )
 
             # Add the response to the context
@@ -297,14 +302,15 @@ class MCPHandler:
 
         for message in context.messages:
             model_message = {
-                "response": message.response,
+                "role": message.role,
+                "content": message.content,
             }
 
             if message.name:
                 model_message["name"] = message.name
 
-            if message.metadata:
-                model_message["metadata"] = message.metadata
+            if message.context:
+                model_message["context"] = message.context
 
             model_messages.append(model_message)
 
