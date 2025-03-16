@@ -204,6 +204,8 @@ muxi chat --agent-id assistant
 
 ## Architecture
 
+![Architecture Diagram](docs/assets/images/muxi-architecture.webp)
+
 <a href="https://www.mermaidchart.com/raw/12634479-a45c-48c0-bcec-d901cd7d62eb?theme=light&version=v0.1&format=svg"><img src="https://www.mermaidchart.com/raw/12634479-a45c-48c0-bcec-d901cd7d62eb?theme=light&version=v0.1&format=svg" alt="Architecture Diagram" style="width: 100%; height: auto;"></a>
 
 ## Using the REST API
