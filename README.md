@@ -28,15 +28,15 @@ Automatically route user messages to the most appropriate agent based on their c
 from src import muxi
 
 # Initialize your app with multiple specialized agents
-mx = muxi()
-mx.add_agent_from_config("configs/weather_agent.yaml")
-mx.add_agent_from_config("configs/finance_agent.json")
-mx.add_agent_from_config("configs/travel_agent.yaml")
+app = muxi()
+app.add_agent("configs/weather_agent.yaml")
+app.add_agent("configs/finance_agent.json")
+app.add_agent("configs/travel_agent.yaml")
 
 # The message will be automatically routed to the most appropriate agent
-response = mx.chat("What's the weather forecast for Tokyo this weekend?")  # Weather agent
-response = mx.chat("Should I invest in tech stocks right now?")  # Finance agent
-response = mx.chat("What are the best attractions in Barcelona?")  # Travel agent
+response = app.chat("What's the weather forecast for Tokyo this weekend?")  # Weather agent
+response = app.chat("Should I invest in tech stocks right now?")  # Finance agent
+response = app.chat("What are the best attractions in Barcelona?")  # Travel agent
 ```
 
 Configure the routing system through environment variables:
@@ -74,21 +74,21 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize - database connection will be loaded automatically when needed
-mx = muxi()
+app = muxi()
 
 # Add an agent from a configuration file
-mx.add_agent("my_assistant", "configs/assistant.yaml")
+app.add_agent("my_assistant", "configs/assistant.yaml")
 
 # Chat with a specific agent
-response = mx.chat("Hello, who are you?", agent_name="my_assistant")
+response = app.chat("Hello, who are you?", agent_name="my_assistant")
 print(response)
 
 # Or let the orchestrator automatically select the appropriate agent
-response = mx.chat("Hello, can you help me?")
+response = app.chat("Hello, can you help me?")
 print(response)
 
 # Start the API server and web UI
-# mx.run()
+# app.run()
 ```
 
 Configuration file (`configs/assistant.yaml`):
