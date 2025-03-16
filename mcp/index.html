@@ -25,7 +25,55 @@
                     ▼
                  Results
                  to LLM
-</code></pre></div></div> <h3 id="key-points-to-remember"> <a href="#key-points-to-remember" class="anchor-heading" aria-labelledby="key-points-to-remember"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Key Points to Remember </h3> <ul> <li><strong>MCP is the messenger</strong>: It formats messages between your application and the language model</li> <li><strong>Language model makes the decision</strong>: The language model (not your code) decides when a tool is needed</li> <li><strong>Your framework executes tools</strong>: Tools run in your application’s environment, not inside the language model</li> <li><strong>MCP formats tool results</strong>: The results are sent back to the language model through the MCP format</li> </ul> <p>This clarifies that MCP is not the tools themselves—it’s just the standardized way to communicate about tools with the language model.</p> <h2 id="mcp-message-structure"> <a href="#mcp-message-structure" class="anchor-heading" aria-labelledby="mcp-message-structure"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> MCP Message Structure </h2> <p>The core of MCP is the message structure:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MCPMessage</span><span class="p">:</span>
+</code></pre></div></div> <h3 id="key-points-to-remember"> <a href="#key-points-to-remember" class="anchor-heading" aria-labelledby="key-points-to-remember"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Key Points to Remember </h3> <ul> <li><strong>MCP is the messenger</strong>: It formats messages between your application and the language model</li> <li><strong>Language model makes the decision</strong>: The language model (not your code) decides when a tool is needed</li> <li><strong>Your framework executes tools</strong>: Tools run in your application’s environment, not inside the language model</li> <li><strong>MCP formats tool results</strong>: The results are sent back to the language model through the MCP format</li> </ul> <p>This clarifies that MCP is not the tools themselves—it’s just the standardized way to communicate about tools with the language model.</p> <h2 id="message-structure"> <a href="#message-structure" class="anchor-heading" aria-labelledby="message-structure"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Message Structure </h2> <p>The <code class="language-plaintext highlighter-rouge">MCPMessage</code> class is the core data structure used for communication in the MCP system. It represents a message in a conversation, with attributes for the sender role, content, and additional metadata.</p> <h3 id="key-attributes"> <a href="#key-attributes" class="anchor-heading" aria-labelledby="key-attributes"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Key Attributes </h3> <p>A proper MCPMessage contains the following key attributes:</p> <ul> <li><code class="language-plaintext highlighter-rouge">role</code>: The role of the sender (e.g., “user”, “assistant”, “system”, “function”)</li> <li><code class="language-plaintext highlighter-rouge">content</code>: The actual content of the message</li> <li><code class="language-plaintext highlighter-rouge">name</code>: Optional name for function messages</li> <li><code class="language-plaintext highlighter-rouge">context</code>: Optional context information</li> </ul> <p>This structure ensures compatibility with various LLM providers like OpenAI, Anthropic, and others.</p> <h3 id="example-usage"> <a href="#example-usage" class="anchor-heading" aria-labelledby="example-usage"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Example Usage </h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">src.core.mcp</span> <span class="kn">import</span> <span class="n">MCPMessage</span>
+
+<span class="c1"># Create a user message
+</span><span class="n">user_msg</span> <span class="o">=</span> <span class="n">MCPMessage</span><span class="p">(</span>
+    <span class="n">role</span><span class="o">=</span><span class="s">"user"</span><span class="p">,</span>
+    <span class="n">content</span><span class="o">=</span><span class="s">"What's the weather like in New York?"</span>
+<span class="p">)</span>
+
+<span class="c1"># Create an assistant response
+</span><span class="n">assistant_msg</span> <span class="o">=</span> <span class="n">MCPMessage</span><span class="p">(</span>
+    <span class="n">role</span><span class="o">=</span><span class="s">"assistant"</span><span class="p">,</span>
+    <span class="n">content</span><span class="o">=</span><span class="s">"The weather in New York is currently sunny with a temperature of 72°F."</span>
+<span class="p">)</span>
+
+<span class="c1"># Create a function message
+</span><span class="n">function_msg</span> <span class="o">=</span> <span class="n">MCPMessage</span><span class="p">(</span>
+    <span class="n">role</span><span class="o">=</span><span class="s">"function"</span><span class="p">,</span>
+    <span class="n">content</span><span class="o">=</span><span class="s">"The current temperature is 72°F with clear skies."</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">"get_weather"</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"location"</span><span class="p">:</span> <span class="s">"New York"</span><span class="p">,</span> <span class="s">"unit"</span><span class="p">:</span> <span class="s">"fahrenheit"</span><span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div></div> <h3 id="internal-processing"> <a href="#internal-processing" class="anchor-heading" aria-labelledby="internal-processing"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Internal Processing </h3> <p>When messages are processed, they are converted to a format suitable for the language model:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_context_to_model_messages</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="s">"""
+    Convert MCPContext to a list of messages for the language model.
+
+    This method processes each message in the context and extracts the
+    appropriate attributes (role, content, name, etc.) to create a
+    properly formatted message for the LLM.
+    """</span>
+    <span class="n">model_messages</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">context</span><span class="p">.</span><span class="n">messages</span><span class="p">:</span>
+        <span class="c1"># Create the base message with required attributes
+</span>        <span class="n">model_message</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">"role"</span><span class="p">:</span> <span class="n">message</span><span class="p">.</span><span class="n">role</span><span class="p">,</span>
+            <span class="s">"content"</span><span class="p">:</span> <span class="n">message</span><span class="p">.</span><span class="n">content</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Add optional attributes if present
+</span>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s">"name"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">message</span><span class="p">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">model_message</span><span class="p">[</span><span class="s">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span><span class="p">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="s">"context"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">message</span><span class="p">.</span><span class="n">context</span><span class="p">:</span>
+            <span class="n">model_message</span><span class="p">[</span><span class="s">"context"</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span><span class="p">.</span><span class="n">context</span>
+
+        <span class="n">model_messages</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_message</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model_messages</span>
+</code></pre></div></div> <p>This ensures that messages maintain proper structure throughout the system.</p> <h2 id="mcp-message-structure"> <a href="#mcp-message-structure" class="anchor-heading" aria-labelledby="mcp-message-structure"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> MCP Message Structure </h2> <p>The core of MCP is the message structure:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MCPMessage</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">role</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tool_calls</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tool_call_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="p">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>  <span class="c1"># "user", "assistant", "system", or "tool"
 </span>        <span class="bp">self</span><span class="p">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>  <span class="c1"># Text content of the message
