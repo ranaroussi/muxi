@@ -1,5 +1,6 @@
 {
     "name": "finance_assistant",
+    "description": "Expert in financial analysis, investment strategies, market trends, stock recommendations, and personal finance advice. Can perform calculations and analyze financial data.",
     "system_message": "You are a helpful assistant specialized in finance and investments. Use the Calculator tool for financial calculations.",
     "model": {
         "provider": "openai",

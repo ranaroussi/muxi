@@ -1,0 +1,43 @@
+# MUXI Framework - Intelligent Routing Guidelines
+
+> These rules define how to work with the intelligent message routing system in the MUXI framework
+
+## Configuration
+
+- Use environment variables for routing configuration
+- Default to use a lightweight model like `gpt-4o-mini` for routing
+- Set temperature to 0.0 for consistent routing decisions
+- Enable caching by default with a reasonable TTL (3600 seconds)
+- Provide fallback mechanisms when routing fails
+
+## Agent Descriptions
+
+- Always provide clear, specific descriptions for agents
+- Focus on agent capabilities and domains of expertise in descriptions
+- Differentiate agent descriptions to avoid routing ambiguity
+- Keep descriptions concise but comprehensive (2-3 sentences maximum)
+- Use consistent terminology across similar agents
+
+## Routing Logic
+
+- Implement robust error handling in routing logic
+- Log routing decisions and failures for debugging
+- Provide fallback to default agent when routing fails
+- Consider the current conversation context for routing decisions
+- Ensure routing latency is minimal (target <500ms)
+
+## System Prompts
+
+- Design system prompts for the routing model to be clear and concise
+- Include all available agent descriptions in the routing prompt
+- Instruct the routing model to return just the agent ID
+- Provide context about why routing is happening
+- Keep routing model token usage low
+
+## Caching
+
+- Cache routing decisions for identical messages
+- Invalidate cache entries when agents are added or removed
+- Use an efficient cache data structure
+- Implement TTL-based cache expiration
+- Consider memory usage implications of cache size

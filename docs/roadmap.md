@@ -122,6 +122,9 @@ We welcome community input on prioritization of these roadmap items. Please open
 
 ### v0.2.0 (Current)
 - Enhanced orchestration ✅
+  - Intelligent agent selection with LLM-based routing ✅
+  - Agent descriptions for specialized capabilities ✅
+  - Route caching for performance optimization ✅
 - Improved memory persistence ✅
 - User-specific domain knowledge ✅
 - Additional built-in tools ✅
@@ -129,8 +132,8 @@ We welcome community input on prioritization of these roadmap items. Please open
 - Real-time communication via WebSockets ✅
 - Multi-user support ✅
 - Robust database schema with optimized indexes ✅
-- Automatic agent selection for messages ✅
 - Simplified configuration-based API ✅
+- Comprehensive configuration documentation ✅
 
 ### v1.0.0
 - Production-ready release

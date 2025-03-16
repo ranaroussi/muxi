@@ -35,6 +35,7 @@ class MCPMessage:
         context: Optional[Dict[str, Any]] = None,
         tool_calls: Optional[List[MCPToolCall]] = None,
         tool_call_id: Optional[str] = None,
+        agent_id: Optional[str] = None,
     ):
         """
         Initialize an MCP message.
@@ -48,6 +49,7 @@ class MCPMessage:
             context: Optional context information for the message.
             tool_calls: Optional list of tool calls in the message.
             tool_call_id: Optional ID of the tool call this message responds to.
+            agent_id: Optional ID of the agent that generated this response.
         """
         self.role = role
         self.content = content
@@ -55,6 +57,7 @@ class MCPMessage:
         self.context = context or {}
         self.tool_calls = tool_calls or []
         self.tool_call_id = tool_call_id
+        self.agent_id = agent_id
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -70,6 +73,9 @@ class MCPMessage:
 
         if self.context:
             message["context"] = self.context
+
+        if self.agent_id:
+            message["agent_id"] = self.agent_id
 
         return message
 
@@ -91,6 +97,7 @@ class MCPMessage:
             context=data.get("context", {}),
             tool_calls=[MCPToolCall(**tool_call) for tool_call in data.get("tool_calls", [])],
             tool_call_id=data.get("tool_call_id"),
+            agent_id=data.get("agent_id"),
         )
 
 
@@ -203,8 +210,7 @@ class MCPHandler:
 
         # Create a response message
         response = MCPMessage(
-            role="assistant",
-            content=response_content,
+            response=response_content,
         )
 
         # Add response to context
@@ -232,7 +238,7 @@ class MCPHandler:
 
         # Create a tool call message
         tool_call_message = MCPMessage(
-            role="user", content="", name=tool_name, context={"input": tool_input}
+            response="", name=tool_name, metadata={"input": tool_input}
         )
 
         # Add the tool call message to the context
@@ -244,7 +250,7 @@ class MCPHandler:
             logger.error(error_message)
 
             # Create an error response
-            response = MCPMessage(role="tool", content={"error": error_message}, name=tool_name)
+            response = MCPMessage(response=f"Error: {error_message}")
 
             # Add the response to the context
             ctx.add_message(response)
@@ -257,7 +263,9 @@ class MCPHandler:
             result = await handler(tool_input)
 
             # Create a response message
-            response = MCPMessage(role="tool", content=result, name=tool_name)
+            response = MCPMessage(
+                response=result,
+            )
 
             # Add the response to the context
             ctx.add_message(response)
@@ -268,7 +276,7 @@ class MCPHandler:
             logger.error(error_message)
 
             # Create an error response
-            response = MCPMessage(role="tool", content={"error": error_message}, name=tool_name)
+            response = MCPMessage(response=f"Error: {error_message}")
 
             # Add the response to the context
             ctx.add_message(response)
@@ -289,12 +297,14 @@ class MCPHandler:
 
         for message in context.messages:
             model_message = {
-                "role": message.role,
-                "content": message.content,
+                "response": message.response,
             }
 
             if message.name:
                 model_message["name"] = message.name
+
+            if message.metadata:
+                model_message["metadata"] = message.metadata
 
             model_messages.append(model_message)
 

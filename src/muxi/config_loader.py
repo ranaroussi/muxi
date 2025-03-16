@@ -193,6 +193,12 @@ class ConfigLoader:
         if not model.get("model"):
             raise ValueError("Missing required field: model.model")
 
+        # Agent metadata validation
+        if "description" in config and not isinstance(config["description"], str):
+            raise ValueError("Invalid field: description must be a string")
+        if "system_message" in config and not isinstance(config["system_message"], str):
+            raise ValueError("Invalid field: system_message must be a string")
+
         # Memory validation - simpler now as we already normalized it
         memory = config.get("memory", {})
         if not isinstance(memory, dict):

@@ -79,3 +79,9 @@ This document tracks the progress of the MUXI documentation. It shows which docu
 - [x] [Roadmap](../roadmap)
 - [ ] License Information
 - [ ] Example Projects
+
+## Setup
+
+- [Installation Guide](/installation-guide/)
+- [Quick Start](/quick-start/)
+- [Configuration Guide](/configuration-guide/)

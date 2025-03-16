@@ -148,8 +148,74 @@ When creating an agent, you can configure various parameters:
 - **long_term_memory**: Persistent memory for storing information across sessions. Can be a LongTermMemory or Memobase instance for multi-user support.
 - **tools**: A list of tools the agent can use
 - **system_message**: Instructions that define the agent's behavior
+- **description**: A concise description of the agent's capabilities and purpose, used for intelligent message routing (critical for multi-agent systems)
 - **set_as_default**: Whether to set this as the default agent for the orchestrator
 - **multi_user_support**: Whether to enable user-specific memory via Memobase
+
+## Intelligent Message Routing
+
+The MUXI framework includes an intelligent message routing system that can automatically direct user messages to the most appropriate agent based on their content and the agents' descriptions.
+
+### How It Works
+
+1. When a user sends a message without specifying an agent, the routing system analyzes the message.
+2. The system compares the message content against each agent's description.
+3. Using a dedicated LLM (configurable via environment variables), it selects the most appropriate agent.
+4. The message is then sent to the selected agent for processing.
+
+### Configuring Agent Descriptions
+
+For effective routing, provide clear and specific descriptions for each agent:
+
+```python
+# Create a weather-focused agent
+orchestrator.create_agent(
+    agent_id="weather_assistant",
+    model=OpenAIModel(model="gpt-4o"),
+    description="Specialized in providing weather forecasts, answering questions about climate and weather phenomena, and reporting current conditions in various locations.",
+    # ... other parameters
+)
+
+# Create a finance-focused agent
+orchestrator.create_agent(
+    agent_id="finance_assistant",
+    model=OpenAIModel(model="gpt-4o"),
+    description="Expert in financial analysis, investment strategies, market trends, stock recommendations, and personal finance advice.",
+    # ... other parameters
+)
+```
+
+### Configuration via YAML/JSON
+
+You can also specify descriptions in configuration files:
+
+```yaml
+name: travel_assistant
+description: "Specialized in travel recommendations, flight and hotel bookings, tourist attractions, and travel planning."
+system_message: "You are a helpful travel assistant."
+# ... other configuration
+```
+
+### Routing Configuration
+
+The routing system can be configured through environment variables:
+
+```
+# Routing LLM provider (defaults to "openai")
+ROUTING_LLM=openai
+
+# Model to use for routing (defaults to "gpt-4o-mini")
+ROUTING_LLM_MODEL=gpt-4o-mini
+
+# Temperature for routing decisions (defaults to 0.0)
+ROUTING_LLM_TEMPERATURE=0.0
+
+# Whether to cache routing decisions (defaults to true)
+ROUTING_USE_CACHING=true
+
+# Time in seconds to cache routing decisions (defaults to 3600)
+ROUTING_CACHE_TTL=3600
+```
 
 ## Interacting with an Agent
 

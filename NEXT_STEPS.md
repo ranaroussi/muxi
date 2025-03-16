@@ -20,7 +20,13 @@ Core components of the muxi framework now implemented:
    - Example tools (Calculator, Web Search)
 4. **Agent Class**: Main interface combining LLM, memory, and tools
 5. **Orchestrator**: For managing multiple agents and their interactions
+   - Intelligent message routing with LLM-based agent selection
+   - Agent descriptions for specialized capabilities
+   - Automatic caching of routing decisions for performance
 6. **Configuration System**: For loading and managing configuration
+   - Support for YAML and JSON configuration files
+   - Environment variable substitution in configurations
+   - Robust validation of configuration parameters
 7. **Example Script**: To demonstrate how to use the framework
 8. **Real-Time Communication**:
    - WebSocket server for real-time agent interaction
@@ -88,6 +94,7 @@ Things to do next to enhance the framework:
 - [ ] Example projects
 - [ ] Generate API documentation with Sphinx
 - [ ] Create more usage examples for common agent scenarios
+- [x] Configuration guide
 
 ### 5. Advanced Features
 

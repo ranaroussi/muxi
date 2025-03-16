@@ -5,16 +5,19 @@ This module provides the Orchestrator class, which manages agents and
 coordinates their interactions with users and other systems.
 """
 
+import os
 from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
+from src.config import config
 from src.core.agent import Agent
 from src.core.mcp import MCPMessage
 from src.memory.base import BaseMemory
 from src.memory.buffer import BufferMemory
 from src.memory.long_term import LongTermMemory
 from src.models.base import BaseModel
+from src.models.providers.openai import OpenAIModel
 from src.tools.base import BaseTool, ToolRegistry
 
 
@@ -30,8 +33,56 @@ class Orchestrator:
     def __init__(self):
         """Initialize the orchestrator."""
         self.agents: Dict[str, Agent] = {}
+        self.agent_descriptions: Dict[str, str] = {}
         self.default_agent_id: Optional[str] = None
         self.tool_registry = ToolRegistry()
+        self.routing_model = None
+        self._routing_cache: Dict[str, str] = {}
+
+        # Initialize the routing model if needed
+        self._initialize_routing_model()
+
+    def _initialize_routing_model(self):
+        """Initialize the routing model from configuration."""
+        try:
+            # Get routing configuration
+            routing_config = config.routing
+
+            # Initialize the appropriate model based on provider
+            provider = routing_config.provider.lower()
+
+            if provider == "openai":
+                # Get API key based on provider
+                api_key = os.environ.get("OPENAI_API_KEY")
+
+                self.routing_model = OpenAIModel(
+                    model=routing_config.model,
+                    temperature=routing_config.temperature,
+                    max_tokens=routing_config.max_tokens,
+                    api_key=api_key
+                )
+
+                logger.info(
+                    f"Initialized routing model: {provider} / {routing_config.model} "
+                    f"(temp: {routing_config.temperature})"
+                )
+            else:
+                # Default to OpenAI if provider not recognized
+                logger.warning(
+                    f"Unrecognized routing LLM provider: {provider}. "
+                    "Defaulting to OpenAI gpt-4o-mini."
+                )
+                self.routing_model = OpenAIModel(
+                    model="gpt-4o-mini",
+                    temperature=0.0,
+                    max_tokens=256,
+                    api_key=os.environ.get("OPENAI_API_KEY")
+                )
+
+        except Exception as e:
+            # If initialization fails, log error but continue (routing will fall back to default)
+            logger.error(f"Failed to initialize routing model: {str(e)}")
+            self.routing_model = None
 
     def create_agent(
         self,
@@ -42,6 +93,7 @@ class Orchestrator:
         long_term_memory: Optional[LongTermMemory] = None,
         tools: Optional[List[BaseTool]] = None,
         system_message: Optional[str] = None,
+        description: Optional[str] = None,
         set_as_default: bool = False,
     ) -> Agent:
         """
@@ -57,6 +109,8 @@ class Orchestrator:
                 Can be a LongTermMemory or Memobase instance for multi-user support.
             tools: Optional list of tools the agent can use.
             system_message: Optional system message to set agent's behavior.
+            description: Optional description of the agent's capabilities and purpose.
+                Used for intelligent message routing. Defaults to system_message if not provided.
             set_as_default: Whether to set this agent as the default.
 
         Returns:
@@ -82,6 +136,11 @@ class Orchestrator:
 
         # Store the agent
         self.agents[agent_id] = agent
+
+        # Store the agent description (use system message as fallback)
+        self.agent_descriptions[agent_id] = (
+            description or system_message or f"Agent with ID '{agent_id}'"
+        )
 
         # Set as default if requested or if this is the first agent
         if set_as_default or self.default_agent_id is None:
@@ -306,13 +365,9 @@ class Orchestrator:
 
         logger.info(f"Cleared {'all' if clear_long_term else 'buffer'} memories " f"for all agents")
 
-    def select_agent_for_message(self, message: str) -> str:
+    async def select_agent_for_message(self, message: str) -> str:
         """
-        Select the most appropriate agent to handle a message.
-
-        This method determines which agent should process the given message.
-        Currently uses the default agent, but could be extended with more
-        sophisticated routing logic like intent detection.
+        Select the most appropriate agent to handle a message using LLM-based routing.
 
         Args:
             message: The message to process
@@ -326,42 +381,158 @@ class Orchestrator:
         if not self.agents:
             raise ValueError("No agents available")
 
-        # If we have a default agent, use it
-        if self.default_agent_id is not None:
+        # If there's only one agent, use it (no need for routing)
+        if len(self.agents) == 1:
+            return next(iter(self.agents))
+
+        # If there's a default agent and no routing model, use the default
+        if self.default_agent_id is not None and self.routing_model is None:
             return self.default_agent_id
 
-        # Otherwise, use the first agent (simplest fallback)
+        # Check cache if enabled
+        if config.routing.use_caching and message in self._routing_cache:
+            cached_agent_id = self._routing_cache[message]
+            # Verify the cached agent still exists
+            if cached_agent_id in self.agents:
+                return cached_agent_id
+
+        # For multiple agents with a routing model, use LLM-based routing
+        if self.routing_model is not None:
+            try:
+                # Create routing prompt
+                routing_prompt = self._create_routing_prompt(message)
+
+                # Query the routing model
+                response = await self.routing_model.chat(
+                    messages=[
+                        {"role": "system", "content": config.routing.system_prompt},
+                        {"role": "user", "content": routing_prompt}
+                    ]
+                )
+
+                # Parse the response to extract agent ID
+                selected_agent_id = self._parse_routing_response(response)
+
+                # If we got a valid agent ID, use it
+                if selected_agent_id and selected_agent_id in self.agents:
+                    # Cache the result if caching is enabled
+                    if config.routing.use_caching:
+                        self._routing_cache[message] = selected_agent_id
+                    return selected_agent_id
+
+                # Log warning if parsing failed
+                logger.warning(
+                    f"Failed to parse routing response: '{response}'. "
+                    f"Falling back to default agent."
+                )
+            except Exception as e:
+                # If routing fails, log error
+                logger.error(f"Agent routing failed: {str(e)}")
+
+        # Fallbacks in order: default agent, first agent
+        if self.default_agent_id is not None:
+            return self.default_agent_id
         return next(iter(self.agents))
+
+    def _create_routing_prompt(self, message: str) -> str:
+        """
+        Create a prompt for the routing model to select the appropriate agent.
+
+        Args:
+            message: The user message to route
+
+        Returns:
+            str: The routing prompt
+        """
+        # Build a routing prompt with all agent descriptions
+        prompt = f"User message: \"{message}\"\n\nAvailable agents:\n\n"
+
+        for agent_id, description in self.agent_descriptions.items():
+            prompt += f"Agent ID: {agent_id}\nDescription: {description}\n\n"
+
+        prompt += (
+            "Based on the user message and agent descriptions above, which agent "
+            "(specify agent ID only) would be best suited to handle this message? "
+            "Reply with just the agent ID."
+        )
+
+        return prompt
+
+    def _parse_routing_response(self, response: str) -> Optional[str]:
+        """
+        Extract the agent ID from the routing model's response.
+
+        Args:
+            response: The routing model's response
+
+        Returns:
+            Optional[str]: The extracted agent ID, or None if parsing failed
+        """
+        # Clean up the response
+        response = response.strip().lower()
+
+        # First try a direct match with one of the agent IDs
+        for agent_id in self.agents.keys():
+            if agent_id.lower() == response:
+                return agent_id
+
+        # Try finding the agent ID in the response
+        for agent_id in self.agents.keys():
+            if agent_id.lower() in response:
+                return agent_id
+
+        # Try using regex to find something that looks like an agent ID
+        import re
+        match = re.search(r"agent[_\s]?id:?\s*[\"']?([a-zA-Z0-9_-]+)[\"']?", response)
+        if match:
+            agent_id = match.group(1)
+            if agent_id in self.agents:
+                return agent_id
+
+        # Return None if we couldn't identify an agent
+        return None
 
     async def chat(
         self,
         message: str,
-        agent_id: Optional[str] = None,
-        user_id: Optional[int] = None
-    ) -> str:
+        agent_name: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ) -> MCPMessage:
         """
-        Chat with an agent.
+        Send a message to an agent and get a response.
 
         Args:
-            message: The message to send
-            agent_id: Optional ID of the agent to chat with
-                    (if None, will automatically select the most appropriate agent)
-            user_id: Optional user ID for multi-user support
+            message: The message to send to the agent.
+            agent_name: Optional name of the agent to use. If not provided,
+                the most appropriate agent will be selected automatically.
+            user_id: Optional user ID for multi-user support.
 
         Returns:
-            str: The agent's response
+            The agent's response.
 
         Raises:
-            ValueError: If no suitable agent is found
+            ValueError: If no agents are available or the specified agent
+                does not exist.
         """
-        # If agent_id is not specified, select the appropriate agent
-        if agent_id is None:
-            agent_id = self.select_agent_for_message(message)
+        if not self.agents:
+            raise ValueError("No agents available")
 
-        # Get the agent
-        agent = self.get_agent(agent_id)
+        # If agent_name is provided, use that specific agent
+        if agent_name:
+            if agent_name not in self.agents:
+                raise ValueError(f"Agent '{agent_name}' does not exist")
+            selected_agent_id = agent_name
+        else:
+            # Otherwise, select the most appropriate agent for this message
+            selected_agent_id = await self.select_agent_for_message(message)
 
-        # Process the message
+        # Get the selected agent
+        agent = self.agents[selected_agent_id]
+
+        # Process the message with the selected agent
         response = await agent.chat(message, user_id=user_id)
+
+        # Add the agent ID to the response for tracking
+        response.agent_id = selected_agent_id
 
         return response

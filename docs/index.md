@@ -12,16 +12,19 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 {: .warning }
 > This project is a work in progress and is not even close to being ready for production use. The framework is actively being developed and new features are being added. Please refer to the [roadmap](roadmap) for detailed information about the current state of the project and where it's headed.
 
-## Features
+## Key Features
 
 - **Multi-Agent Orchestration**: Create and manage multiple AI agents with different capabilities
-- **Standardized LLM Communication**: Model Context Protocol (MCP) for consistent interaction with various LLM providers
-- **Memory Systems**: Short-term buffer memory and long-term persistent memory for agents
+- **Intelligent Message Routing**: Automatically select the most appropriate agent based on message content
+- **Standardized LLM Communication**: Use a consistent protocol across different LLM providers
+- **Memory Systems**: Short-term buffer memory and long-term persistent memory
 - **Multi-User Support**: Memobase provides user-specific memory partitioning for multi-tenant applications
-- **Tool Integration**: Extensible tool system with built-in utilities and custom tool support
-- **Real-Time Communication**: WebSocket support for instant messaging and streaming responses
+- **Domain Knowledge**: Store and retrieve structured information to personalize agent responses
+- **Tool Integration**: Easy-to-use system for adding capabilities to agents
+- **Real-Time Communication**: WebSocket support for instant messaging
 - **REST API**: Comprehensive API for managing agents, tools, and conversations
 - **Command Line Interface**: Rich terminal-based interface for creating and interacting with agents
+- **Flexible Configuration**: Define agents using YAML or JSON with minimal code
 
 ## Getting Started
 

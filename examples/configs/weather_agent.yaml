@@ -1,5 +1,6 @@
 ---
 name: weather_assistant
+description: "Specialized in providing weather forecasts, answering questions about climate and weather phenomena, and reporting current conditions in various locations worldwide."
 system_message: You are a helpful assistant that can check the weather. Use the Weather
   tool when asked about weather conditions.
 model:

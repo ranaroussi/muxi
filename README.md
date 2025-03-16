@@ -8,6 +8,7 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 ## Features
 
 - **Multi-Agent Orchestration**: Create and manage multiple AI agents with different capabilities
+- **Intelligent Message Routing**: Automatically direct messages to the most appropriate agent using LLM-based analysis
 - **Standardized LLM Communication**: Model Context Protocol (MCP) for consistent interaction with various LLM providers
 - **Memory Systems**: Short-term buffer memory and long-term persistent memory for agents
 - **Multi-User Support**: Memobase provides user-specific memory partitioning for multi-tenant applications
@@ -17,6 +18,36 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 - **REST API**: Comprehensive API for managing agents, tools, and conversations
 - **Command Line Interface**: Rich terminal-based interface for creating and interacting with agents
 - **Reliable Message Handling**: Robust error handling and automatic reconnection mechanisms
+- **Declarative Configuration**: Define agents using YAML or JSON files with minimal code
+
+## Intelligent Message Routing
+
+Automatically route user messages to the most appropriate agent based on their content:
+
+```python
+from src import muxi
+
+# Initialize your app with multiple specialized agents
+mx = muxi()
+mx.add_agent_from_config("configs/weather_agent.yaml")
+mx.add_agent_from_config("configs/finance_agent.json")
+mx.add_agent_from_config("configs/travel_agent.yaml")
+
+# The message will be automatically routed to the most appropriate agent
+response = mx.chat("What's the weather forecast for Tokyo this weekend?")  # Weather agent
+response = mx.chat("Should I invest in tech stocks right now?")  # Finance agent
+response = mx.chat("What are the best attractions in Barcelona?")  # Travel agent
+```
+
+Configure the routing system through environment variables:
+
+```
+ROUTING_LLM=openai
+ROUTING_LLM_MODEL=gpt-4o-mini
+ROUTING_LLM_TEMPERATURE=0.0
+```
+
+For complete configuration options, see the [Configuration Guide](docs/configuration_guide.md).
 
 ## Installation
 
@@ -300,6 +331,10 @@ Comprehensive documentation is available in the `docs` directory:
 ### Concepts
 - [Agents vs Tools](docs/agents_vs_tools.md)
 - [Tools vs MCP](docs/tools_vs_mcp.md)
+
+### Setup and Configuration
+- [Quick Start Guide](docs/quick_start.md)
+- [Configuration Guide](docs/configuration_guide.md)
 
 ### Interfaces
 - [CLI Documentation](docs/cli.md)

@@ -7,7 +7,7 @@ permalink: /quick-start/
 
 # Quick Start Guide
 
-This guide will help you quickly get started with the MUXI Framework using a simplified configuration-based approach.
+This guide will help you quickly get started with the MUXI Framework using a simplified configuration-based approach. For more detailed configuration options, see the [Configuration Guide](/configuration-guide/).
 
 ## Installation
 
@@ -36,6 +36,7 @@ Create a file `agents/weather_agent.yaml`:
 
 ```yaml
 name: weather_assistant
+description: "Specialized in providing weather forecasts and current conditions."
 system_message: You are a helpful assistant that can check the weather.
 model:
   provider: openai
@@ -57,6 +58,7 @@ Alternatively, create `agents/finance_agent.json`:
 ```json
 {
     "name": "finance_assistant",
+    "description": "Expert in financial analysis, investments, and market trends.",
     "system_message": "You are a helpful finance assistant.",
     "model": {
         "provider": "openai",
@@ -74,6 +76,38 @@ Alternatively, create `agents/finance_agent.json`:
 }
 ```
 
+## Automatic Agent Selection
+
+When you add multiple agents to your application, MUXI will automatically route messages to the most appropriate agent based on their descriptions:
+
+```python
+from src import muxi
+
+# Create a new MUXI instance
+app = muxi()
+
+# Add multiple agents with different specializations
+app.add_agent("weather", "agents/weather_agent.yaml")
+app.add_agent("finance", "agents/finance_agent.json")
+
+# Let the orchestrator automatically select the appropriate agent
+response = app.chat("What's the current stock market trend?")
+print(response)  # Will likely be handled by the finance agent
+
+response = app.chat("What's the weather in New York?")
+print(response)  # Will likely be handled by the weather agent
+```
+
+The routing system uses a dedicated LLM to analyze the message content and agent descriptions to determine the best match. You can configure this behavior with environment variables:
+
+```
+# Routing LLM configuration
+ROUTING_LLM=openai
+ROUTING_LLM_MODEL=gpt-4o-mini
+ROUTING_LLM_TEMPERATURE=0.0
+ROUTING_USE_CACHING=true
+```
+
 ## Create Your Application
 
 Create a new Python file with minimal code:
@@ -87,27 +121,27 @@ load_dotenv()
 
 # Initialize MUXI - no connection string needed
 # It will be loaded from DATABASE_URL when required
-mx = muxi()
+app = muxi()
 
 # Add agents from configuration files
-mx.add_agent("weather", "agents/weather_agent.yaml")
-mx.add_agent("finance", "agents/finance_agent.json")
+app.add_agent("weather", "agents/weather_agent.yaml")
+app.add_agent("finance", "agents/finance_agent.json")
 
 # Option 1: Interactive usage
 # Chat with a specific agent
-response = mx.chat("What's the weather in New York?", agent_name="weather")
+response = app.chat("What's the weather in New York?", agent_name="weather")
 print(response)
 
 # Let the orchestrator automatically select the appropriate agent
-response = mx.chat("What's the current stock market trend?")
+response = app.chat("What's the current stock market trend?")
 print(response)  # Will likely be handled by the finance agent
 
 # Chat with user-specific context
-response = mx.chat("What's the weather in my city?", user_id=123)
+response = app.chat("What's the weather in my city?")
 print(response)  # Will use Alice's location data
 
 # Option 2: Start server and web UI
-mx.run()
+app.run()
 ```
 
 ## Multi-User Support
@@ -122,10 +156,10 @@ knowledge = {
     "name": "Alice",
     "location": {"city": "New York"}
 }
-mx.add_user_domain_knowledge(user_id, knowledge)
+app.add_user_domain_knowledge(user_id, knowledge)
 
 # Chat with user-specific context
-response = mx.chat("weather", "What's the weather in my city?", user_id=user_id)
+response = app.chat("weather", "What's the weather in my city?", user_id=user_id)
 print(response)  # Will use Alice's location data
 ```
 

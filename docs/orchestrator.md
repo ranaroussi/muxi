@@ -20,6 +20,60 @@ The Orchestrator:
 - Maintains a registry of available agents
 - Controls access to shared resources
 
+## Core Features
+
+The Orchestrator provides several key features:
+
+1. **Agent Management**: Create, retrieve, and manage multiple agents
+2. **Default Agent Selection**: Set and use a default agent for messages
+3. **Message Routing**: Direct messages to the appropriate agent
+4. **Intelligent Message Routing**: Automatically select the best agent for a message based on content analysis
+5. **Memory Management**: Clear memories for individual agents or all agents
+6. **Tool Management**: Centralized registry for tools used by agents
+
+## Intelligent Message Routing
+
+The Orchestrator includes an intelligent message routing system that can automatically direct user messages to the most appropriate agent based on the message content and agent descriptions.
+
+### How It Works
+
+1. When a user sends a message without specifying an agent, the routing system analyzes the message.
+2. The system compares the message content against each agent's description using a dedicated LLM.
+3. The LLM selects the most appropriate agent based on this analysis.
+4. The message is then sent to the selected agent for processing.
+5. If routing fails or no appropriate agent is found, the system falls back to the default agent or the first available agent.
+
+### Configuration
+
+The routing system is configured through environment variables:
+
+```
+# Routing LLM provider (defaults to "openai")
+ROUTING_LLM=openai
+
+# Model to use for routing (defaults to "gpt-4o-mini")
+ROUTING_LLM_MODEL=gpt-4o-mini
+
+# Temperature for routing decisions (defaults to 0.0)
+ROUTING_LLM_TEMPERATURE=0.0
+
+# Whether to cache routing decisions (defaults to true)
+ROUTING_USE_CACHING=true
+
+# Time in seconds to cache routing decisions (defaults to 3600)
+ROUTING_CACHE_TTL=3600
+```
+
+For optimal routing results, provide clear and specific descriptions for each agent when creating them:
+
+```python
+orchestrator.create_agent(
+    agent_id="weather_agent",
+    model=OpenAIModel(...),
+    description="Specialized in providing weather forecasts, answering questions about climate and weather phenomena, and reporting current conditions in various locations."
+)
+```
+
 ## Using the Orchestrator
 
 ### Initialization

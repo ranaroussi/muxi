@@ -1,9 +1,8 @@
 """
 Agent implementation for the MUXI Framework.
 
-This module provides the Agent class, which is the main interface for users
-of the framework. It combines the language model, memory, and tools to create a
-powerful AI agent.
+This module provides the Agent class, which represents an agent in the
+MUXI Framework.
 """
 
 import asyncio
@@ -488,29 +487,23 @@ class Agent:
         """
         return tool_registry.get_schema()["tools"]
 
-    async def chat(self, message: str, user_id: Optional[int] = None) -> str:
+    async def chat(
+        self, message: str, user_id: Optional[str] = None
+    ) -> MCPMessage:
         """
-        Process a user message and return a response.
+        Process a message and generate a response.
 
         Args:
-            message: The user's message.
+            message: The message to process.
             user_id: Optional user ID for multi-user support.
 
         Returns:
-            The agent's response as a string.
+            The agent's response as an MCPMessage.
         """
-        # Use process_message which is now async
-        response = await self.process_message(message, user_id=user_id)
+        # Create a user message
+        user_message = MCPMessage(role="user", content=message)
 
-        # Track tools used for UI reporting
-        self.last_used_tools = []
-        # We can't access tool calls directly since we don't store the handler
+        # Process the message
+        response = await self.mcp_handler.process_message(user_message)
 
-        # If we have a buffer memory, store the interaction
-        if hasattr(self, "buffer_memory") and self.buffer_memory:
-            # Since _store_in_memory is async, we need to create a no-op
-            # version for the purpose of the chat interface
-            # In a real implementation, this should be properly awaited
-            pass  # We'll implement a better solution in the future
-
-        return response.content
+        return response

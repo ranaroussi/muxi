@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from src.config.database import DatabaseConfig, database_config
 from src.config.memory import MemoryConfig, memory_config
 from src.config.model import ModelConfig, model_config
+from src.config.routing import RoutingConfig, routing_config
 from src.config.tools import ToolsConfig, tools_config
 
 
@@ -25,6 +26,7 @@ class Config(BaseModel):
     database: DatabaseConfig = Field(default_factory=lambda: database_config)
     memory: MemoryConfig = Field(default_factory=lambda: memory_config)
     model: ModelConfig = Field(default_factory=lambda: model_config)
+    routing: RoutingConfig = Field(default_factory=lambda: routing_config)
     tools: ToolsConfig = Field(default_factory=lambda: tools_config)
     debug: bool = Field(default=os.getenv("DEBUG", "false").lower() == "true")
     telemetry_enabled: bool = Field(
@@ -59,6 +61,8 @@ __all__ = [
     "MemoryConfig",
     "model_config",
     "ModelConfig",
+    "routing_config",
+    "RoutingConfig",
     "tools_config",
     "ToolsConfig",
 ]

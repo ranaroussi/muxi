@@ -127,6 +127,9 @@ class Muxi:
         # Create the tools
         tools = self._create_tools(config.get("tools", []))
 
+        # Extract description or use system message as fallback
+        description = config.get("description", config.get("system_message", ""))
+
         # Create the agent
         self.orchestrator.create_agent(
             agent_id=name,
@@ -134,7 +137,8 @@ class Muxi:
             buffer_memory=buffer_memory,
             long_term_memory=long_term_memory,
             tools=tools,
-            system_message=config.get("system_message", "")
+            system_message=config.get("system_message", ""),
+            description=description
         )
 
     def _create_model(self, model_config: Dict[str, Any]) -> Any:
@@ -222,32 +226,38 @@ class Muxi:
 
         return tools
 
-    def chat(
+    async def chat(
         self,
         message: str,
         agent_name: Optional[str] = None,
-        user_id: Optional[int] = None
+        user_id: Optional[str] = None
     ) -> str:
         """
-        Chat with an agent.
+        Send a message to an agent and get a response.
 
         Args:
-            message: Message to send to the agent
-            agent_name: Optional name of the agent to chat with
-                       (if None, the orchestrator will select the most appropriate agent)
+            message: The message to send
+            agent_name: Optional name of the agent to use (if None, will select automatically)
             user_id: Optional user ID for multi-user support
 
         Returns:
-            str: The agent's response
-
-        Raises:
-            ValueError: If no suitable agent is available
+            The agent's response as a string
         """
-        return self.orchestrator.chat(
+        # Process the message through the orchestrator
+        response = await self.orchestrator.chat(
             message=message,
-            agent_id=agent_name,
+            agent_name=agent_name,
             user_id=user_id
         )
+
+        # Return just the text response (content could be a string or dict)
+        if isinstance(response.content, str):
+            return response.content
+        elif isinstance(response.content, dict) and "text" in response.content:
+            return response.content["text"]
+        else:
+            # Fallback to string representation
+            return str(response.content)
 
     def add_user_domain_knowledge(
         self,
