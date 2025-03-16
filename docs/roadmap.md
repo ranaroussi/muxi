@@ -129,6 +129,8 @@ We welcome community input on prioritization of these roadmap items. Please open
 - Real-time communication via WebSockets ✅
 - Multi-user support ✅
 - Robust database schema with optimized indexes ✅
+- Automatic agent selection for messages ✅
+- Simplified configuration-based API ✅
 
 ### v1.0.0
 - Production-ready release

@@ -1,0 +1,35 @@
+{
+    "name": "finance_assistant",
+    "system_message": "You are a helpful assistant specialized in finance and investments. Use the Calculator tool for financial calculations.",
+    "model": {
+        "provider": "openai",
+        "api_key": "${OPENAI_API_KEY}",
+        "model": "gpt-4o",
+        "temperature": 0.2
+    },
+    "memory": {
+        "buffer": 15,
+        "long_term": true
+    },
+    "tools": [
+        "enable_calculator"
+    ],
+    "mcp_servers": [
+        {
+            "name": "stock_data",
+            "url": "http://localhost:5002",
+            "credentials": [
+                {
+                    "id": "alpha_vantage_api_key",
+                    "param_name": "api_key",
+                    "required": true
+                },
+                {
+                    "id": "alpha_vantage_account_id",
+                    "param_name": "account_id",
+                    "required": false
+                }
+            ]
+        }
+    ]
+}

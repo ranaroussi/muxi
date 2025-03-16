@@ -18,6 +18,17 @@
 - Implement proper content negotiation
 - Use HTTPS for all API endpoints
 
+## Agent Interaction Patterns
+- Make agent selection optional in chat interfaces
+- Favor automatic agent selection over requiring explicit agent_id
+- Support both patterns for backward compatibility
+- In documentation, recommend automatic selection as the preferred approach
+- Ensure message is the primary parameter in chat requests
+- Provide clear responses indicating which agent handled the request
+- Design APIs to be intuitive for new users while flexible for advanced users
+- Keep interfaces simple by handling complexity in the backend
+- Support user_id consistently across all multi-user APIs
+
 ## API Serialization
 - Use JSON as the primary serialization format
 - Maintain consistent naming convention (snake_case or camelCase)

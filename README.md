@@ -31,6 +31,57 @@ pip install -r requirements.txt
 
 ## Quick Start
 
+### Configuration-based Approach (Recommended)
+
+The simplest way to get started is with the configuration-based approach:
+
+```python
+from src import muxi
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Initialize - database connection will be loaded automatically when needed
+mx = muxi()
+
+# Add an agent from a configuration file
+mx.add_agent("my_assistant", "configs/assistant.yaml")
+
+# Chat with a specific agent
+response = mx.chat("Hello, who are you?", agent_name="my_assistant")
+print(response)
+
+# Or let the orchestrator automatically select the appropriate agent
+response = mx.chat("Hello, can you help me?")
+print(response)
+
+# Start the API server and web UI
+# mx.run()
+```
+
+Configuration file (`configs/assistant.yaml`):
+
+```yaml
+name: my_assistant
+system_message: You are a helpful AI assistant.
+model:
+  provider: openai
+  api_key: "${OPENAI_API_KEY}"
+  model: gpt-4o
+  temperature: 0.7
+memory:
+  buffer: 10  # Buffer window size of 10
+  long_term: true  # Enable long-term memory
+tools:
+- enable_calculator
+- enable_web_search
+```
+
+### Code-based Approach (Traditional)
+
+For more control, you can use the code-based approach:
+
 ```python
 from src.core.orchestrator import Orchestrator
 from src.models.openai import OpenAIModel

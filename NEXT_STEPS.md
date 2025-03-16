@@ -194,3 +194,87 @@ Guidelines for contributing to the framework:
   - [x] Template-based code generation
   - [ ] Built-in testing utilities
   - [ ] Documentation generator
+
+## End-to-End Scenarios
+
+### Simple Agent with Configuration Files
+
+This scenario demonstrates a complete workflow from installation to running an agent using the new configuration-based approach:
+
+1. **Install the Framework**
+   ```bash
+   # Clone the repository
+   git clone https://github.com/your-org/muxi.git
+   cd muxi
+
+   # Install dependencies
+   pip install -e .
+   ```
+
+2. **Create a Configuration File**
+   Create a file `configs/my_agent.yaml`:
+   ```yaml
+   name: my_assistant
+   system_message: You are a helpful assistant with weather capabilities.
+   model:
+     provider: openai
+     api_key: "${OPENAI_API_KEY}"
+     model: gpt-4o
+     temperature: 0.7
+   memory:
+     buffer: 10  # Buffer window size of 10
+     long_term: true  # Enable long-term memory
+   tools:
+   - enable_calculator
+   - enable_web_search
+   mcp_servers:
+   - name: weather
+     url: http://localhost:5001
+     credentials:
+     - id: weather_api_key
+       param_name: api_key
+       required: true
+   ```
+
+3. **Set Up Environment Variables**
+   Create a `.env` file:
+   ```
+   OPENAI_API_KEY=your_openai_key_here
+   DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+   WEATHER_API_KEY=your_weather_api_key
+   ```
+
+4. **Create a Simple Application**
+   Create a file `app.py`:
+   ```python
+   from dotenv import load_dotenv
+   from src import muxi
+
+   # Load environment variables
+   load_dotenv()
+
+   # Initialize MUXI - the database connection will be loaded
+   # automatically from DATABASE_URL when needed
+   mx = muxi()
+
+   # Add agent from configuration
+   mx.add_agent("assistant", "configs/my_agent.yaml")
+
+   # Interactive mode - explicitly specify the agent (optional)
+   response = mx.chat("What's the weather like in London?", agent_name="assistant")
+   print(f"Response: {response}")
+
+   # Let the orchestrator automatically select the appropriate agent (recommended)
+   response = mx.chat("What's the weather like in New York?")
+   print(f"Response: {response}")
+
+   # Or start a server
+   # mx.start_server(port=5050)
+   ```
+
+5. **Run the Application**
+   ```bash
+   python app.py
+   ```
+
+This approach significantly reduces the amount of code needed while providing powerful configuration options through YAML or JSON files.

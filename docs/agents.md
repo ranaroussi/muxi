@@ -155,25 +155,51 @@ When creating an agent, you can configure various parameters:
 
 Once you've created an agent, you can interact with it in several ways:
 
-### Via Python Code
+### Via Python Code with Configuration-based Approach (Recommended)
+
+```python
+from src import muxi
+
+# Initialize MUXI
+mx = muxi()
+
+# Add agents from configuration files
+mx.add_agent("assistant", "configs/general_assistant.yaml")
+mx.add_agent("weather", "configs/weather_agent.yaml")
+mx.add_agent("finance", "configs/finance_agent.yaml")
+
+# Let the orchestrator automatically select the appropriate agent (recommended)
+response = mx.chat("What's the weather in New York?")
+print(response)  # Will likely be handled by the weather agent
+
+# Or chat with a specific agent if needed (optional)
+response = mx.chat("Tell me about investment strategies", agent_name="finance")
+print(response)
+
+# With user-specific context
+response = mx.chat("What's my favorite color?", user_id=123)
+print(response)  # Will use the user's context if available
+```
+
+### Via Python Code with Traditional Approach
 
 ```python
 # Continue from previous example
 
 # Standard agent interaction
-response = await orchestrator.run(agent_id, "What's the population of Tokyo?")
-print(response)
+response = await orchestrator.chat(message="What's the population of Tokyo?")
+print(response)  # Orchestrator will select the appropriate agent
 
-# Using the default agent
-response = await orchestrator.run("Tell me about quantum computing")
+# Explicitly specifying an agent
+response = await orchestrator.chat(message="Tell me about quantum computing", agent_id=agent_id)
 print(response)
 
 # Multi-user agent interaction
-response = await orchestrator.run("multi_user_agent", "My favorite color is blue", user_id=123)
+response = await orchestrator.chat(message="My favorite color is blue", user_id=123)
 print(response)
 
 # The multi-user agent will remember user-specific information
-response = await orchestrator.run("multi_user_agent", "What's my favorite color?", user_id=123)
+response = await orchestrator.chat(message="What's my favorite color?", user_id=123)
 print(response)  # Should respond with "Your favorite color is blue"
 ```
 
@@ -223,7 +249,7 @@ async def chat_with_agent():
             "user_id": 123
         }))
 
-        # Subscribe to an agent
+        # Subscribe to an agent (optional - if you want messages from a specific agent)
         await websocket.send(json.dumps({
             "type": "subscribe",
             "agent_id": "multi_user_agent"
@@ -233,11 +259,17 @@ async def chat_with_agent():
         response = await websocket.recv()
         print(f"Subscription response: {response}")
 
-        # Send a message
+        # Send a message without specifying an agent (automatic selection)
         await websocket.send(json.dumps({
             "type": "chat",
-            "agent_id": "multi_user_agent",
             "message": "What is the capital of France?"
+        }))
+
+        # Or send a message to a specific agent
+        await websocket.send(json.dumps({
+            "type": "chat",
+            "message": "What's the weather forecast?",
+            "agent_id": "weather_agent"
         }))
 
         # Receive response

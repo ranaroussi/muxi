@@ -305,3 +305,63 @@ class Orchestrator:
                 agent.clear_memory(clear_long_term=clear_long_term)
 
         logger.info(f"Cleared {'all' if clear_long_term else 'buffer'} memories " f"for all agents")
+
+    def select_agent_for_message(self, message: str) -> str:
+        """
+        Select the most appropriate agent to handle a message.
+
+        This method determines which agent should process the given message.
+        Currently uses the default agent, but could be extended with more
+        sophisticated routing logic like intent detection.
+
+        Args:
+            message: The message to process
+
+        Returns:
+            str: The ID of the selected agent
+
+        Raises:
+            ValueError: If no agents are available
+        """
+        if not self.agents:
+            raise ValueError("No agents available")
+
+        # If we have a default agent, use it
+        if self.default_agent_id is not None:
+            return self.default_agent_id
+
+        # Otherwise, use the first agent (simplest fallback)
+        return next(iter(self.agents))
+
+    async def chat(
+        self,
+        message: str,
+        agent_id: Optional[str] = None,
+        user_id: Optional[int] = None
+    ) -> str:
+        """
+        Chat with an agent.
+
+        Args:
+            message: The message to send
+            agent_id: Optional ID of the agent to chat with
+                    (if None, will automatically select the most appropriate agent)
+            user_id: Optional user ID for multi-user support
+
+        Returns:
+            str: The agent's response
+
+        Raises:
+            ValueError: If no suitable agent is found
+        """
+        # If agent_id is not specified, select the appropriate agent
+        if agent_id is None:
+            agent_id = self.select_agent_for_message(message)
+
+        # Get the agent
+        agent = self.get_agent(agent_id)
+
+        # Process the message
+        response = await agent.chat(message, user_id=user_id)
+
+        return response
