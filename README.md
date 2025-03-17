@@ -25,24 +25,7 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 
 ## Architecture
 
-### Current Architecture
-
-```
-┌───────────────┐      ┌───────────┐      ┌───────────┐
-│  Application  │──────│  Agents   │──────│    LLM    │
-└───────┬───────┘      └─────┬─────┘      └───────────┘
-        │                    │
-        │              ┌─────┴─────┐
-        │              │  Memory   │
-        │              └─────┬─────┘
-┌───────┴───────┐      ┌─────┴─────┐
-│  CLI/API/Web  │──────│   Tools   │
-└───────────────┘      └───────────┘
-```
-
-### Target Architecture
-
-MUXI is evolving towards a more flexible, service-oriented approach:
+MUXI has a flexible, service-oriented approach:
 
 ```
 ┌───────────────────┐
@@ -83,14 +66,39 @@ MUXI is evolving towards a more flexible, service-oriented approach:
 └─────────────────────────────────────────────────────┘
 ```
 
-This evolution preserves the current programmatic API while adding powerful capabilities for distributed deployment. For more details, see [ARCHITECTURE_EVOLUTION.md](ARCHITECTURE_EVOLUTION.md).
+For more details, see [Architecture Documentation](docs/architecture.md).
+
+## Package Structure
+
+MUXI follows a modular packaging approach:
+
+```
+packages/
+├── core/      # Core functionality and shared components
+├── server/    # Server implementation
+├── cli/       # Command-line interface
+└── web/       # Web application
+```
+
+### Installation Options
+
+```bash
+# Full installation (excluding web components)
+pip install muxi
+
+# Standalone CLI client for connecting to remote servers
+pip install muxi-cli
+
+# Standalone web app for connecting to remote servers
+pip install muxi-web
+```
 
 ## Intelligent Message Routing
 
 Automatically route user messages to the most appropriate agent based on their content:
 
 ```python
-from src import muxi
+from muxi import muxi
 
 # Initialize your app with multiple specialized agents
 app = muxi()
@@ -121,8 +129,8 @@ For complete configuration options, see the [Configuration Guide](docs/configura
 git clone https://github.com/ranaroussi/muxi.git
 cd muxi
 
-# Install dependencies
-pip install -r requirements.txt
+# Install in development mode
+./install_dev.sh
 ```
 
 ## Quick Start
@@ -132,7 +140,7 @@ pip install -r requirements.txt
 The simplest way to get started is with the configuration-based approach:
 
 ```python
-from src import muxi
+from muxi import muxi
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -174,12 +182,12 @@ tools:
 - enable_web_search
 ```
 
-### Remote Server Connection (New)
+### Remote Server Connection
 
 Connect to an existing MUXI server:
 
 ```python
-from src import muxi
+from muxi import muxi
 
 # Connect to a remote MUXI server
 app = muxi(
@@ -206,28 +214,14 @@ await socket.close()
 The framework includes a rich CLI for interacting with agents directly from your terminal:
 
 ```bash
-# Start the CLI (before package installation)
-python -m src.cli
-
-# Start a chat session with an agent
-python -m src.cli chat --agent-id assistant
+# Start the CLI
+muxi chat --agent-id assistant
 
 # Send a one-off message to an agent
-python -m src.cli send --agent-id assistant "What is the capital of France?"
+muxi send --agent-id assistant "What is the capital of France?"
 
-# Start the API server
-python -m src.cli api
-
-# Start both API server and web UI
-python -m src.cli run
-# or simply
-python -m src
-```
-
-After installing the package, you can use the `muxi` command instead:
-
-```bash
-muxi chat --agent-id assistant
+# Start the server
+muxi run
 ```
 
 ## Communication Protocols
@@ -257,15 +251,15 @@ Start the API server:
 
 ```bash
 # Default setup (binds to 0.0.0.0, allowing remote connections)
-python -m src.api.run
+muxi run
 
 # Specify custom host and port
-python -m src.api.run --host 0.0.0.0 --port 5050
+muxi run --host 0.0.0.0 --port 5050
 ```
 
 > **Note:** The WebSocket server runs on the same port as the API server. When you change the API port, the WebSocket port changes too.
 
-When running the frontend on a different server, update the `BACKEND_API_URL` in `src/web/.env`:
+When running the frontend on a different server, update the `BACKEND_API_URL` in your web client configuration:
 
 ```
 # Replace with your API server's IP or domain name
@@ -350,6 +344,7 @@ socket.onmessage = (event) => {
 
 ## Recent Improvements
 
+- **Modular Package Structure**: Reorganized codebase into core, server, CLI, and web packages
 - **Multi-User Support**: Added Memobase for user-specific memory partitioned memory
 - **Memory Management**: Added endpoints for memory search and clearing, with support for user-specific operations
 - **Shared Orchestrator Instance**: Fixed issue with WebSocket and REST API using different orchestrator instances

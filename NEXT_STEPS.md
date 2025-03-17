@@ -56,6 +56,12 @@ Core components of the muxi framework now implemented:
     - MCP Server Generator with interactive CLI wizard
     - Template-based code generation system
     - Flattened template structure for simpler maintenance
+13. **Architecture Evolution**:
+    - Restructured codebase into modular packages
+    - Created setup.py for each package with appropriate dependencies
+    - Implemented proper monorepo structure
+    - Created development installation scripts
+    - Fixed cross-package imports
 
 ## Todo List
 
@@ -229,10 +235,10 @@ Transform agents into omni agents capable of handling various media types:
 
 ### 11. Package Distribution
 
-- [ ] Create proper Python package for PyPI distribution
-- [ ] Versioning strategy
-- [ ] Dependency management
-- [ ] Package documentation
+- [x] Create proper Python package for PyPI distribution
+- [x] Versioning strategy
+- [x] Dependency management
+- [x] Package documentation
 - [ ] Installation guides
 
 ### 12. Development Workflow
@@ -245,42 +251,42 @@ Transform agents into omni agents capable of handling various media types:
 
 ### 13. Architecture Evolution
 
-Implementing the service-oriented architecture described in ARCHITECTURE_EVOLUTION.md:
+The service-oriented architecture described in ARCHITECTURE_EVOLUTION.md:
 
 #### Core Architecture Refactoring
-- [ ] Separate local mode from server mode
-- [ ] Create unified server component
-- [ ] Ensure programmatic API remains backward compatible
-- [ ] Implement flexible API key authentication
-  - [ ] Support auto-generated keys with one-time display
-  - [ ] Allow environment variable configuration
-  - [ ] Add explicit auth configuration options
-- [ ] Implement client-side connector for remote servers
-- [ ] Create connection management utilities
-- [ ] Update facade to handle local and remote operation
-- [ ] Ensure connection state persistence
+- [x] Separate local mode from server mode
+- [x] Create unified server component
+- [x] Ensure programmatic API remains backward compatible
+- [x] Implement flexible API key authentication
+  - [x] Support auto-generated keys with one-time display
+  - [x] Allow environment variable configuration
+  - [x] Add explicit auth configuration options
+- [x] Implement client-side connector for remote servers
+- [x] Create connection management utilities
+- [x] Update facade to handle local and remote operation
+- [x] Ensure connection state persistence
 
 #### Communication Protocol
-- [ ] Implement standard HTTP for all API requests
-- [ ] Add SSE (Server-Sent Events) support for streaming responses
-  - [ ] Implement auto-closing SSE connections when responses complete
-  - [ ] Add fallback for unsupported clients
-- [ ] Enable WebSocket support for Omni capabilities
-  - [ ] Create WebSocket session management API (open_socket/close)
-  - [ ] Support multi-modal streaming over WebSockets
-  - [ ] Implement binary data handling for audio/video
+- [x] Implement standard HTTP for all API requests
+- [x] Add SSE (Server-Sent Events) support for streaming responses
+  - [x] Implement auto-closing SSE connections when responses complete
+  - [x] Add fallback for unsupported clients
+- [x] Enable WebSocket support for Omni capabilities
+  - [x] Create WebSocket session management API (open_socket/close)
+  - [x] Support multi-modal streaming over WebSockets
+  - [x] Implement binary data handling for audio/video
 
 #### Packaging Strategy
-- [ ] Structure the codebase for modular packaging:
-  - [ ] muxi-core: Core functionality and shared components
-  - [ ] muxi-server: Server implementation
-  - [ ] muxi-cli: Command-line interface
-  - [ ] muxi-web: Web application
-- [ ] Setup installation options:
-  - [ ] Full installation (all components)
-  - [ ] Minimal CLI for working with remote servers only
-  - [ ] Standalone web app for connecting to remote servers
-- [ ] Create package.json files with appropriate dependencies
+- [x] Structure the codebase for modular packaging:
+  - [x] muxi-core: Core functionality and shared components
+  - [x] muxi-server: Server implementation
+  - [x] muxi-cli: Command-line interface
+  - [x] muxi-web: Web application
+- [x] Setup installation options:
+  - [x] Full installation (all components except web)
+  - [x] Minimal CLI for working with remote servers only
+  - [x] Standalone web app for connecting to remote servers
+- [x] Create setup.py files with appropriate dependencies
 - [ ] Setup build pipeline for each package
 
 #### MCP Server Unification
@@ -293,14 +299,14 @@ Implementing the service-oriented architecture described in ARCHITECTURE_EVOLUTI
 - [ ] Add utilities for spinning up MCP servers
 
 #### Client Applications
-- [ ] Update CLI to support server connections
-- [ ] Add commands for managing remote servers
-- [ ] Implement connection profiles
+- [x] Update CLI to support server connections
+- [x] Add commands for managing remote servers
+- [x] Implement connection profiles
 - [ ] Convert web UI to standalone SPA
 - [ ] Add server connection screen
 - [ ] Implement connection state management
 - [ ] Create settings for managing multiple servers
-- [ ] Update Python SDK for remote operation
+- [x] Update Python SDK for remote operation
 - [ ] Create client libraries for other languages
 
 ## Contribution Guidelines
@@ -376,7 +382,7 @@ This scenario demonstrates a complete workflow from installation to running an a
    Create a file `app.py`:
    ```python
    from dotenv import load_dotenv
-   from src import muxi
+   from muxi import muxi
 
    # Load environment variables
    load_dotenv()

@@ -1,5 +1,23 @@
 #!/bin/bash
-# Script to fix cross-package imports
+# =====================================================================
+# MUXI Import Fixer Script
+# =====================================================================
+# This script updates import references to align with the new package
+# structure and creates necessary symlinks for development mode.
+#
+# When to use:
+# - After pulling in changes that modify import paths
+# - When you experience import errors with cross-package references
+# - After adding new modules that import across package boundaries
+#
+# What it does:
+# 1. Fixes imports in core to reference server components
+# 2. Fixes internal imports in the server package
+# 3. Creates symlinks for cross-package dependencies
+#
+# NOTE: This script is for development only. In production, these
+# imports will be resolved through proper package dependencies.
+# =====================================================================
 
 echo "Fixing imports for core package..."
 # Move config from core to server
@@ -41,4 +59,6 @@ find packages/server/src/muxi/memory -name "*.py" -type f -exec sed -i '' 's/fro
 find packages/server/src/muxi/tools -name "*.py" -type f -exec sed -i '' 's/from muxi.tools/from muxi.server.tools/g' {} \;
 find packages/server/src/muxi/api -name "*.py" -type f -exec sed -i '' 's/from muxi.api/from muxi.server.api/g' {} \;
 
-echo "Done!"
+echo "Import fixing complete!"
+echo ""
+echo "To verify your changes, try running: python -c \"from muxi import muxi; print('Imports working!')\""
