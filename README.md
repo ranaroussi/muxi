@@ -46,7 +46,7 @@ MUXI is evolving towards a more flexible, service-oriented approach:
 
 ```
 ┌───────────────┐
-┤ Thin Clients  │
+│ Thin Clients  │
 │ (CLI/Web/SDK) │
 └───────┬───────┘
         │

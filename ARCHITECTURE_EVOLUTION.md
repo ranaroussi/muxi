@@ -35,7 +35,7 @@ This evolution preserves the current programmatic API while adding powerful capa
 
 ```
 ┌───────────────┐
-┤ Thin Clients  │
+│ Thin Clients  │
 │ (CLI/Web/SDK) │
 └───────┬───────┘
         │
