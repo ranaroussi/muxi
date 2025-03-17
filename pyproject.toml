@@ -36,7 +36,7 @@ dependencies = [
 "Bug Tracker" = "https://github.com/ranaroussi/muxi/issues"
 
 [project.scripts]
-muxi = "src.cli.commands:cli_main"
+muxi = "muxi.cli:main"
 
 [tool.black]
 line-length = 100

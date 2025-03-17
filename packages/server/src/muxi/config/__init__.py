@@ -42,10 +42,10 @@ class Config(BaseModel):
             provider_name: Name of the provider module
         """
         try:
-            import_module(f"src.providers.{provider_type}.{provider_name}")
-        except ImportError as error:
-            module_path = f"src.providers.{provider_type}.{provider_name}"
-            raise ImportError(f"Could not import provider module {module_path}: {error}")
+            return import_module(f"muxi.providers.{provider_type}.{provider_name}")
+        except (ImportError, ModuleNotFoundError):
+            module_path = f"muxi.providers.{provider_type}.{provider_name}"
+            raise ImportError(f"Could not import provider module {module_path}")
 
 
 # Create a global config instance

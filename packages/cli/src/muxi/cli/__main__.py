@@ -1,11 +1,7 @@
-"""
-Main entry point for the CLI when run as a module.
-
-This allows running the CLI with:
-python -m src.cli
-"""
-
-from muxi.cli.commands import cli_main
+#!/usr/bin/env python3
+# Main entry point for the MUXI CLI
 
 if __name__ == "__main__":
-    cli_main()
+    import sys
+    from muxi.cli import main
+    sys.exit(main())

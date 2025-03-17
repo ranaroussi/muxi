@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from fastapi.middleware.asgi import ASGILifespanMiddleware
 
 from muxi.server.api.websocket import register_websocket_routes
 from muxi.server.config import config
@@ -502,6 +503,9 @@ def create_app() -> FastAPI:
             index_path = os.path.join(web_build_dir, "index.html")
             return FileResponse(index_path)
 
+    app = ASGILifespanMiddleware(app)
+
+    # For use with hypercorn or other ASGI servers
     return app
 
 
@@ -515,7 +519,7 @@ def start_api(host: str = "0.0.0.0", port: int = 8000, reload: bool = False):
         reload: Whether to enable auto-reload.
     """
     uvicorn.run(
-        "src.api.app:create_app",
+        "muxi.api.app:create_app",
         host=host,
         port=port,
         reload=reload,
