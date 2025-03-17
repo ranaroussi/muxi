@@ -182,6 +182,9 @@ print(response.content)
 # Chat with multi-user support
 response = await orchestrator.chat("Remember my name is Alice", user_id="user123")
 print(response.content)
+
+# Run the server
+# app.run()
 ```
 
 ### Using the CLI
