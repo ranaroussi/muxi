@@ -18,19 +18,19 @@
 ┌─────────│───────────────────────────────────────────┐
 │         │    MUXI Server (Local/Remote)             │
 │         │                                           │
-│         │         ┌──────────────┐                  │
-│         └───────&gt; │ Orchestrator │                  │
-│                   └──────┬───────┘                  │
+│         │        ┌───────────────┐                  │
+│         └───────&gt;│  Orchestrator │                  │
+│                  └───────┬───────┘                  │
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │
 │         ▼                ▼                ▼         │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
 │  │   Agent 1   │  │   Agent 2   │  │   Agent N   │  │
-│  │ (from YAML) │  │ (from JSON) │  │ (from YAML) │  │
+│  │    (YAML)   │  │    (JSON)   │  │    (YAML)   │  │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
-│         │                │                │         │
+│         ↓                ↓                ↓         │
 │         └────────┬───────┴────────┬───────┘         │
-│                  │                │                 │
+│                  ↓                :                 │
 │           ┌──────┴──────┐  ┌──────┴──────┐          │
 │           │ MCP Handler │  │   Memory    │          │
 │           └──────┬──────┘  └─────────────┘          │
@@ -41,7 +41,7 @@
 ┌─────────────────────────────────────────────────────┐
 │              MCP Servers (via Command/SSE)          │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │ Weather API │  │ Search Tool │  │ Custom Tool │  │
+│  │   Weather   │  │  Web Search │  │     ....    │  │
 │  └─────────────┘  └─────────────┘  └─────────────┘  │
 └─────────────────────────────────────────────────────┘
 </code></pre></div></div> <h3 id="key-architectural-changes"> <a href="#key-architectural-changes" class="anchor-heading" aria-labelledby="key-architectural-changes"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Key Architectural Changes </h3> <ol> <li><strong>Client-Server Model</strong> <ul> <li>Separate client and server components</li> <li>Local and remote operation with the same API</li> <li>Flexible authentication mechanisms</li> <li>Connection management utilities</li> </ul> </li> <li><strong>Modular Packaging</strong> <ul> <li>Core package with minimal dependencies</li> <li>Server package with full capabilities</li> <li>CLI package for remote connections</li> <li>Web package for browser-based access</li> </ul> </li> <li><strong>Hybrid Communication Protocol</strong> <ul> <li>HTTP for standard API requests</li> <li>SSE (Server-Sent Events) for streaming responses <ul> <li>Real-time token-by-token streaming</li> <li>Automatic connection closure after response completion</li> </ul> </li> <li>WebSockets for multi-modal capabilities (Omni features) <ul> <li>Bi-directional communication for audio/video</li> <li>Available through <code class="language-plaintext highlighter-rouge">app.open_socket()</code> API</li> </ul> </li> </ul> </li> <li><strong>Authentication Implementation</strong> <ul> <li>API key authentication</li> <li>Auto-generated keys with one-time display</li> <li>Environment variable configuration</li> </ul> </li> <li><strong>MCP Server Unification</strong> <ul> <li>Tool system based on MCP servers</li> <li>Adapters for local Python tools</li> <li>Service discovery mechanisms</li> <li>Deployment utilities</li> </ul> </li> </ol> <h3 id="client-usage"> <a href="#client-usage" class="anchor-heading" aria-labelledby="client-usage"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Client Usage </h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Local usage (unchanged)
