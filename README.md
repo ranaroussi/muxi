@@ -112,7 +112,7 @@ ROUTING_LLM_MODEL=gpt-4o-mini
 ROUTING_LLM_TEMPERATURE=0.0
 ```
 
-For complete configuration options, see the [Configuration Guide](docs/configuration_guide.md).
+For complete configuration options, see the [Configuration Guide](docs/configuration-guide.md).
 
 ## Installation
 
@@ -371,13 +371,13 @@ Comprehensive documentation is available in the `docs` directory:
 - [Agent Guide](docs/agent.md)
 - [Orchestrator Documentation](docs/orchestrator.md)
 - [Memory Systems](docs/memory.md)
-- [Domain Knowledge](docs/domain_knowledge.md)
+- [Domain Knowledge](docs/domain-knowledge.md)
 - [Tool System](docs/tools.md)
 - [Model Context Protocol (MCP)](docs/mcp.md)
 
 ### Concepts
-- [Agents vs Tools](docs/agents_vs_tools.md)
-- [Tools vs MCP](docs/tools_vs_mcp.md)
+- [Agents vs Tools](docs/agents-vs-tools.md)
+- [Tools vs MCP](docs/tools-vs-mcp.md)
 
 ### Setup and Configuration
 - [Quick Start Guide](docs/quick_start.md)
