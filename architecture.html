@@ -9,7 +9,7 @@
 │  CLI/API/Web  │──────│   Tools   │
 └───────────────┘      └───────────┘
 </code></pre></div></div> <h3 id="core-components"> <a href="#core-components" class="anchor-heading" aria-labelledby="core-components"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Core Components </h3> <ol> <li><strong>Model Context Protocol (MCP)</strong>: Standardized communication layer with LLMs <ul> <li>Provides consistent interfaces for different LLM providers</li> <li>Handles message formatting and processing</li> </ul> </li> <li><strong>Memory System</strong>: Stores conversation history and knowledge <ul> <li>Buffer memory for short-term context</li> <li>Long-term memory for persistent storage</li> <li>Memobase for multi-user support</li> <li>Domain knowledge for structured information</li> </ul> </li> <li><strong>Tool System</strong>: Extends agent capabilities <ul> <li>Provides a registry for tools</li> <li>Handles tool execution and results</li> </ul> </li> <li><strong>Agents</strong>: Core entities that combine LLMs with memory and tools <ul> <li>Process user messages</li> <li>Generate responses</li> <li>Execute tools when needed</li> </ul> </li> <li><strong>Orchestrator</strong>: Manages multiple agents <ul> <li>Routes messages to appropriate agents</li> <li>Facilitates inter-agent communication</li> <li>Manages agent lifecycle</li> </ul> </li> <li><strong>Interfaces</strong>: Multiple ways to interact with the framework <ul> <li>CLI for terminal-based interactions</li> <li>API for programmatic access</li> <li>Web UI for visual interaction</li> <li>WebSocket for real-time communication</li> </ul> </li> </ol> <h2 id="evolution-to-service-oriented-architecture"> <a href="#evolution-to-service-oriented-architecture" class="anchor-heading" aria-labelledby="evolution-to-service-oriented-architecture"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Evolution to Service-Oriented Architecture </h2> <p>The MUXI framework is evolving towards a more flexible, service-oriented approach that enables distributed deployment while maintaining simplicity and ease of use.</p> <h3 id="target-architecture"> <a href="#target-architecture" class="anchor-heading" aria-labelledby="target-architecture"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Target Architecture </h3> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌───────────────┐                     ┌───────────────┐
-│ MUXI Local/   │◄──API Calls/SSE/WS──┤ Thin Clients  │
+│ MUXI Local/   │◄─────API/SSE/WS─────┤ Thin Clients  │
 │ Remote Client │                     │ (CLI/Web/SDK) │
 └───────┬───────┘                     └───────────────┘
         │
@@ -18,24 +18,25 @@
 ┌─────────────────────────────────────────────────────┐
 │                     MUXI Server                     │
 │                                                     │
+│                   ┌──────────────┐                  │
+│                   │ Orchestrator │                  │
+│                   └──────┬───────┘                  │
+│                          │                          │
+│                          ▼                          │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │  Agent 1    │  │  Agent 2    │  │  Agent N    │  │
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │  │
 │  │ (from YAML) │  │ (from JSON) │  │ (from YAML) │  │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
 │         │                │                │         │
 │         └────────┬───────┴────────┬───────┘         │
 │                  │                │                 │
 │           ┌──────┴──────┐  ┌──────┴──────┐          │
-│           │ Orchestrator│  │  Memory     │          │
+│           │ MCP Handler │  │   Memory    │          │
 │           └──────┬──────┘  └─────────────┘          │
-│                  │                                  │
-│           ┌──────┴──────┐                           │
-│           │ MCP Servers │                           │
-│           └─────────────┘                           │
-└─────────────────────────────────────────────────────┘
-        │
-        │ (gRPC/HTTP)
-        ▼
+└──────────────────│──────────────────────────────────┘
+                   │
+                   │ (gRPC/HTTP)
+                   ▼
 ┌─────────────────────────────────────────────────────┐
 │                 External MCP Servers                │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
