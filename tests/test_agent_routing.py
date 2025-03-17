@@ -10,8 +10,8 @@ import os
 import yaml
 import json
 import asyncio
-from src.models.providers.openai import OpenAIModel
-from src.core.orchestrator import Orchestrator
+from muxi.models.providers.openai import OpenAIModel
+from muxi.core.orchestrator import Orchestrator
 from tests.utils.env_setup import load_api_keys
 
 # Load API keys from .env file

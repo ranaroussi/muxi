@@ -9,7 +9,7 @@ be routed to the correct agent based on their content.
 
 import asyncio
 import os
-from src import muxi
+from muxi import muxi
 from tests.utils.env_setup import load_api_keys
 
 # Load API keys from .env file

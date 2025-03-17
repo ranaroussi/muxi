@@ -8,8 +8,8 @@ import asyncio
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.core.agent import Agent
-from src.core.mcp import MCPMessage
+from muxi.core.agent import Agent
+from muxi.core.mcp import MCPMessage
 
 
 class TestAgent(unittest.TestCase):
@@ -61,7 +61,7 @@ class TestAgent(unittest.TestCase):
         # Verify result
         self.assertEqual(result.content, "I'm a helpful assistant.")
 
-    @patch("src.core.agent.MCPHandler")
+    @patch("muxi.core.agent.MCPHandler")
     def test_process_tool_calls(self, mock_handler_class):
         """Test processing tool calls."""
         # Set up mock for MCPHandler
@@ -109,7 +109,7 @@ class TestAgent(unittest.TestCase):
         # Verify result
         self.assertEqual(result, self.mock_memory.search.return_value)
 
-    @patch("src.core.agent.datetime")
+    @patch("muxi.core.agent.datetime")
     def test_create_message_context(self, mock_datetime):
         """Test creating message context."""
         # Set up datetime mock

@@ -13,9 +13,9 @@ from unittest.mock import MagicMock, patch
 import faiss
 import numpy as np
 
-from src.memory.buffer import BufferMemory
-from src.memory.vector import VectorMemory
-from src.models.base import BaseModel
+from muxi.server.memory.buffer import BufferMemory
+from muxi.server.memory.vector import VectorMemory
+from muxi.models.base import BaseModel
 
 
 class TestBufferMemory(unittest.TestCase):

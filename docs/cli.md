@@ -14,7 +14,7 @@ The MUXI Framework includes a powerful command-line interface (CLI) that allows 
 
 The CLI provides a rich terminal-based interface for:
 - Creating and interacting with agents
-- Managing API server and web UI
+- Managing the server
 - Sending one-off messages to agents
 - Viewing rich-formatted responses with markdown support
 
@@ -44,8 +44,7 @@ muxi [COMMAND] [OPTIONS] [ARGUMENTS]
 
 Available commands:
 - `chat`: Start an interactive chat session with an agent
-- `api`: Run the API server
-- `run`: Run both the API server and web UI
+- `run`: Run the server
 - `send`: Send a one-off message to an agent
 
 ### Examples
@@ -67,15 +66,11 @@ muxi chat --agent-id researcher
 python -m src.cli send --agent-id assistant "What is the capital of France?"
 muxi send --agent-id assistant "What is the capital of France?"
 
-# Run the API server
-python -m src.cli api
-muxi api
-
-# Run both the API server and web UI
+# Run the server
 python -m src.cli run
 muxi run
 
-# Alternatively, you can run both the API server and web UI with:
+# Alternatively, you can run the server with:
 python -m src
 ```
 
@@ -140,12 +135,12 @@ Example:
 python -m src.cli send "What is the capital of France?"
 ```
 
-## API Server Mode
+## Server Mode
 
-The API server mode starts the REST API server, which provides endpoints for interacting with agents.
+The server mode starts the REST API server, which provides endpoints for interacting with agents.
 
 ```bash
-python -m src.cli api [OPTIONS]
+python -m src.cli run [OPTIONS]
 ```
 
 Options:
@@ -155,25 +150,7 @@ Options:
 
 Example:
 ```bash
-python -m src.cli api --host 127.0.0.1 --port 8080
-```
-
-## Run Mode
-
-The run mode starts both the API server and the web UI.
-
-```bash
-python -m src.cli run [OPTIONS]
-```
-
-Options:
-- `--api-host TEXT`: Host for the API server (default: "0.0.0.0")
-- `--api-port INTEGER`: Port for the API server (default: 5050)
-- `--help`: Show this message and exit.
-
-Example:
-```bash
-python -m src.cli run --api-port 8080
+python -m src.cli run --host 127.0.0.1 --port 8080
 ```
 
 ## Configuration
@@ -182,7 +159,7 @@ The CLI uses the same configuration as the rest of the framework. You can config
 
 1. Environment variables
 2. `.env` file in the project root
-3. Configuration files in the `src/config` directory
+3. Configuration files in the `config` directory
 
 Key configuration options that affect the CLI:
 
@@ -206,8 +183,8 @@ You can create custom agents with specific capabilities by modifying the configu
 
 Example using the API to create a custom agent:
 ```bash
-# Start the API server
-python -m src.cli api
+# Start the server
+muxi run
 
 # In another terminal, create a custom agent
 curl -X POST http://localhost:5050/agents \
@@ -218,7 +195,7 @@ curl -X POST http://localhost:5050/agents \
   }'
 
 # Now chat with the custom agent
-python -m src.cli chat --agent-id custom_agent
+muxi chat --agent-id custom_agent
 ```
 
 ### Using Multi-User Agents
@@ -226,7 +203,7 @@ python -m src.cli chat --agent-id custom_agent
 For agents that support multiple users, you can specify the user ID:
 
 ```bash
-python -m src.cli chat --agent-id multi_user_assistant --user-id 123
+muxi chat --agent-id multi_user_assistant --user-id 123
 ```
 
 This ensures that the agent maintains separate memory contexts for different users.
@@ -237,7 +214,7 @@ This ensures that the agent maintains separate memory contexts for different use
 
 1. **Port already in use**: If you get an error about port 5050 being already in use, you can specify a different port:
    ```bash
-   python -m src.cli api --port 5051
+   muxi run --port 5051
    ```
 
 2. **API key not found**: Ensure you've set up your API keys in the `.env` file or as environment variables.
@@ -253,7 +230,7 @@ You can enable debug logging to get more information about what's happening:
 export DEBUG=1
 
 # Run CLI
-python -m src.cli chat
+muxi chat
 ```
 
 ## Integration with Scripts
@@ -261,7 +238,7 @@ python -m src.cli chat
 You can use the CLI programmatically in your Python scripts:
 
 ```python
-from src.cli import run_cli, chat_with_agent
+from muxi.cli import run_cli, chat_with_agent
 
 # Run CLI directly
 run_cli()
@@ -327,61 +304,3 @@ Available Tools
 You: /exit
 
 Goodbye!
-```
-
-## Advanced Usage
-
-### Modifying System Message
-
-The system message defines the agent's persona and capabilities. You can customize it:
-
-1. Via environment variable:
-   ```
-   SYSTEM_MESSAGE="You are an expert programmer specializing in Python..."
-   ```
-
-2. Via the configuration file:
-   ```python
-   # src/config/app.py
-   system_message = "You are an expert programmer..."
-   ```
-
-### Adding Custom Tools
-
-To add custom tools to the CLI agent, modify the `create_agent_from_config` function in `src/cli/app.py`:
-
-```python
-# Create tools
-tools = []
-
-# Load tools based on configuration
-if config.tools.enable_calculator:
-    tools.append(Calculator())
-
-if config.tools.enable_web_search:
-    tools.append(WebSearch())
-
-# Add your custom tool
-if config.tools.enable_custom_tool:
-    tools.append(CustomTool())
-```
-
-## Troubleshooting
-
-### LLM API Key Issues
-
-If you encounter errors related to the LLM API key, make sure:
-- You have set the correct API key in your `.env` file
-- The API key has sufficient permissions and credits
-
-### Memory Errors
-
-If memory search doesn't work properly:
-- Ensure you have a proper embedding dimension set up
-- Check that you have enough previous messages for context
-
-### Tool Execution Errors
-
-If tools don't work correctly:
-- Check if the tool's API key is properly set (if required)
-- Verify the tool's dependencies are installed

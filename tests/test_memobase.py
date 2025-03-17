@@ -8,8 +8,8 @@ import time
 import unittest
 from unittest.mock import MagicMock, patch
 
-from src.memory.long_term import LongTermMemory
-from src.memory.memobase import Memobase
+from muxi.server.memory.long_term import LongTermMemory
+from muxi.server.memory.memobase import Memobase
 from tests.utils.async_test import async_test
 
 

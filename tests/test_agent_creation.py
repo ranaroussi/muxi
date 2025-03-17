@@ -10,10 +10,9 @@ import os
 import yaml
 import json
 from dotenv import load_dotenv
-from src.models.providers.openai import OpenAIModel
-from src.core.agent import Agent
-from src.core.orchestrator import Orchestrator
-from src.config import config
+from muxi.models.providers.openai import OpenAIModel
+from muxi.core.agent import Agent
+from muxi.core.orchestrator import Orchestrator
 
 # Load environment variables from .env file
 load_dotenv()
@@ -21,6 +20,7 @@ load_dotenv()
 # Path to configuration files
 CONFIGS_DIR = "tests/configs"
 os.makedirs(CONFIGS_DIR, exist_ok=True)
+
 
 def create_test_configs():
     """Create test configuration files for agents."""
@@ -99,7 +99,7 @@ def test_agent_creation():
 
     # Create an agent programmatically (baseline test)
     print("Creating agent programmatically...")
-    agent = Agent(
+    Agent(
         model=model,
         system_message="You are a test assistant.",
     )
@@ -119,7 +119,7 @@ def test_agent_creation():
         api_key=api_key
     )
 
-    weather_agent = orchestrator.create_agent(
+    orchestrator.create_agent(
         agent_id="weather",
         model=weather_model,
         system_message=weather_config["system_message"],
@@ -141,7 +141,7 @@ def test_agent_creation():
         api_key=api_key
     )
 
-    finance_agent = orchestrator.create_agent(
+    orchestrator.create_agent(
         agent_id="finance",
         model=finance_model,
         system_message=finance_config["system_message"],

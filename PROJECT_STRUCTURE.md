@@ -1,7 +1,7 @@
 # MUXI Framework Project Structure
 
 ```
-muxi/
+muxi-framework/
 ├── .cursor/                   # Cursor editor configuration files
 ├── .github/                   # GitHub configuration (actions, templates, etc.)
 ├── .git/                      # Git repository data
@@ -19,20 +19,29 @@ muxi/
 ├── migrations/                # Database migration scripts
 ├── packages/                  # Modular packages structure
 │   ├── cli/                   # Command-line interface package
+│   │   ├── pyproject.toml     # Package configuration
+│   │   └── src/muxi/cli/      # CLI package source code
 │   ├── core/                  # Core functionality package
+│   │   ├── pyproject.toml     # Package configuration
+│   │   └── src/muxi/core/     # Core package source code with agents, memory, tools
 │   ├── muxi/                  # Meta-package that includes core, server, and CLI
+│   │   ├── pyproject.toml     # Package configuration
+│   │   └── src/muxi/          # Meta-package source code
 │   ├── server/                # Server implementation package
+│   │   ├── pyproject.toml     # Package configuration
+│   │   └── src/muxi/server/   # Server package with API endpoints and WebSocket
 │   └── web/                   # Web application package
+│       ├── package.json       # NPM package configuration
+│       ├── public/            # Static web assets
+│       └── src/               # Web app source code
 ├── scripts/                   # Utility scripts for project management
 ├── tests/                     # Test files and directories
 ├── .cursorignore              # Files to be ignored by Cursor editor
 ├── .env                       # Environment variables (not in repo)
 ├── .env.example               # Example environment variables
 ├── .flake8                    # Flake8 configuration
-├── cleanup.sh                 # Script to remove old src/ directory after migration
 ├── CONTRIBUTOR_LICENSE_AGREEMENT.md # Contributor license agreement
 ├── env_check.py               # Script to check environment variables
-├── fix_imports.sh             # Script to fix imports after package restructuring
 ├── install_dev.sh             # Script to install packages in development mode
 ├── LICENSE.txt                # License information
 ├── NEXT_STEPS.md              # Development tasks and implementation checklist
@@ -43,8 +52,7 @@ muxi/
 ├── requirements-dev.txt       # Development dependencies
 ├── requirements.txt           # Production dependencies
 ├── run_tests.py               # Script to run tests
-├── run_version_tests.sh       # Script to run tests on different Python versions
-└── update_imports.sh          # Script to update imports
+└── run_version_tests.sh       # Script to run tests on different Python versions
 ```
 
 ## Files Explanation
@@ -64,13 +72,10 @@ muxi/
 - `NEXT_STEPS.md` - Detailed task tracker for developers with completed work and todo items.
 
 ### Utility Scripts
-- `cleanup.sh` - Script to remove the old src/ directory after successful migration to packages structure.
 - `env_check.py` - Validates environment variables and their configuration.
-- `fix_imports.sh` - Fixes import references for the new package structure and creates symlinks for development.
 - `install_dev.sh` - Installs all MUXI packages in development mode for easier modification.
 - `run_tests.py` - Script to run the project's test suite.
 - `run_version_tests.sh` - Tests compatibility with different Python versions.
-- `update_imports.sh` - Updates import statements throughout the codebase.
 
 ## Directories Explanation
 
@@ -98,14 +103,30 @@ muxi/
 
 ### Package Structure
 - `packages/` - Modular monorepo structure:
-  - `core/` - Core functionality and shared components
+  - `core/` - Core functionality including agents, memory systems, tools, and MCP handlers
+    - `src/muxi/core/agent.py` - Agent implementation
+    - `src/muxi/core/memory.py` - Memory system implementation
+    - `src/muxi/core/mcp.py` - Model Context Protocol implementation
+    - `src/muxi/core/tools/` - Tool implementations
   - `server/` - Server implementation with API endpoints and WebSocket
+    - `src/muxi/server/api/` - REST API implementation
+    - `src/muxi/server/ws/` - WebSocket implementation
+    - `src/muxi/server/config/` - Server configuration
   - `cli/` - Command-line interface for interacting with agents
+    - `src/muxi/cli/commands.py` - CLI commands
+    - `src/muxi/cli/app.py` - CLI application
   - `web/` - Web application frontend
+    - `src/components/` - React components
+    - `src/services/` - API service implementations
   - `muxi/` - Meta-package that installs core, server, and CLI
+    - Provides a unified interface to all components
 
 ### Supporting Directories
 - `brainstorm/` - Contains early-stage ideas and development notes.
 - `migrations/` - Database schema migration scripts.
 - `scripts/` - Utility scripts for project management and automation.
 - `tests/` - Test files and directories for unit and integration tests.
+  - `tests/test_agent.py` - Tests for agent functionality
+  - `tests/test_mcp.py` - Tests for Model Context Protocol
+  - `tests/test_memory.py` - Tests for memory systems
+  - `tests/test_tools.py` - Tests for tools framework

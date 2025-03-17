@@ -1,133 +1,30 @@
-# MUXI - AI Agent Framework
+# MUXI Framework
 
-MUXI is an extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration.
-
-> [!WARNING]
-> This project is a work in progress and is not even close to being ready for production use. I'm actively developing the framework and adding new features. Please refer to the [roadmap](docs/roadmap.md) for detailed information about the current state of the project and where it's headed.
+MUXI (Multi-agent User eXperience Interface) Framework is a powerful platform for building AI agents with memory, tools, and real-time communication capabilities. It provides a solid foundation for creating advanced AI applications through a unified architecture that integrates multiple interfaces.
 
 ## Features
 
-- **Multi-Agent Orchestration**: Create and manage multiple AI agents with different capabilities
-- **Intelligent Message Routing**: Automatically direct messages to the most appropriate agent using LLM-based analysis
-- **Standardized LLM Communication**: Model Context Protocol (MCP) for consistent interaction with various LLM providers
-- **Memory Systems**: Short-term buffer memory and long-term persistent memory for agents
-- **Multi-User Support**: Memobase provides user-specific memory partitioning for multi-tenant applications
-- **Domain Knowledge**: Store and retrieve user-specific structured information to personalize agent responses
-- **Tool Integration**: Extensible tool system with built-in utilities and custom tool support
-- **Real-Time Communication**: WebSocket support for instant messaging and streaming responses
-- **REST API**: Comprehensive API for managing agents, tools, and conversations
-- **Command Line Interface**: Rich terminal-based interface for creating and interacting with agents
-- **Reliable Message Handling**: Robust error handling and automatic reconnection mechanisms
-- **Declarative Configuration**: Define agents using YAML or JSON files with minimal code
-- **Flexible Deployment**: Run locally or connect to remote MUXI servers
-- **Hybrid Communication Protocol**: HTTP for standard requests, SSE for streaming, WebSockets for multi-modal
-- **Modular Packaging**: Install only the components you need
-
-## Architecture
-
-MUXI has a flexible, service-oriented approach:
-
-```
-┌───────────────────┐
-│      Clients      │
-│   (CLI/Web/SDK)   │
-└─────────┬─────────┘
-          │
-          │ (API/SSE/WS)
-          │
-┌─────────│───────────────────────────────────────────┐
-│         │    MUXI Server (Local/Remote)             │
-│         │                                           │
-│         │        ┌───────────────┐                  │
-│         └───────>│  Orchestrator │                  │
-│                  └───────┬───────┘                  │
-│         ┌────────────────┼────────────────┐         │
-│         │                │                │         │
-│         ▼                ▼                ▼         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │  │
-│  │    (YAML)   │  │    (JSON)   │  │    (YAML)   │  │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
-│         ↓                ↓                ↓         │
-│         └────────┬───────┴────────┬───────┘         │
-│                  ↓                :                 │
-│           ┌──────┴──────┐  ┌──────┴──────┐          │
-│           │ MCP Handler │  │   Memory    │          │
-│           └──────┬──────┘  └─────────────┘          │
-└──────────────────│──────────────────────────────────┘
-                   │
-                   │ (gRPC/HTTP)
-                   ▼
-┌─────────────────────────────────────────────────────┐
-│              MCP Servers (via Command/SSE)          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │   Weather   │  │  Web Search │  │     ....    │  │
-│  └─────────────┘  └─────────────┘  └─────────────┘  │
-└─────────────────────────────────────────────────────┘
-```
-
-For more details, see [Architecture Documentation](docs/architecture.md).
-
-## Package Structure
-
-MUXI follows a modular packaging approach:
-
-```
-packages/
-├── core/      # Core functionality and shared components
-├── server/    # Server implementation
-├── cli/       # Command-line interface
-└── web/       # Web application
-```
-
-### Installation Options
-
-```bash
-# Full installation (excluding web components)
-pip install muxi
-
-# Standalone CLI client for connecting to remote servers
-pip install muxi-cli
-
-# Standalone web app for connecting to remote servers
-pip install muxi-web
-```
-
-## Intelligent Message Routing
-
-Automatically route user messages to the most appropriate agent based on their content:
-
-```python
-from muxi import muxi
-
-# Initialize your app with multiple specialized agents
-app = muxi()
-app.add_agent("configs/weather_agent.yaml")
-app.add_agent("configs/finance_agent.json")
-app.add_agent("configs/travel_agent.yaml")
-
-# The message will be automatically routed to the most appropriate agent
-response = app.chat("What's the weather forecast for Tokyo this weekend?")  # Weather agent
-response = app.chat("Should I invest in tech stocks right now?")  # Finance agent
-response = app.chat("What are the best attractions in Barcelona?")  # Travel agent
-```
-
-Configure the routing system through environment variables:
-
-```
-ROUTING_LLM=openai
-ROUTING_LLM_MODEL=gpt-4o-mini
-ROUTING_LLM_TEMPERATURE=0.0
-```
-
-For complete configuration options, see the [Configuration Guide](docs/configuration-guide.md).
+- 🤖 **Multi-Agent Support**: Create and manage multiple AI agents with different capabilities
+- 🧠 **Memory Systems**: Short-term and long-term memory for contextual interactions
+- 🛠️ **Tool Integration**: Extensible tool system with built-in web search, calculator, and more
+- 🌐 **Multiple Interfaces**: REST API, WebSockets, CLI, Web UI, etc.
+- 🔌 **Plugin System**: Extend functionality with custom plugins
+- 🔒 **Security**: Built-in authentication and authorization
 
 ## Installation
 
+### From PyPI (Recommended)
+
+```bash
+pip install muxi
+```
+
+### For Development
+
 ```bash
 # Clone the repository
-git clone https://github.com/ranaroussi/muxi.git
-cd muxi
+git clone https://github.com/yourusername/muxi-framework.git
+cd muxi-framework
 
 # Install in development mode
 ./install_dev.sh
@@ -135,270 +32,124 @@ cd muxi
 
 ## Quick Start
 
-### Configuration-based Approach (Recommended)
-
-The simplest way to get started is with the configuration-based approach:
-
-```python
-from muxi import muxi
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Initialize - database connection will be loaded automatically when needed
-app = muxi()
-
-# Add an agent from a configuration file
-app.add_agent("my_assistant", "configs/assistant.yaml")
-
-# Chat with a specific agent
-response = app.chat("Hello, who are you?", agent_name="my_assistant")
-print(response)
-
-# Or let the orchestrator automatically select the appropriate agent
-response = app.chat("Hello, can you help me?")
-print(response)
-
-# Start the API server and web UI
-# app.run()
-```
-
-Configuration file (`configs/assistant.yaml`):
-
-```yaml
-name: my_assistant
-system_message: You are a helpful AI assistant.
-model:
-  provider: openai
-  api_key: "${OPENAI_API_KEY}"
-  model: gpt-4o
-  temperature: 0.7
-memory:
-  buffer: 10  # Buffer window size of 10
-  long_term: true  # Enable long-term memory
-tools:
-- enable_calculator
-- enable_web_search
-```
-
-### Remote Server Connection
-
-Connect to an existing MUXI server:
-
-```python
-from muxi import muxi
-
-# Connect to a remote MUXI server
-app = muxi(
-    server_url="http://server-ip:5050",
-    api_key="your_api_key"
-)
-
-# Use the same API
-response = app.chat("Hello, remote assistant!")
-print(response)
-
-# Streaming responses via SSE
-for chunk in app.chat("Tell me a story", stream=True):
-    print(chunk, end="", flush=True)
-
-# Multi-modal capabilities via WebSockets
-socket = app.open_socket()
-await socket.send_message("Process this image", images=["path/to/image.jpg"])
-await socket.close()
-```
-
-## Using the Command Line Interface
-
-The framework includes a rich CLI for interacting with agents directly from your terminal:
+### Using the CLI
 
 ```bash
-# Start the CLI
-muxi chat --agent-id assistant
+# Start a chat session with the default agent
+muxi chat
 
-# Send a one-off message to an agent
-muxi send --agent-id assistant "What is the capital of France?"
+# Send a one-off message
+muxi send "What is the capital of France?"
 
-# Start the server
+# Run the server
 muxi run
 ```
 
-## Communication Protocols
+### Using the API
 
-MUXI implements a hybrid protocol approach for optimal performance and flexibility:
-
-### Standard HTTP
-- Used for all API requests like configuration and management
-- RESTful API design with clear endpoint structure
-- Standard authentication via headers
-
-### Server-Sent Events (SSE)
-- Used for streaming responses during chat/generation
-- Real-time token-by-token streaming
-- Connection automatically closes after response completion
-- Higher scalability than persistent WebSocket connections
-
-### WebSockets
-- Used for multi-modal capabilities (Omni features)
-- Bi-directional communication for audio/video
-- Persistent connections for continuous interaction
-- Available through the `app.open_socket()` API
-
-## Using the REST API
-
-Start the API server:
+Start the server:
 
 ```bash
-# Default setup (binds to 0.0.0.0, allowing remote connections)
 muxi run
-
-# Specify custom host and port
-muxi run --host 0.0.0.0 --port 5050
 ```
 
-> **Note:** The WebSocket server runs on the same port as the API server. When you change the API port, the WebSocket port changes too.
-
-When running the frontend on a different server, update the `BACKEND_API_URL` in your web client configuration:
-
-```
-# Replace with your API server's IP or domain name
-BACKEND_API_URL=http://your-server-ip:5050
-```
-
-Create a new agent:
+Then, in another terminal or from your application:
 
 ```bash
-curl -X POST http://localhost:5050/agents \
+# Send a message to an agent
+curl -X POST http://localhost:5050/agents/assistant/messages \
   -H "Content-Type: application/json" \
-  -d '{
-    "agent_id": "agent",
-    "system_message": "You are a helpful AI assistant."
-  }'
+  -d '{"content": "What is the capital of France?"}'
 ```
 
-Send a message to the agent:
+### Using the Web UI
+
+Start the server and web UI:
 
 ```bash
-curl -X POST http://localhost:5050/chat/agent \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Hello, what can you help me with today?"
-  }'
+muxi run
 ```
 
-## Using WebSockets
+Then open your browser and navigate to:
 
-To use the WebSocket feature, run the server and connect using a WebSocket client:
-
-```javascript
-// Browser WebSocket client example
-// Note: The WebSocket server runs on the same port as the API server
-const socket = new WebSocket('ws://localhost:5050/ws');
-
-socket.onopen = () => {
-  console.log('Connected to WebSocket server');
-
-  // Set user ID (for multi-user agents)
-  socket.send(JSON.stringify({
-    type: 'set_user',
-    user_id: 123
-  }));
-
-  // Subscribe to an agent
-  socket.send(JSON.stringify({
-    type: 'subscribe',
-    agent_id: 'agent'
-  }));
-
-  // Send a message
-  socket.send(JSON.stringify({
-    type: 'chat',
-    message: 'Tell me about artificial intelligence'
-  }));
-};
-
-socket.onmessage = (event) => {
-  const response = JSON.parse(event.data);
-  console.log('Received:', response);
-};
 ```
-
-### WebSocket Message Types
-
-#### Client to Server:
-
-- `subscribe`: Subscribe to an agent
-- `chat`: Send a chat message
-- `ping`: Keep the connection alive
-- `set_user`: Set the user ID for this connection
-- `search_memory`: Search agent memory for relevant information
-- `clear_memory`: Clear agent memory for a specific user
-
-#### Server to Client:
-
-- `message`: Response from the agent
-- `error`: Error message
-- `tool_start`: Notification that a tool is being executed
-- `tool_end`: Results from a tool execution
-
-## Recent Improvements
-
-- **Modular Package Structure**: Reorganized codebase into core, server, CLI, and web packages
-- **Multi-User Support**: Added Memobase for user-specific memory partitioned memory
-- **Memory Management**: Added endpoints for memory search and clearing, with support for user-specific operations
-- **Shared Orchestrator Instance**: Fixed issue with WebSocket and REST API using different orchestrator instances
-- **Enhanced Error Handling**: Improved error handling and reporting in WebSocket connections
-- **Message Serialization**: Fixed JSON serialization issues with MCPMessage objects
-- **Reliable Connection Management**: Implemented automatic reconnection and subscription recovery
-- **MCP Message Structure**: Improved message handling with standardized role/content attributes for better compatibility with various LLM providers
-- **Testing Environment**: Added utilities for consistent API key handling in tests
-- **Documentation**: Added comprehensive documentation for all components
-- **Test Coverage**: Added extensive test coverage for all API endpoints, especially multi-user functionality
+http://localhost:5050
+```
 
 ## Documentation
 
-Comprehensive documentation is available in the `docs` directory:
+For more detailed documentation, see:
 
-### Overview
-- [Framework Overview](docs/overview.md)
-- [Architecture](docs/architecture.md)
-- [Agent Guide](docs/agent.md)
-- [Orchestrator Documentation](docs/orchestrator.md)
-- [Memory Systems](docs/memory.md)
-- [Domain Knowledge](docs/domain-knowledge.md)
-- [Tool System](docs/tools.md)
-- [Model Context Protocol (MCP)](docs/mcp.md)
+- [User Guide](docs/user_guide.md)
+- [Developer Guide](docs/developer_guide.md)
+- [API Reference](docs/api_reference.md)
+- [CLI Reference](docs/cli.md)
+- [Web UI Guide](docs/web_ui.md)
+- [Configuration](docs/configuration.md)
+- [Package Structure](docs/package_structure.md)
 
-### Concepts
-- [Agents vs Tools](docs/agents-vs-tools.md)
-- [Tools vs MCP](docs/tools-vs-mcp.md)
+## Architecture
 
-### Setup and Configuration
-- [Quick Start Guide](docs/quick_start.md)
-- [Configuration Guide](docs/configuration_guide.md)
-- [Testing Guide](docs/testing.md)
+The MUXI Framework is organized into a modular architecture with the following main components:
 
-### Interfaces
-- [CLI Documentation](docs/cli.md)
-- [Webapp Documentation](docs/webapp.md)
-- [REST API Documentation](docs/api.md)
-- [WebSocket Implementation](docs/websocket.md)
+```
+muxi-framework/
+├── packages/
+│   ├── core/          # Core components: agents, memory, tools, LLM interface
+│   ├── server/        # REST API and WebSocket server
+│   ├── cli/           # Command-line interface
+│   ├── web/           # Web user interface
+│   └── muxi/          # Meta-package that integrates all components
+└── tests/             # Test suite for all components
+```
 
+## Examples
 
-## License
+### Creating a Custom Agent
 
-This project is licensed under a dual licensing model to balance open-source collaboration with sustainable business practices.
+```python
+from muxi.core import Agent, MemorySystem
+from muxi.core.tools import Calculator, WebSearch
 
-### Development Phase (Pre-Version 1.0)
+# Create a new agent with custom tools and memory
+agent = Agent(
+    agent_id="math_helper",
+    system_message="You are a helpful math assistant.",
+    tools=[Calculator(), WebSearch()],
+    memory=MemorySystem()
+)
 
-During the development phase, the software is licensed under the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0)** license. This license prohibits commercial use, derivative works, and redistribution to ensure the integrity of the development process and to avoid fragmentation of the project before it reaches maturity.
+# Send a message to the agent
+response = await agent.process_message("What is the square root of 16?")
+print(response.content)  # Output: 4
+```
 
-### After Version 1.0 Release
+### Building a Multi-Agent System
 
-When the project reaches version 1.0, it will adopt a more permissive open-source license that permits free use for non-commercial and internal commercial purposes, with the possibility of a commercial license for specific use cases.
+```python
+from muxi.core import AgentManager
+from muxi.server import Server
+
+# Create and register multiple agents
+manager = AgentManager()
+manager.create_agent("researcher", "You are a research assistant...")
+manager.create_agent("coder", "You are a coding assistant...")
+
+# Start the server with these agents
+server = Server(agent_manager=manager)
+server.start()
+```
 
 ## Contributing
 
-**Contributions are welcome!** Please read our [Contributing Guide](docs/contributing.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgements
+
+- OpenAI for their LLM technologies
+- The many open-source projects that make this framework possible
 

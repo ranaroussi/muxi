@@ -8,8 +8,8 @@ import asyncio
 import unittest
 from unittest.mock import MagicMock, patch
 
-from src.tools.calculator import Calculator
-from src.tools.web_search import WebSearch
+from muxi.server.tools.calculator import Calculator
+from muxi.server.tools.web_search import WebSearch
 
 
 class TestCalculator(unittest.TestCase):
@@ -133,7 +133,7 @@ class TestWebSearch(unittest.TestCase):
         self.assertEqual(result["search_results"][0]["title"], "Test Result 1")
         self.assertEqual(result["search_results"][1]["link"], "https://example.com/2")
 
-    @patch("src.tools.web_search.urllib.request.urlopen")
+    @patch("muxi.server.tools.web_search.urllib.request.urlopen")
     def test_missing_credentials(self, mock_urlopen):
         """Test handling of missing API credentials."""
         # Create a WebSearch with no credentials

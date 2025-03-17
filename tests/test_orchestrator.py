@@ -7,8 +7,8 @@ These tests verify that the Orchestrator implementation works correctly.
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from src.core.orchestrator import Orchestrator
-from src.core.mcp import MCPMessage
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.mcp import MCPMessage
 
 
 class TestOrchestrator:

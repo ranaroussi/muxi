@@ -242,7 +242,7 @@ class MCPHandler:
             role="function",
             content="",
             name=tool_name,
-            metadata={"input": tool_input}
+            context={"input": tool_input}
         )
 
         # Add the tool call message to the context

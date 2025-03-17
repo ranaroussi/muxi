@@ -1,271 +1,449 @@
-# MUXI Developer Guide
+---
+layout: default
+title: Developer Guide
+nav_order: 7
+has_children: false
+permalink: /developer-guide/
+---
 
-This guide provides information for developers contributing to the MUXI framework, including how to work with the new modular package structure.
+# Developer Guide
 
-## Setting Up Your Development Environment
+This guide provides information for developers who want to contribute to the MUXI Framework or build extensions on top of it.
 
-1. **Clone the Repository**
+## Project Structure
+
+The MUXI Framework follows a modular architecture with the following directory structure:
+
+```
+muxi-framework/
+├── packages/
+│   ├── core/          # Core components: agents, memory, tools, LLM interface
+│   ├── server/        # REST API and WebSocket server
+│   ├── cli/           # Command-line interface
+│   ├── web/           # Web user interface
+│   └── muxi/          # Meta-package that integrates all components
+├── tests/             # Test suite for all components
+├── docs/              # Documentation
+├── examples/          # Example usage scenarios
+└── scripts/           # Utility scripts
+```
+
+### Key Components
+
+1. **Core Package**:
+   - `Agent`: The main class representing an AI agent
+   - `Memory`: Memory systems for storing conversation history
+   - `Tool`: Base class for implementing agent tools
+   - `MCPHandler`: Handler for Model Context Protocol communications
+
+2. **Server Package**:
+   - `Server`: REST API server for agent interaction
+   - `WebSocketServer`: Real-time communication server
+   - `Router`: Request routing and middleware
+
+3. **CLI Package**:
+   - `MuxiCLI`: Command-line interface for interacting with agents
+   - `ChatSession`: Terminal-based chat interface
+
+4. **Web Package**:
+   - Frontend user interface built with React
+   - WebSocket client for real-time communication
+
+## Setting Up Development Environment
+
+### Prerequisites
+
+- Python 3.9 or higher
+- Node.js 16 or higher (for web development)
+- Git
+
+### Installation for Development
+
+1. Clone the repository:
    ```bash
-   git clone https://github.com/ranaroussi/muxi.git
-   cd muxi
+   git clone https://github.com/yourusername/muxi-framework.git
+   cd muxi-framework
    ```
 
-2. **Install Development Dependencies**
+2. Run the development installation script:
    ```bash
    ./install_dev.sh
    ```
-   This script installs all packages in development mode, allowing you to modify the code without reinstalling.
 
-3. **Install Additional Development Tools**
+   This script installs all packages in development mode, allowing you to make changes without reinstalling.
+
+3. Set up your environment variables:
    ```bash
-   pip install pytest black isort flake8
+   cp .env.example .env
+   # Edit .env with your preferred text editor to add API keys
    ```
 
-## Package Structure
-
-MUXI now follows a modular monorepo structure with these main packages:
-
-- **muxi-core**: Core functionality and shared components
-- **muxi-server**: Server implementation
-- **muxi-cli**: Command-line interface
-- **muxi-web**: Web application
-- **muxi**: Meta-package that includes core, server, and CLI
-
-The recommended way to navigate the codebase is:
-
-```
-packages/
-├── core/        # Core abstractions, models, utils
-├── server/      # API, memory, config, tools
-├── cli/         # CLI commands and interface
-└── web/         # Web interface
-```
-
-## Working with Packages
-
-### Making Changes to Core Components
-
-When modifying core components:
-
-1. Navigate to the core package:
+4. Run tests to ensure everything is working:
    ```bash
-   cd packages/core
+   python -m pytest
    ```
 
-2. Make your changes to files in `src/muxi/`
+## Working with the Core Package
 
-3. Test your changes:
-   ```bash
-   pytest
-   ```
+The core package contains the foundational components of the MUXI Framework.
 
-4. See changes immediately thanks to editable mode installation
+### Creating a Custom Agent
 
-### Cross-Package Development
+```python
+from muxi.core import Agent
+from muxi.core.memory import BufferMemory
+from muxi.core.tools import WebSearch
 
-When your changes span multiple packages:
+# Create a custom agent
+agent = Agent(
+    agent_id="research_assistant",
+    system_message="You are a research assistant specialized in scientific topics.",
+    memory=BufferMemory(max_tokens=4000),
+    tools=[WebSearch()]
+)
 
-1. Use imports from the package perspective:
-   ```python
-   # In packages/server/src/muxi/server/api/app.py
-   from muxi.core.agent import Agent  # Core import
-   from muxi.server.config import config  # Server import
-   ```
-
-2. Be aware of circular dependencies:
-   - core should not import from server, cli, or web
-   - server can import from core, but not cli or web
-   - cli can import from core, but should avoid importing from server
-   - web can import from core, but should avoid importing from server
-
-### Using Symlinks for Development
-
-During development, we use symlinks to handle cross-package imports. The `fix_imports.sh` script has set up these symlinks for you:
-
-```bash
-packages/core/src/muxi/server/config -> packages/server/src/muxi/config
-packages/core/src/muxi/server/memory -> packages/server/src/muxi/memory
-packages/core/src/muxi/server/tools -> packages/server/src/muxi/tools
+# Process a message
+response = await agent.process_message("Tell me about quantum computing.")
+print(response.content)
 ```
 
-This allows core components to access server components during development. In production, these will be proper package imports.
+### Implementing a Custom Tool
+
+```python
+from muxi.core.tools import Tool
+from typing import Dict, Any, Optional
+
+class WeatherTool(Tool):
+    name = "weather"
+    description = "Get current weather information for a location"
+    parameters = {
+        "location": {
+            "type": "string",
+            "description": "The city and country/state"
+        }
+    }
+
+    async def _execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        location = params.get("location", "")
+
+        # Implementation to fetch weather data
+        # ...
+
+        return {
+            "temperature": 72,
+            "condition": "Sunny",
+            "humidity": 45,
+            "location": location
+        }
+```
+
+### Creating a Custom Memory System
+
+```python
+from muxi.core.memory import MemoryBase
+from typing import List, Dict, Any, Optional
+
+class CustomMemory(MemoryBase):
+    def __init__(self, capacity: int = 10):
+        self.capacity = capacity
+        self.messages = []
+
+    async def add(self, message: Dict[str, Any]) -> None:
+        self.messages.append(message)
+        if len(self.messages) > self.capacity:
+            self.messages.pop(0)
+
+    async def get(self) -> List[Dict[str, Any]]:
+        return self.messages
+
+    async def clear(self) -> None:
+        self.messages = []
+```
+
+## Working with the Server Package
+
+The server package provides RESTful API and WebSocket interfaces for interacting with agents.
+
+### Creating a Custom API Endpoint
+
+```python
+from muxi.server import Server
+from muxi.core import AgentManager
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+
+# Create a router
+router = APIRouter()
+
+# Define a model for request validation
+class CustomRequest(BaseModel):
+    agent_id: str
+    query: str
+
+# Define a new endpoint
+@router.post("/custom-endpoint")
+async def custom_endpoint(
+    request: CustomRequest,
+    agent_manager: AgentManager = Depends(lambda: server.agent_manager)
+):
+    agent = agent_manager.get_agent(request.agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    result = await agent.process_message(request.query)
+    return {
+        "agent_id": request.agent_id,
+        "result": result.content
+    }
+
+# Create a server and include the router
+server = Server()
+server.app.include_router(router, prefix="/api/v1")
+
+# Run the server
+server.start()
+```
+
+### Implementing Custom WebSocket Handlers
+
+```python
+from muxi.server.websocket import WebSocketManager
+from fastapi import WebSocket
+
+class CustomWebSocketManager(WebSocketManager):
+    async def handle_custom_message(self, websocket: WebSocket, data: dict):
+        # Custom message handling logic
+        agent_id = data.get("agent_id")
+        message = data.get("message")
+
+        agent = self.agent_manager.get_agent(agent_id)
+        if not agent:
+            await websocket.send_json({"error": "Agent not found"})
+            return
+
+        response = await agent.process_message(message)
+        await websocket.send_json({
+            "type": "custom_response",
+            "content": response.content
+        })
+
+    async def handle_message(self, websocket: WebSocket, data: dict):
+        message_type = data.get("type")
+
+        if message_type == "custom":
+            await self.handle_custom_message(websocket, data)
+        else:
+            await super().handle_message(websocket, data)
+```
+
+## Working with the CLI Package
+
+The CLI package provides a command-line interface for interacting with agents.
+
+### Extending the CLI
+
+```python
+import click
+from muxi.cli.app import cli
+
+@cli.command()
+@click.argument("agent_id")
+@click.argument("file_path")
+def process_file(agent_id, file_path):
+    """Process a file with a specific agent."""
+    click.echo(f"Processing {file_path} with agent {agent_id}")
+
+    # Implementation to read the file and process it
+    with open(file_path, "r") as f:
+        content = f.read()
+
+    # Process the file content with the agent
+    # ...
+
+    click.echo("File processed successfully.")
+
+# Register the command
+if __name__ == "__main__":
+    cli()
+```
+
+## Working with the Web Package
+
+The web package provides a web-based user interface for interacting with agents.
+
+### Customizing the Web UI
+
+1. Navigate to the web package directory:
+   ```bash
+   cd packages/web
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Modify the source files in the `src` directory.
+
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
 ## Testing
 
-### Running Tests
-
-Run tests for a specific package:
+The MUXI Framework uses pytest for testing. To run tests:
 
 ```bash
-cd packages/core
-pytest
-```
+# Run all tests
+python -m pytest
 
-Run all tests:
+# Run specific test files
+python -m pytest tests/test_agent.py
 
-```bash
-pytest
+# Run with coverage
+python -m pytest --cov=muxi
 ```
 
 ### Writing Tests
 
-Tests should be organized by package:
+1. Create a new test file in the `tests` directory.
+2. Write tests using pytest conventions.
+3. Use fixtures for common setup.
 
+Example:
+
+```python
+import pytest
+from muxi.core import Agent
+from muxi.core.mcp import MCPMessage
+
+@pytest.fixture
+def test_agent():
+    return Agent(
+        agent_id="test_agent",
+        system_message="You are a test agent."
+    )
+
+def test_agent_process_message(test_agent):
+    # Mock the LLM response
+    test_agent.llm_handler.generate = lambda messages, **kwargs: MCPMessage(
+        role="assistant",
+        content="This is a test response."
+    )
+
+    # Test processing a message
+    response = await test_agent.process_message("Hello")
+    assert response.content == "This is a test response."
+    assert response.role == "assistant"
 ```
-packages/core/tests/
-packages/server/tests/
-packages/cli/tests/
-packages/web/tests/
+
+## Documentation
+
+The MUXI Framework uses Jekyll with Just the Docs theme for documentation.
+
+### Building the Documentation
+
+1. Install Ruby and Jekyll:
+   ```bash
+   gem install jekyll bundler
+   ```
+
+2. Navigate to the docs directory:
+   ```bash
+   cd docs
+   ```
+
+3. Install dependencies:
+   ```bash
+   bundle install
+   ```
+
+4. Build and serve the documentation:
+   ```bash
+   bundle exec jekyll serve
+   ```
+
+5. View the documentation at http://localhost:4000
+
+### Adding Documentation
+
+1. Create a new Markdown file in the `docs` directory.
+2. Add front matter with appropriate metadata.
+3. Write the content using Markdown.
+
+Example:
+
+```markdown
+---
+layout: default
+title: Custom Module
+parent: Developer Guide
+nav_order: 3
+---
+
+# Custom Module
+
+Documentation for the custom module...
 ```
 
-## Building and Publishing
+## Continuous Integration
 
-### Building Packages
+The MUXI Framework uses GitHub Actions for continuous integration.
 
-Build a specific package:
+### CI Workflow
+
+The CI workflow includes:
+
+1. Running tests on multiple Python versions
+2. Checking code style with flake8
+3. Building and testing the documentation
+4. Publishing packages to PyPI on release
+
+### Local Pre-commit Checks
+
+Install pre-commit hooks:
 
 ```bash
-cd packages/core
-python setup.py sdist bdist_wheel
+pip install pre-commit
+pre-commit install
 ```
 
-### Publishing to PyPI
+This will run checks before each commit to ensure code quality.
 
-Publish a specific package:
+## Versioning and Releases
 
-```bash
-cd packages/core
-twine upload dist/*
-```
+The MUXI Framework follows semantic versioning (SemVer):
 
-## Common Development Tasks
+- MAJOR version for incompatible API changes
+- MINOR version for adding functionality in a backward-compatible manner
+- PATCH version for backward-compatible bug fixes
 
-### Adding a New Tool
+### Creating a Release
 
-1. Create the tool in `packages/server/src/muxi/server/tools/`:
-   ```python
-   # packages/server/src/muxi/server/tools/my_tool.py
-   from muxi.server.tools.base import BaseTool
+1. Update version numbers in relevant files:
+   - `packages/core/pyproject.toml`
+   - `packages/server/pyproject.toml`
+   - `packages/cli/pyproject.toml`
+   - `packages/web/package.json`
+   - `packages/muxi/pyproject.toml`
 
-   class MyTool(BaseTool):
-       name = "my_tool"
-       description = "My new tool description"
+2. Update the CHANGELOG.md file with details of the changes.
 
-       def execute(self, **kwargs):
-           # Implement tool functionality
-           return {"result": "Tool output"}
-   ```
-
-2. Register the tool in `packages/server/src/muxi/server/tools/__init__.py`:
-   ```python
-   from muxi.server.tools.my_tool import MyTool
-
-   AVAILABLE_TOOLS = {
-       "my_tool": MyTool,
-       # Other tools...
-   }
-   ```
-
-### Adding a New CLI Command
-
-1. Add the command in `packages/cli/src/muxi/cli/commands.py`:
-   ```python
-   @cli.command()
-   @click.option("--option", help="Option description")
-   def my_command(option):
-       """My command description."""
-       # Implement command
-       click.echo(f"Running my command with option: {option}")
-   ```
-
-### Adding a New Web Component
-
-1. Create the component in `packages/web/src/muxi/web/src/components/`:
-   ```javascript
-   // packages/web/src/muxi/web/src/components/MyComponent.js
-   import React from 'react';
-
-   const MyComponent = () => {
-     return (
-       <div>
-         <h1>My Component</h1>
-       </div>
-     );
-   };
-
-   export default MyComponent;
-   ```
-
-## Common Issues and Solutions
-
-### Import Errors
-
-If you encounter import errors:
-
-1. Run the import fixer script:
+3. Create a tag for the release:
    ```bash
-   ./fix_imports.sh
+   git tag -a v1.0.0 -m "Version 1.0.0"
+   git push origin v1.0.0
    ```
 
-2. Check for circular imports:
-   - Ensure core doesn't import from server/cli/web
-   - Ensure server only imports from core
-   - Ensure cli only imports from core
+4. The CI pipeline will build and publish the packages.
 
-### Missing Packages After Pull
+## Contributing
 
-If packages are missing after pulling changes:
+Contributions to the MUXI Framework are welcome! Please see [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
-1. Re-run the development installation:
-   ```bash
-   ./install_dev.sh
-   ```
+## Support and Community
 
-## Best Practices
-
-1. **Follow Package Boundaries**: Respect the separation of concerns between packages
-2. **Minimize Dependencies**: Keep dependencies minimal, especially in core
-3. **Write Tests**: Add tests for new functionality
-4. **Document Public APIs**: Document all public methods and classes
-5. **Use Type Hints**: Provide type hints for better code quality
-
-## Code Style
-
-Follow these guidelines:
-
-1. Use Black for formatting:
-   ```bash
-   black packages/
-   ```
-
-2. Use isort for import sorting:
-   ```bash
-   isort packages/
-   ```
-
-3. Use flake8 for linting:
-   ```bash
-   flake8 packages/
-   ```
-
-## Contribution Workflow
-
-1. Create a branch for your changes:
-   ```bash
-   git checkout -b feature/my-feature
-   ```
-
-2. Make your changes in the appropriate package(s)
-
-3. Run tests:
-   ```bash
-   pytest
-   ```
-
-4. Format your code:
-   ```bash
-   black packages/
-   isort packages/
-   ```
-
-5. Create a pull request with a clear description of your changes
+- GitHub Issues: For bug reports and feature requests
+- Discussions: For questions and community support
+- Discord: For real-time communication with the community
