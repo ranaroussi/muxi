@@ -66,18 +66,18 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
 ### Target Architecture
 
 ```
-┌───────────────┐                     ┌───────────────┐
-│ MUXI Local/   │◄─────API/SSE/WS─────┤ Thin Clients  │
-│ Remote Client │                     │ (CLI/Web/SDK) │
-└───────┬───────┘                     └───────────────┘
+┌───────────────┐
+┤ Thin Clients  │
+│ (CLI/Web/SDK) │
+└───────┬───────┘
         │
-        │ (Local or Remote APIs)
-        ▼
-┌─────────────────────────────────────────────────────┐
-│                     MUXI Server                     │
-│                                                     │
-│                   ┌──────────────┐                  │
-│                   │ Orchestrator │                  │
+        │ (API/SSE/WS)
+        │
+┌───────│─────────────────────────────────────────────┐
+│       │      MUXI Server (Local/Remote)             │
+│       │                                             │
+│       │           ┌──────────────┐                  │
+│       └─────────► │ Orchestrator │                  │
 │                   └──────┬───────┘                  │
 │                          │                          │
 │                          ▼                          │
@@ -96,7 +96,7 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
                    │ (gRPC/HTTP)
                    ▼
 ┌─────────────────────────────────────────────────────┐
-│                 External MCP Servers                │
+│              MCP Servers (via Command/SSE)          │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
 │  │ Weather API │  │ Search Tool │  │ Custom Tool │  │
 │  └─────────────┘  └─────────────┘  └─────────────┘  │

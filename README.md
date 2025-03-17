@@ -45,18 +45,18 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 MUXI is evolving towards a more flexible, service-oriented approach:
 
 ```
-┌───────────────┐                     ┌───────────────┐
-│ MUXI Local/   │◄─────API/SSE/WS─────┤ Thin Clients  │
-│ Remote Client │                     │ (CLI/Web/SDK) │
-└───────┬───────┘                     └───────────────┘
+┌───────────────┐
+┤ Thin Clients  │
+│ (CLI/Web/SDK) │
+└───────┬───────┘
         │
-        │ (Local or Remote APIs)
-        ▼
-┌─────────────────────────────────────────────────────┐
-│                     MUXI Server                     │
-│                                                     │
-│                   ┌──────────────┐                  │
-│                   │ Orchestrator │                  │
+        │ (API/SSE/WS)
+        │
+┌───────│─────────────────────────────────────────────┐
+│       │      MUXI Server (Local/Remote)             │
+│       │                                             │
+│       │           ┌──────────────┐                  │
+│       └─────────► │ Orchestrator │                  │
 │                   └──────┬───────┘                  │
 │                          │                          │
 │                          ▼                          │
@@ -75,7 +75,7 @@ MUXI is evolving towards a more flexible, service-oriented approach:
                    │ (gRPC/HTTP)
                    ▼
 ┌─────────────────────────────────────────────────────┐
-│                 External MCP Servers                │
+│              MCP Servers (via Command/SSE)          │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
 │  │ Weather API │  │ Search Tool │  │ Custom Tool │  │
 │  └─────────────┘  └─────────────┘  └─────────────┘  │
