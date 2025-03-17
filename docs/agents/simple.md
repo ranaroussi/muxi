@@ -1,188 +1,289 @@
 ---
 layout: default
-title: Simple Agents
+title: Simple Agent
 parent: Building Agents
 nav_order: 1
 permalink: /agents/simple/
 ---
 
-# Simple Agents
+# Creating a Simple Agent
 
-This guide will walk you through creating simple AI agents with the MUXI Framework. A simple agent consists of a language model with optional memory and tool capabilities.
+This guide walks you through creating a basic agent using the MUXI Framework.
 
-## Prerequisites
+## Basic Agent Creation
 
-Before creating an agent, make sure you have:
+<h4>Declarative way</h4>
 
-1. Installed the MUXI Framework: `pip install muxi`
-2. Set up any required API keys (e.g., for OpenAI)
+```yaml
+# configs/assistant.yaml
 
-## Creating Your First Agent
+---
+agent_id: assistant
+description: A helpful assistant that answers questions and performs tasks.
+model:
+  provider: openai
+  api_key: "${OPENAI_API_KEY}"
+  model: gpt-4o
+system_message: You are a helpful AI assistant.
 
-The simplest way to create an agent is by using the Orchestrator class, which manages agents and their interactions.
+```
 
-### Basic Agent Example
-
-Here's a minimal example of creating an agent with OpenAI:
 
 ```python
-from muxi.core.orchestrator import Orchestrator
-from muxi.core.models.openai import OpenAIModel
+# app.py
 
-# Initialize the orchestrator
-orchestrator = Orchestrator()
+from muxi import muxi
+from dotenv import load_dotenv
 
-# Create a model (make sure to set your API key)
-model = OpenAIModel(
-    api_key="your_openai_api_key",  # Set your API key or use an environment variable
-    model="gpt-4o",                  # Specify the model to use
-)
+# Load environment variables
+load_dotenv()
 
-# Create a simple agent
-orchestrator.create_agent(
-    agent_id="assistant",
-    model=model,
-    system_message="You are a helpful assistant that provides clear and concise information."
-)
+# Initialize MUXI
+app = muxi()
+
+# Add an agent from a configuration file
+app.add_agent("assistant", "configs/assistant.yaml")
 
 # Chat with the agent
-response = orchestrator.chat("assistant", "What can you tell me about the MUXI Framework?")
+response = await app.chat("Hello, who are you?")
 print(response)
 ```
 
-### Customizing the System Message
-
-The system message defines the agent's behavior and capabilities. Here are some examples of effective system messages:
-
-```python
-# For a general assistant
-system_message = "You are a helpful, informative assistant that provides accurate information."
-
-# For a specialized coding assistant
-system_message = """You are a Python expert who helps with coding tasks.
-Always provide code examples and explain your solutions clearly.
-Focus on best practices and readability."""
-
-# For a creative writing assistant
-system_message = """You are a creative writing assistant with a talent for
-generating engaging stories, poems, and other creative content.
-You excel at matching the tone and style requested by the user."""
-```
-
-## Using Environment Variables
-
-For security, it's recommended to use environment variables for sensitive information like API keys:
+<h4>Programmatic way</h4>
 
 ```python
 import os
-from dotenv import load_dotenv
 from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.openai import OpenAIModel
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Initialize the orchestrator
 orchestrator = Orchestrator()
 
-# Create a model using environment variable
+# Create an OpenAI model
 model = OpenAIModel(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o"
 )
 
-# Create a simple agent
+# Create an agent
 orchestrator.create_agent(
     agent_id="assistant",
-    model=model
+    description="A helpful assistant that answers questions and performs tasks.",
+    model=model,
+    system_message="You are a helpful AI assistant."
 )
-```
-
-## Running Agents from Configuration
-
-MUXI supports creating agents from configuration files, which is useful for deployment:
-
-```python
-from muxi.core.orchestrator import Orchestrator
-
-# Initialize the orchestrator
-orchestrator = Orchestrator()
-
-# Load agent from configuration
-config = {
-    "agent_id": "assistant",
-    "model": {
-        "provider": "openai",
-        "model": "gpt-4o",
-        "parameters": {
-            "temperature": 0.7
-        }
-    },
-    "system_message": "You are a helpful assistant."
-}
-
-# Create agent from config
-orchestrator.create_agent_from_config(config)
 
 # Chat with the agent
-response = orchestrator.chat("assistant", "How can I create a MUXI agent?")
+response = orchestrator.chat("Hello, who are you?")
 print(response)
 ```
 
-## Handling Agent Responses
+## Customizing Agent Settings
 
-You can interact with the agent and process its responses:
+<h4>Declarative way</h4>
 
-```python
-# Single interaction
-response = orchestrator.chat("assistant", "What is the capital of France?")
-print(f"Agent: {response}")
-
-# Multi-turn conversation
-questions = [
-    "What is machine learning?",
-    "Can you give an example of a machine learning algorithm?",
-    "How is it different from deep learning?"
-]
-
-for question in questions:
-    print(f"User: {question}")
-    response = orchestrator.chat("assistant", question)
-    print(f"Agent: {response}")
-    print("-" * 50)
+```yaml
+---
+agent_id: creative_writer
+description: A creative assistant that can help with writing and generating creative
+  content.
+model:
+  provider: openai
+  api_key: "${OPENAI_API_KEY}"
+  model: gpt-4o
+  temperature: 0.8
+  top_p: 0.9
+  max_tokens: 1000
+system_message: You are a creative assistant specializing in fiction writing. Help
+  users craft stories, characters, and engaging narratives.
 ```
 
-## Command Line Interface
+<h4>Programmatic way</h4>
 
-MUXI also provides a command-line interface for quick interaction with agents:
+```python
+# ...
 
-```bash
-# Start a chat session with a default agent
-muxi chat
+# Create a model with custom parameters
+model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    temperature=0.8,
+    top_p=0.9,
+    max_tokens=1000
+)
 
-# Start a chat session with a specific model
-muxi chat --model gpt-4o
+# Create a creative agent
+orchestrator.create_agent(
+    agent_id="creative_writer",
+    description="...",
+    model=model,
+    system_message="..."
+)
 
-# Start a chat session with a custom system message
-muxi chat --system "You are a helpful coding assistant."
+# ...
+```
+
+## Using Different Model Providers
+
+MUXI supports multiple model providers including OpenAI, Anthropic, Google, and more.
+
+### Anthropic Agent Example
+
+<h4>Declarative way</h4>
+
+```yaml
+---
+agent_id: claude
+description: An intelligent assistant powered by Claude.
+model:
+  provider: anthropic
+  api_key: "${ANTHROPIC_API_KEY}"
+  model: claude-3-opus-20240229
+system_message: You are Claude, a helpful AI assistant created by Anthropic.
+
+```
+
+<h4>Programmatic way</h4>
+
+```python
+# Create an Anthropic model
+model = AnthropicModel(
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
+    model="claude-3-opus-20240229"
+)
+
+# Create a Claude agent
+orchestrator.create_agent(
+    agent_id="claude",
+    description="...",
+    model=model,
+    system_message="..."
+)
+```
+
+### Google Agent Example
+
+<h4>Declarative way</h4>
+
+```yaml
+---
+agent_id: gemini
+description: An intelligent assistant powered by Google's Gemini model.
+model:
+  provider: google
+  api_key: "${GOOGLE_API_KEY}"
+  model: gemini-1.5-pro
+system_message: You are Gemini, a helpful AI assistant created by Google.
+```
+
+<h4>Programmatic way</h4>
+
+```python
+# Create a Google model
+model = GoogleModel(
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    model="gemini-1.5-pro"
+)
+
+# Create a Gemini agent
+orchestrator.create_agent(
+    agent_id="gemini",
+    description="...",
+    model=model,
+    system_message="..."
+)
+```
+
+## Azure OpenAI Support
+
+MUXI also supports Azure OpenAI services:
+
+<h4>Declarative way</h4>
+
+```yaml
+---
+agent_id: azure_assistant
+description: A helpful assistant using Azure-hosted OpenAI models.
+model:
+  provider: azure_openai
+  api_key: "${AZURE_OPENAI_API_KEY}"
+  api_version: 2023-12-01-preview
+  api_base: "${AZURE_OPENAI_ENDPOINT}"
+  deployment_name: gpt-4
+system_message: You are a helpful AI assistant running on Azure infrastructure.
+```
+
+<h4>Programmatic way</h4>
+
+```python
+# Create an Azure OpenAI model
+model = AzureOpenAIModel(
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    api_version="2023-12-01-preview",
+    api_base=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    deployment_name="gpt-4"
+)
+
+# Create an Azure agent
+orchestrator.create_agent(
+    agent_id="azure_assistant",
+    description="...",
+    model=model,
+    system_message="..."
+)
+```
+
+## Local Models
+
+MUXI supports running models locally using the local provider:
+
+<h4>Declarative way</h4>
+
+```yaml
+---
+agent_id: local_assistant
+description: A locally-hosted AI assistant running on your own hardware.
+model:
+  provider: local
+  model_path: "/path/to/local/model"
+  model_type: llama2
+  context_window: 4096
+system_message: You are a locally-hosted AI assistant.
+```
+
+<h4>Programmatic way</h4>
+
+```python
+# Create a local model
+model = LocalModel(
+    model_path="/path/to/local/model",
+    model_type="llama2",
+    context_window=4096
+)
+
+# Create a local agent
+orchestrator.create_agent(
+    agent_id="local_assistant",
+    description="...",
+    model=model,
+    system_message="..."
+)
 ```
 
 ## Next Steps
 
-Now that you've created a simple agent, you might want to:
+Now that you've created a simple agent, you can:
 
-- Add memory to your agent for persistent conversations - see [Adding Memory](../memory/)
-- Create multiple agents for different purposes - see [Multi-Agent Systems](../multi-agent/)
-- Configure your agent with specific tools and capabilities - see [Agent Configuration](../configuration/)
+- Learn how to configure agent settings in detail - see [Agent Configuration](../configuration/)
+- Add memory capabilities to your agent - see [Adding Memory](../memory/)
+- Create multi-agent systems - see [Multi-Agent Systems](../multi-agent/)
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **API Key Issues**: If you receive authentication errors, check that your API key is correct and properly set.
-
 2. **Model Availability**: Ensure you have access to the model you're trying to use (e.g., GPT-4o might require special access).
-
 3. **Rate Limiting**: If you encounter rate limiting, consider adding delays between requests or using a different API key.
 
 ### Getting Help

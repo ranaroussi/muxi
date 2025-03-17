@@ -2,505 +2,725 @@
 layout: default
 title: Agent Configuration
 parent: Building Agents
-nav_order: 4
+nav_order: 2
 permalink: /agents/configuration/
 ---
 
 # Agent Configuration
 
-This guide explains how to configure MUXI agents with various settings, tools, and capabilities to meet your specific requirements.
+This guide covers the various configuration options available when creating MUXI agents.
 
-## Configuration Methods
+## Basic Configuration
 
-MUXI supports multiple ways to configure agents:
+<h4>Declarative way</h4>
 
-1. **Programmatic Configuration**: Direct configuration via code
-2. **Declarative Configuration**: Using JSON or YAML files
-3. **Environment Variables**: Setting defaults via environment variables
+`configs/basic_agent.json`
 
-## Basic Agent Configuration
+```json
+{
+  "agent_id": "assistant",
+  "description": "A general-purpose assistant that can help with a wide range of tasks.",
+  "model": {
+    "provider": "openai",
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "gpt-4o"
+  },
+  "system_message": "You are a helpful assistant."
+}
+```
 
-When creating an agent, you can specify various parameters:
+`app.py`
 
 ```python
+from muxi import muxi
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
+
+# Initialize MUXI
+app = muxi()
+
+# Add agent from configuration
+app.add_agent("configs/basic_agent.json")
+
+# Chat with the agent
+response = await app.chat("assistant", "Hello, can you help me?")
+print(response)
+```
+
+<h4>Programmatic way</h4>
+
+```python
+import os
 from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.openai import OpenAIModel
 
+# Initialize components
 orchestrator = Orchestrator()
-
-# Create an agent with basic configuration
-orchestrator.create_agent(
-    agent_id="assistant",                    # Unique identifier for the agent
-    model=OpenAIModel(model="gpt-4o"),       # Language model to use
-    system_message="You are a helpful assistant that specializes in technology.",  # Personality/role
-    temperature=0.7,                         # Creativity level (0.0-1.0)
-    max_tokens=1000,                         # Maximum response length
-    streaming=True                           # Enable streaming responses
+model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o"
 )
+
+# Create agent
+orchestrator.create_agent(
+    agent_id="assistant",
+    description="A general-purpose assistant that can help with a wide range of tasks.",
+    model=model,
+    system_message="You are a helpful assistant."
+)
+
+# Chat with the agent
+response = orchestrator.chat("assistant", "Hello, can you help me?")
+print(response)
 ```
+
+## Required Configuration Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `agent_id` | Unique identifier for the agent | `"assistant"` |
+| `description` | Description of the agent's purpose and capabilities | `"A helpful assistant for answering questions"` |
+| `model` | Model configuration including provider and API key | `{"provider": "openai", "api_key": "${OPENAI_API_KEY}", "model": "gpt-4o"}` |
 
 ## Model Configuration
 
-MUXI supports different language model providers:
-
 ### OpenAI Models
 
+<h4>Declarative way (JSON)</h4>
+
+`configs/openai_model.json`
+
+```json
+{
+  "agent_id": "openai_assistant",
+  "description": "An assistant powered by OpenAI models with custom parameters.",
+  "model": {
+    "provider": "openai",
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "gpt-4o",
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "max_tokens": 1000,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+  }
+}
+```
+
+<h4>Declarative way (YAML)</h4>
+
+`configs/openai_model.yaml`
+
+```yaml
+---
+agent_id: openai_assistant
+description: An assistant powered by OpenAI models with custom parameters.
+model:
+  provider: openai
+  api_key: "${OPENAI_API_KEY}"
+  model: gpt-4o
+  temperature: 0.7
+  top_p: 0.9
+  max_tokens: 1000
+  presence_penalty: 0
+  frequency_penalty: 0
+```
+
+<h4>Programmatic way</h4>
+
 ```python
+import os
+from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.openai import OpenAIModel
 
-# Configure an OpenAI model
+# Initialize orchestrator
+orchestrator = Orchestrator()
+
+# Create an OpenAI model with custom parameters
 model = OpenAIModel(
-    api_key="your_api_key_here",             # API key (or use environment variable)
-    model="gpt-4o",                          # Model name
-    temperature=0.7,                         # Creativity level
-    max_tokens=1000,                         # Max response length
-    top_p=0.9,                               # Nucleus sampling parameter
-    presence_penalty=0.1,                    # Penalize repeated tokens
-    frequency_penalty=0.1,                   # Penalize frequent tokens
-    timeout=30,                              # Request timeout in seconds
-    retry_attempts=3                         # Number of retries on failure
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o",
+    temperature=0.7,
+    top_p=0.9,
+    max_tokens=1000,
+    presence_penalty=0.0,
+    frequency_penalty=0.0
 )
+
+# Create an agent with the configured model
+orchestrator.create_agent(
+    agent_id="openai_assistant",
+    description="An assistant powered by OpenAI models with custom parameters.",
+    model=model
+)
+
+# Chat with the OpenAI-powered agent
+response = orchestrator.chat("openai_assistant", "Tell me about machine learning.")
+print(response)
 ```
 
 ### Anthropic Models
 
+<h4>Declarative way (JSON)</h4>
+
+`configs/anthropic_model.json`
+
+```json
+{
+  "agent_id": "claude_assistant",
+  "description": "An assistant powered by Anthropic's Claude model.",
+  "model": {
+    "provider": "anthropic",
+    "api_key": "${ANTHROPIC_API_KEY}",
+    "model": "claude-3-opus-20240229",
+    "temperature": 0.7,
+    "max_tokens": 1000
+  }
+}
+```
+
+<h4>Declarative way (YAML)</h4>
+
+`configs/anthropic_model.yaml`
+
+```yaml
+---
+agent_id: claude_assistant
+description: An assistant powered by Anthropic's Claude model.
+model:
+  provider: anthropic
+  api_key: "${ANTHROPIC_API_KEY}"
+  model: claude-3-opus-20240229
+  temperature: 0.7
+  max_tokens: 1000
+```
+
+<h4>Programmatic way</h4>
+
 ```python
+import os
+from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.anthropic import AnthropicModel
 
-# Configure an Anthropic model
+# Initialize orchestrator
+orchestrator = Orchestrator()
+
+# Create an Anthropic model
 model = AnthropicModel(
-    api_key="your_api_key_here",             # API key
-    model="claude-3-opus-20240229",          # Model name
-    temperature=0.7,                         # Creativity level
-    max_tokens=1000                          # Max response length
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
+    model="claude-3-opus-20240229",
+    temperature=0.7,
+    max_tokens=1000
 )
+
+# Create an agent with the Anthropic model
+orchestrator.create_agent(
+    agent_id="claude_assistant",
+    description="An assistant powered by Anthropic's Claude model.",
+    model=model
+)
+
+# Chat with the Claude-powered agent
+response = orchestrator.chat("claude_assistant", "Tell me about the history of AI.")
+print(response)
 ```
 
-### Local Models (Ollama)
+### Google Models
+
+<h4>Declarative way</h4>
+
+`configs/google_model.json`
+
+```json
+{
+  "agent_id": "gemini_assistant",
+  "description": "An assistant powered by Google's Gemini model.",
+  "model": {
+    "provider": "google",
+    "api_key": "${GOOGLE_API_KEY}",
+    "model": "gemini-1.5-pro",
+    "temperature": 0.7,
+    "max_tokens": 1000
+  }
+}
+```
+
+<h4>Programmatic way</h4>
 
 ```python
-from muxi.core.models.ollama import OllamaModel
+import os
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.google import GoogleModel
 
-# Configure a local model via Ollama
-model = OllamaModel(
-    model="llama3",                          # Model name
-    host="http://localhost:11434",           # Ollama host
-    temperature=0.7,                         # Creativity level
-    max_tokens=1000                          # Max response length
+# Initialize orchestrator
+orchestrator = Orchestrator()
+
+# Create a Google model
+model = GoogleModel(
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    model="gemini-1.5-pro",
+    temperature=0.7,
+    max_tokens=1000
 )
+
+# Create an agent with the Google model
+orchestrator.create_agent(
+    agent_id="gemini_assistant",
+    description="An assistant powered by Google's Gemini model.",
+    model=model
+)
+
+# Chat with the Gemini-powered agent
+response = orchestrator.chat("gemini_assistant", "Tell me about quantum computing.")
+print(response)
 ```
 
-## Tool Configuration
+### Azure OpenAI Models
 
-Equip your agents with tools to perform specific actions:
+<h4>Declarative way</h4>
+
+`configs/azure_model.json`
+
+```json
+{
+  "agent_id": "azure_assistant",
+  "description": "An assistant powered by Azure-hosted OpenAI models.",
+  "model": {
+    "provider": "azure_openai",
+    "api_key": "${AZURE_OPENAI_API_KEY}",
+    "api_base": "${AZURE_OPENAI_ENDPOINT}",
+    "api_version": "2023-12-01-preview",
+    "deployment_name": "gpt-4"
+  }
+}
+```
+
+<h4>Programmatic way</h4>
+
+```python
+import os
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.azure_openai import AzureOpenAIModel
+
+# Initialize orchestrator
+orchestrator = Orchestrator()
+
+# Create an Azure OpenAI model
+model = AzureOpenAIModel(
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    api_base=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    api_version="2023-12-01-preview",
+    deployment_name="gpt-4"
+)
+
+# Create an agent with the Azure model
+orchestrator.create_agent(
+    agent_id="azure_assistant",
+    description="An assistant powered by Azure-hosted OpenAI models.",
+    model=model
+)
+
+# Chat with the Azure-powered agent
+response = orchestrator.chat("azure_assistant", "What are the benefits of cloud computing?")
+print(response)
+```
+
+### Local Models
+
+<h4>Declarative way</h4>
+
+`configs/local_model.json`
+
+```json
+{
+  "agent_id": "local_assistant",
+  "description": "An assistant powered by a locally-hosted model.",
+  "model": {
+    "provider": "local",
+    "model_path": "/path/to/model",
+    "model_type": "llama2"
+  }
+}
+```
+
+<h4>Programmatic way</h4>
 
 ```python
 from muxi.core.orchestrator import Orchestrator
-from muxi.core.models.openai import OpenAIModel
-from muxi.core.tools.web_search import WebSearch
-from muxi.core.tools.calculator import Calculator
-from muxi.core.tools.weather import WeatherTool
+from muxi.core.models.local import LocalModel
 
-# Create tools with configuration
-web_search = WebSearch(
-    api_key="your_search_api_key",           # API key for search service
-    search_engine="google",                  # Search engine to use
-    max_results=5                            # Maximum number of results
-)
-
-calculator = Calculator()
-
-weather_tool = WeatherTool(
-    api_key="your_weather_api_key",          # Weather service API key
-    units="metric"                           # Units for temperature (metric/imperial)
-)
-
-# Create an agent with tools
+# Initialize orchestrator
 orchestrator = Orchestrator()
-orchestrator.create_agent(
-    agent_id="assistant",
-    model=OpenAIModel(model="gpt-4o"),
-    tools=[web_search, calculator, weather_tool]
+
+# Create a local model
+model = LocalModel(
+    model_path="/path/to/model",
+    model_type="llama2"
 )
+
+# Create an agent with the local model
+orchestrator.create_agent(
+    agent_id="local_assistant",
+    description="An assistant powered by a locally-hosted model.",
+    model=model
+)
+
+# Chat with the locally-hosted agent
+response = orchestrator.chat("local_assistant", "Tell me about open-source AI.")
+print(response)
+```
+
+## System Message Configuration
+
+The system message provides instructions to the AI about its role and behavior.
+
+<h4>Declarative way</h4>
+
+`configs/system_message.json`
+
+```json
+{
+  "agent_id": "science_assistant",
+  "description": "A specialized assistant for science and technology topics.",
+  "model": {
+    "provider": "openai",
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "gpt-4o"
+  },
+  "system_message": "You are a helpful assistant specialized in answering questions about science and technology. Keep your answers concise but informative."
+}
+```
+
+
+<h4>Programmatic way</h4>
+
+```python
+import os
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.openai import OpenAIModel
+
+# Initialize orchestrator
+orchestrator = Orchestrator()
+
+# Create a model
+model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o"
+)
+
+# Create an agent with specialized system message
+orchestrator.create_agent(
+    agent_id="science_assistant",
+    description="A specialized assistant for science and technology topics.",
+    model=model,
+    system_message="You are a helpful assistant specialized in answering questions about science and technology. Keep your answers concise but informative."
+)
+
+# Chat with the specialized agent
+response = orchestrator.chat("science_assistant", "Explain how nuclear fusion works.")
+print(response)
+```
+
+### Multi-line System Messages
+
+<h4>Declarative way</h4>
+
+`configs/multiline_system_message.json`
+
+```json
+{
+  "agent_id": "python_assistant",
+  "description": "A specialized assistant for Python programming.",
+  "model": {
+    "provider": "openai",
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "gpt-4o"
+  },
+  "system_message": "You are a Python coding assistant.\n\nYour role is to help users with Python programming questions.\n\nAlways provide explanations along with code examples.\n\nFocus on best practices and readability."
+}
+```
+
+<h4>Programmatic way</h4>
+
+```python
+import os
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.openai import OpenAIModel
+
+# Initialize orchestrator
+orchestrator = Orchestrator()
+
+# Create a model
+model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o"
+)
+
+# Define a multi-line system message
+system_message = """You are a Python coding assistant.
+
+Your role is to help users with Python programming questions.
+
+Always provide explanations along with code examples.
+
+Focus on best practices and readability."""
+
+# Create an agent with the multi-line system message
+orchestrator.create_agent(
+    agent_id="python_assistant",
+    description="A specialized assistant for Python programming.",
+    model=model,
+    system_message=system_message
+)
+
+# Chat with the specialized coding agent
+response = orchestrator.chat("python_assistant", "How do I read a CSV file in Python?")
+print(response)
 ```
 
 ## Memory Configuration
 
-Configure memory systems to enhance your agent's capabilities:
+### Buffer Memory
+
+<h4>Declarative way</h4>
+
+`configs/buffer_memory.json`
+
+```json
+{
+  "agent_id": "assistant",
+  "description": "An assistant with buffer memory for maintaining conversation context.",
+  "model": {
+    "provider": "openai",
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "gpt-4o"
+  },
+  "buffer_memory": {
+    "type": "buffer",
+    "max_tokens": 2000,
+    "include_system_messages": true
+  }
+}
+```
+
+<h4>Programmatic way</h4>
 
 ```python
+import os
 from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.openai import OpenAIModel
 from muxi.core.memory.buffer import BufferMemory
+
+# Initialize components
+orchestrator = Orchestrator()
+model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o"
+)
+
+# Create buffer memory with custom settings
+buffer = BufferMemory(
+    max_tokens=2000,
+    include_system_messages=True
+)
+
+# Create an agent with buffer memory
+orchestrator.create_agent(
+    agent_id="assistant",
+    description="An assistant with buffer memory for maintaining conversation context.",
+    model=model,
+    buffer_memory=buffer
+)
+
+# Have a conversation that requires context
+orchestrator.chat("assistant", "My name is Sam.")
+response = orchestrator.chat("assistant", "Do you remember my name?")
+print(response)  # Should mention "Sam"
+```
+
+### Long-Term Memory
+
+<h4>Declarative way</h4>
+
+`configs/long_term_memory.json`
+
+```json
+{
+  "agent_id": "assistant",
+  "description": "An assistant with long-term memory capabilities.",
+  "model": {
+    "provider": "openai",
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "gpt-4o"
+  },
+  "long_term_memory": {
+    "type": "long_term",
+    "connection_string": "${DATABASE_URL}",
+    "collection": "agent_memories"
+  }
+}
+```
+
+<h4>Programmatic way</h4>
+
+```python
+import os
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.openai import OpenAIModel
 from muxi.core.memory.long_term import LongTermMemory
 
-# Configure buffer memory
-buffer = BufferMemory(
-    max_tokens=4000,                         # Maximum tokens to store
-    include_system_messages=True,            # Include system messages in context
-    include_tool_calls=True                  # Include tool usage in context
+# Initialize components
+orchestrator = Orchestrator()
+model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o"
 )
 
 # Configure long-term memory
 long_term = LongTermMemory(
-    connection_string="postgresql://user:password@localhost:5432/muxidb",
-    collection="agent_memories",             # Collection/table name
-    embedding_model="text-embedding-3-small", # Embedding model to use
-    embedding_dimensions=1536,               # Dimensions of embeddings
-    similarity_threshold=0.75                # Minimum similarity for retrieval
+    connection_string=os.getenv("DATABASE_URL"),
+    collection="agent_memories"
 )
 
-# Create an agent with configured memory
-orchestrator = Orchestrator()
+# Create an agent with long-term memory
 orchestrator.create_agent(
     agent_id="assistant",
-    model=OpenAIModel(model="gpt-4o"),
-    buffer_memory=buffer,
+    description="An assistant with long-term memory capabilities.",
+    model=model,
     long_term_memory=long_term
 )
+
+# Store information in long-term memory
+orchestrator.chat("assistant", "Remember that I like to travel to Japan.")
+
+# Clear buffer memory to simulate a new session
+agent = orchestrator.get_agent("assistant")
+agent.buffer_memory.clear()
+
+# The agent should still remember the information
+response = orchestrator.chat("assistant", "Where do I like to travel?")
+print(response)  # Should mention "Japan"
 ```
 
-## Declarative Configuration
+## Complete Configuration Example
 
-For easier deployment and management, configure agents using YAML or JSON:
+<h4>Declarative way</h4>
 
-### JSON Configuration Example
-
-```python
-import json
-from muxi.core.orchestrator import Orchestrator
-
-# Load configuration from a JSON file
-with open("agent_config.json", "r") as f:
-    config = json.load(f)
-
-# Create orchestrator and load agents
-orchestrator = Orchestrator()
-for agent_config in config["agents"]:
-    orchestrator.create_agent_from_config(agent_config)
-```
-
-Example `agent_config.json`:
+`configs/complete_configuration.yaml`
 
 ```json
 {
-  "agents": [
-    {
-      "agent_id": "assistant",
-      "model": {
-        "provider": "openai",
-        "model": "gpt-4o",
-        "parameters": {
-          "temperature": 0.7,
-          "max_tokens": 1000
-        }
-      },
-      "system_message": "You are a helpful assistant specializing in technology.",
-      "tools": [
-        {
-          "type": "web_search",
-          "config": {
-            "api_key": "${SEARCH_API_KEY}",
-            "max_results": 5
-          }
-        },
-        {
-          "type": "calculator"
-        }
-      ],
-      "memory": {
-        "buffer": {
-          "max_tokens": 4000
-        },
-        "long_term": {
-          "connection_string": "${DATABASE_URL}",
-          "collection": "assistant_memories"
-        }
-      }
-    },
-    {
-      "agent_id": "coding_assistant",
-      "model": {
-        "provider": "anthropic",
-        "model": "claude-3-opus-20240229",
-        "parameters": {
-          "temperature": 0.2,
-          "max_tokens": 1500
-        }
-      },
-      "system_message": "You are a specialized coding assistant that helps with programming tasks.",
-      "tools": [
-        {
-          "type": "code_interpreter"
-        },
-        {
-          "type": "repository_search"
-        }
-      ]
-    }
-  ]
+  "agent_id": "expert_assistant",
+  "description": "A comprehensive AI assistant with multiple capabilities.",
+  "model": {
+    "provider": "openai",
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "gpt-4o",
+    "temperature": 0.7,
+    "max_tokens": 1000
+  },
+  "system_message": "You are an expert assistant with broad knowledge and capabilities. You can help with research, writing, problem-solving, and many other tasks. Always be helpful, accurate, and concise.",
+  "buffer_memory": {
+    "type": "buffer",
+    "max_tokens": 4000
+  },
+  "long_term_memory": {
+    "type": "long_term",
+    "connection_string": "${DATABASE_URL}"
+  }
 }
 ```
 
-### YAML Configuration Example
+`app.py`
 
 ```python
-import yaml
-from muxi.core.orchestrator import Orchestrator
+from muxi import muxi
+from dotenv import load_dotenv
+import os
 
-# Load configuration from a YAML file
-with open("agent_config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+# Load environment variables
+load_dotenv()
 
-# Create orchestrator and load agents
-orchestrator = Orchestrator()
-for agent_config in config["agents"]:
-    orchestrator.create_agent_from_config(agent_config)
+# Initialize MUXI
+app = muxi()
+
+# Add fully-configured agent
+app.add_agent("configs/complete_configuration.yaml")
+
+# Chat with the comprehensive agent
+response = await app.chat("expert_assistant", "Tell me about recent advances in AI.")
+print(response)
 ```
 
-Example `agent_config.yaml`:
-
-```yaml
-agents:
-  - agent_id: assistant
-    model:
-      provider: openai
-      model: gpt-4o
-      parameters:
-        temperature: 0.7
-        max_tokens: 1000
-    system_message: You are a helpful assistant specializing in technology.
-    tools:
-      - type: web_search
-        config:
-          api_key: ${SEARCH_API_KEY}
-          max_results: 5
-      - type: calculator
-    memory:
-      buffer:
-        max_tokens: 4000
-      long_term:
-        connection_string: ${DATABASE_URL}
-        collection: assistant_memories
-
-  - agent_id: coding_assistant
-    model:
-      provider: anthropic
-      model: claude-3-opus-20240229
-      parameters:
-        temperature: 0.2
-        max_tokens: 1500
-    system_message: You are a specialized coding assistant that helps with programming tasks.
-    tools:
-      - type: code_interpreter
-      - type: repository_search
-```
-
-## Environment Variables
-
-Configure MUXI with environment variables for secure deployment:
-
-```bash
-# Model API keys
-export OPENAI_API_KEY="your_openai_key"
-export ANTHROPIC_API_KEY="your_anthropic_key"
-
-# Database configuration
-export MUXI_DATABASE_URL="postgresql://username:password@localhost:5432/muxidb"
-
-# Tool API keys
-export MUXI_SEARCH_API_KEY="your_search_key"
-export MUXI_WEATHER_API_KEY="your_weather_key"
-
-# Default configuration
-export MUXI_DEFAULT_MODEL="gpt-4o"
-export MUXI_ENABLE_TOOLS="true"
-export MUXI_USE_LONG_TERM_MEMORY="true"
-```
-
-You can then load these variables in your code:
+<h4>Programmatic way</h4>
 
 ```python
 import os
-from dotenv import load_dotenv
 from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.openai import OpenAIModel
+from muxi.core.memory.buffer import BufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.domain_knowledge import DomainKnowledge
 
-# Load environment variables from .env file if present
-load_dotenv()
-
-# Create model using environment variables
-model = OpenAIModel(
-    # API key will be automatically loaded from OPENAI_API_KEY
-    model=os.getenv("MUXI_DEFAULT_MODEL", "gpt-4o")
-)
-
-# Create orchestrator
+# Initialize the orchestrator
 orchestrator = Orchestrator()
-orchestrator.create_agent(
-    agent_id="assistant",
-    model=model
-)
-```
 
-## Advanced Configuration
-
-### Streaming Configuration
-
-Configure how responses are streamed to clients:
-
-```python
-from muxi.core.orchestrator import Orchestrator
-from muxi.core.models.openai import OpenAIModel
-
-# Configure streaming behavior
-orchestrator = Orchestrator()
-orchestrator.create_agent(
-    agent_id="streaming_agent",
-    model=OpenAIModel(model="gpt-4o"),
-    streaming=True,                          # Enable streaming
-    stream_chunk_size=20,                    # Characters per chunk
-    stream_delay=0.02                        # Delay between chunks (seconds)
-)
-
-# Use with a streaming handler
-def stream_handler(chunk):
-    print(chunk, end="", flush=True)
-
-# Get streaming response
-orchestrator.chat(
-    "streaming_agent",
-    "Write a short story about a robot.",
-    stream_handler=stream_handler
-)
-```
-
-### Rate Limiting Configuration
-
-Configure rate limiting to manage API usage:
-
-```python
-from muxi.core.orchestrator import Orchestrator
-from muxi.core.models.openai import OpenAIModel
-from muxi.core.rate_limiter import RateLimiter
-
-# Configure rate limiting
-rate_limiter = RateLimiter(
-    requests_per_minute=60,                 # Maximum requests per minute
-    tokens_per_minute=100000,               # Maximum tokens per minute
-    max_retries=3,                          # Retries on rate limit errors
-    retry_delay=5.0                         # Seconds between retries
-)
-
-# Create model with rate limiter
+# Create model
 model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o",
-    rate_limiter=rate_limiter
+    temperature=0.7,
+    max_tokens=1000
 )
 
-# Create agent with rate-limited model
-orchestrator = Orchestrator()
+# Configure memory
+buffer = BufferMemory(max_tokens=4000)
+long_term = LongTermMemory(connection_string=os.getenv("DATABASE_URL"))
+
+# Create a fully-configured agent
 orchestrator.create_agent(
-    agent_id="rate_limited_agent",
-    model=model
-)
-```
-
-### Multi-Modal Configuration
-
-Configure agents to handle images and other media:
-
-```python
-from muxi.core.orchestrator import Orchestrator
-from muxi.core.models.openai import OpenAIModel
-
-# Create multi-modal agent
-orchestrator = Orchestrator()
-orchestrator.create_agent(
-    agent_id="vision_agent",
-    model=OpenAIModel(
-        model="gpt-4o",                     # Model that supports vision
-        vision_enabled=True,                # Enable vision capabilities
-        max_image_size=4096,                # Maximum image dimension in pixels
-        image_detail="high"                 # Image detail level (low/medium/high)
-    )
+    agent_id="expert_assistant",
+    description="A comprehensive AI assistant with multiple capabilities.",
+    model=model,
+    system_message="You are an expert assistant with broad knowledge and capabilities. You can help with research, writing, problem-solving, and many other tasks. Always be helpful, accurate, and concise.",
+    buffer_memory=buffer,
+    long_term_memory=long_term,
 )
 
-# Use the agent with an image
-response = orchestrator.chat(
-    "vision_agent",
-    "What's in this image?",
-    image_paths=["path/to/image.jpg"]       # Local image path
-)
-
-# Or with a URL
-response = orchestrator.chat(
-    "vision_agent",
-    "What's in this image?",
-    image_urls=["https://example.com/image.jpg"]  # Remote image URL
-)
+# Chat with the agent
+response = orchestrator.chat("expert_assistant", "Tell me about recent advances in AI.")
+print(response)
 ```
 
 ## Configuration Best Practices
 
-1. **Use Environment Variables for Secrets**: Never hardcode API keys or credentials
+1. **Use Environment Variables for API Keys**
+   - Always use environment variables for sensitive information like API keys
+   - Example: `"api_key": "${OPENAI_API_KEY}"`
+2. **Set Appropriate Temperature**
+   - Use lower values (0.0-0.3) for factual tasks
+   - Use moderate values (0.3-0.7) for balanced responses
+   - Use higher values (0.7-1.0) for creative tasks
+3. **Craft Detailed System Messages**
+   - Be specific about the agent's role, capabilities, and limitations
+   - Include examples of desired behavior when possible
+   - Structure long system messages with clear sections
 
-2. **Declarative Configuration for Production**: Use YAML/JSON configs for deployment environments
-
-3. **Appropriate Tool Selection**: Only include tools that agents actually need
-
-4. **Memory Optimization**: Configure memory systems according to your use case
-
-5. **Model Selection**: Choose the right model for your task complexity
-
-6. **Environment-Specific Configs**: Create different configs for development, testing, and production
-
-7. **Centralized Configuration**: Store common settings in shared config files
-
-8. **Version Control**: Keep configuration files in version control with secrets redacted
-
-## Troubleshooting Configuration Issues
-
-### Common Issues and Solutions
-
-1. **Missing API Keys**: Ensure API keys are correctly set in environment variables
-
-2. **Model Compatibility**: Verify that the selected model supports the required capabilities (e.g., vision, tool use)
-
-3. **Database Connection**: Check that database credentials and connection strings are correct
-
-4. **Tool Configuration**: Ensure tools have the necessary parameters and API keys
-
-5. **Rate Limiting**: If experiencing rate limiting errors, adjust rate limiter settings
-
-### Debugging Configuration
-
-To debug configuration issues, you can print the configuration:
-
-```python
-from muxi.core.orchestrator import Orchestrator
-from muxi.core.models.openai import OpenAIModel
-import json
-
-# Initialize components
-orchestrator = Orchestrator()
-model = OpenAIModel(model="gpt-4o")
-
-# Create an agent
-orchestrator.create_agent(
-    agent_id="assistant",
-    model=model
-)
-
-# Get agent configuration (with sensitive data masked)
-config = orchestrator.get_agent_config("assistant", mask_secrets=True)
-print(json.dumps(config, indent=2))
-```
+4. **Balance Memory Configuration**
+   - Set appropriate token limits for buffer memory based on your model's context window
+   - Use long-term memory for important information that needs to persist
+   - Use domain knowledge for static information that doesn't change
+5. **Use Descriptive Agent IDs**
+   - Choose agent IDs that clearly reflect their purpose
+   - Follow a consistent naming convention
 
 ## Next Steps
 
-Now that you've learned how to configure agents, you might want to:
+Now that you've learned about agent configuration, you can:
 
-- Learn about multi-agent systems - see [Multi-Agent Systems](../multi-agent/)
-- Add memory to your agents - see [Adding Memory](../memory/)
-- Explore how to connect your agents to external services - see [Using MCP Servers](../../extend/using-mcp/)
+- Add memory capabilities to your agent - see [Adding Memory](../memory/)
+- Create multi-agent systems - see [Multi-Agent Systems](../multi-agent/)
+- Learn about advanced agent capabilities - see [Advanced Features](../../advanced-features/)
