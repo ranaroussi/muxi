@@ -27,7 +27,18 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 
 ### Current Architecture
 
-![Architecture Diagram](docs/assets/images/muxi-overview.webp)
+```
+┌───────────────┐      ┌───────────┐      ┌───────────┐
+│  Application  │──────│  Agents   │──────│    LLM    │
+└───────┬───────┘      └─────┬─────┘      └───────────┘
+        │                    │
+        │              ┌─────┴─────┐
+        │              │  Memory   │
+        │              └─────┬─────┘
+┌───────┴───────┐      ┌─────┴─────┐
+│  CLI/API/Web  │──────│   Tools   │
+└───────────────┘      └───────────┘
+```
 
 ### Target Architecture
 

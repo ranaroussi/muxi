@@ -67,7 +67,7 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
 
 ```
 ┌───────────────┐                     ┌───────────────┐
-│ MUXI Local/   │◄────API Calls/SSE/WS┤ Thin Clients  │
+│ MUXI Local/   │◄──API Calls/SSE/WS──┤ Thin Clients  │
 │ Remote Client │                     │ (CLI/Web/SDK) │
 └───────┬───────┘                     └───────────────┘
         │
