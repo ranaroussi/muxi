@@ -67,7 +67,7 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
 
 ```
 ┌───────────────┐                     ┌───────────────┐
-│ MUXI Local/   │◄──API Calls/SSE/WS──┤ Thin Clients  │
+│ MUXI Local/   │◄─────API/SSE/WS─────┤ Thin Clients  │
 │ Remote Client │                     │ (CLI/Web/SDK) │
 └───────┬───────┘                     └───────────────┘
         │
@@ -76,24 +76,25 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
 ┌─────────────────────────────────────────────────────┐
 │                     MUXI Server                     │
 │                                                     │
+│                   ┌──────────────┐                  │
+│                   │ Orchestrator │                  │
+│                   └──────┬───────┘                  │
+│                          │                          │
+│                          ▼                          │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │  Agent 1    │  │  Agent 2    │  │  Agent N    │  │
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │  │
 │  │ (from YAML) │  │ (from JSON) │  │ (from YAML) │  │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
 │         │                │                │         │
 │         └────────┬───────┴────────┬───────┘         │
 │                  │                │                 │
 │           ┌──────┴──────┐  ┌──────┴──────┐          │
-│           │ Orchestrator│  │  Memory     │          │
+│           │ MCP Handler │  │   Memory    │          │
 │           └──────┬──────┘  └─────────────┘          │
-│                  │                                  │
-│           ┌──────┴──────┐                           │
-│           │ MCP Servers │                           │
-│           └─────────────┘                           │
-└─────────────────────────────────────────────────────┘
-        │
-        │ (gRPC/HTTP)
-        ▼
+└──────────────────│──────────────────────────────────┘
+                   │
+                   │ (gRPC/HTTP)
+                   ▼
 ┌─────────────────────────────────────────────────────┐
 │                 External MCP Servers                │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
