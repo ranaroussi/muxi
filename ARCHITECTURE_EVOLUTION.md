@@ -34,18 +34,18 @@ This evolution preserves the current programmatic API while adding powerful capa
 ### Target Architecture
 
 ```
-┌───────────────┐
-│ Thin Clients  │
-│ (CLI/Web/SDK) │
-└───────┬───────┘
-        │
-        │ (API/SSE/WS)
-        │
-┌───────│─────────────────────────────────────────────┐
-│       │      MUXI Server (Local/Remote)             │
-│       │                                             │
-│       │           ┌──────────────┐                  │
-│       └─────────> │ Orchestrator │                  │
+┌───────────────────┐
+│      Clients      │
+│   (CLI/Web/SDK)   │
+└─────────┬─────────┘
+          │
+          │ (API/SSE/WS)
+          │
+┌─────────│───────────────────────────────────────────┐
+│         │    MUXI Server (Local/Remote)             │
+│         │                                           │
+│         │         ┌──────────────┐                  │
+│         └───────> │ Orchestrator │                  │
 │                   └──────┬───────┘                  │
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │

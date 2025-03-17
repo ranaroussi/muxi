@@ -66,18 +66,18 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
 ### Target Architecture
 
 ```
-┌───────────────┐
-│ Thin Clients  │
-│ (CLI/Web/SDK) │
-└───────┬───────┘
-        │
-        │ (API/SSE/WS)
-        │
-┌───────│─────────────────────────────────────────────┐
-│       │      MUXI Server (Local/Remote)             │
-│       │                                             │
-│       │           ┌──────────────┐                  │
-│       └─────────> │ Orchestrator │                  │
+┌───────────────────┐
+│      Clients      │
+│   (CLI/Web/SDK)   │
+└─────────┬─────────┘
+          │
+          │ (API/SSE/WS)
+          │
+┌─────────│───────────────────────────────────────────┐
+│         │    MUXI Server (Local/Remote)             │
+│         │                                           │
+│         │         ┌──────────────┐                  │
+│         └───────> │ Orchestrator │                  │
 │                   └──────┬───────┘                  │
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │
