@@ -1,6 +1,6 @@
 # MUXI Framework
 
-MUXI Framework is a powerful platform for building AI agents with memory, tools, and real-time communication capabilities. It provides a solid foundation for creating advanced AI applications through a unified architecture that integrates multiple interfaces.
+MUXI Framework is a powerful platform for building AI agents with memory, MCP server integration, and real-time communication capabilities. It provides a solid foundation for creating advanced AI applications through a unified architecture that integrates multiple interfaces.
 
 > [!WARNING]
 > This project is a work in progress and is not yet ready for production use. We're actively developing the framework and adding new features. Please refer to the [roadmap](docs/roadmap.md) for information about the current state of the project and where it's headed.
@@ -9,12 +9,11 @@ MUXI Framework is a powerful platform for building AI agents with memory, tools,
 
 - 🤖 **Multi-Agent Support**: Create and manage multiple AI agents with different capabilities
 - 🧠 **Memory Systems**: Short-term and long-term memory for contextual interactions
-- 🛠️ **Tool Integration**: Extensible tool system with built-in web search, calculator, and more
+- 🔌 **MCP Server Integration**: Connect to external services via Model Context Protocol servers
 - 🌐 **Multiple Interfaces**: REST API, WebSockets, CLI, Web UI, etc.
 - 🔄 **Intelligent Message Routing**: Automatically direct messages to the most appropriate agent
 - 📊 **Multi-User Support**: User-specific memory partitioning for multi-tenant applications
 - 📘 **Domain Knowledge**: Store and retrieve structured information to personalize responses
-- 🔌 **Plugin System**: Extend functionality with custom plugins
 - 🔄 **Hybrid Communication Protocol**: HTTP for standard requests, SSE for streaming, WebSockets for multi-modal
 - 📝 **Declarative Configuration**: Define agents using YAML or JSON files with minimal code
 - 🚀 **Modular Architecture**: Use only the components you need
@@ -123,9 +122,66 @@ model:
 memory:
   buffer: 10  # Buffer window size of 10
   long_term: true  # Enable long-term memory
-tools:
-- enable_calculator
-- enable_web_search
+mcp_servers:
+- name: web_search
+  url: http://localhost:5001
+  credentials:
+  - id: search_api_key
+    param_name: api_key
+    required: true
+    env_fallback: SEARCH_API_KEY
+```
+
+### Programmatic Approach
+
+You can also create agents programmatically using the Orchestrator interface:
+
+```python
+from muxi.core.orchestrator import Orchestrator
+from muxi.models.providers.openai import OpenAIModel
+from muxi.server.memory.buffer import BufferMemory
+from muxi.server.memory.long_term import LongTermMemory
+
+# Create an orchestrator to manage agents
+orchestrator = Orchestrator()
+
+# Create a basic agent with buffer memory
+orchestrator.create_agent(
+    agent_id="assistant",
+    model=OpenAIModel(model="gpt-4o", api_key="your_api_key"),
+    buffer_memory=BufferMemory(),
+    system_message="You are a helpful AI assistant.",
+    description="General-purpose assistant for answering questions and providing information."
+)
+
+# Create an agent with long-term memory
+orchestrator.create_agent(
+    agent_id="researcher",
+    model=OpenAIModel(model="gpt-4o", api_key="your_api_key"),
+    buffer_memory=BufferMemory(),
+    long_term_memory=LongTermMemory(connection_string="your_db_connection"),
+    system_message="You are a helpful research assistant.",
+    description="Specialized in research tasks, data analysis, and information retrieval."
+)
+
+# Add MCP server to the agent
+await orchestrator.agents["assistant"].connect_mcp_server(
+    name="web_search",
+    url="http://localhost:5001",
+    credentials={"api_key": "your_search_api_key"}
+)
+
+# Chat with an agent (automatic routing based on query)
+response = await orchestrator.chat("Tell me about quantum physics")
+print(response.content)
+
+# Chat with a specific agent
+response = await orchestrator.chat("Tell me about quantum physics", agent_name="researcher")
+print(response.content)
+
+# Chat with multi-user support
+response = await orchestrator.chat("Remember my name is Alice", user_id="user123")
+print(response.content)
 ```
 
 ### Using the CLI
@@ -219,7 +275,7 @@ The MUXI Framework is organized into a modular architecture with the following c
 ```
 muxi-framework/
 ├── packages/
-│   ├── core/          # Core components: agents, memory, tools, LLM interface
+│   ├── core/          # Core components: agents, memory, MCP interface
 │   ├── server/        # REST API and WebSocket server
 │   ├── cli/           # Command-line interface
 │   ├── web/           # Web user interface
