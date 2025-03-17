@@ -25,7 +25,7 @@ The CLI is included with the MUXI Framework. You can use it in two ways:
 ### As a module (before package installation)
 ```bash
 # From the project root directory
-python -m src.cli
+python -m muxi.cli
 ```
 
 ### As a standalone command (after package installation)
@@ -51,27 +51,27 @@ Available commands:
 
 ```bash
 # Show help
-python -m src.cli --help   # Before installation
+python -m muxi.cli --help   # Before installation
 muxi --help                # After installation
 
 # Start a chat with the default agent
-python -m src.cli chat
+python -m muxi.cli chat
 muxi chat
 
 # Start a chat with a specific agent
-python -m src.cli chat --agent-id researcher
+python -m muxi.cli chat --agent-id researcher
 muxi chat --agent-id researcher
 
 # Send a one-off message to an agent
-python -m src.cli send --agent-id assistant "What is the capital of France?"
+python -m muxi.cli send --agent-id assistant "What is the capital of France?"
 muxi send --agent-id assistant "What is the capital of France?"
 
 # Run the server
-python -m src.cli run
+python -m muxi.cli run
 muxi run
 
 # Alternatively, you can run the server with:
-python -m src
+python -m muxi.server
 ```
 
 ## Chat Mode
@@ -87,7 +87,7 @@ The chat mode provides an interactive terminal-based chat interface with the sel
 ### Starting a Chat Session
 
 ```bash
-python -m src.cli chat [OPTIONS]
+python -m muxi.cli chat [OPTIONS]
 ```
 
 Options:
@@ -122,7 +122,7 @@ Assistant: Arr, matey! The capital of France be Paris, ye landlubber!
 The send mode allows you to send a single message to an agent and get the response without starting an interactive session.
 
 ```bash
-python -m src.cli send [OPTIONS] MESSAGE
+python -m muxi.cli send [OPTIONS] MESSAGE
 ```
 
 Options:
@@ -132,7 +132,7 @@ Options:
 
 Example:
 ```bash
-python -m src.cli send "What is the capital of France?"
+python -m muxi.cli send "What is the capital of France?"
 ```
 
 ## Server Mode
@@ -140,7 +140,7 @@ python -m src.cli send "What is the capital of France?"
 The server mode starts the REST API server, which provides endpoints for interacting with agents.
 
 ```bash
-python -m src.cli run [OPTIONS]
+python -m muxi.cli run [OPTIONS]
 ```
 
 Options:
@@ -150,7 +150,7 @@ Options:
 
 Example:
 ```bash
-python -m src.cli run --host 127.0.0.1 --port 8080
+python -m muxi.cli run --host 127.0.0.1 --port 8080
 ```
 
 ## Configuration

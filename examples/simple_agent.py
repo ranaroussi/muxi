@@ -1,8 +1,7 @@
 """
-Simple example of using the MUXI Framework.
+Simple agent example with the MUXI Framework.
 
-This script demonstrates how to create and use a simple agent with the
-MUXI Framework.
+This example demonstrates how to create a simple agent with memory, tools, and a large language model.
 """
 
 import asyncio
@@ -10,78 +9,62 @@ import os
 
 from dotenv import load_dotenv
 
-from src.core.orchestrator import Orchestrator
-from src.memory.buffer import BufferMemory
-from src.models import OpenAIModel
-from src.tools.calculator import CalculatorTool
-from src.tools.web_search import WebSearchTool
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.memory import BufferMemory
+from muxi.core.models import OpenAIModel
+from muxi.core.tools.calculator import CalculatorTool
+from muxi.core.tools.web_search import WebSearchTool
 
+# Load environment variables from .env file
+load_dotenv()
 
 async def main():
-    """Run the example."""
-    # Load environment variables from .env file
-    load_dotenv()
-
-    # Check for API key
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError(
-            "OPENAI_API_KEY environment variable not set. "
-            "Please set it in a .env file or in your environment."
-        )
-
-    # Create language model
+    # Create an LLM model instance
     model = OpenAIModel(
-        api_key=api_key,
-        model="gpt-4o",  # You can change this to any supported model
-    )
-
-    # Create memory
-    memory = BufferMemory(
-        dimension=1536,  # OpenAIModel embeddings dimension
-        max_size=100,  # Maximum number of items to store
+        api_key=os.getenv("OPENAI_API_KEY"),
+        model="gpt-4o",
+        temperature=0.7,
     )
 
     # Create tools
-    tools = [
-        WebSearchTool(),
-        CalculatorTool(),
-    ]
+    calculator = CalculatorTool()
+    web_search = WebSearchTool()
 
-    # Create orchestrator
+    # Create a memory system
+    memory = BufferMemory(max_tokens=4000)
+
+    # Create an orchestrator (manages agents)
     orchestrator = Orchestrator()
 
-    # Create agent
-    orchestrator.create_agent(
-        agent_id="simple_agent",
+    # Add an agent
+    orchestrator.add_agent(
+        agent_id="assistant",
+        system_message="You are a helpful assistant.",
+        tools=[calculator, web_search],
+        memory=memory,
         model=model,
-        buffer_memory=memory,
-        tools=tools,
-        system_message=(
-            "You are a helpful AI assistant. You can search the web and "
-            "perform calculations to help answer questions."
-        ),
-        set_as_default=True,
     )
 
-    print("Agent created! You can now chat with it.")
-    print("Type 'exit' to quit.")
+    # Chat with the agent
+    response = await orchestrator.process_message(
+        "What is the weather like in New York City today?",
+        agent_id="assistant",
+    )
+    print(f"Agent: {response.content}")
 
-    # Chat loop
-    while True:
-        # Get user input
-        user_input = input("\nYou: ")
+    # Demonstrate conversation memory
+    response = await orchestrator.process_message(
+        "What about tomorrow?",
+        agent_id="assistant",
+    )
+    print(f"Agent: {response.content}")
 
-        # Check for exit command
-        if user_input.lower() in ["exit", "quit", "bye"]:
-            print("Goodbye!")
-            break
-
-        # Process input
-        print("\nAgent: ", end="")
-        response = await orchestrator.run(user_input)
-        print(response)
-
+    # Demonstrate tool usage
+    response = await orchestrator.process_message(
+        "What is the square root of 144?",
+        agent_id="assistant",
+    )
+    print(f"Agent: {response.content}")
 
 if __name__ == "__main__":
     asyncio.run(main())

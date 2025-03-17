@@ -59,6 +59,49 @@ MUXI is built around several core components that work together to provide a com
    - Web UI for visual interaction
    - WebSocket for real-time communication
 
+## Modular Package Structure
+
+The MUXI framework is now organized into a modular monorepo structure with multiple packages:
+
+```
+muxi-framework/
+├── packages/
+│   ├── core/          # Core components: agents, memory, tools, LLM interface
+│   ├── server/        # REST API and WebSocket server
+│   ├── cli/           # Command-line interface
+│   ├── web/           # Web user interface
+│   └── muxi/          # Meta-package that integrates all components
+└── tests/             # Test suite for all components
+```
+
+### Package Descriptions
+
+1. **Core Package (`muxi-core`)**
+   - Contains foundational components like Agent, Memory, and MCP
+   - Has minimal dependencies for lightweight usage
+   - Provides tools base classes and core implementations
+
+2. **Server Package (`muxi-server`)**
+   - Implements the REST API server for agent interaction
+   - Includes WebSocket server for real-time communication
+   - Handles request routing and middleware
+   - Manages API authentication
+
+3. **CLI Package (`muxi-cli`)**
+   - Provides command-line interface for interacting with agents
+   - Includes interactive terminal-based chat interface
+   - Implements agent management and server commands
+
+4. **Web Package (`muxi-web`)**
+   - Contains the frontend user interface built with React
+   - Implements WebSocket client for real-time communication
+   - Provides agent configuration UI
+
+5. **Meta Package (`muxi`)**
+   - Integrates core, server, and CLI packages
+   - Provides a unified API for the whole framework
+   - Simplifies installation and usage
+
 ## Evolution to Service-Oriented Architecture
 
 The MUXI framework is evolving towards a more flexible, service-oriented approach that enables distributed deployment while maintaining simplicity and ease of use.
@@ -112,13 +155,7 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
    - Flexible authentication mechanisms
    - Connection management utilities
 
-2. **Modular Packaging**
-   - Core package with minimal dependencies
-   - Server package with full capabilities
-   - CLI package for remote connections
-   - Web package for browser-based access
-
-3. **Hybrid Communication Protocol**
+2. **Hybrid Communication Protocol**
    - HTTP for standard API requests
    - SSE (Server-Sent Events) for streaming responses
      - Real-time token-by-token streaming
@@ -127,12 +164,12 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
      - Bi-directional communication for audio/video
      - Available through `app.open_socket()` API
 
-4. **Authentication Implementation**
+3. **Authentication Implementation**
    - API key authentication
    - Auto-generated keys with one-time display
    - Environment variable configuration
 
-5. **MCP Server Unification**
+4. **MCP Server Unification**
    - Tool system based on MCP servers
    - Adapters for local Python tools
    - Service discovery mechanisms
@@ -141,23 +178,17 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
 ### Client Usage
 
 ```python
-# Local usage (unchanged)
+# Local usage with unified API
+from muxi import muxi
+
 app = muxi()
 
-# Remote usage
-app = muxi(
-    server_url="http://server-ip:5050",
-    api_key="your_api_key"
-)
+# Chat with a specific agent
+response = await app.chat("What's the weather in New York?", agent_id="weather")
+print(response)
 
-# Streaming responses via SSE
-for chunk in app.chat("Tell me a story", stream=True):
-    print(chunk, end="", flush=True)
-
-# Multi-modal capabilities via WebSockets
-socket = app.open_socket()
-await socket.send_message("Process this image", images=["path/to/image.jpg"])
-await socket.close()
+# Start the server
+app.run()
 ```
 
 ## Implementation Strategy
@@ -184,4 +215,4 @@ The evolution to the service-oriented architecture will be implemented in phases
    - Set up CI/CD for package publishing
    - Create package-specific documentation
 
-For a detailed implementation roadmap, see [ARCHITECTURE_EVOLUTION.md](../ARCHITECTURE_EVOLUTION.md) and the [roadmap](roadmap.md).
+For a detailed implementation roadmap, see the [roadmap](roadmap.md).

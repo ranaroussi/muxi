@@ -11,12 +11,18 @@ This guide will help you quickly get started with the MUXI Framework using a sim
 
 ## Installation
 
-Install the MUXI Framework from GitHub:
+Install the MUXI Framework using pip:
 
 ```bash
-git clone https://github.com/your-organization/muxi.git
-cd muxi
-pip install -e .
+pip install muxi
+```
+
+For development, you can clone the repository and install in development mode:
+
+```bash
+git clone https://github.com/yourusername/muxi-framework.git
+cd muxi-framework
+./install_dev.sh
 ```
 
 ## Set Up Environment Variables
@@ -81,7 +87,7 @@ Alternatively, create `agents/finance_agent.json`:
 When you add multiple agents to your application, MUXI will automatically route messages to the most appropriate agent based on their descriptions:
 
 ```python
-from src import muxi
+from muxi import muxi
 
 # Create a new MUXI instance
 app = muxi()
@@ -114,7 +120,7 @@ Create a new Python file with minimal code:
 
 ```python
 from dotenv import load_dotenv
-from src import muxi
+from muxi import muxi
 
 # Load environment variables
 load_dotenv()
@@ -140,7 +146,7 @@ print(response)  # Will likely be handled by the finance agent
 response = app.chat("What's the weather in my city?")
 print(response)  # Will use Alice's location data
 
-# Option 2: Start server and web UI
+# Option 2: Start the server
 app.run()
 ```
 
@@ -159,13 +165,45 @@ knowledge = {
 app.add_user_domain_knowledge(user_id, knowledge)
 
 # Chat with user-specific context
-response = app.chat("weather", "What's the weather in my city?", user_id=user_id)
+response = app.chat("What's the weather in my city?", user_id=user_id)
 print(response)  # Will use Alice's location data
+```
+
+## Using the CLI
+
+MUXI provides a convenient command-line interface:
+
+```bash
+# Start a chat session with the default agent
+muxi chat
+
+# Send a one-off message
+muxi send "What is the capital of France?"
+
+# Run the server
+muxi run
+```
+
+## Using the API
+
+After starting the server:
+
+```bash
+muxi run
+```
+
+You can interact with the API:
+
+```bash
+# Send a message to an agent
+curl -X POST http://localhost:5050/agents/assistant/messages \
+  -H "Content-Type: application/json" \
+  -d '{"content": "What is the capital of France?"}'
 ```
 
 ## Using MCP Servers
 
-To integrate external Model Context Protocol servers:
+To integrate external Model Context Protocol servers, add this to the `agent.yaml` file:
 
 ```yaml
 mcp_servers:
@@ -178,6 +216,7 @@ mcp_servers:
 ```
 
 For credentials, the framework will:
+
 1. First look for user-specific credentials in the database
 2. Then look for system-wide credentials in the database
 3. Finally, fall back to environment variables

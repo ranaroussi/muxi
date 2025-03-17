@@ -4,15 +4,16 @@ This document outlines the modular package structure of the MUXI framework and e
 
 ## Overview
 
-MUXI follows a modular monorepo structure internally, with three main installation options for users:
+MUXI follows a modular monorepo structure with these main packages:
 
 ```
-muxi/
+muxi-framework/
 ├── packages/
-│   ├── core/      # Core functionality and shared components
-│   ├── server/    # Server implementation
+│   ├── core/      # Core functionality: agents, memory, tools, LLM interface
+│   ├── server/    # Server implementation with API endpoints and WebSocket
 │   ├── cli/       # Command-line interface
-│   └── web/       # Web application
+│   ├── web/       # Web application
+│   └── muxi/      # Meta-package that integrates all components
 ├── examples/      # Cross-package examples
 ├── docs/          # Unified documentation
 ├── scripts/       # Build and release scripts
@@ -21,9 +22,9 @@ muxi/
 
 ## Installation Options
 
-There are three main installation options for MUXI:
+There are several installation options for MUXI:
 
-### 1. muxi (Base Framework)
+### 1. muxi (Complete Framework)
 
 The full framework including all components needed to run MUXI locally.
 
@@ -39,37 +40,7 @@ The full framework including all components needed to run MUXI locally.
 pip install muxi
 ```
 
-### 2. muxi-cli (CLI Client Only)
-
-A lightweight client for connecting to remote MUXI servers via command line.
-
-**Key components:**
-- Command-line interface
-- Remote server connections
-- Minimal dependencies
-- Interactive mode
-
-**Installed by:**
-```bash
-pip install muxi-cli
-```
-
-### 3. muxi-web (Web Client Only)
-
-The standalone web client for connecting to MUXI servers.
-
-**Key components:**
-- Web application frontend
-- Connection management UI
-- Chat interface
-- Agent configuration
-
-**Installed by:**
-```bash
-pip install muxi-web
-```
-
-## Development Setup
+### 2. Development Installation
 
 For development, install all packages in editable mode:
 
@@ -79,14 +50,25 @@ For development, install all packages in editable mode:
 
 This script installs all packages in development mode, allowing you to modify the code without reinstalling.
 
-## Internal Package Structure
+## Package Structure Details
 
-Internally, the MUXI framework consists of these packages:
+Each package has a standard structure:
 
-- **core**: Foundation package with abstractions, models, and client code
-- **server**: Server implementation with API, memory, and agent orchestration
-- **cli**: Command-line interface for interacting with MUXI
-- **web**: Web application for interacting with MUXI
+```
+packages/core/
+├── pyproject.toml     # Package configuration
+└── src/
+    └── muxi/
+        └── core/      # Core package code
+            ├── __init__.py
+            ├── agent.py
+            ├── memory.py
+            ├── mcp.py
+            └── tools/
+                ├── __init__.py
+                ├── base.py
+                └── ...
+```
 
 The dependencies follow this pattern:
 
@@ -110,21 +92,21 @@ When developing within the MUXI framework, use the following import patterns:
 ### Core Components
 ```python
 from muxi.core.agent import Agent
-from muxi.models.base import BaseModel
-from muxi.utils.id_generator import generate_id
+from muxi.core.memory import MemorySystem
+from muxi.core.mcp import MCPMessage
+from muxi.core.tools import Calculator, WebSearch
 ```
 
 ### Server Components
 ```python
 from muxi.server.config import config
-from muxi.server.memory import LongTermMemory
 from muxi.server.api.app import start_api
-from muxi.server.tools.calculator import Calculator
+from muxi.server.ws import WebSocketManager
 ```
 
 ### CLI Components
 ```python
-from muxi.cli.commands import run_chat
+from muxi.cli.commands import chat, run, send
 ```
 
 ### Web Components
@@ -140,14 +122,14 @@ To add a new package to the MUXI framework:
 2. Create the standard Python package structure:
    ```
    packages/new-package/
-   ├── setup.py
+   ├── pyproject.toml
    ├── README.md
    ├── src/
    │   └── muxi/
    │       └── new_module/
    │           └── __init__.py
    ```
-3. Define appropriate dependencies in `setup.py`
+3. Define appropriate dependencies in `pyproject.toml`
 4. Update the installation scripts
 
 ## Building and Publishing
@@ -155,6 +137,44 @@ To add a new package to the MUXI framework:
 Each package can be built and published to PyPI:
 
 ```bash
+# Build a specific package
+cd packages/core
+python -m build
+
 # Build all packages
-./scripts/build_all.sh
+# Use a script that iterates through all packages
 ```
+
+## Package Contents
+
+### Core Package
+The core package contains the foundational components:
+- `Agent`: Base class for AI agents
+- `MemorySystem`: Short-term and long-term memory implementations
+- `MCPHandler`: Model Context Protocol implementation
+- `Tool`: Base class for tool implementations
+
+### Server Package
+The server package provides:
+- REST API implementation
+- WebSocket server for real-time communication
+- Configuration management
+- Database connections
+
+### CLI Package
+The CLI package includes:
+- Interactive terminal-based chat interface
+- Command-line tools for managing agents
+- Server management commands
+
+### Web Package
+The web package contains:
+- React-based user interface
+- WebSocket client implementation
+- Configuration UI for agents and tools
+
+### Meta Package
+The `muxi` meta-package:
+- Provides a unified API
+- Handles dependencies across packages
+- Simplifies installation

@@ -1,48 +1,54 @@
-#!/usr/bin/env python3
+"""
+Basic usage example of the MUXI Framework.
 
-from src.core.orchestrator import Orchestrator
-from src.models.providers.openai import OpenAIModel
+This example demonstrates the simplest way to use the MUXI Framework.
+"""
 
-# Example demonstrating agent creation and usage
-if __name__ == "__main__":
+import asyncio
+import os
+
+from dotenv import load_dotenv
+
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.providers.openai import OpenAIModel
+
+
+# Load environment variables
+load_dotenv()
+
+
+async def main():
+    # Create an OpenAI model
+    model = OpenAIModel(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        model="gpt-4o",
+        temperature=0.7,
+    )
+
     # Create an orchestrator
     orchestrator = Orchestrator()
 
-    # Create weather-focused agent
-    orchestrator.create_agent(
-        agent_id="weather_agent",
-        model=OpenAIModel(model="gpt-4o", api_key="your-openai-key-here"),
-        system_message="You are a helpful assistant specialized in weather forecasts.",
-        description=(
-            "Expert in providing weather forecasts, current conditions, and answering "
-            "questions about climate and meteorology."
-        )
+    # Add a basic agent with default memory and no tools
+    orchestrator.add_agent(
+        agent_id="basic_agent",
+        system_message="You are a helpful AI assistant.",
+        model=model,
     )
 
-    # Create finance-focused agent
-    orchestrator.create_agent(
-        agent_id="finance_agent",
-        model=OpenAIModel(model="gpt-4o", api_key="your-openai-key-here"),
-        system_message="You are a helpful assistant specialized in finance and investments.",
-        description=(
-            "Expert in financial analysis, investment strategies, market trends, "
-            "stock recommendations, and personal finance advice."
-        )
+    # Chat with the agent
+    response = await orchestrator.process_message(
+        "Hello, who are you?",
+        agent_id="basic_agent",
     )
+    print(f"Agent: {response.content}")
 
-    # Demonstrate intelligent routing
-    print("\n=== Weather Query ===")
-    weather_response = orchestrator.chat("What's the weather like in New York today?")
-    print(f"Selected agent: {weather_response.agent_id}")
-    print(f"Response: {weather_response.response}")
+    # Continue the conversation
+    response = await orchestrator.process_message(
+        "What can you tell me about the MUXI Framework?",
+        agent_id="basic_agent",
+    )
+    print(f"Agent: {response.content}")
 
-    print("\n=== Finance Query ===")
-    finance_response = orchestrator.chat("How should I diversify my investment portfolio?")
-    print(f"Selected agent: {finance_response.agent_id}")
-    print(f"Response: {finance_response.response}")
 
-    # You can still specify an agent explicitly if needed
-    print("\n=== Explicit Agent Selection ===")
-    explicit_response = orchestrator.chat("Tell me about bonds.", agent_name="finance_agent")
-    print(f"Selected agent: {explicit_response.agent_id}")
-    print(f"Response: {explicit_response.response}")
+if __name__ == "__main__":
+    asyncio.run(main())

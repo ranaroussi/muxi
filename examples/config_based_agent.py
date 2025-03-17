@@ -1,62 +1,55 @@
 """
-Example of using the MUXI Framework with configuration files.
+Configuration-based agent example with the MUXI Framework.
 
-This example demonstrates how to create agents from configuration files,
-interact with them, and start the API server with minimal code.
+This example demonstrates how to create agents from YAML/JSON configuration files.
 """
 
+import asyncio
 from dotenv import load_dotenv
-from src import muxi
+from muxi import muxi
 
-# Load environment variables
-# This is useful for setting API keys and other credentials
-# that will be referenced in the configuration with ${ENV_VAR}
+# Load environment variables (including API keys)
 load_dotenv()
 
-# Create a MUXI instance
-# No need to provide database connection - it will be loaded automatically
-# from DATABASE_URL when an agent with long-term memory is created
-app = muxi()
+async def main():
+    # Create a new MUXI instance
+    app = muxi()
 
-# Add an agent from a YAML configuration file
-app.add_agent(
-    name="weather_assistant",
-    path="examples/configs/weather_agent.yaml"
-)
+    # Create an agent from a configuration file (YAML)
+    # This would be a file like:
+    # name: assistant
+    # system_message: You are a helpful AI assistant.
+    # model:
+    #   provider: openai
+    #   api_key: "${OPENAI_API_KEY}"
+    #   model: gpt-4o
+    #   temperature: 0.7
+    # memory:
+    #   buffer: 10
+    #   long_term: true
+    # tools:
+    # - enable_calculator
+    # - enable_web_search
+    await app.add_agent("assistant", "configs/assistant.yaml")
 
-# Add another agent from a JSON configuration file
-app.add_agent(
-    name="finance_assistant",
-    path="examples/configs/finance_agent.json"
-)
+    # You can also create an agent from a JSON file
+    # await app.add_agent("researcher", "configs/researcher.json")
 
-# Add domain knowledge for a specific user
-user_id = 123
-knowledge = {
-    "name": "Alice",
-    "age": 30,
-    "location": {"city": "New York", "country": "USA"},
-    "interests": ["AI", "programming", "music"],
-    "family": {"spouse": "Bob", "children": ["Charlie", "Diana"]}
-}
-app.add_user_domain_knowledge(user_id=user_id, knowledge=knowledge)
+    # Send a message to the agent and get the response
+    response = await app.chat("Hello, who are you?")
+    print(f"Agent: {response}")
 
-# --- Option 1: Interactive usage ---
+    # Continue the conversation with conversation memory
+    response = await app.chat("What can you help me with?")
+    print(f"Agent: {response}")
 
-# Chat with a specific agent (explicitly specifying the agent)
-response = app.chat("What's the weather in London?", agent_name="weather_assistant")
-print(f"Weather Assistant: {response}")
+    # Ask something that requires tool use
+    response = await app.chat("What is the square root of 144?")
+    print(f"Agent: {response}")
 
-# Chat without specifying the agent (orchestrator will select the appropriate agent)
-response = app.chat("What's the weather in my city?", user_id=user_id)
-print(f"Auto-selected Agent: {response}")
+    # Ask something that requires web search
+    response = await app.chat("What is the current weather in New York?")
+    print(f"Agent: {response}")
 
-# --- Option 2: Start a server ---
-
-# Uncomment to start the API server
-# app.start_server(port=5050)
-
-# --- Option 3: Start both API server and web UI ---
-
-# Uncomment to start both the API server and web UI
-# app.run()
+if __name__ == "__main__":
+    asyncio.run(main())
