@@ -17,7 +17,7 @@ import websockets
 class WebSocketClient:
     """Simple WebSocket client for interacting with the MUXI Framework."""
 
-    def __init__(self, base_url="ws://localhost:8000"):
+    def __init__(self, base_url="ws://localhost:5050"):
         """
         Initialize the WebSocket client.
 
@@ -43,6 +43,17 @@ class WebSocketClient:
         """
         self.agent_id = agent_id
         await self.ws.send(json.dumps({"type": "subscribe", "agent_id": agent_id}))
+        response = await self.ws.recv()
+        return json.loads(response)
+
+    async def set_user(self, user_id):
+        """
+        Set the user ID for this connection.
+
+        Args:
+            user_id: User ID for multi-user agents
+        """
+        await self.ws.send(json.dumps({"type": "set_user", "user_id": user_id}))
         response = await self.ws.recv()
         return json.loads(response)
 
@@ -73,25 +84,25 @@ class WebSocketClient:
                 data = json.loads(response)
 
                 # Handle different message types
-                if data.get("type") == "response":
-                    print(f"\nAgent: {data['message']}")
+                if data.get("type") == "message":
+                    print(f"\nAgent: {data.get('content', '')}")
                     if data.get("tools_used"):
                         print(f"Tools used: {', '.join(data['tools_used'])}")
 
-                elif data.get("type") == "agent_thinking":
-                    print("\nAgent is thinking...", end="", flush=True)
+                elif data.get("type") == "tool_start":
+                    print(f"\nUsing tool: {data.get('tool_name', '')}", flush=True)
 
-                elif data.get("type") == "agent_done":
-                    print(" done", flush=True)
+                elif data.get("type") == "tool_end":
+                    print(f"\nTool result: {data.get('result', '')}", flush=True)
 
                 elif data.get("type") == "error":
-                    print(f"\nError: {data['message']}")
+                    print(f"\nError: {data.get('message', '')}")
 
                 elif data.get("type") == "subscribed":
-                    print(f"\nSubscribed to agent: {data['agent_id']}")
+                    print(f"\nSubscribed to agent: {data.get('agent_id', '')}")
 
                 else:
-                    print(f"\nUnknown message: {data}")
+                    print(f"\nReceived: {data}")
 
             except websockets.exceptions.ConnectionClosed:
                 print("\nConnection closed")
@@ -107,6 +118,11 @@ class WebSocketClient:
 
         try:
             print("Enter messages to send to the agent (Ctrl+C to exit):")
+            print("Special commands:")
+            print("  /user <user_id>  - Set user ID (for multi-user agents)")
+            print("  /agent <agent_id> - Switch to a different agent")
+            print("  /exit - Exit the chat")
+
             while True:
                 # Use asyncio to read from stdin without blocking
                 line = await asyncio.get_event_loop().run_in_executor(
@@ -116,9 +132,21 @@ class WebSocketClient:
                 if not line:
                     continue
 
-                # Check for exit command
-                if line.lower() in ["exit", "quit", "bye"]:
+                # Check for commands
+                if line.lower() in ["/exit", "/quit", "/bye"]:
                     break
+
+                elif line.startswith("/user "):
+                    user_id = line[6:].strip()
+                    await self.set_user(user_id)
+                    print(f"Set user ID to: {user_id}")
+                    continue
+
+                elif line.startswith("/agent "):
+                    agent_id = line[7:].strip()
+                    await self.subscribe_to_agent(agent_id)
+                    print(f"Switched to agent: {agent_id}")
+                    continue
 
                 # Send message to agent
                 await self.send_message(line)
@@ -142,10 +170,13 @@ async def main():
 
     parser = argparse.ArgumentParser(description="WebSocket client example")
     parser.add_argument(
-        "--url", default="ws://localhost:8000", help="WebSocket URL (default: ws://localhost:8000)"
+        "--url", default="ws://localhost:5050", help="WebSocket URL (default: ws://localhost:5050)"
     )
     parser.add_argument(
-        "--agent", default="my_agent", help="Agent ID to connect to (default: my_agent)"
+        "--agent", default="assistant", help="Agent ID to connect to (default: assistant)"
+    )
+    parser.add_argument(
+        "--user", default=None, help="User ID for multi-user agents (default: None)"
     )
     args = parser.parse_args()
 
@@ -158,6 +189,10 @@ async def main():
 
         # Subscribe to agent
         await client.subscribe_to_agent(args.agent)
+
+        # Set user ID if provided
+        if args.user:
+            await client.set_user(args.user)
 
         # Start interactive chat
         await client.interactive_chat()
