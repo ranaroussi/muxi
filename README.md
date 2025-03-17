@@ -235,28 +235,7 @@ MUXI implements a hybrid protocol approach for optimal performance and flexibili
 - **Server-Sent Events (SSE)**: For streaming responses token-by-token
 - **WebSockets**: For multi-modal capabilities with bi-directional communication
 
-## Examples
-
-### Creating a Custom Agent
-
-```python
-from muxi.core import Agent, MemorySystem
-from muxi.core.tools import Calculator, WebSearch
-
-# Create a new agent with custom tools and memory
-agent = Agent(
-    agent_id="math_helper",
-    system_message="You are a helpful math assistant.",
-    tools=[Calculator(), WebSearch()],
-    memory=MemorySystem()
-)
-
-# Send a message to the agent
-response = await agent.process_message("What is the square root of 16?")
-print(response.content)  # Output: 4
-```
-
-### Working with Memory and Domain Knowledge
+## Working with Memory and Domain Knowledge
 
 ```python
 from muxi import muxi
