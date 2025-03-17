@@ -1,0 +1,78 @@
+# MUXI Framework - Service-Oriented Architecture Guidelines
+
+> These rules define how to work with the service-oriented architecture in the MUXI framework
+
+## Client-Server Model
+
+- Maintain a consistent API between local and remote modes
+- Implement connection management that handles failures gracefully
+- Support connection state persistence for resuming sessions
+- Ensure client components have minimal dependencies
+- Separate client logic from server implementation details
+- Provide clear feedback on connection status to users
+- Handle authentication transparently for the client consumer
+
+## Communication Protocols
+
+- Use standard HTTP for configuration and management API requests
+- Implement SSE (Server-Sent Events) for streaming responses
+  - Auto-close SSE connections after response completion
+  - Provide fallback for clients that don't support SSE
+- Use WebSockets only for multi-modal (Omni) capabilities
+  - Support connection via `app.open_socket()` and `socket.close()`
+  - Handle binary data for audio/video streams
+  - Implement efficient protocol for large data transfers
+- Ensure protocol selection is automatic based on the request type
+- Follow standard security practices for each protocol
+
+## API Authentication
+
+- Use API key authentication for all server connections
+- Support auto-generated keys with one-time display
+- Allow keys to be configured via environment variables
+- Implement key rotation capabilities
+- Provide clear error messages for authentication failures
+- Follow security best practices for key storage and transmission
+- Support scoped keys with limited permissions (future)
+
+## Modular Packaging
+
+- Structure codebase into distinct packages:
+  - muxi-core: Essential shared components
+  - muxi-server: Full server implementation
+  - muxi-cli: Command-line interface
+  - muxi-web: Web application interface
+- Minimize cross-dependencies between packages
+- Design for optional installation of components
+- Ensure consistent versioning across packages
+- Provide clear documentation for each package
+- Support upgrading individual components
+
+## MCP Server Integration
+
+- Design all tools as MCP servers for consistency
+- Create adapters for local Python tools when needed
+- Implement service discovery for MCP servers
+- Support both local and remote MCP servers
+- Use standardized error handling across all servers
+- Ensure secure communication between components
+- Document interfaces for third-party MCP servers
+
+## Configuration
+
+- Extend YAML/JSON schemas for the new architecture
+- Maintain backward compatibility with existing configurations
+- Provide clear migration path for older configurations
+- Support both local and remote server configurations
+- Include protocol-specific settings in configuration
+- Document all configuration options thoroughly
+
+## Error Handling
+
+- Implement comprehensive error handling for network issues
+- Provide clear error messages for connection problems
+- Support automatic reconnection with exponential backoff
+- Log detailed diagnostics for troubleshooting
+- Handle partial responses gracefully
+- Ensure errors propagate with appropriate context
+- Support graceful degradation when services are unavailable
