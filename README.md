@@ -19,6 +19,58 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 - **Command Line Interface**: Rich terminal-based interface for creating and interacting with agents
 - **Reliable Message Handling**: Robust error handling and automatic reconnection mechanisms
 - **Declarative Configuration**: Define agents using YAML or JSON files with minimal code
+- **Flexible Deployment**: Run locally or connect to remote MUXI servers
+- **Hybrid Communication Protocol**: HTTP for standard requests, SSE for streaming, WebSockets for multi-modal
+- **Modular Packaging**: Install only the components you need
+
+## Architecture
+
+### Current Architecture
+
+![Architecture Diagram](docs/assets/images/muxi-overview.webp)
+
+### Target Architecture
+
+MUXI is evolving towards a more flexible, service-oriented approach:
+
+```
+┌───────────────┐                     ┌───────────────┐
+│ MUXI Local/   │◄──API Calls/SSE/WS──┤ Thin Clients  │
+│ Remote Client │                     │ (CLI/Web/SDK) │
+└───────┬───────┘                     └───────────────┘
+        │
+        │ (Local or Remote APIs)
+        ▼
+┌─────────────────────────────────────────────────────┐
+│                     MUXI Server                     │
+│                                                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │  Agent 1    │  │  Agent 2    │  │  Agent N    │  │
+│  │ (from YAML) │  │ (from JSON) │  │ (from YAML) │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
+│         │                │                │         │
+│         └────────┬───────┴────────┬───────┘         │
+│                  │                │                 │
+│           ┌──────┴──────┐  ┌──────┴──────┐          │
+│           │ Orchestrator│  │  Memory     │          │
+│           └──────┬──────┘  └─────────────┘          │
+│                  │                                  │
+│           ┌──────┴──────┐                           │
+│           │ MCP Servers │                           │
+│           └─────────────┘                           │
+└─────────────────────────────────────────────────────┘
+        │
+        │ (gRPC/HTTP)
+        ▼
+┌─────────────────────────────────────────────────────┐
+│                 External MCP Servers                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │ Weather API │  │ Search Tool │  │ Custom Tool │  │
+│  └─────────────┘  └─────────────┘  └─────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+This evolution preserves the current programmatic API while adding powerful capabilities for distributed deployment. For more details, see [ARCHITECTURE_EVOLUTION.md](ARCHITECTURE_EVOLUTION.md).
 
 ## Intelligent Message Routing
 
@@ -109,68 +161,31 @@ tools:
 - enable_web_search
 ```
 
-### Code-based Approach (Traditional)
+### Remote Server Connection (New)
 
-For more control, you can use the code-based approach:
+Connect to an existing MUXI server:
 
 ```python
-from src.core.orchestrator import Orchestrator
-from src.models.openai import OpenAIModel
-from src.memory.buffer import BufferMemory
-from src.memory.long_term import LongTermMemory
-from src.memory.memobase import Memobase
+from src import muxi
 
-# Create an orchestrator to manage agents
-orchestrator = Orchestrator()
-
-# Create a basic agent with buffer memory
-orchestrator.create_agent(
-    agent_id="assistant",
-    model=OpenAIModel(model="gpt-4o"),
-    buffer_memory=BufferMemory(),
-    system_message="You are a helpful AI assistant."
+# Connect to a remote MUXI server
+app = muxi(
+    server_url="http://server-ip:5050",
+    api_key="your_api_key"
 )
 
-# Create an agent with long-term memory
-long_term_memory = LongTermMemory()
-orchestrator.create_agent(
-    agent_id="researcher",
-    model=OpenAIModel(model="gpt-4o"),
-    buffer_memory=BufferMemory(),
-    long_term_memory=long_term_memory,
-    system_message="You are a helpful research assistant."
-)
-
-# Create an agent with multi-user support
-# Memobase extends LongTermMemory with multi-user capabilities
-memobase = Memobase(long_term_memory=LongTermMemory())
-orchestrator.create_agent(
-    agent_id="multi_user_assistant",
-    model=OpenAIModel(model="gpt-4o"),
-    buffer_memory=BufferMemory(),
-    long_term_memory=memobase,  # Pass Memobase as long_term_memory
-    system_message="You are a helpful assistant that supports multiple users."
-)
-
-# Add domain knowledge for a specific user
-user_id = 123
-knowledge = {
-    "name": "Alice",
-    "age": 30,
-    "location": {"city": "New York", "country": "USA"},
-    "interests": ["AI", "programming", "music"],
-    "family": {"spouse": "Bob", "children": ["Charlie", "Diana"]}
-}
-await memobase.add_user_domain_knowledge(user_id=user_id, knowledge=knowledge)
-
-# Chat with a regular agent
-response = orchestrator.chat("assistant", "Hello, can you help me with a Python question?")
+# Use the same API
+response = app.chat("Hello, remote assistant!")
 print(response)
 
-# Chat with a multi-user agent (specify user_id)
-# The agent will automatically enhance the message with domain knowledge
-response = orchestrator.chat("multi_user_assistant", "What are my interests?", user_id=123)
-print(response)  # The response will reference the user's interests from domain knowledge
+# Streaming responses via SSE
+for chunk in app.chat("Tell me a story", stream=True):
+    print(chunk, end="", flush=True)
+
+# Multi-modal capabilities via WebSockets
+socket = app.open_socket()
+await socket.send_message("Process this image", images=["path/to/image.jpg"])
+await socket.close()
 ```
 
 ## Using the Command Line Interface
@@ -202,9 +217,26 @@ After installing the package, you can use the `muxi` command instead:
 muxi chat --agent-id assistant
 ```
 
-## Architecture
+## Communication Protocols
 
-![Architecture Diagram](docs/assets/images/muxi-overview.webp)
+MUXI implements a hybrid protocol approach for optimal performance and flexibility:
+
+### Standard HTTP
+- Used for all API requests like configuration and management
+- RESTful API design with clear endpoint structure
+- Standard authentication via headers
+
+### Server-Sent Events (SSE)
+- Used for streaming responses during chat/generation
+- Real-time token-by-token streaming
+- Connection automatically closes after response completion
+- Higher scalability than persistent WebSocket connections
+
+### WebSockets
+- Used for multi-modal capabilities (Omni features)
+- Bi-directional communication for audio/video
+- Persistent connections for continuous interaction
+- Available through the `app.open_socket()` API
 
 ## Using the REST API
 

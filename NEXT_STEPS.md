@@ -243,6 +243,66 @@ Transform agents into omni agents capable of handling various media types:
 - [ ] Set up automated release pipeline
 - [x] Automated test environment setup to handle API key loading
 
+### 13. Architecture Evolution
+
+Implementing the service-oriented architecture described in ARCHITECTURE_EVOLUTION.md:
+
+#### Core Architecture Refactoring
+- [ ] Separate local mode from server mode
+- [ ] Create unified server component
+- [ ] Ensure programmatic API remains backward compatible
+- [ ] Implement flexible API key authentication
+  - [ ] Support auto-generated keys with one-time display
+  - [ ] Allow environment variable configuration
+  - [ ] Add explicit auth configuration options
+- [ ] Implement client-side connector for remote servers
+- [ ] Create connection management utilities
+- [ ] Update facade to handle local and remote operation
+- [ ] Ensure connection state persistence
+
+#### Communication Protocol
+- [ ] Implement standard HTTP for all API requests
+- [ ] Add SSE (Server-Sent Events) support for streaming responses
+  - [ ] Implement auto-closing SSE connections when responses complete
+  - [ ] Add fallback for unsupported clients
+- [ ] Enable WebSocket support for Omni capabilities
+  - [ ] Create WebSocket session management API (open_socket/close)
+  - [ ] Support multi-modal streaming over WebSockets
+  - [ ] Implement binary data handling for audio/video
+
+#### Packaging Strategy
+- [ ] Structure the codebase for modular packaging:
+  - [ ] muxi-core: Core functionality and shared components
+  - [ ] muxi-server: Server implementation
+  - [ ] muxi-cli: Command-line interface
+  - [ ] muxi-web: Web application
+- [ ] Setup installation options:
+  - [ ] Full installation (all components)
+  - [ ] Minimal CLI for working with remote servers only
+  - [ ] Standalone web app for connecting to remote servers
+- [ ] Create package.json files with appropriate dependencies
+- [ ] Setup build pipeline for each package
+
+#### MCP Server Unification
+- [ ] Refactor tool system to be MCP server based
+- [ ] Create adapters for local Python tools
+- [ ] Update tool registry to handle remote services
+- [ ] Implement service discovery
+- [ ] Extend YAML/JSON schemas for new architecture
+- [ ] Create migration utilities for existing configurations
+- [ ] Add utilities for spinning up MCP servers
+
+#### Client Applications
+- [ ] Update CLI to support server connections
+- [ ] Add commands for managing remote servers
+- [ ] Implement connection profiles
+- [ ] Convert web UI to standalone SPA
+- [ ] Add server connection screen
+- [ ] Implement connection state management
+- [ ] Create settings for managing multiple servers
+- [ ] Update Python SDK for remote operation
+- [ ] Create client libraries for other languages
+
 ## Contribution Guidelines
 
 Guidelines for contributing to the framework:
@@ -346,3 +406,40 @@ This scenario demonstrates a complete workflow from installation to running an a
    ```
 
 This approach significantly reduces the amount of code needed while providing powerful configuration options through YAML or JSON files.
+
+### Client-Server Connection
+This scenario demonstrates connecting to a remote MUXI server:
+
+1. **Install the Client Library**
+   ```bash
+   # Install just the client component
+   pip install muxi-cli
+   ```
+
+2. **Connect to a Remote Server**
+   ```python
+   from muxi import muxi
+
+   # Connect to an existing MUXI server
+   app = muxi(
+       server_url="http://server-ip:5050",
+       api_key="sk_muxi_abc123"
+   )
+
+   # Use the same API as with local mode
+   app.add_agent("remote_assistant", "configs/assistant.yaml")
+   response = app.chat("Hello, remote assistant!")
+   print(response)
+   ```
+
+3. **Use Streaming Responses**
+   ```python
+   # Streaming - yields chunks as they arrive via SSE
+   for chunk in app.chat("Tell me a short story", stream=True):
+       print(chunk, end="", flush=True)
+
+   # Using WebSockets for multi-modal capabilities
+   socket = app.open_socket()
+   await socket.send_message("Process this image", images=["path/to/image.jpg"])
+   await socket.close()
+   ```

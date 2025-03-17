@@ -1,112 +1,185 @@
 ---
 layout: default
 title: Architecture
-parent: Getting Started
+parent: Core Concepts
 has_children: false
-nav_order: 3
-permalink: /architecture/
+nav_order: 1
 ---
-# Architecture
 
-The MUXI framework consists of several core components that work together to provide a flexible and powerful agent-based system.
+# MUXI Architecture
 
-## Architecture Diagram
+The MUXI framework is designed with a modular, extensible architecture that allows for flexibility in deployment and usage. This document outlines the current architecture and the evolution towards a more service-oriented approach.
 
-```mermaid
-%%{init: {"theme":"light", "flowchart": {"defaultRenderer": "elk"}} }%%
-flowchart TB
-    subgraph Interfaces["Interfaces"]
-        REST["REST&nbsp;API"]
-        WS["&nbsp;WebSocket&nbsp;"]
-        APP["&nbsp;Web&nbsp;App&nbsp;"]
-        CLI["&nbsp;CLI&nbsp;"]
-    end
-    subgraph MS["Memory"]
-        Buffer["FAISS&nbsp;(ST)"]
-        PGSQL["PGVector&nbsp;(LT)"]
-        MBASE["Memobase"]
-    end
-    subgraph LE["LLM Engines"]
-        LLM["Open AI"]
-        Grok["Anthropic"]
-        Ollama["Ollama"]
-    end
-    subgraph Tools["Tools"]
-        BuiltIn["Built-in<br>Files,&nbsp;Search,&nbsp;etc."]
-        Custom["Custom<br>User&nbsp;Generated"]
-    end
-    subgraph MUXI["<b><big>MUXI</big></b>"]
-        Server["Server"]
-        Orchestrator["Orchestrator"]
-        Agent["Agent&nbsp;1"]
-        Agent2["Agent&nbsp;N"]
-        AgentN["Agent&nbsp;2"]
-        MCP["MCP&nbsp;Handler"]
-        MS
-        LE
-        Tools
-    end
-    REST --> Server
-    WS --> Server
-    APP --> Server
-    CLI --> Server
-    Server -- &nbsp;Forwards Request&nbsp; --> Orchestrator
-    Orchestrator -- &nbsp;Routes&nbsp; --> Agent & Agent2 & AgentN
-    Agent -- Uses --> LLM
-    Agent -- &nbsp; &nbsp; &nbsp;Execute&nbsp; &nbsp; &nbsp; --> Tools
-    Agent -- &nbsp;Accesses&nbsp; --> MS
-    LLM <-- &nbsp;Communicates&nbsp; --> MCP
-    LLM <-- &nbsp;Executes&nbsp; --> Tools
-    MCP -- &nbsp;Executes&nbsp; --> MCP2[MCP&nbsp;Servers]
-    PGSQL -- &nbsp;Profiles&nbsp; --- MBASE
+## Current Architecture
 
-    %% style APP fill:#ff6602,color:#fff,stroke:#e0085f
-    style LLM fill:#bfb,stroke:#4f8f00
-    style Server fill:#bfb,stroke:#4f8f00
-    style Orchestrator fill:#bfb,stroke:#4f8f00
-    style Agent fill:#bfb,stroke:#4f8f00
-    style MCP fill:#bfb,stroke:#4f8f00
-    style MUXI fill:#fff,stroke:#4f8f00,stroke-width:2px,stroke-dasharray:5
-    style MS fill:#fff,stroke:#808080,stroke-dasharray:5
-    style LE fill:#fff,stroke:#808080,stroke-dasharray:5
+MUXI is built around several core components that work together to provide a complete AI agent framework:
+
+```
+┌───────────────┐      ┌───────────┐      ┌───────────┐
+│  Application  │──────│  Agents   │──────│    LLM    │
+└───────┬───────┘      └─────┬─────┘      └───────────┘
+        │                    │
+        │              ┌─────┴─────┐
+        │              │  Memory   │
+        │              └─────┬─────┘
+┌───────┴───────┐      ┌─────┴─────┐
+│  CLI/API/Web  │──────│   Tools   │
+└───────────────┘      └───────────┘
 ```
 
-## Component Descriptions
+### Core Components
 
-### User Interfaces
-- **REST API**: HTTP endpoints for agent management and communication
-- **WebSocket**: Real-time bidirectional communication for streaming responses
-- **Web App**: Browser-based interface for interacting with agents
-- **CLI**: Command-line interface for local agent interaction
+1. **Model Context Protocol (MCP)**: Standardized communication layer with LLMs
+   - Provides consistent interfaces for different LLM providers
+   - Handles message formatting and processing
 
-### Core Framework
-- **Server**: Handles incoming requests from different interfaces
-- **Orchestrator**: Manages multiple agents and their interactions
-- **Agents**: Autonomous entities that process requests using models, memory, and tools
-- **MCP Handler**: Model Context Protocol for standardized communication with LLM providers
+2. **Memory System**: Stores conversation history and knowledge
+   - Buffer memory for short-term context
+   - Long-term memory for persistent storage
+   - Memobase for multi-user support
+   - Domain knowledge for structured information
 
-### Memory Systems
-- **FAISS (ST)**: Short-term buffer memory using vector embeddings
-- **PGVector (LT)**: Long-term persistent memory using PostgreSQL with vector extensions
-- **Memobase**: User-aware memory partitioning for multi-tenant applications
+3. **Tool System**: Extends agent capabilities
+   - Provides a registry for tools
+   - Handles tool execution and results
 
-### LLM Engines
-- **OpenAI**: Integration with OpenAI models (GPT-4, etc.)
-- **Anthropic**: Integration with Anthropic models (Claude, etc.)
-- **Ollama**: Support for local models via Ollama
+4. **Agents**: Core entities that combine LLMs with memory and tools
+   - Process user messages
+   - Generate responses
+   - Execute tools when needed
 
-### Tools
-- **Built-in Tools**: File operations, web search, calculator, etc.
-- **Custom Tools**: User-created tools to extend agent capabilities
+5. **Orchestrator**: Manages multiple agents
+   - Routes messages to appropriate agents
+   - Facilitates inter-agent communication
+   - Manages agent lifecycle
 
-## Data Flow
+6. **Interfaces**: Multiple ways to interact with the framework
+   - CLI for terminal-based interactions
+   - API for programmatic access
+   - Web UI for visual interaction
+   - WebSocket for real-time communication
 
-1. User requests come in through one of the interfaces (REST, WebSocket, Web App, CLI)
-2. Server forwards requests to the Orchestrator
-3. Orchestrator directs requests to the appropriate Agent
-4. Agent processes requests using:
-   - LLM for generating responses
-   - Memory for context and persistence
-   - Tools for performing actions
-5. MCP Handler standardizes communication between the framework and LLM providers
-6. Responses are sent back through the original interface
+## Evolution to Service-Oriented Architecture
+
+The MUXI framework is evolving towards a more flexible, service-oriented approach that enables distributed deployment while maintaining simplicity and ease of use.
+
+### Target Architecture
+
+```
+┌───────────────┐                     ┌───────────────┐
+│ MUXI Local/   │◄────API Calls/SSE/WS┤ Thin Clients  │
+│ Remote Client │                     │ (CLI/Web/SDK) │
+└───────┬───────┘                     └───────────────┘
+        │
+        │ (Local or Remote APIs)
+        ▼
+┌─────────────────────────────────────────────────────┐
+│                     MUXI Server                     │
+│                                                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │  Agent 1    │  │  Agent 2    │  │  Agent N    │  │
+│  │ (from YAML) │  │ (from JSON) │  │ (from YAML) │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
+│         │                │                │         │
+│         └────────┬───────┴────────┬───────┘         │
+│                  │                │                 │
+│           ┌──────┴──────┐  ┌──────┴──────┐          │
+│           │ Orchestrator│  │  Memory     │          │
+│           └──────┬──────┘  └─────────────┘          │
+│                  │                                  │
+│           ┌──────┴──────┐                           │
+│           │ MCP Servers │                           │
+│           └─────────────┘                           │
+└─────────────────────────────────────────────────────┘
+        │
+        │ (gRPC/HTTP)
+        ▼
+┌─────────────────────────────────────────────────────┐
+│                 External MCP Servers                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │ Weather API │  │ Search Tool │  │ Custom Tool │  │
+│  └─────────────┘  └─────────────┘  └─────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+### Key Architectural Changes
+
+1. **Client-Server Model**
+   - Separate client and server components
+   - Local and remote operation with the same API
+   - Flexible authentication mechanisms
+   - Connection management utilities
+
+2. **Modular Packaging**
+   - Core package with minimal dependencies
+   - Server package with full capabilities
+   - CLI package for remote connections
+   - Web package for browser-based access
+
+3. **Hybrid Communication Protocol**
+   - HTTP for standard API requests
+   - SSE (Server-Sent Events) for streaming responses
+     - Real-time token-by-token streaming
+     - Automatic connection closure after response completion
+   - WebSockets for multi-modal capabilities (Omni features)
+     - Bi-directional communication for audio/video
+     - Available through `app.open_socket()` API
+
+4. **Authentication Implementation**
+   - API key authentication
+   - Auto-generated keys with one-time display
+   - Environment variable configuration
+
+5. **MCP Server Unification**
+   - Tool system based on MCP servers
+   - Adapters for local Python tools
+   - Service discovery mechanisms
+   - Deployment utilities
+
+### Client Usage
+
+```python
+# Local usage (unchanged)
+app = muxi()
+
+# Remote usage
+app = muxi(
+    server_url="http://server-ip:5050",
+    api_key="your_api_key"
+)
+
+# Streaming responses via SSE
+for chunk in app.chat("Tell me a story", stream=True):
+    print(chunk, end="", flush=True)
+
+# Multi-modal capabilities via WebSockets
+socket = app.open_socket()
+await socket.send_message("Process this image", images=["path/to/image.jpg"])
+await socket.close()
+```
+
+## Implementation Strategy
+
+The evolution to the service-oriented architecture will be implemented in phases:
+
+1. **Core Architecture Refactoring**
+   - Separate local mode from server mode
+   - Implement authentication framework
+   - Create client-side connector
+
+2. **MCP Server Unification**
+   - Refactor tool system to MCP-based approach
+   - Update configuration schemas
+   - Create tool adapters
+
+3. **Client Applications**
+   - Update CLI interface
+   - Modify web app for standalone use
+   - Create client libraries
+
+4. **Packaging and Distribution**
+   - Restructure for modular packaging
+   - Set up CI/CD for package publishing
+   - Create package-specific documentation
+
+For a detailed implementation roadmap, see [ARCHITECTURE_EVOLUTION.md](../ARCHITECTURE_EVOLUTION.md) and the [roadmap](roadmap.md).

@@ -18,6 +18,9 @@ This document outlines the high-level strategic vision and planned future develo
 - Finalize REST API specification ✅
 - Implement WebSocket communication ✅
 - Add user-specific domain knowledge support ✅
+- Implement service-oriented architecture
+- Create client-server model for remote operation
+- Add support for hybrid communication protocol (HTTP/SSE/WebSockets)
 
 ## Medium-term Goals
 
@@ -26,6 +29,8 @@ This document outlines the high-level strategic vision and planned future develo
 - Add advanced memory persistence ✅
 - Develop more sophisticated built-in tools
 - Create comprehensive documentation
+- Implement modular packaging strategy
+- Develop client libraries for multiple languages
 
 ## Long-term Vision
 
@@ -36,6 +41,40 @@ This document outlines the high-level strategic vision and planned future develo
 - Develop managed SaaS offering
 
 ## Planned Features
+
+### Service-Oriented Architecture
+
+Transform the framework into a flexible, distributed system:
+
+- **Client-Server Model**
+  - Local and remote operation with the same API
+  - Flexible authentication mechanisms
+  - Connection management utilities
+  - Support for multiple connection profiles
+
+- **Modular Packaging**
+  - Core package with minimal dependencies
+  - Server package with full capabilities
+  - CLI package for remote connections
+  - Web package for browser-based access
+  - Installation options for different use cases
+
+- **Hybrid Communication Protocol**
+  - HTTP for standard API requests
+  - SSE (Server-Sent Events) for streaming responses
+  - WebSockets for multi-modal and continuous interactions
+
+- **Authentication Implementation**
+  - API key authentication
+  - Auto-generated keys with one-time display
+  - Environment variable configuration
+  - Explicit auth configuration options
+
+- **MCP Server Unification**
+  - Tool system based on MCP servers
+  - Adapters for local Python tools
+  - Service discovery mechanisms
+  - Deployment utilities
 
 ### Multi-Modal Agent Capabilities
 
@@ -134,6 +173,8 @@ Develop a comprehensive Docker image strategy:
 - Built-in testing utilities for MCP servers
 - Documentation generator for MCP servers
 - MCP server validation tools
+- Connection utilities for remote server development
+- Client libraries for multiple programming languages
 
 ### Deployment and Operations
 
@@ -170,6 +211,16 @@ We welcome community input on prioritization of these roadmap items. Please open
 - Simplified configuration-based API ✅
 - Comprehensive configuration documentation ✅
 
+### v0.3.0 (Next)
+- Service-oriented architecture
+- Client-server model
+- Hybrid communication protocol (HTTP/SSE/WebSockets)
+- Flexible authentication mechanisms
+- Initial modular packaging
+- Client connector for remote servers
+- WebSocket support for Omni capabilities
+- Enhanced CLI with remote connection support
+
 ### v1.0.0
 - Production-ready release
 - Complete documentation
@@ -181,6 +232,8 @@ We welcome community input on prioritization of these roadmap items. Please open
 - Interactive MCP server generator ✅
 - Developer tooling for MCP server creation ✅
 - Initial multi-modal capabilities (image and audio support)
+- Complete modular packaging with standalone components
+- Client libraries for multiple programming languages
 
 ### v1.5.0
 - Advanced multi-modal capabilities

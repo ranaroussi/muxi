@@ -16,6 +16,7 @@ This document tracks the progress of the MUXI documentation. It shows which docu
 - [x] [Quick Start Guide](../quickstart)
 - [x] [Architecture](../architecture)
 - [ ] Installation & Setup
+- [x] [Architecture Evolution](../ARCHITECTURE_EVOLUTION.md)
 
 ## 2. Core Concepts
 - **Agents & Orchestration**
@@ -67,6 +68,12 @@ This document tracks the progress of the MUXI documentation. It shows which docu
   - [ ] Overview
   - [ ] User Management
   - [ ] Memory Partitioning
+- **Service-Oriented Architecture**
+  - [x] [Client-Server Model](../ARCHITECTURE_EVOLUTION.md#core-architecture-changes)
+  - [x] [Hybrid Communication Protocol](../ARCHITECTURE_EVOLUTION.md#communication-protocol)
+  - [x] [Authentication](../ARCHITECTURE_EVOLUTION.md#authentication-implementation-details)
+  - [x] [Streaming Responses](../ARCHITECTURE_EVOLUTION.md#streaming-response-example)
+  - [x] [WebSocket for Omni Capabilities](../ARCHITECTURE_EVOLUTION.md#websocket-support-for-omni-capabilities)
 
 ## 5. Reference
 - [ ] API Reference
@@ -93,3 +100,4 @@ This document tracks the progress of the MUXI documentation. It shows which docu
 - [Tool System](tools.md)
 - [Model Context Protocol (MCP)](mcp.md)
 - [Multi-Modal Capabilities](multi-modal.md)
+- [Architecture Evolution](../ARCHITECTURE_EVOLUTION.md)
