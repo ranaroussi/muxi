@@ -1,7 +1,7 @@
 {
     "name": "finance_assistant",
     "description": "Expert in financial analysis, investment strategies, market trends, stock recommendations, and personal finance advice. Can perform calculations and analyze financial data.",
-    "system_message": "You are a helpful assistant specialized in finance and investments. Use the Calculator tool for financial calculations.",
+    "system_message": "You are a helpful assistant specialized in finance and investments. Use the Calculator API for financial calculations.",
     "model": {
         "provider": "openai",
         "api_key": "${OPENAI_API_KEY}",
@@ -12,10 +12,18 @@
         "buffer": 15,
         "long_term": true
     },
-    "tools": [
-        "enable_calculator"
-    ],
     "mcp_servers": [
+        {
+            "name": "calculator",
+            "url": "http://localhost:5001",
+            "credentials": [
+                {
+                    "id": "calc_api_key",
+                    "param_name": "api_key",
+                    "required": false
+                }
+            ]
+        },
         {
             "name": "stock_data",
             "url": "http://localhost:5002",

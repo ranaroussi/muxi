@@ -9,15 +9,15 @@ MCP servers, and starting the API server with minimal code.
 import os
 from typing import Any, Dict, List, Optional
 
+from loguru import logger
+
+from muxi.core.agent import Agent
 from muxi.core.orchestrator import Orchestrator
+from muxi.models.providers.openai import OpenAIModel
 from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.server.memory.memobase import Memobase
-from muxi.models import OpenAIModel
-from muxi.server.tools.calculator import Calculator
-from muxi.server.tools.web_search import WebSearch
-
-from .config_loader import ConfigLoader
+from muxi.config_loader import ConfigLoader
 from .credential_manager import CredentialManager
 
 
@@ -124,22 +124,23 @@ class Muxi:
         memory_config = config.get("memory", {})
         buffer_memory, long_term_memory = self._create_memory_systems(memory_config)
 
-        # Create the tools
-        tools = self._create_tools(config.get("tools", []))
-
         # Extract description or use system message as fallback
         description = config.get("description", config.get("system_message", ""))
 
         # Create the agent
-        self.orchestrator.create_agent(
+        agent = self.orchestrator.create_agent(
             agent_id=name,
             model=model,
             buffer_memory=buffer_memory,
             long_term_memory=long_term_memory,
-            tools=tools,
             system_message=config.get("system_message", ""),
             description=description
         )
+
+        # Connect MCP servers if specified
+        mcp_servers = config.get("mcp_servers", [])
+        if mcp_servers:
+            self._connect_mcp_servers(agent, mcp_servers)
 
     def _create_model(self, model_config: Dict[str, Any]) -> Any:
         """
@@ -178,24 +179,18 @@ class Muxi:
         Returns:
             tuple: (buffer_memory, long_term_memory)
         """
-        # Create buffer memory - always enabled with configurable window size
-        buffer_config = memory_config.get("buffer", {})
-        buffer_memory = BufferMemory(
-            max_size=buffer_config.get("window_size", 5)
-        )
+        # Create buffer memory
+        buffer_size = memory_config.get("buffer", 10)
+        buffer_memory = BufferMemory(buffer_size=buffer_size)
 
         # Create long-term memory if enabled
-        long_term_config = memory_config.get("long_term", {})
         long_term_memory = None
-
-        if long_term_config.get("enabled", False):
-            # Get connection string only when needed and verify it exists
+        if memory_config.get("long_term", False):
+            # Get database connection string
             connection_string = self._get_connection_string(required=True)
 
-            # Create the long-term memory
-            long_term_memory = LongTermMemory(
-                connection_string=connection_string
-            )
+            # Create long-term memory with database connection
+            long_term_memory = LongTermMemory(connection_string=connection_string)
 
             # Always wrap with Memobase for multi-user support
             # (will use user_id=0 when none provided for backwards compatibility)
@@ -203,28 +198,40 @@ class Muxi:
 
         return buffer_memory, long_term_memory
 
-    def _create_tools(self, tool_list: List[str]) -> List[Any]:
+    def _connect_mcp_servers(self, agent: Agent, mcp_servers: List[Dict[str, Any]]) -> None:
         """
-        Create tools from the configuration.
+        Connect MCP servers to an agent.
 
         Args:
-            tool_list: List of tool identifiers
-
-        Returns:
-            List[Any]: List of tool instances
+            agent: The agent to connect MCP servers to
+            mcp_servers: List of MCP server configurations
         """
-        tools = []
+        for server in mcp_servers:
+            name = server.get("name")
+            url = server.get("url")
+            credentials = server.get("credentials", [])
 
-        # Add built-in tools based on configuration
-        if "enable_calculator" in tool_list:
-            tools.append(Calculator())
+            if name and url:
+                # Process credentials
+                processed_credentials = {}
+                for cred in credentials:
+                    cred_id = cred.get("id")
+                    param_name = cred.get("param_name")
+                    required = cred.get("required", False)
+                    env_fallback = cred.get("env_fallback")
 
-        if "enable_web_search" in tool_list:
-            tools.append(WebSearch())
+                    # Try to get credential from environment if fallback is specified
+                    if env_fallback and env_fallback in os.environ:
+                        processed_credentials[param_name] = os.environ[env_fallback]
+                    elif required:
+                        logger.warning(
+                            f"Required credential {cred_id} for MCP server {name} not found"
+                        )
 
-        # TODO: Add support for custom tools
-
-        return tools
+                # Connect MCP server to agent
+                agent.connect_mcp_server(name, url, processed_credentials)
+            else:
+                logger.warning("Invalid MCP server configuration: missing name or url")
 
     async def chat(
         self,

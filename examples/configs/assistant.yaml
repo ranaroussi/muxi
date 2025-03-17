@@ -10,6 +10,17 @@ model:
 memory:
   buffer: 10
   long_term: true
-tools:
-- enable_calculator
-- enable_web_search
+mcp_servers:
+- name: calculator
+  url: http://localhost:5001
+  credentials:
+  - id: calc_api_key
+    param_name: api_key
+    required: false
+- name: web_search
+  url: http://localhost:5002
+  credentials:
+  - id: search_api_key
+    param_name: api_key
+    required: true
+    env_fallback: SEARCH_API_KEY

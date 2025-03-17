@@ -2,7 +2,7 @@
 name: weather_assistant
 description: "Specialized in providing weather forecasts, answering questions about climate and weather phenomena, and reporting current conditions in various locations worldwide."
 system_message: You are a helpful assistant that can check the weather. Use the Weather
-  tool when asked about weather conditions.
+  API when asked about weather conditions.
 model:
   provider: openai
   api_key: "${OPENAI_API_KEY}"
@@ -11,9 +11,6 @@ model:
 memory:
   buffer: 10
   long_term: true
-tools:
-- enable_calculator
-- enable_web_search
 mcp_servers:
 - name: weather
   url: http://localhost:5001
@@ -22,3 +19,10 @@ mcp_servers:
     param_name: api_key
     required: true
     env_fallback: WEATHER_API_KEY
+- name: web_search
+  url: http://localhost:5002
+  credentials:
+  - id: search_api_key
+    param_name: api_key
+    required: true
+    env_fallback: SEARCH_API_KEY

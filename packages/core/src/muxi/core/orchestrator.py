@@ -18,7 +18,6 @@ from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.models.base import BaseModel
 from muxi.models.providers.openai import OpenAIModel
-from muxi.server.tools.base import BaseTool, ToolRegistry
 
 
 class Orchestrator:
@@ -35,8 +34,6 @@ class Orchestrator:
         self.agents: Dict[str, Agent] = {}
         self.agent_descriptions: Dict[str, str] = {}
         self.default_agent_id: Optional[str] = None
-        self.tool_registry = ToolRegistry()
-        self.routing_model = None
         self._routing_cache: Dict[str, str] = {}
 
         # Initialize the routing model if needed
@@ -91,7 +88,6 @@ class Orchestrator:
         memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
-        tools: Optional[List[BaseTool]] = None,
         system_message: Optional[str] = None,
         description: Optional[str] = None,
         set_as_default: bool = False,
@@ -107,7 +103,6 @@ class Orchestrator:
             buffer_memory: Optional buffer memory for short-term context.
             long_term_memory: Optional long-term memory for persistent storage.
                 Can be a LongTermMemory or Memobase instance for multi-user support.
-            tools: Optional list of tools the agent can use.
             system_message: Optional system message to set agent's behavior.
             description: Optional description of the agent's capabilities and purpose.
                 Used for intelligent message routing. Defaults to system_message if not provided.
@@ -119,31 +114,22 @@ class Orchestrator:
         if agent_id in self.agents:
             raise ValueError(f"Agent with ID '{agent_id}' already exists")
 
-        # Convert tools list to dictionary
-        tools_dict = {}
-        if tools:
-            for tool in tools:
-                tools_dict[tool.name] = tool
-
         # Create agent
         agent = Agent(
             model=model,
             buffer_memory=buffer_memory,
             long_term_memory=long_term_memory,
-            tools=tools_dict,
             system_message=system_message,
         )
 
         # Store the agent
         self.agents[agent_id] = agent
 
-        # Store the agent description (use system message as fallback)
-        self.agent_descriptions[agent_id] = (
-            description or system_message or f"Agent with ID '{agent_id}'"
-        )
+        # Store description for routing
+        self.agent_descriptions[agent_id] = description or system_message or ""
 
-        # Set as default if requested or if this is the first agent
-        if set_as_default or self.default_agent_id is None:
+        # Set as default if requested or if it's the first agent
+        if set_as_default or len(self.agents) == 1:
             self.default_agent_id = agent_id
 
         logger.info(f"Created agent with ID '{agent_id}'")
@@ -307,32 +293,6 @@ class Orchestrator:
         """
         agent = self.get_agent(agent_id)
         return await agent.search_memory(query, k=k, use_long_term=use_long_term)
-
-    def register_tool(self, tool: BaseTool) -> None:
-        """
-        Register a tool with the orchestrator.
-
-        This makes the tool available to all agents.
-
-        Args:
-            tool: The tool to register.
-        """
-        self.tool_registry.register(tool)
-
-        # Add the tool to all agents
-        for agent in self.agents.values():
-            agent.add_tool(tool)
-
-        logger.info(f"Registered tool '{tool.name}'")
-
-    def get_available_tools(self) -> List[Dict[str, Any]]:
-        """
-        Get a list of all available tools.
-
-        Returns:
-            A list of tool descriptions.
-        """
-        return self.tool_registry.get_schema()["tools"]
 
     def list_agents(self) -> Dict[str, Dict[str, Any]]:
         """

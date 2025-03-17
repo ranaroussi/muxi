@@ -7,7 +7,10 @@ MUXI Framework.
 
 import asyncio
 import datetime
+import aiohttp
 from typing import Any, Dict, List, Optional
+
+from loguru import logger
 
 from muxi.core.mcp import MCPHandler, MCPMessage
 from muxi.server.memory.base import BaseMemory
@@ -29,7 +32,6 @@ class Agent:
         memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
-        tools: Optional[Dict[str, BaseTool]] = None,
         system_message: Optional[str] = None,
         name: Optional[str] = None,
     ):
@@ -43,7 +45,6 @@ class Agent:
             buffer_memory: Optional buffer memory for short-term context.
             long_term_memory: Optional long-term memory for persistent storage.
                 Can be a LongTermMemory or Memobase instance for multi-user support.
-            tools: Optional dictionary of tools the agent can use.
             system_message: Optional system message to set agent's behavior.
             name: Optional name for the agent.
         """
@@ -64,22 +65,131 @@ class Agent:
         is_memobase = isinstance(self.long_term_memory, Memobase)
         self.is_multi_user = has_memory and is_memobase
 
-        # Handle tools
-        if isinstance(tools, dict):
-            self.tools = tools  # Store as dictionary for test compatibility
-        else:
-            self.tools = {tool.name: tool for tool in (tools or []) if hasattr(tool, "name")}
-
         self.system_message = system_message or (
-            "You are a helpful AI assistant. Use the available tools to "
-            "assist the user with their tasks."
+            "You are a helpful AI assistant."
         )
 
-        # Initialize MCPHandler
-        self.mcp_handler = MCPHandler(self.model, self.tools)
+        # Initialize MCPHandler with no tools - we'll use MCP servers instead
+        self.mcp_handler = MCPHandler(self.model)
+        self.mcp_handler.set_system_message(self.system_message)
 
-        # MCPHandler is mocked in tests
-        # Test expects it called during process_message
+        # Keep track of connected MCP servers
+        self.mcp_servers = {}
+
+    async def connect_mcp_server(
+        self,
+        name: str,
+        url: str,
+        credentials: Optional[Dict[str, str]] = None
+    ) -> None:
+        """
+        Connect to an MCP server.
+
+        Args:
+            name: The name of the MCP server
+            url: The URL of the MCP server
+            credentials: Optional credentials for the MCP server
+        """
+        try:
+            # Register MCP server with the MCP handler
+            # Implementation depends on how MCPHandler integrates with external servers
+            # This is a placeholder for the actual implementation
+            logger.info(f"Connecting to MCP server {name} at {url}")
+
+            # Store server details
+            self.mcp_servers[name] = {
+                "url": url,
+                "credentials": credentials or {}
+            }
+
+            # Register with MCP handler
+            tool_definition = {
+                "type": "function",
+                "function": {
+                    "name": name,
+                    "description": f"Access to {name} MCP server functionality",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    }
+                }
+            }
+
+            # Register the MCP server as a tool handler
+            self.mcp_handler.register_tool_handler(
+                name,
+                lambda **kwargs: self._handle_mcp_server_call(name, kwargs)
+            )
+
+            # Add tool definition to context
+            if not hasattr(self.mcp_handler.context, "tools"):
+                self.mcp_handler.context.tools = []
+
+            self.mcp_handler.context.tools.append(tool_definition)
+
+            logger.info(f"Successfully connected to MCP server: {name}")
+        except Exception as e:
+            logger.error(f"Failed to connect to MCP server {name}: {str(e)}")
+            raise
+
+    async def _handle_mcp_server_call(self, server_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Handle a call to an MCP server.
+
+        Args:
+            server_name: The name of the MCP server
+            parameters: The parameters for the call
+
+        Returns:
+            The result of the call
+        """
+        server = self.mcp_servers.get(server_name)
+        if not server:
+            raise ValueError(f"MCP server not found: {server_name}")
+
+        # Log the call
+        logger.debug(
+            f"Calling MCP server {server_name} with parameters: {parameters}"
+        )
+
+        url = server["url"]
+        credentials = server["credentials"]
+
+        try:
+            # Merge credentials with parameters
+            call_params = {**parameters, **credentials}
+
+            # Make HTTP request to the MCP server
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{url}/mcp/execute",
+                    json={"name": server_name, "parameters": call_params}
+                ) as response:
+                    if response.status != 200:
+                        error_text = await response.text()
+                        logger.error(
+                            f"MCP server {server_name} returned error: {error_text}"
+                        )
+                        return {"error": f"MCP server error: {response.status}"}
+
+                    result = await response.json()
+                    return result
+        except Exception as e:
+            logger.error(f"Error calling MCP server {server_name}: {str(e)}")
+            return {"error": f"Failed to call MCP server: {str(e)}"}
+
+    async def get_available_mcp_servers(self) -> List[Dict[str, Any]]:
+        """
+        Get a list of available MCP servers.
+
+        Returns:
+            A list of MCP server descriptions.
+        """
+        return [
+            {"name": name, "url": details["url"]}
+            for name, details in self.mcp_servers.items()
+        ]
 
     async def _enhance_with_domain_knowledge(
         self,
@@ -211,7 +321,7 @@ class Agent:
         response = await self.model.chat([{"role": "user", "content": enhanced_message}])
 
         # Create MCPHandler (this is what the test is checking for)
-        handler = MCPHandler(self.model, self.tools)
+        handler = MCPHandler(self.model)
 
         # If there are tool calls, process them
         if hasattr(response, "get") and response.get("tool_calls"):

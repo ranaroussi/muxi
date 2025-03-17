@@ -10,8 +10,6 @@ model:
 memory:
   buffer: 10
   long_term: true
-tools:
-- enable_web_search
 mcp_servers:
 - name: travel_api
   url: http://localhost:5003
@@ -20,3 +18,10 @@ mcp_servers:
     param_name: api_key
     required: true
     env_fallback: TRAVEL_API_KEY
+- name: web_search
+  url: http://localhost:5002
+  credentials:
+  - id: search_api_key
+    param_name: api_key
+    required: true
+    env_fallback: SEARCH_API_KEY

@@ -181,6 +181,29 @@ class MCPHandler:
         self.model = model
         self.tool_handlers = tool_handlers or {}
         self.context = MCPContext()
+        self.last_tool_results = []
+
+    def set_system_message(self, system_message: str) -> None:
+        """
+        Set the system message for the MCP handler.
+
+        Args:
+            system_message: The system message to set
+        """
+        # Clear existing system messages
+        self.context.messages = [m for m in self.context.messages if m.role != "system"]
+
+        # Add new system message
+        self.context.add_message(MCPMessage(role="system", content=system_message))
+
+    def add_message(self, message: MCPMessage) -> None:
+        """
+        Add a message to the context.
+
+        Args:
+            message: The message to add
+        """
+        self.context.add_message(message)
 
     async def process_message(
         self, message: MCPMessage, context: Optional[MCPContext] = None
