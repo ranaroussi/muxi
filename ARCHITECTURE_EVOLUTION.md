@@ -44,19 +44,19 @@ This evolution preserves the current programmatic API while adding powerful capa
 ┌─────────│───────────────────────────────────────────┐
 │         │    MUXI Server (Local/Remote)             │
 │         │                                           │
-│         │         ┌──────────────┐                  │
-│         └───────> │ Orchestrator │                  │
-│                   └──────┬───────┘                  │
+│         │        ┌───────────────┐                  │
+│         └───────>│  Orchestrator │                  │
+│                  └───────┬───────┘                  │
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │
 │         ▼                ▼                ▼         │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
 │  │   Agent 1   │  │   Agent 2   │  │   Agent N   │  │
-│  │ (from YAML) │  │ (from JSON) │  │ (from YAML) │  │
+│  │    (YAML)   │  │    (JSON)   │  │    (YAML)   │  │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
-│         │                │                │         │
+│         ↓                ↓                ↓         │
 │         └────────┬───────┴────────┬───────┘         │
-│                  │                │                 │
+│                  ↓                :                 │
 │           ┌──────┴──────┐  ┌──────┴──────┐          │
 │           │ MCP Handler │  │   Memory    │          │
 │           └──────┬──────┘  └─────────────┘          │
@@ -67,7 +67,7 @@ This evolution preserves the current programmatic API while adding powerful capa
 ┌─────────────────────────────────────────────────────┐
 │              MCP Servers (via Command/SSE)          │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │ Weather API │  │ Search Tool │  │ Custom Tool │  │
+│  │   Weather   │  │  Web Search │  │     ....    │  │
 │  └─────────────┘  └─────────────┘  └─────────────┘  │
 └─────────────────────────────────────────────────────┘
 ```
