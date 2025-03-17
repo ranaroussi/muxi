@@ -13,7 +13,7 @@ import uvicorn
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Add the project root to the path so we can import from src
+# Add the project root to the path so we can import from muxi packages
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 
