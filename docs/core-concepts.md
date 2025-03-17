@@ -19,9 +19,8 @@ This section explains the fundamental concepts and components that make up the M
 ### Memory Systems
 - [Memory](../memory) - Learn about the different memory systems in MUXI
 
-### Tool System
-- [Tools](../tools) - Understand how tools extend agent capabilities
+### MCP System
+- [MCP](../mcp) - Learn about the Model Context Protocol and how it enables external service integration
 
 ### LLM Integration
 - [Models](../models) - Learn about LLM provider integration and configuration
-- [MCP](../mcp) - Understand the standardized communication protocol for LLMs

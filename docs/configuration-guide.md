@@ -35,6 +35,10 @@ ROUTING_LLM_MODEL=gpt-4o-mini
 ROUTING_LLM_TEMPERATURE=0.0
 ROUTING_USE_CACHING=true
 ROUTING_CACHE_TTL=3600
+
+# MCP Server API keys
+WEATHER_API_KEY=your_weather_api_key
+FINANCE_API_KEY=your_finance_api_key
 ```
 
 You can load these variables from a `.env` file using:
@@ -53,8 +57,7 @@ MUXI supports both YAML and JSON formats for agent configuration:
 ```yaml
 name: weather_assistant
 description: "Specialized in providing weather forecasts, answering questions about climate and weather phenomena, and reporting current conditions in various locations worldwide."
-system_message: You are a helpful assistant that can check the weather. Use the Weather
-  tool when asked about weather conditions.
+system_message: You are a helpful assistant that can check the weather. Use the Weather MCP server when asked about weather conditions.
 model:
   provider: openai
   api_key: "${OPENAI_API_KEY}"
@@ -63,9 +66,6 @@ model:
 memory:
   buffer: 10
   long_term: true
-tools:
-- enable_calculator
-- enable_web_search
 mcp_servers:
 - name: weather
   url: http://localhost:5001
@@ -74,6 +74,13 @@ mcp_servers:
     param_name: api_key
     required: true
     env_fallback: WEATHER_API_KEY
+- name: web_search
+  url: http://localhost:5003
+  credentials:
+  - id: web_search_api_key
+    param_name: api_key
+    required: true
+    env_fallback: WEB_SEARCH_API_KEY
 ```
 
 #### JSON Example (finance_agent.json)
@@ -82,7 +89,7 @@ mcp_servers:
 {
     "name": "finance_assistant",
     "description": "Expert in financial analysis, investment strategies, market trends, stock recommendations, and personal finance advice. Can perform calculations and analyze financial data.",
-    "system_message": "You are a helpful assistant specialized in finance and investments. Use the Calculator tool for financial calculations.",
+    "system_message": "You are a helpful assistant specialized in finance and investments. Use the available MCP servers to get financial data and perform calculations.",
     "model": {
         "provider": "openai",
         "api_key": "${OPENAI_API_KEY}",
@@ -93,10 +100,12 @@ mcp_servers:
         "buffer": 15,
         "long_term": true
     },
-    "tools": [
-        "enable_calculator"
-    ],
     "mcp_servers": [
+        {
+            "name": "calculator",
+            "url": "http://localhost:5004",
+            "credentials": []
+        },
         {
             "name": "stock_data",
             "url": "http://localhost:5002",
@@ -104,7 +113,8 @@ mcp_servers:
                 {
                     "id": "alpha_vantage_api_key",
                     "param_name": "api_key",
-                    "required": true
+                    "required": true,
+                    "env_fallback": "ALPHA_VANTAGE_API_KEY"
                 },
                 {
                     "id": "alpha_vantage_account_id",
@@ -226,28 +236,11 @@ memory:
   multi_user: true
 ```
 
-## Tool Configuration
-
-Enable built-in tools or add custom tools:
-
-```yaml
-tools:
-# Built-in tools
-- enable_calculator
-- enable_web_search
-
-# Custom tools
-- name: custom_tool
-  module: src.tools.custom
-  class: CustomTool
-  config:
-    param1: value1
-    param2: value2
-```
-
 ## MCP Server Configuration
 
-Connect to Model Context Protocol servers:
+MCP (Model Context Protocol) servers are external services that extend agent capabilities. They provide a standardized way to integrate external functionality into your MUXI application.
+
+### Basic MCP Server Configuration
 
 ```yaml
 mcp_servers:
@@ -265,6 +258,31 @@ mcp_servers:
     param_name: api_key
     required: true
 ```
+
+### Creating Custom MCP Servers
+
+You can create your own MCP servers to extend agent capabilities:
+
+```bash
+# Generate a new MCP server template
+muxi mcp create my_custom_server
+cd my_custom_server
+
+# Install dependencies and start the server
+pip install -r requirements.txt
+python server.py
+```
+
+### Available MCP Servers
+
+MUXI provides templates for common MCP servers:
+
+- `calculator`: Perform mathematical calculations
+- `web_search`: Search the web for information
+- `weather`: Get weather forecasts and conditions
+- `finance`: Access financial data and stock information
+- `news`: Retrieve news articles and headlines
+- `image_generation`: Generate images from text descriptions
 
 ## Advanced Configuration
 

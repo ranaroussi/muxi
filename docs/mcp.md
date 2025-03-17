@@ -45,19 +45,19 @@ The complete flow of tool usage looks like this:
 9. The language model incorporates these results into its final response
 
 ```
-┌───────────┐    Query     ┌──────────────┐     MCP format     ┌─────┐
-│   User    ├─────────────►│ Agent/       ├───────────────────►│     │
-└───────────┘              │ Orchestrator │                    │     │
-                           └──────┬───────┘                    │     │
-                                  │                            │     │
-                                  │                            │ LLM │
+┌───────────┐    Query     ┌──────────────┐     MCP format    ┌─────┐
+│   User    ├─────────────►│ Agent via    ├──────────────────►│     │
+└───────────┘              │ Orchestrator │                   │     │
+                           └──────┬───────┘                   │     │
+                                  │                           │     │
+                                  │                           │ LLM │
                         ┌─────────▼────────┐                  │     │
 ┌─────────────┐         │                  │   Tool request   │     │
 │ Application │         │   MCP Handler    │◄─────────────────┤     │
 │ Environment │         │                  │                  └─────┘
 │             │         └─────────┬────────┘
 │    ┌────────▼─────┐             │
-│    │              │    Tool     │
+│    │              │     Tool    │
 │    │     Tool     │◄────request─┘
 │    │   Execution  │
 │    │              │
@@ -101,7 +101,7 @@ This structure ensures compatibility with various LLM providers like OpenAI, Ant
 ### Example Usage
 
 ```python
-from src.core.mcp import MCPMessage
+from muxi.core.mcp import MCPMessage
 
 # Create a user message
 user_msg = MCPMessage(
@@ -199,8 +199,8 @@ class MCPToolCall:
 ### Basic Message Exchange
 
 ```python
-from src.mcp.message import MCPMessage
-from src.models.openai import OpenAIModel
+from muxi.core.mcp import MCPMessage
+from muxi.core.models.openai import OpenAIModel
 
 # Create messages
 system_message = MCPMessage(role="system", content="You are a helpful assistant.")
@@ -229,10 +229,10 @@ if isinstance(response, MCPMessage):
 The complete flow of a tool-enabled conversation:
 
 ```python
-from src.mcp.message import MCPMessage, MCPToolCall
-from src.models.openai import OpenAIModel
-from src.tools.registry import ToolRegistry
-from src.tools.weather import WeatherTool
+from muxi.core.mcp import MCPMessage, MCPToolCall
+from muxi.core.models.openai import OpenAIModel
+from muxi.core.tools.registry import ToolRegistry
+from muxi.core.tools.weather import WeatherTool
 
 # Set up language model and tools
 model = OpenAIModel(model="gpt-4o")
@@ -279,10 +279,10 @@ if response.tool_calls:
 The framework provides an MCP handler to abstract the message processing:
 
 ```python
-from src.mcp.handler import MCPHandler
-from src.models.openai import OpenAIModel
-from src.tools.registry import ToolRegistry
-from src.tools.weather import WeatherTool
+from muxi.core.mcp.handler import MCPHandler
+from muxi.core.models.openai import OpenAIModel
+from muxi.core.tools.registry import ToolRegistry
+from muxi.core.tools.weather import WeatherTool
 
 async def chat_with_tools():
     # Set up language model, tools, and handler
@@ -374,8 +374,8 @@ The MCP standardizes interactions across different language model providers:
 ### OpenAI Implementation
 
 ```python
-from src.mcp.message import MCPMessage
-from src.models.openai import OpenAIModel
+from muxi.core.mcp import MCPMessage
+from muxi.core.models.openai import OpenAIModel
 
 # Create an OpenAI language model
 model = OpenAIModel(model="gpt-4o")
@@ -393,8 +393,8 @@ print(response.content)
 ### Anthropic Implementation
 
 ```python
-from src.mcp.message import MCPMessage
-from src.models.anthropic import AnthropicModel
+from muxi.core.mcp import MCPMessage
+from muxi.core.models.anthropic import AnthropicModel
 
 # Create an Anthropic language model
 model = AnthropicModel(model="claude-3-opus")
@@ -416,7 +416,7 @@ print(response.content)
 MCP allows for parallel execution of multiple tool calls:
 
 ```python
-from src.mcp.handler import MCPHandler, execute_tool_calls_parallel
+from muxi.core.mcp.handler import MCPHandler, execute_tool_calls_parallel
 
 async def process_with_parallel_tools(handler, user_message):
     # Get response from language model
@@ -460,9 +460,9 @@ async def process_with_parallel_tools(handler, user_message):
 You can chain different language models together using MCP as a common interface:
 
 ```python
-from src.mcp.message import MCPMessage
-from src.models.openai import OpenAIModel
-from src.models.anthropic import AnthropicModel
+from muxi.core.mcp import MCPMessage
+from muxi.core.models.openai import OpenAIModel
+from muxi.core.models.anthropic import AnthropicModel
 
 async def multi_model_processing(query):
     # First model generates a detailed plan
@@ -501,7 +501,7 @@ async def multi_model_processing(query):
 You can extend the MCP format for custom needs:
 
 ```python
-from src.mcp.message import MCPMessage
+from muxi.core.mcp import MCPMessage
 
 class ExtendedMCPMessage(MCPMessage):
     def __init__(self, role, content=None, tool_calls=None, tool_call_id=None, metadata=None):
@@ -531,7 +531,7 @@ For storing or transmitting MCP messages, you can serialize them:
 
 ```python
 import json
-from src.mcp.message import MCPMessage, MCPToolCall
+from muxi.core.mcp import MCPMessage, MCPToolCall
 
 def serialize_mcp_message(message):
     """Serialize an MCP message to a dictionary."""
@@ -600,8 +600,8 @@ MCP messages can be transmitted via WebSockets for real-time communication:
 
 ```python
 # Server-side
-from src.mcp.handler import MCPHandler
-from src.mcp.message import MCPMessage
+from muxi.core.mcp.handler import MCPHandler
+from muxi.core.mcp import MCPMessage
 import json
 
 async def handle_websocket(websocket, path):

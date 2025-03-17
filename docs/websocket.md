@@ -17,7 +17,7 @@ WebSocket support in the MUXI Framework:
 - Provides immediate responses as they're generated
 - Supports subscription to specific agents
 - Allows for streaming responses from LLMs
-- Facilitates tool execution updates
+- Facilitates MCP server execution updates
 - Supports multi-user interactions with user-specific memory
 
 ## Server-side Implementation
@@ -27,12 +27,12 @@ WebSocket support in the MUXI Framework:
 The framework includes a WebSocket server implementation:
 
 ```python
-# src/api/websocket.py
+# muxi/server/websocket.py
 import asyncio
 import json
 import logging
 from fastapi import WebSocket, WebSocketDisconnect
-from src.core.orchestrator import Orchestrator
+from muxi.core.orchestrator import Orchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -230,11 +230,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str = None):
 To integrate the WebSocket server with FastAPI:
 
 ```python
-# src/api/app.py
+# muxi/server/app.py
 from fastapi import FastAPI, WebSocket, Depends
 import uuid
-from src.core.orchestrator import Orchestrator
-from src.api.websocket import websocket_endpoint, set_orchestrator
+from muxi.core.orchestrator import Orchestrator
+from muxi.server.websocket import websocket_endpoint, set_orchestrator
 
 app = FastAPI(title="MUXI Framework API")
 
@@ -1272,6 +1272,6 @@ initChat();
 After implementing WebSocket support, you might want to explore:
 
 - Creating [agents](./agent) that can utilize WebSocket connections
-- Setting up [tool systems](./tools) that send real-time progress updates
+- Setting up [MCP servers](./mcp) that send real-time progress updates
 - Implementing [MCP features](./mcp) for structured communication
 - Enhancing [memory systems](./memory) with real-time updates

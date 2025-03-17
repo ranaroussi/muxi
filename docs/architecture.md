@@ -23,14 +23,15 @@ MUXI is built around several core components that work together to provide a com
         │              │  Memory   │
         │              └─────┬─────┘
 ┌───────┴───────┐      ┌─────┴─────┐
-│  CLI/API/Web  │──────│   Tools   │
+│  CLI/API/Web  │──────│ MCP Server│
 └───────────────┘      └───────────┘
 ```
 
 ### Core Components
 
-1. **Model Context Protocol (MCP)**: Standardized communication layer with LLMs
-   - Provides consistent interfaces for different LLM providers
+1. **Model Context Protocol (MCP)**: Standardized communication layer
+   - Provides consistent interfaces for LLM interaction
+   - Connects to external MCP servers for extended functionality
    - Handles message formatting and processing
 
 2. **Memory System**: Stores conversation history and knowledge
@@ -39,14 +40,15 @@ MUXI is built around several core components that work together to provide a com
    - Memobase for multi-user support
    - Domain knowledge for structured information
 
-3. **Tool System**: Extends agent capabilities
-   - Provides a registry for tools
-   - Handles tool execution and results
+3. **MCP Servers**: External services that extend agent capabilities
+   - Implement the standardized MCP protocol
+   - Provide specialized functionality (weather, finance, web search, etc.)
+   - Run as separate services with their own lifecycle
 
-4. **Agents**: Core entities that combine LLMs with memory and tools
+4. **Agents**: Core entities that combine LLMs with memory and MCP server connections
    - Process user messages
    - Generate responses
-   - Execute tools when needed
+   - Connect to MCP servers for extended capabilities
 
 5. **Orchestrator**: Manages multiple agents
    - Routes messages to appropriate agents
@@ -61,12 +63,12 @@ MUXI is built around several core components that work together to provide a com
 
 ## Modular Package Structure
 
-The MUXI framework is now organized into a modular monorepo structure with multiple packages:
+The MUXI framework is organized into a modular monorepo structure with multiple packages:
 
 ```
 muxi-framework/
 ├── packages/
-│   ├── core/          # Core components: agents, memory, tools, LLM interface
+│   ├── core/          # Core components: agents, memory, MCP interface
 │   ├── server/        # REST API and WebSocket server
 │   ├── cli/           # Command-line interface
 │   ├── web/           # Web user interface
@@ -79,7 +81,7 @@ muxi-framework/
 1. **Core Package (`muxi-core`)**
    - Contains foundational components like Agent, Memory, and MCP
    - Has minimal dependencies for lightweight usage
-   - Provides tools base classes and core implementations
+   - Provides MCP handler implementation for connecting to MCP servers
 
 2. **Server Package (`muxi-server`)**
    - Implements the REST API server for agent interaction
@@ -91,6 +93,7 @@ muxi-framework/
    - Provides command-line interface for interacting with agents
    - Includes interactive terminal-based chat interface
    - Implements agent management and server commands
+   - Includes utilities for generating MCP server templates
 
 4. **Web Package (`muxi-web`)**
    - Contains the frontend user interface built with React
@@ -102,11 +105,11 @@ muxi-framework/
    - Provides a unified API for the whole framework
    - Simplifies installation and usage
 
-## Evolution to Service-Oriented Architecture
+## Service-Oriented Architecture
 
-The MUXI framework is evolving towards a more flexible, service-oriented approach that enables distributed deployment while maintaining simplicity and ease of use.
+The MUXI framework is a flexible, service-oriented approach that enables distributed deployment while maintaining simplicity and ease of use.
 
-### Target Architecture
+### Architecture
 
 ```
 ┌───────────────────┐
@@ -170,8 +173,8 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
    - Environment variable configuration
 
 4. **MCP Server Unification**
-   - Tool system based on MCP servers
-   - Adapters for local Python tools
+   - All external functionality provided through standardized MCP servers
+   - Consistent interface for interacting with external services
    - Service discovery mechanisms
    - Deployment utilities
 
@@ -193,17 +196,17 @@ app.run()
 
 ## Implementation Strategy
 
-The evolution to the service-oriented architecture will be implemented in phases:
+The evolution to the service-oriented architecture has been implemented in phases:
 
 1. **Core Architecture Refactoring**
    - Separate local mode from server mode
    - Implement authentication framework
    - Create client-side connector
 
-2. **MCP Server Unification**
-   - Refactor tool system to MCP-based approach
-   - Update configuration schemas
-   - Create tool adapters
+2. **MCP Server Implementation**
+   - Fully transition to MCP-based approach for all external functionality
+   - Update configuration schemas to support MCP servers
+   - Remove legacy tool system
 
 3. **Client Applications**
    - Update CLI interface

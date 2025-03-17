@@ -9,7 +9,7 @@ permalink: /agents/
 
 # Agents Overview
 
-Agents are the core component of the MUXI Framework. An agent combines a language model, memory systems, and tools to create an intelligent assistant that can understand and respond to user requests.
+Agents are the core component of the MUXI Framework. An agent combines a language model, memory systems, and MCP server connections to create an intelligent assistant that can understand and respond to user requests.
 
 ## What is an Agent?
 
@@ -17,7 +17,7 @@ An agent is an autonomous entity that:
 - Communicates with users via natural language
 - Processes requests and generates responses using a language model
 - Stores conversation history in memory
-- Executes tools to perform actions or retrieve information
+- Connects to MCP servers to perform actions or retrieve information
 - Can maintain separate memory contexts for different users (with Memobase)
 
 ## Creating an Agent
@@ -28,13 +28,12 @@ Agents can be created through the Orchestrator, which manages multiple agents an
 
 ```python
 import asyncio
-from src.models import OpenAIModel
-from src.memory.buffer import BufferMemory
-from src.memory.long_term import LongTermMemory
-from src.memory.memobase import Memobase
-from src.tools.web_search import WebSearchTool
-from src.tools.calculator import CalculatorTool
-from src.core.orchestrator import Orchestrator
+from muxi.core.models.openai import OpenAIModel
+from muxi.core.memory.buffer import BufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
+from muxi.core.mcp.handler import MCPHandler
+from muxi.core.orchestrator import Orchestrator
 
 async def create_agent():
     # Create language model
@@ -50,8 +49,10 @@ async def create_agent():
     # For multi-user support, add Memobase
     memobase = Memobase(long_term_memory=long_term_memory)
 
-    # Create tools
-    tools = [WebSearchTool(), CalculatorTool()]
+    # Create MCP handlers
+    web_search_mcp = MCPHandler(url="http://localhost:5001", name="web_search")
+    calculator_mcp = MCPHandler(url="http://localhost:5002", name="calculator")
+    mcp_servers = [web_search_mcp, calculator_mcp]
 
     # Create orchestrator and agent
     orchestrator = Orchestrator()
@@ -63,7 +64,7 @@ async def create_agent():
         model=model,
         buffer_memory=buffer_memory,
         long_term_memory=long_term_memory,
-        tools=tools,
+        mcp_servers=mcp_servers,
         system_message="You are a helpful AI assistant.",
         set_as_default=True
     )
@@ -74,7 +75,7 @@ async def create_agent():
         model=model,
         buffer_memory=BufferMemory(),
         long_term_memory=memobase,  # Pass Memobase as long_term_memory
-        tools=tools,
+        mcp_servers=mcp_servers,
         system_message="You are a helpful AI assistant that remembers user preferences."
     )
 
@@ -111,7 +112,10 @@ curl -X POST http://localhost:5050/agents \
   -d '{
     "agent_id": "my_agent",
     "system_message": "You are a helpful AI assistant.",
-    "tools": ["web_search", "calculator"]
+    "mcp_servers": [
+      {"name": "web_search", "url": "http://localhost:5001"},
+      {"name": "calculator", "url": "http://localhost:5002"}
+    ]
   }'
 
 # Create a multi-user agent
@@ -120,7 +124,10 @@ curl -X POST http://localhost:5050/agents \
   -d '{
     "agent_id": "multi_user_agent",
     "system_message": "You are a helpful AI assistant that remembers user preferences.",
-    "tools": ["web_search", "calculator"],
+    "mcp_servers": [
+      {"name": "web_search", "url": "http://localhost:5001"},
+      {"name": "calculator", "url": "http://localhost:5002"}
+    ],
     "use_long_term_memory": true,
     "multi_user_support": true
   }'
@@ -132,10 +139,10 @@ The framework provides a CLI command to create agents:
 
 ```bash
 # Create a standard agent
-python -m src.cli.agent create my_agent --system "You are a helpful AI assistant." --tools web_search calculator
+muxi agent create my_agent --system "You are a helpful AI assistant." --mcp web_search:http://localhost:5001 calculator:http://localhost:5002
 
 # Create a multi-user agent
-python -m src.cli.agent create multi_user_agent --system "You are a helpful AI assistant that remembers user preferences." --tools web_search calculator --multi-user
+muxi agent create multi_user_agent --system "You are a helpful AI assistant that remembers user preferences." --mcp web_search:http://localhost:5001 calculator:http://localhost:5002 --multi-user
 ```
 
 ## Agent Parameters
@@ -146,7 +153,7 @@ When creating an agent, you can configure various parameters:
 - **model** (required): The language model provider to use (e.g., OpenAIModel, AnthropicModel)
 - **buffer_memory**: Short-term memory for the current conversation
 - **long_term_memory**: Persistent memory for storing information across sessions. Can be a LongTermMemory or Memobase instance for multi-user support.
-- **tools**: A list of tools the agent can use
+- **mcp_servers**: A list of MCP servers the agent can connect to
 - **system_message**: Instructions that define the agent's behavior
 - **description**: A concise description of the agent's capabilities and purpose, used for intelligent message routing (critical for multi-agent systems)
 - **set_as_default**: Whether to set this as the default agent for the orchestrator
@@ -224,7 +231,7 @@ Once you've created an agent, you can interact with it in several ways:
 ### Via Python Code with Configuration-based Approach (Recommended)
 
 ```python
-from src import muxi
+from muxi import muxi
 
 # Initialize MUXI
 mx = muxi()
@@ -382,7 +389,7 @@ You can create specialized agents for specific tasks:
 orchestrator.create_agent(
     agent_id="code_assistant",
     model=OpenAIModel(model="gpt-4o"),
-    tools=[CalculatorTool()],
+    mcp_servers=[calculator_mcp],
     system_message="You are an expert coding assistant. Provide clean, efficient code examples and explain your reasoning.",
 )
 
@@ -390,7 +397,7 @@ orchestrator.create_agent(
 orchestrator.create_agent(
     agent_id="customer_service",
     model=AnthropicModel(model="claude-3-opus"),
-    tools=[WebSearchTool()],
+    mcp_servers=[web_search_mcp],
     system_message="You are a friendly customer service representative. Help users with their questions in a polite and helpful manner.",
 )
 ```
@@ -400,8 +407,8 @@ orchestrator.create_agent(
 You can create agents that support multiple users with separate memory contexts:
 
 ```python
-from src.memory.memobase import Memobase
-from src.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
+from muxi.core.memory.long_term import LongTermMemory
 
 # Create a multi-user agent
 # Memobase extends LongTermMemory with multi-user capabilities
@@ -412,6 +419,7 @@ orchestrator.create_agent(
     model=OpenAIModel(model="gpt-4o"),
     buffer_memory=BufferMemory(),
     long_term_memory=memobase,  # Pass Memobase as long_term_memory
+    mcp_servers=[web_search_mcp, calculator_mcp],
     system_message="""
     You are a customer service assistant that helps different customers.
     Maintain a personalized conversation with each user.
@@ -437,11 +445,11 @@ user2_followup = await orchestrator.chat("customer_service", "Thanks for the inf
 
 2. **Craft effective system messages**: Be specific about the agent's role, tone, and constraints.
 
-3. **Provide relevant tools**: Only give the agent tools it needs for its specific purpose.
+3. **Select relevant MCP servers**: Only connect the agent to MCP servers it needs for its specific purpose.
 
 4. **Memory management**: For long conversations, ensure your buffer size is adequate. For persistent knowledge, use long-term memory.
 
-5. **Error handling**: Implement proper error handling for tool execution failures.
+5. **Error handling**: Implement proper error handling for MCP server communication failures.
 
 6. **Regular testing**: Test your agents with diverse inputs to ensure they behave as expected.
 
@@ -457,11 +465,11 @@ user2_followup = await orchestrator.chat("customer_service", "Thanks for the inf
 - Ensure the agent ID is correct
 - Verify that the WebSocket connection is established
 
-### Agent Not Using Tools Correctly
+### Agent Not Using MCP Servers Correctly
 
-- Check if tools are properly registered
+- Check if MCP servers are properly connected and running
 - Review the system message for clear instructions
-- Ensure tool parameters are correctly defined
+- Ensure MCP server credentials are correctly configured
 
 ### Memory Issues
 
@@ -473,7 +481,7 @@ user2_followup = await orchestrator.chat("customer_service", "Thanks for the inf
 
 After creating your agent, you might want to:
 
-- Add [custom tools](./tools) to extend its capabilities
+- Add [custom MCP servers](./mcp-servers) to extend its capabilities
 - Configure [memory systems](./memory) for better recall
 - Implement [multi-agent collaboration](./orchestrator) for complex tasks
 - Connect to the [WebSocket server](./websocket) for real-time interaction

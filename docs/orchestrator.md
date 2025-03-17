@@ -81,7 +81,7 @@ orchestrator.create_agent(
 The Orchestrator can be initialized as a standalone component:
 
 ```python
-from src.core.orchestrator import Orchestrator
+from muxi.core.orchestrator import Orchestrator
 
 # Create a new orchestrator
 orchestrator = Orchestrator()
@@ -92,9 +92,9 @@ orchestrator = Orchestrator()
 The primary function of the Orchestrator is to create and manage agents:
 
 ```python
-from src.models import OpenAIModel
-from src.memory.buffer import BufferMemory
-from src.tools.web_search import WebSearchTool
+from muxi.core.models.openai import OpenAIModel
+from muxi.core.memory.buffer import BufferMemory
+from muxi.core.tools.web_search import WebSearchTool
 
 # Create an agent with the orchestrator
 orchestrator.create_agent(
@@ -248,7 +248,6 @@ response = await orchestrator.run(
     agent_id=physics_agent_id,
     message="Explain quantum field theory in simple terms"
 )
-print(response)
 ```
 
 ### Agent Teams

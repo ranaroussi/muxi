@@ -58,10 +58,10 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
-3. Install dependencies:
+3. Install the framework in development mode:
 
    ```bash
-   pip install -r requirements.txt
+   pip install -e .
    ```
 4. Install development dependencies:
 
@@ -71,10 +71,10 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
 
 ### For frontend development:
 
-1. Navigate to the web directory:
+1. Navigate to the web module directory:
 
    ```bash
-   cd src/web
+   cd packages/web/src/muxi/web/ui
    ```
 2. Install Node.js dependencies:
 
@@ -89,21 +89,24 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
 
 ## Project Structure
 
-The MUXI Framework follows a modular structure:
+The MUXI Framework follows a modular architecture:
 
 ```
 .github/                  # GitHub configuration (workflows, templates)
 docs/                     # Documentation files
-src/                      # Source code
- └─ core/                 # Core components (Agent, Orchestrator)
- └─ models/               # Language model implementations
- └─ memory/               # Memory systems
- └─ tools/                # Tool system
- └─ api/                  # API server
+packages/                 # Source code organized into modules
+ └─ core/                 # Core components (Agent, Orchestrator, MCP)
+    └─ src/muxi/core/     # Core module source code
+ └─ server/               # API and WebSocket server
+    └─ src/muxi/server/   # Server module source code
+ └─ cli/                  # Command-line interface
+    └─ src/muxi/cli/      # CLI module source code
  └─ web/                  # Web dashboard
- └─ utils/                # Utility functions
+    └─ src/muxi/web/      # Web module source code
+ └─ meta/                 # Meta-package for MUXI distribution
 tests/                    # Test files
 examples/                 # Example usage
+  └─ configs/             # Example configuration files
 scripts/                  # Utility scripts
 ```
 
@@ -114,9 +117,9 @@ scripts/                  # Utility scripts
 - Follow PEP 8 guidelines for code formatting
 - Use 4 spaces for indentation (no tabs)
 - Maximum line length of 88 characters (Black default)
-- Use Black for code formatting: `black src tests`
-- Use isort for import sorting: `isort src tests`
-- Use flake8 for linting: `flake8 src tests`
+- Use Black for code formatting: `black packages tests`
+- Use isort for import sorting: `isort packages tests`
+- Use flake8 for linting: `flake8 packages tests`
 - Use type hints for all function signatures
 - Add docstrings in Google format for all functions, classes, and modules
 
@@ -133,7 +136,7 @@ scripts/                  # Utility scripts
 from typing import Dict, List, Optional, Any  # Import specific types
 import standard_library                       # Standard library imports first
 import third_party_library                    # Third party imports second
-from src.module import local_import           # Local imports last
+from muxi.core.module import local_import     # Local imports last
 ```
 
 ### TypeScript/React Guidelines (Web UI)
@@ -163,7 +166,7 @@ When working with the Model Context Protocol:
 2. Run the tests to make sure your changes don't break existing functionality:
 
    ```bash
-   python run_tests.py
+   python -m pytest
    ```
 3. Update the documentation if you're changing any user-facing features
 4. Make sure your commit messages are clear and follow conventional commit format:
@@ -226,7 +229,7 @@ Documentation is critical to the success of the project. When contributing:
 - Run the existing test suite before submitting a PR:
 
   ```bash
-  python run_tests.py
+  python -m pytest
   ```
 - Aim for high test coverage, especially for business logic
 - Test both happy paths and error cases

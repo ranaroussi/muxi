@@ -32,6 +32,7 @@ Create a `.env` file with your API keys:
 ```bash
 OPENAI_API_KEY=your-openai-key
 DATABASE_URL=your-database-connection-string
+WEATHER_API_KEY=your-weather-api-key
 ```
 
 ## Create Agent Configuration Files
@@ -52,9 +53,14 @@ model:
 memory:
   buffer: 10  # Sets buffer window size to 10
   long_term: true  # Enables long-term memory
-tools:
-- enable_calculator
-- enable_web_search
+mcp_servers:
+- name: weather_api
+  url: http://localhost:5001
+  credentials:
+  - id: weather_api_key
+    param_name: api_key
+    value: "${WEATHER_API_KEY}"
+    required: true
 ```
 
 ### JSON Configuration Example
@@ -76,8 +82,19 @@ Alternatively, create `agents/finance_agent.json`:
         "buffer": 5,
         "long_term": false
     },
-    "tools": [
-        "enable_calculator"
+    "mcp_servers": [
+        {
+            "name": "finance_api",
+            "url": "http://localhost:5002",
+            "credentials": [
+                {
+                    "id": "finance_api_key",
+                    "param_name": "api_key",
+                    "value": "${FINANCE_API_KEY}",
+                    "required": true
+                }
+            ]
+        }
     ]
 }
 ```
@@ -203,23 +220,40 @@ curl -X POST http://localhost:5050/agents/assistant/messages \
 
 ## Using MCP Servers
 
-To integrate external Model Context Protocol servers, add this to the `agent.yaml` file:
+To integrate external Model Context Protocol servers, add them to the agent configuration file as shown in the examples above. MCP servers extend agent capabilities by providing specialized functionality like weather data, financial information, web search, etc.
 
-```yaml
-mcp_servers:
-- name: weather_api
-  url: http://localhost:5001
-  credentials:
-  - id: weather_api_key
-    param_name: api_key
-    required: true
-```
-
-For credentials, the framework will:
+For MCP server credentials, the framework will:
 
 1. First look for user-specific credentials in the database
 2. Then look for system-wide credentials in the database
 3. Finally, fall back to environment variables
+
+### Creating Your Own MCP Server
+
+You can create your own MCP server to extend agent capabilities:
+
+```bash
+# Generate a new MCP server template
+muxi mcp create my_custom_server
+cd my_custom_server
+
+# Install dependencies and start the server
+pip install -r requirements.txt
+python server.py
+```
+
+Once your MCP server is running, add it to your agent configuration:
+
+```yaml
+mcp_servers:
+- name: custom_server
+  url: http://localhost:5010
+  credentials:
+  - id: custom_api_key
+    param_name: api_key
+    value: "${CUSTOM_API_KEY}"
+    required: true
+```
 
 ## Advanced Usage
 

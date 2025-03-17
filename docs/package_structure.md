@@ -9,7 +9,7 @@ MUXI follows a modular monorepo structure with these main packages:
 ```
 muxi-framework/
 ├── packages/
-│   ├── core/      # Core functionality: agents, memory, tools, LLM interface
+│   ├── core/      # Core functionality: agents, memory, MCP, LLM interface
 │   ├── server/    # Server implementation with API endpoints and WebSocket
 │   ├── cli/       # Command-line interface
 │   ├── web/       # Web application
@@ -64,7 +64,7 @@ packages/core/
             ├── agent.py
             ├── memory.py
             ├── mcp.py
-            └── tools/
+            └── mcp/
                 ├── __init__.py
                 ├── base.py
                 └── ...
@@ -92,9 +92,11 @@ When developing within the MUXI framework, use the following import patterns:
 ### Core Components
 ```python
 from muxi.core.agent import Agent
-from muxi.core.memory import MemorySystem
+from muxi.core.memory.buffer import BufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
 from muxi.core.mcp import MCPMessage
-from muxi.core.tools import Calculator, WebSearch
+from muxi.core.mcp import MCPClient, MCPRequest
 ```
 
 ### Server Components
@@ -150,9 +152,9 @@ python -m build
 ### Core Package
 The core package contains the foundational components:
 - `Agent`: Base class for AI agents
-- `MemorySystem`: Short-term and long-term memory implementations
+- `Memory`: Buffer, long-term, and multi-user memory implementations
 - `MCPHandler`: Model Context Protocol implementation
-- `Tool`: Base class for tool implementations
+- `MCP`: MCP client implementation for external service integration
 
 ### Server Package
 The server package provides:
@@ -164,14 +166,14 @@ The server package provides:
 ### CLI Package
 The CLI package includes:
 - Interactive terminal-based chat interface
-- Command-line tools for managing agents
+- Command-line utilities for managing agents
 - Server management commands
 
 ### Web Package
 The web package contains:
 - React-based user interface
 - WebSocket client implementation
-- Configuration UI for agents and tools
+- Configuration UI for agents and MCP servers
 
 ### Meta Package
 The `muxi` meta-package:

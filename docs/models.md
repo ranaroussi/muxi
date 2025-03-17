@@ -47,7 +47,7 @@ graph TD
 ### Basic Model Configuration
 
 ```python
-from src.models.openai import OpenAIModel
+from muxi.core.models.openai import OpenAIModel
 
 # Create a model with default settings
 model = OpenAIModel(model="gpt-4o")
@@ -66,9 +66,9 @@ custom_model = OpenAIModel(
 ### Assigning Models to Agents
 
 ```python
-from src.core.orchestrator import Orchestrator
-from src.models.openai import OpenAIModel
-from src.memory.buffer import BufferMemory
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.openai import OpenAIModel
+from muxi.core.memory.buffer import BufferMemory
 
 # Create an orchestrator
 orchestrator = Orchestrator()
@@ -194,8 +194,8 @@ MUXI is designed to be extensible. To add support for a new LLM provider:
 Example of a custom model provider implementation:
 
 ```python
-from src.models.base import BaseModel
-from src.models.mcp import MCPMessage, MCPRole
+from muxi.core.models.base import BaseModel
+from muxi.core.mcp import MCPMessage, MCPRole
 
 class CustomProviderModel(BaseModel):
     def __init__(self, api_key=None, model="default-model", **kwargs):

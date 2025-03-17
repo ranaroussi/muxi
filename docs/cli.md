@@ -46,6 +46,7 @@ Available commands:
 - `chat`: Start an interactive chat session with an agent
 - `run`: Run the server
 - `send`: Send a one-off message to an agent
+- `create`: Create new components like MCP servers
 
 ### Examples
 
@@ -70,8 +71,8 @@ muxi send --agent-id assistant "What is the capital of France?"
 python -m muxi.cli run
 muxi run
 
-# Alternatively, you can run the server with:
-python -m muxi.server
+# Create a new MCP server
+muxi create mcp-server
 ```
 
 ## Chat Mode
@@ -87,7 +88,7 @@ The chat mode provides an interactive terminal-based chat interface with the sel
 ### Starting a Chat Session
 
 ```bash
-python -m muxi.cli chat [OPTIONS]
+muxi chat [OPTIONS]
 ```
 
 Options:
@@ -104,6 +105,7 @@ During a chat session, you can use special commands:
 - `/clear`: Clear the chat history
 - `/system <message>`: Update the agent's system message
 - `/memory`: Show the current memory contents
+- `/user <user_id>`: Switch to a different user context
 
 Example:
 ```
@@ -122,7 +124,7 @@ Assistant: Arr, matey! The capital of France be Paris, ye landlubber!
 The send mode allows you to send a single message to an agent and get the response without starting an interactive session.
 
 ```bash
-python -m muxi.cli send [OPTIONS] MESSAGE
+muxi send [OPTIONS] MESSAGE
 ```
 
 Options:
@@ -132,7 +134,7 @@ Options:
 
 Example:
 ```bash
-python -m muxi.cli send "What is the capital of France?"
+muxi send "What is the capital of France?"
 ```
 
 ## Server Mode
@@ -140,17 +142,34 @@ python -m muxi.cli send "What is the capital of France?"
 The server mode starts the REST API server, which provides endpoints for interacting with agents.
 
 ```bash
-python -m muxi.cli run [OPTIONS]
+muxi run [OPTIONS]
 ```
 
 Options:
 - `--host TEXT`: Host to bind to (default: "0.0.0.0")
 - `--port INTEGER`: Port to run on (default: 5050)
+- `--reload`: Enable hot-reloading for development
 - `--help`: Show this message and exit.
 
 Example:
 ```bash
-python -m muxi.cli run --host 127.0.0.1 --port 8080
+muxi run --host 127.0.0.1 --port 8080
+```
+
+## Create Mode
+
+The create mode provides wizards for generating new components like MCP servers.
+
+```bash
+muxi create [COMPONENT] [OPTIONS]
+```
+
+Available components:
+- `mcp-server`: Create a new MCP server project
+
+Example:
+```bash
+muxi create mcp-server --output-dir ./my_servers --name WeatherMCP
 ```
 
 ## Configuration
@@ -238,17 +257,17 @@ muxi chat
 You can use the CLI programmatically in your Python scripts:
 
 ```python
-from muxi.cli import run_cli, chat_with_agent
+from muxi.cli.cli import run_cli
+from muxi.core.agent import Agent
 
 # Run CLI directly
 run_cli()
 
-# Or use specific functions
-response = chat_with_agent("assistant", "Hello, how are you?")
+# Or create and use agents programmatically
+agent = Agent(agent_id="my_agent", model="gpt-4o")
+response = agent.chat("Hello, how are you?")
 print(response)
 ```
-
-This allows you to build custom workflows that leverage the CLI's functionality.
 
 ## Implementation Details
 

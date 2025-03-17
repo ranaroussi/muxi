@@ -7,7 +7,7 @@ permalink: /
 
 # MUXI - AI Agent Framework
 
-MUXI is an extensible framework for building AI agents with real-time communication capabilities, memory persistence, and tool integration.
+MUXI is an extensible framework for building AI agents with real-time communication capabilities, memory persistence, and MCP server integration.
 
 {: .warning }
 > This project is a work in progress and is not even close to being ready for production use. The framework is actively being developed and new features are being added. Please refer to the [roadmap](roadmap) for detailed information about the current state of the project and where it's headed.
@@ -16,19 +16,19 @@ MUXI is an extensible framework for building AI agents with real-time communicat
 
 - **Multi-Agent Orchestration**: Create and manage multiple AI agents with different capabilities
 - **Intelligent Message Routing**: Automatically select the most appropriate agent based on message content
+- **Model Context Protocol (MCP)**: Connect to external services and capabilities via standardized MCP servers
 - **Standardized LLM Communication**: Use a consistent protocol across different LLM providers
 - **Memory Systems**: Short-term buffer memory and long-term persistent memory
 - **Multi-User Support**: Memobase provides user-specific memory partitioning for multi-tenant applications
 - **Domain Knowledge**: Store and retrieve structured information to personalize agent responses
-- **Tool Integration**: Easy-to-use system for adding capabilities to agents
 - **Real-Time Communication**: WebSocket support for instant messaging
-- **REST API**: Comprehensive API for managing agents, tools, and conversations
+- **REST API**: Comprehensive API for managing agents, MCP servers, and conversations
 - **Command Line Interface**: Rich terminal-based interface for creating and interacting with agents
 - **Flexible Configuration**: Define agents using YAML or JSON with minimal code
 
 ## Getting Started
 
-The easiest way to get started with MUXI is to follow our [Quickstart Guide](quickstart).
+The easiest way to get started with MUXI is to follow our [Quick Start Guide](quick_start).
 
 ## Documentation
 
@@ -41,7 +41,44 @@ The documentation is organized into the following sections:
 
 ## Architecture
 
-![Architecture Diagram](https://www.mermaidchart.com/raw/12634479-a45c-48c0-bcec-d901cd7d62eb?theme=light&version=v0.1&format=svg)
+```
+┌───────────────────┐
+│      Clients      │
+│   (CLI/Web/SDK)   │
+└─────────┬─────────┘
+          │
+          │ (API/SSE/WS)
+          │
+┌─────────│───────────────────────────────────────────┐
+│         │    MUXI Server (Local/Remote)             │
+│         │                                           │
+│         │        ┌───────────────┐                  │
+│         └───────>│  Orchestrator │                  │
+│                  └───────┬───────┘                  │
+│         ┌────────────────┼────────────────┐         │
+│         │                │                │         │
+│         ▼                ▼                ▼         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │  │
+│  │    (YAML)   │  │    (JSON)   │  │    (YAML)   │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
+│         ↓                ↓                ↓         │
+│         └────────┬───────┴────────┬───────┘         │
+│                  ↓                :                 │
+│           ┌──────┴──────┐  ┌──────┴──────┐          │
+│           │ MCP Handler │  │   Memory    │          │
+│           └──────┬──────┘  └─────────────┘          │
+└──────────────────│──────────────────────────────────┘
+                   │
+                   │ (gRPC/HTTP)
+                   ▼
+┌─────────────────────────────────────────────────────┐
+│              MCP Servers (via Command/SSE)          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │   Weather   │  │  Web Search │  │     ....    │  │
+│  └─────────────┘  └─────────────┘  └─────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
 
 ## License
 

@@ -6,13 +6,20 @@ has_children: false
 nav_order: 4
 permalink: /memory/
 ---
-# Memory Systems
+# Memory in MUXI Framework
 
-Memory is a crucial component of the MUXI Framework that allows agents to retain information over time. The framework provides three complementary memory systems:
+Memory is a crucial component of the MUXI Framework that allows agents to retain information over time. The framework provides three complementary memory components:
 
-1. **Buffer Memory**: Short-term memory for the current conversation context
+1. **Buffer Memory**: Short-term memory for the current conversation context (always available by default)
 2. **Long-term Memory**: Persistent memory for storing information across multiple sessions
 3. **Memobase**: Multi-user memory system that partitions memories by user ID
+
+## Default Memory Behavior
+
+By default, MUXI implements the following memory behavior:
+
+- **Buffer Memory** is always available with a default buffer size of 5, unless otherwise specified
+- **Long-term Memory** is automatically enabled when using the multi-user architecture with Memobase, as long as at least one agent requires long-term memory
 
 ## Buffer Memory
 
@@ -31,13 +38,14 @@ Buffer memory:
 #### Basic Initialization
 
 ```python
-from src.memory.buffer import BufferMemory
+from muxi.core.memory.buffer import BufferMemory
 
-# Create a buffer memory with default settings
+# Create a buffer memory with default settings (max_size=5)
 buffer = BufferMemory()
 
 # Create a buffer memory with custom settings
 buffer = BufferMemory(
+    max_size=10,  # Maximum number of messages to store
     max_tokens=4000,  # Maximum token count to maintain
     model="gpt-3.5-turbo",  # Model used for token counting
     summarize_after=20  # Summarize after 20 messages
@@ -102,7 +110,7 @@ Long-term memory:
 #### Initialization
 
 ```python
-from src.memory.long_term import LongTermMemory
+from muxi.core.memory.long_term import LongTermMemory
 
 # Create a long-term memory with database connection
 memory = LongTermMemory(
@@ -187,8 +195,8 @@ Memobase:
 #### Initialization
 
 ```python
-from src.memory.long_term import LongTermMemory
-from src.memory.memobase import Memobase
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
 
 # First, initialize a long-term memory instance
 long_term_memory = LongTermMemory(
@@ -405,11 +413,11 @@ async def process_with_domain_knowledge(agent, message, user_id):
 ### Using Memobase with Agents
 
 ```python
-from src.core.orchestrator import Orchestrator
-from src.models import OpenAIModel
-from src.memory.buffer import BufferMemory
-from src.memory.long_term import LongTermMemory
-from src.memory.memobase import Memobase
+from muxi.core.orchestrator import Orchestrator
+from muxi.models import OpenAIModel
+from muxi.core.memory.buffer import BufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
 
 # Initialize memory systems
 buffer_memory = BufferMemory()
@@ -491,7 +499,7 @@ You can create custom memory implementations by extending the base classes:
 ### Custom Buffer Memory
 
 ```python
-from src.memory.buffer import BufferMemory
+from muxi.core.memory.buffer import BufferMemory
 
 class CustomBufferMemory(BufferMemory):
     def __init__(self, max_tokens=2000, **kwargs):
@@ -518,7 +526,7 @@ class CustomBufferMemory(BufferMemory):
 ### Custom Long-term Memory
 
 ```python
-from src.memory.long_term import LongTermMemory
+from muxi.core.memory.long_term import LongTermMemory
 
 class CustomLongTermMemory(LongTermMemory):
     def __init__(self, **kwargs):
@@ -724,7 +732,7 @@ CREATE TABLE credentials (
 );
 ```
 
-- Stores user credentials for MCP servers and external tools
+- Stores user credentials for MCP servers and external services
 - Uses JSONB for flexible credential format storage
 - Secured with proper indexing and access controls
 
@@ -764,7 +772,7 @@ This database structure provides a solid foundation for the memory systems withi
 
 After implementing memory systems, you might want to explore:
 
-- Creating [custom tools](./tools) that can access and manipulate memory
+- Creating [custom MCP servers](./mcp) that can access and manipulate memory
 - Setting up [WebSocket connections](./websocket) for real-time memory updates
 - Implementing advanced [MCP features](./mcp) to better control how the LLM uses memory
 - Developing [agent collaboration](./orchestrator) methods that share memory between agents

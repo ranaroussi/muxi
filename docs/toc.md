@@ -26,16 +26,16 @@ This document tracks the progress of the MUXI documentation. It shows which docu
   - [x] [Memory](../memory)
   - [ ] Memory Types (Buffer, Long-term, Memobase)
   - [ ] Multi-User Memory Management
-- **Tools**
-  - [x] [Tools](../tools)
-  - [ ] Creating Custom Tools
+- **Model Context Protocol**
+  - [x] [MCP](../mcp)
+  - [ ] Creating Custom MCP Servers
 - **LLM Integration**
   - [x] [Models](../models)
   - [x] [MCP](../mcp)
   - [ ] LLM Provider Integration
 - **Reference**
-  - [x] [Agents vs Tools](../agents_vs_tools)
-  - [x] [Tools vs MCP](../tools_vs_mcp)
+  - [ ] Agent Collaboration Patterns
+  - [ ] MCP Server Implementation Guide
 
 ## 3. User Interfaces
 - **Command Line Interface**
@@ -97,7 +97,6 @@ This document tracks the progress of the MUXI documentation. It shows which docu
 - [Agents](agents.md)
 - [Memory Systems](memory.md)
 - [Domain Knowledge](domain_knowledge.md)
-- [Tool System](tools.md)
 - [Model Context Protocol (MCP)](mcp.md)
 - [Multi-Modal Capabilities](multi-modal.md)
 - [Architecture Evolution](../ARCHITECTURE_EVOLUTION.md)

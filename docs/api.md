@@ -28,13 +28,23 @@ To start the API server, run:
 
 ```bash
 # Start the API server on the default port (5050)
-python -m src.api.run
+muxi run
 
 # Start the API server on a different port
-python -m src.api.run --port 8080
+muxi run --port 8080
 
 # Start the API server with auto-reload for development
-python -m src.api.run --reload
+muxi run --reload
+```
+
+Alternatively, you can use the module directly:
+
+```bash
+# Start the API server using the module
+python -m muxi.server.run
+
+# Start the API server on a different port
+python -m muxi.server.run --port 8080
 ```
 
 ### API Documentation
@@ -55,7 +65,7 @@ export API_AUTH_ENABLED=true
 export API_KEY=your_secret_api_key
 
 # Then start the server
-python -m src.api.run
+muxi run
 ```
 
 When authentication is enabled, include the API key in the headers:
@@ -413,7 +423,7 @@ curl -X POST http://localhost:5050/tools/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "weather",
-    "class_path": "src.tools.weather.WeatherTool",
+    "class_path": "muxi.core.tools.weather.WeatherTool",
     "config": {
       "api_key": "your_weather_api_key"
     }
@@ -1096,7 +1106,7 @@ To view detailed logs from the API server:
 export LOG_LEVEL=DEBUG
 
 # Start the server
-python -m src.api.run
+muxi run
 
 # View logs in real-time
 tail -f logs/api.log

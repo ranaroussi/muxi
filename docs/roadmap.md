@@ -221,6 +221,8 @@ We welcome community input on prioritization of these roadmap items. Please open
 - WebSocket support for Omni capabilities
 - Enhanced CLI with remote connection support
 
+### ...
+
 ### v1.0.0
 - Production-ready release
 - Complete documentation

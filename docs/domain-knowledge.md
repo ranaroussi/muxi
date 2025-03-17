@@ -37,8 +37,8 @@ When a user interacts with an agent, the agent can automatically enhance the use
 ### Adding Domain Knowledge
 
 ```python
-from src.memory.memobase import Memobase
-from src.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
+from muxi.core.memory.long_term import LongTermMemory
 
 # Create a Memobase instance
 memobase = Memobase(long_term_memory=LongTermMemory())
@@ -120,9 +120,9 @@ await memobase.clear_user_domain_knowledge(user_id=123)
 When using an agent with Memobase as its long-term memory, messages are automatically enhanced with relevant domain knowledge:
 
 ```python
-from src.core.orchestrator import Orchestrator
-from src.models.openai import OpenAIModel
-from src.memory.buffer import BufferMemory
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.openai import OpenAIModel
+from muxi.core.memory.buffer import BufferMemory
 
 # Create an orchestrator
 orchestrator = Orchestrator()

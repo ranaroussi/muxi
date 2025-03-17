@@ -81,19 +81,19 @@ def load_api_keys():
 To run all tests:
 
 ```bash
-pytest
+python -m pytest
 ```
 
 To run a specific test module:
 
 ```bash
-pytest tests/test_agent.py
+python -m pytest tests/test_agent.py
 ```
 
 To run a specific test function:
 
 ```bash
-pytest tests/test_agent.py::test_create_agent
+python -m pytest tests/test_agent.py::test_create_agent
 ```
 
 ## Test Environment Configuration
@@ -121,10 +121,10 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 class TestLLMModel(unittest.TestCase):
-    @patch('src.models.providers.openai.OpenAIModel.chat')
-    def test_chat_functionality(self, mock_chat):
+    @patch('muxi.core.models.openai.OpenAIModel.generate')
+    def test_generate_functionality(self, mock_generate):
         # Configure the mock
-        mock_chat.return_value = "Mocked response from the LLM"
+        mock_generate.return_value = "Mocked response from the LLM"
 
         # Test your component that uses the LLM
         # ...
@@ -137,6 +137,7 @@ class TestLLMModel(unittest.TestCase):
 3. **Clean up resources**: Always clean up resources (like database connections) after tests
 4. **Test edge cases**: Include tests for error conditions and edge cases
 5. **Use consistent API key handling**: Always use the environment setup utility for API keys
+6. **Respect package boundaries**: When testing, respect the boundaries between packages to ensure proper integration
 
 ## Continuous Integration
 
