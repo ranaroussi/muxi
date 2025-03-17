@@ -79,11 +79,11 @@ To support the service-oriented architecture, the MUXI framework will be broken 
 ### Package Structure
 
 ```
-muxi/
-├── muxi-core/      # Core functionality and shared components
-├── muxi-server/    # Server implementation
-├── muxi-cli/       # Command-line interface
-└── muxi-web/       # Web application
+packages/
+├── core/      # Core functionality and shared components
+├── server/    # Server implementation
+├── cli/       # Command-line interface
+└── web/       # Web application
 ```
 
 ### Installation Options
