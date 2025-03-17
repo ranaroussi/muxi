@@ -1,0 +1,16 @@
+Metadata-Version: 2.2
+Name: muxi-server
+Version: 0.1.0
+Summary: MUXI Framework Server Implementation
+Author: MUXI Team
+Requires-Python: >=3.8
+Requires-Dist: muxi-core>=0.1.0
+Requires-Dist: fastapi>=0.95.0
+Requires-Dist: uvicorn>=0.22.0
+Requires-Dist: websockets>=11.0.0
+Requires-Dist: python-multipart>=0.0.6
+Requires-Dist: sqlalchemy>=2.0.0
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

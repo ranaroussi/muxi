@@ -1,0 +1,11 @@
+Metadata-Version: 2.2
+Name: muxi
+Version: 0.1.0
+Summary: MUXI Framework - Complete System (excluding web interface)
+Author: MUXI Team
+Requires-Dist: muxi-core>=0.1.0
+Requires-Dist: muxi-server>=0.1.0
+Requires-Dist: muxi-cli>=0.1.0
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: summary

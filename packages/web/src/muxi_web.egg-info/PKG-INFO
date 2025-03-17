@@ -1,0 +1,14 @@
+Metadata-Version: 2.2
+Name: muxi-web
+Version: 0.1.0
+Summary: MUXI Framework Web Interface
+Author: MUXI Team
+Requires-Python: >=3.8
+Requires-Dist: muxi-core>=0.1.0
+Requires-Dist: flask>=2.2.0
+Requires-Dist: jinja2>=3.1.0
+Requires-Dist: werkzeug>=2.2.0
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

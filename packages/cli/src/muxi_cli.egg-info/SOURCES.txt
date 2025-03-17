@@ -1,0 +1,16 @@
+README.md
+setup.py
+src/muxi/__init__.py
+src/muxi/__main__.py
+src/muxi/cli/__init__.py
+src/muxi/cli/__main__.py
+src/muxi/cli/app.py
+src/muxi/cli/commands.py
+src/muxi/cli/mcp_generator.py
+src/muxi/cli/templates/__init__.py
+src/muxi_cli.egg-info/PKG-INFO
+src/muxi_cli.egg-info/SOURCES.txt
+src/muxi_cli.egg-info/dependency_links.txt
+src/muxi_cli.egg-info/entry_points.txt
+src/muxi_cli.egg-info/requires.txt
+src/muxi_cli.egg-info/top_level.txt

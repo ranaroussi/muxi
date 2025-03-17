@@ -1,0 +1,2 @@
+[console_scripts]
+muxi = muxi.cli.main:cli

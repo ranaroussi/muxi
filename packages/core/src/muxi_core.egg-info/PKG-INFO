@@ -1,0 +1,13 @@
+Metadata-Version: 2.2
+Name: muxi-core
+Version: 0.1.0
+Summary: MUXI Framework Core Components
+Author: MUXI Team
+Requires-Python: >=3.8
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: httpx>=0.24.0
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
