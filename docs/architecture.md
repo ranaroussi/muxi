@@ -79,8 +79,9 @@ The MUXI framework is evolving towards a more flexible, service-oriented approac
 │       │           ┌──────────────┐                  │
 │       └─────────► │ Orchestrator │                  │
 │                   └──────┬───────┘                  │
-│                          │                          │
-│                          ▼                          │
+│         ┌────────────────┼────────────────┐         │
+│         │                │                │         │
+│         ▼                ▼                ▼         │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
 │  │   Agent 1   │  │   Agent 2   │  │   Agent N   │  │
 │  │ (from YAML) │  │ (from JSON) │  │ (from YAML) │  │

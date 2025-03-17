@@ -47,8 +47,9 @@ This evolution preserves the current programmatic API while adding powerful capa
 │       │           ┌──────────────┐                  │
 │       └─────────► │ Orchestrator │                  │
 │                   └──────┬───────┘                  │
-│                          │                          │
-│                          ▼                          │
+│         ┌────────────────┼────────────────┐         │
+│         │                │                │         │
+│         ▼                ▼                ▼         │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
 │  │   Agent 1   │  │   Agent 2   │  │   Agent N   │  │
 │  │ (from YAML) │  │ (from JSON) │  │ (from YAML) │  │
