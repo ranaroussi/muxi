@@ -56,7 +56,7 @@ MUXI is evolving towards a more flexible, service-oriented approach:
 │       │      MUXI Server (Local/Remote)             │
 │       │                                             │
 │       │           ┌──────────────┐                  │
-│       └─────────► │ Orchestrator │                  │
+│       └─────────> │ Orchestrator │                  │
 │                   └──────┬───────┘                  │
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │

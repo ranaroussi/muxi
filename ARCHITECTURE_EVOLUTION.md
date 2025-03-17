@@ -45,7 +45,7 @@ This evolution preserves the current programmatic API while adding powerful capa
 │       │      MUXI Server (Local/Remote)             │
 │       │                                             │
 │       │           ┌──────────────┐                  │
-│       └─────────► │ Orchestrator │                  │
+│       └─────────> │ Orchestrator │                  │
 │                   └──────┬───────┘                  │
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │
