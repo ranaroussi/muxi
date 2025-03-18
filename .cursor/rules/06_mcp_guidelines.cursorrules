@@ -102,9 +102,9 @@
 
 ## Transport Implementation
 - Implement the Transport Factory pattern for managing different transport types
-- Support HTTP+SSE transport for web-based MCP servers
-- Support Command-line transport for local executable MCP servers
-- Design with forward compatibility for upcoming Streamable HTTP transport
+- Support HTTP+SSE transport for web-based MCP servers (via url parameter)
+- Support Command-line transport for local executable MCP servers (via command parameter)
+- Use distinct parameters (url or command) to clearly indicate server type
 - Implement proper connection lifecycle management (connect, send, receive, disconnect)
 - Handle transport-specific error conditions
 - Abstract transport details from higher-level code
