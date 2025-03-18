@@ -19,6 +19,8 @@ from muxi.server.memory.long_term import LongTermMemory
 from muxi.server.memory.memobase import Memobase
 from muxi.models.base import BaseModel
 from muxi.server.tools.base import BaseTool, tool_registry
+from muxi.knowledge.base import KnowledgeSource
+from muxi.utils.id_generator import get_default_nanoid
 
 
 class Agent:
@@ -34,6 +36,8 @@ class Agent:
         long_term_memory: Optional[LongTermMemory] = None,
         system_message: Optional[str] = None,
         name: Optional[str] = None,
+        agent_id: Optional[str] = None,
+        knowledge: Optional[List[KnowledgeSource]] = None,
     ):
         """
         Initialize an agent.
@@ -47,9 +51,12 @@ class Agent:
                 Can be a LongTermMemory or Memobase instance for multi-user support.
             system_message: Optional system message to set agent's behavior.
             name: Optional name for the agent.
+            agent_id: Optional unique identifier for the agent.
+            knowledge: Optional list of knowledge sources for the agent.
         """
         self.model = model
         self.name = name or "AI Assistant"
+        self.agent_id = agent_id or get_default_nanoid()
 
         # Handle memory options
         if memory is not None:
@@ -68,6 +75,11 @@ class Agent:
         self.system_message = system_message or (
             "You are a helpful AI assistant."
         )
+
+        # Initialize knowledge handler if knowledge sources are provided
+        self.knowledge_handler = None
+        if knowledge:
+            self._initialize_knowledge(knowledge)
 
         # Initialize MCPHandler with no tools - we'll use MCP servers instead
         self.mcp_handler = MCPHandler(self.model)
@@ -133,7 +145,11 @@ class Agent:
             logger.error(f"Failed to connect to MCP server {name}: {str(e)}")
             raise
 
-    async def _handle_mcp_server_call(self, server_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_mcp_server_call(
+        self,
+        server_name: str,
+        parameters: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Handle a call to an MCP server.
 
@@ -620,3 +636,106 @@ class Agent:
         response = await self.mcp_handler.process_message(user_message)
 
         return response
+
+    async def _initialize_knowledge(self, knowledge_sources: List[KnowledgeSource]) -> None:
+        """
+        Initialize the knowledge handler and add knowledge sources.
+
+        Args:
+            knowledge_sources: List of knowledge sources to add
+        """
+        from muxi.knowledge.base import KnowledgeHandler
+
+        # Determine embedding dimension by getting a sample embedding
+        sample_embedding = await self.model.embed("Sample text to determine embedding dimension")
+        embedding_dimension = len(sample_embedding)
+
+        # Create knowledge handler with the correct embedding dimension
+        self.knowledge_handler = KnowledgeHandler(
+            self.agent_id,
+            embedding_dimension=embedding_dimension
+        )
+
+        # Add knowledge sources
+        for source in knowledge_sources:
+            await self.add_knowledge(source)
+
+    async def add_knowledge(self, knowledge_source: KnowledgeSource) -> int:
+        """
+        Add a knowledge source to the agent.
+
+        Args:
+            knowledge_source: The knowledge source to add
+
+        Returns:
+            Number of chunks added to the knowledge base
+        """
+        from muxi.knowledge.base import KnowledgeHandler, FileKnowledge
+
+        # Initialize knowledge handler if it doesn't exist
+        if not self.knowledge_handler:
+            self.knowledge_handler = KnowledgeHandler(self.agent_id)
+
+        # Currently only supporting FileKnowledge
+        if isinstance(knowledge_source, FileKnowledge):
+            return await self.knowledge_handler.add_file(
+                knowledge_source,
+                self.model.generate_embeddings
+            )
+
+        logger.warning(f"Unsupported knowledge source type: {type(knowledge_source)}")
+        return 0
+
+    async def remove_knowledge(self, file_path: str) -> bool:
+        """
+        Remove a knowledge source from the agent.
+
+        Args:
+            file_path: Path to the file to remove
+
+        Returns:
+            True if the file was removed, False otherwise
+        """
+        if not self.knowledge_handler:
+            return False
+
+        return await self.knowledge_handler.remove_file(file_path)
+
+    def get_knowledge_sources(self) -> List[str]:
+        """
+        Get a list of knowledge sources.
+
+        Returns:
+            List of file paths in the knowledge base
+        """
+        if not self.knowledge_handler:
+            return []
+
+        return self.knowledge_handler.get_sources()
+
+    async def search_knowledge(
+        self,
+        query: str,
+        top_k: int = 5,
+        threshold: float = 0.0
+    ) -> List[Dict[str, Any]]:
+        """
+        Search the knowledge base for relevant information.
+
+        Args:
+            query: The query to search for
+            top_k: Maximum number of results to return
+            threshold: Minimum relevance score (0-1) to include a result
+
+        Returns:
+            List of relevant documents
+        """
+        if not self.knowledge_handler:
+            return []
+
+        return await self.knowledge_handler.search(
+            query,
+            self.model.generate_embeddings,
+            top_k,
+            threshold
+        )

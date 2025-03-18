@@ -160,6 +160,21 @@ class OpenAIModel(BaseModel):
         response = await self.client.embeddings.create(model="text-embedding-3-small", input=text)
         return response.data[0].embedding
 
+    async def generate_embeddings(self, texts: List[str], **kwargs: Any) -> List[List[float]]:
+        """
+        Generate embeddings for a list of texts.
+
+        Args:
+            texts: List of texts to generate embeddings for.
+            **kwargs: Additional provider-specific parameters.
+
+        Returns:
+            A list of embeddings, each as a list of floats.
+        """
+        model = kwargs.get("model", "text-embedding-3-small")
+        response = await self.client.embeddings.create(model=model, input=texts)
+        return [item.embedding for item in response.data]
+
     async def chat(
         self,
         messages: List[Dict[str, str]],
