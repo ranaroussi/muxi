@@ -125,7 +125,7 @@ async def test_http_sse_transport():
         print(f"✅ Created HTTPSSETransport: {transport}")
 
         # Check the instance attributes
-        print(f"✅ Instance created successfully")
+        print("✅ Instance created successfully")
 
         # Check if key methods exist
         has_connect = hasattr(transport, "connect")
@@ -255,7 +255,7 @@ async def test_error_handling():
             error1 = MCPConnectionError("Connection failed")
             print(f"✅ Created MCPConnectionError: {error1}")
             print(f"✅ Error message: {str(error1)}")
-        except TypeError as e:
+        except TypeError:
             # Try alternative constructor if the first one fails
             error1 = MCPConnectionError("Connection failed", {"server_name": "test_server"})
             print(f"✅ Created MCPConnectionError with alternative constructor: {error1}")
@@ -265,7 +265,7 @@ async def test_error_handling():
             error2 = MCPRequestError("Request failed")
             print(f"✅ Created MCPRequestError: {error2}")
             print(f"✅ Error message: {str(error2)}")
-        except TypeError as e:
+        except TypeError:
             # Try alternative constructor if the first one fails
             error2 = MCPRequestError(
                 "Request failed",
@@ -278,7 +278,7 @@ async def test_error_handling():
             error3 = MCPTimeoutError("Request timed out")
             print(f"✅ Created MCPTimeoutError: {error3}")
             print(f"✅ Error message: {str(error3)}")
-        except TypeError as e:
+        except TypeError:
             # Try alternative constructor if the first one fails
             error3 = MCPTimeoutError(
                 "Request timed out",

@@ -13,24 +13,25 @@ This script tests all key components of the MCP implementation:
 """
 
 import asyncio
-import unittest
-import sys
 import os
 import subprocess
+import sys
+import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add the root directory to the path
+# Important: Add the root directory to the path before importing from packages
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from packages.core.src.muxi.core.mcp_handler import (
-    MCPHandler,
-    MCPServerClient,
-    HTTPSSETransport,
-    CommandLineTransport,
-    MCPTransportFactory,
+# Import after sys.path modification
+from packages.core.src.muxi.core.mcp_handler import (  # noqa: E402
     CancellationToken,
+    CommandLineTransport,
+    HTTPSSETransport,
     MCPConnectionError,
-    MCPRequestError
+    MCPHandler,
+    MCPRequestError,
+    MCPServerClient,
+    MCPTransportFactory,
 )
 
 
@@ -123,7 +124,9 @@ class TestHTTPSSETransport(unittest.IsolatedAsyncioTestCase):
         self.transport = HTTPSSETransport("https://server.mcpify.ai/sse?server=test-id", 30)
 
         # Set up patches
-        self.http_client_patcher = patch('packages.core.src.muxi.core.mcp_handler.httpx.AsyncClient')
+        self.http_client_patcher = patch(
+            'packages.core.src.muxi.core.mcp_handler.httpx.AsyncClient'
+        )
         self.mock_http_client_class = self.http_client_patcher.start()
         self.mock_http_client = MagicMock()
         self.mock_http_client.aclose = AsyncMock()
@@ -178,14 +181,16 @@ class TestHTTPSSETransport(unittest.IsolatedAsyncioTestCase):
 
         # Verify connection state
         self.assertTrue(self.transport.connected)
-        self.assertEqual(self.transport.message_url, "https://server.mcpify.ai/messages?server=test-id&sessionId=12345")
+        msg_url = "https://server.mcpify.ai/messages?server=test-id&sessionId=12345"
+        self.assertEqual(self.transport.message_url, msg_url)
         self.assertIsNotNone(self.transport._listen_task)
 
     async def test_send_request(self):
         """Test sending a request to an HTTP+SSE server."""
         # Set up transport for test
         self.transport.connected = True
-        self.transport.message_url = "https://server.mcpify.ai/messages?server=test-id&sessionId=12345"
+        msg_url = "https://server.mcpify.ai/messages?server=test-id&sessionId=12345"
+        self.transport.message_url = msg_url
 
         # Mock HTTP response
         mock_response = MagicMock()
@@ -199,7 +204,7 @@ class TestHTTPSSETransport(unittest.IsolatedAsyncioTestCase):
         # Verify the request was sent correctly
         self.mock_http_client.post.assert_called_once()
         call_args = self.mock_http_client.post.call_args
-        self.assertEqual(call_args[0][0], "https://server.mcpify.ai/messages?server=test-id&sessionId=12345")
+        self.assertEqual(call_args[0][0], msg_url)
         self.assertEqual(call_args[1]["json"], request)
 
         # The result should be None as the response is 202 Accepted
@@ -278,7 +283,8 @@ class TestCommandLineTransport(unittest.IsolatedAsyncioTestCase):
         self.transport.process = self.mock_process
 
         # Mock process response
-        self.mock_process.stdout.readline.return_value = b'{"jsonrpc":"2.0","result":{"data":"test_result"},"id":"1"}\n'
+        resp = b'{"jsonrpc":"2.0","result":{"data":"test_result"},"id":"1"}\n'
+        self.mock_process.stdout.readline.return_value = resp
 
         # Send request
         request = {"jsonrpc": "2.0", "method": "test_method", "params": {}, "id": "1"}
@@ -570,8 +576,12 @@ class TestCommandLineTransportWithRealProcess(unittest.IsolatedAsyncioTestCase):
     Skip this test if NPM is not available.
     """
 
-    @unittest.skipIf(not any(subprocess.run(["which", "npx"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout),
-                    "NPX not found, skipping real process test")
+    @unittest.skipIf(
+        not any(subprocess.run(
+            ["which", "npx"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ).stdout),
+        "NPX not found, skipping real process test"
+    )
     async def test_command_line_real_process(self):
         """Test CommandLineTransport with a real NPX process if available."""
         # Create transport for the calculator server

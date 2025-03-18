@@ -92,7 +92,7 @@ async def test_brave_search_server():
             elif isinstance(result["result"], dict) and "web" in result["result"]:
                 print(f"✅ Received search results with {len(result['result']['web'])} web items")
         else:
-            print(f"❌ Test failed: Did not receive expected result structure")
+            print("❌ Test failed: Did not receive expected result structure")
 
     except Exception as e:
         print(f"❌ Test failed with exception: {str(e)}")

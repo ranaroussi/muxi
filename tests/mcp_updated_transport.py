@@ -176,7 +176,9 @@ class HTTPSSETransport:
                 try:
                     return response.json()
                 except Exception:
-                    resp_text = response.text[:100] + "..." if len(response.text) > 100 else response.text
+                    resp_text = response.text
+                    if len(response.text) > 100:
+                        resp_text = response.text[:100] + "..."
                     logger.warning(
                         f"Non-JSON response with status {response.status_code}: {resp_text}"
                     )
@@ -222,7 +224,7 @@ async def test_mcp_server():
             print("Failed to connect to MCP server")
             return
 
-        print(f"Successfully connected to MCP server")
+        print("Successfully connected to MCP server")
         print(f"Message URL: {transport.message_url}")
         print(f"Session ID: {transport.session_id}")
 

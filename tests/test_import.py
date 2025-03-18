@@ -23,19 +23,19 @@ except ImportError as e:
     print(f"Failed to import MCP: {e}")
 
 try:
-    from muxi.core.mcp import MCPMessage
+    from muxi.core.mcp import MCPMessage  # noqa: F401
     print("Successfully imported MCPMessage")
 except ImportError as e:
     print(f"Failed to import MCPMessage: {e}")
 
 try:
-    from muxi.core.mcp_handler import MCPHandler
+    from muxi.core.mcp_handler import MCPHandler  # noqa: F401
     print("Successfully imported MCPHandler")
 except ImportError as e:
     print(f"Failed to import MCPHandler: {e}")
 
 try:
-    from mcp.client.session import ClientSession
+    from mcp.client.session import ClientSession  # noqa: F401
     print("Successfully imported ClientSession from mcp.client.session")
 except ImportError as e:
     print(f"Failed to import ClientSession: {e}")

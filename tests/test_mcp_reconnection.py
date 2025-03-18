@@ -11,7 +11,6 @@ import sys
 import asyncio
 import unittest
 import importlib.util
-import time
 import random
 import logging
 import json
@@ -54,20 +53,29 @@ except ImportError as e:
         "mcp_handler",
         os.path.join(root_dir, "packages/core/src/muxi/core/mcp_handler.py")
     )
-    mcp_handler = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mcp_handler)
+    if spec is not None:
+        mcp_handler = importlib.util.module_from_spec(spec)
+        if spec.loader is not None:
+            spec.loader.exec_module(mcp_handler)
 
-    # Get the classes we need
-    MCPHandler = mcp_handler.MCPHandler
-    MCPServerClient = mcp_handler.MCPServerClient
-    HTTPSSETransport = mcp_handler.HTTPSSETransport
-    CommandLineTransport = mcp_handler.CommandLineTransport
-    MCPTransportFactory = mcp_handler.MCPTransportFactory
-    CancellationToken = mcp_handler.CancellationToken
-    MCPConnectionError = mcp_handler.MCPConnectionError
-    MCPRequestError = mcp_handler.MCPRequestError
-    BaseTransport = mcp_handler.BaseTransport
-    print("✅ Successfully imported MCP classes via importlib")
+            # Get the classes from the module
+            # Use type ignore to suppress mypy errors about assigning to types
+            MCPHandler = mcp_handler.MCPHandler  # type: ignore
+            MCPServerClient = mcp_handler.MCPServerClient  # type: ignore
+            HTTPSSETransport = mcp_handler.HTTPSSETransport  # type: ignore
+            CommandLineTransport = mcp_handler.CommandLineTransport  # type: ignore
+            MCPTransportFactory = mcp_handler.MCPTransportFactory  # type: ignore
+            CancellationToken = mcp_handler.CancellationToken  # type: ignore
+            MCPConnectionError = mcp_handler.MCPConnectionError  # type: ignore
+            MCPRequestError = mcp_handler.MCPRequestError  # type: ignore
+            BaseTransport = mcp_handler.BaseTransport  # type: ignore
+            print("✅ Successfully imported MCP classes via importlib")
+        else:
+            print("❌ Failed to load module: spec.loader is None")
+            sys.exit(1)
+    else:
+        print("❌ Failed to find module: spec is None")
+        sys.exit(1)
 
 
 class UnstableTransport(BaseTransport):
@@ -88,8 +96,9 @@ class UnstableTransport(BaseTransport):
         self.connection_attempts = 0
         self.successful_requests = 0
         self.failed_requests = 0
-        self.connect_time = None
-        self.last_activity = None
+        # Initialize datetime attributes with None
+        self.connect_time: Optional[datetime] = None
+        self.last_activity: Optional[datetime] = None
 
     async def connect(self) -> bool:
         """Attempt to connect, with possible failure."""
@@ -110,10 +119,11 @@ class UnstableTransport(BaseTransport):
         if random.random() < self.failure_rate:
             self.consecutive_failures += 1
             logger.info(f"Connection failed (consecutive failures: {self.consecutive_failures})")
-            raise MCPConnectionError(
-                "Simulated connection failure",
-                {"attempt": self.connection_attempts, "consecutive_failures": self.consecutive_failures}
-            )
+            error_info = {
+                "attempt": self.connection_attempts,
+                "consecutive_failures": self.consecutive_failures
+            }
+            raise MCPConnectionError("Simulated connection failure", error_info)
 
         # Successful connection
         self.consecutive_failures = 0
@@ -123,8 +133,12 @@ class UnstableTransport(BaseTransport):
         logger.info("Connected successfully")
         return True
 
-    async def send_request(self, request: Dict[str, Any],
-                         cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
+    # pyright: ignore[reportInvalidTypeForm]
+    async def send_request(
+        self,
+        request: Dict[str, Any],
+        cancellation_token: Optional[Any] = None
+    ) -> Dict[str, Any]:
         """Send a request, with possible failure."""
         if not self.connected:
             raise MCPConnectionError("Not connected")
@@ -137,10 +151,18 @@ class UnstableTransport(BaseTransport):
         await asyncio.sleep(random.uniform(0.1, 0.5))
 
         # Update activity time
-        self.last_activity = datetime.now()
+        if self.last_activity is None:
+            self.last_activity = datetime.now()
+        else:
+            self.last_activity = datetime.now()
 
         # Check for cancellation
-        if cancellation_token and hasattr(cancellation_token, 'cancelled') and cancellation_token.cancelled:
+        has_cancelled = (
+            cancellation_token and
+            hasattr(cancellation_token, 'cancelled') and
+            cancellation_token.cancelled
+        )
+        if has_cancelled:
             logger.info(f"Request cancelled: {method} (id: {request_id})")
             raise asyncio.CancelledError("Request cancelled")
 
@@ -355,10 +377,9 @@ class MCPReconnectionTest(unittest.IsolatedAsyncioTestCase):
 
             for retry in range(max_retries_per_request):
                 try:
-                    result = await self.handler.execute_tool(
-                        server_name="test_server",
-                        tool_name=f"test_tool_{i}",
-                        params={"request_num": i},
+                    await self.handler.execute_tool(
+                        tool_name="test_tool",
+                        params={"param": f"value_{i}"}
                     )
                     successful_requests += 1
                     success = True

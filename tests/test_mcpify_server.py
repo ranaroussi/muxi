@@ -6,11 +6,10 @@ Test script for connecting to the mcpify.ai MCP server.
 import asyncio
 import uuid
 import httpx
-from mcp import JSONRPCRequest
 import json
 import traceback
 from dataclasses import dataclass
-from typing import Optional, AsyncGenerator
+from typing import Optional
 
 
 @dataclass
@@ -106,7 +105,8 @@ class MCPTester:
                         # Extract the session ID from the URL query parameters
                         if "?" in self.message_url:
                             query_params = self.message_url.split("?")[1]
-                            params_dict = dict(param.split("=") for param in query_params.split("&"))
+                            params_dict = dict(
+                                param.split("=") for param in query_params.split("&"))
 
                             # Check for either session_id or sessionId
                             if "session_id" in params_dict:
@@ -297,9 +297,9 @@ async def main():
                 print(f"\nAlternative Endpoints Test: {'Passed' if alt_success else 'Failed'}")
 
                 if not alt_success:
-                    print("\nAll tests failed. The MCP server might not be compatible or reachable.")
+                    print("\nAll tests failed. MCP server might not be compatible or reachable.")
             else:
-                print("\nAll tests passed. The MCP server is working correctly.")
+                print("\nAll tests passed. MCP server is working correctly.")
         else:
             print("\nSSE connection failed. Cannot proceed with further tests.")
 
