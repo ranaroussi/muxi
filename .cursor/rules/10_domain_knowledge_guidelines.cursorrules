@@ -1,0 +1,225 @@
+--------------------------------------------------------------------------------
+# Domain Knowledge Guidelines
+# Guidelines for working with agent-level domain knowledge in the MUXI framework
+--------------------------------------------------------------------------------
+
+## Overview
+
+This document outlines the guidelines, patterns, and best practices for working with agent-level domain knowledge in the MUXI framework. The domain knowledge system provides lightweight RAG (Retrieval-Augmented Generation) capabilities that enable agents to access specialized knowledge sources.
+
+## Core Principles
+
+1. **Lightweight RAG**: Keep domain knowledge implementation focused and efficient
+   - File-based knowledge sources for simplicity
+   - In-memory vector storage using FAISS
+   - Persistent caching to minimize API costs
+
+2. **Model Reuse**: Use the agent's configured model for embedding generation
+   - No additional embedding-specific dependencies
+   - Dynamic dimension detection based on model
+
+3. **Clear API**: Maintain a clean, intuitive API for knowledge management
+   - Add, remove, list, and search knowledge programmatically
+   - Declarative configuration in YAML/JSON
+
+## Implementation Details
+
+### Knowledge Source Types
+
+Currently, MUXI supports the following knowledge source types:
+
+- **FileKnowledge**: Text-based documents containing domain-specific information
+
+### Knowledge Handler
+
+The `KnowledgeHandler` class manages knowledge sources and embedding operations:
+
+```python
+class KnowledgeHandler:
+    def __init__(self, agent_id, embedding_dimension=1536, cache_dir=".cache/knowledge_embeddings"):
+        self.agent_id = agent_id
+        self.embedding_dimension = embedding_dimension
+        self.cache_dir = cache_dir
+        self.embedding_file = f"{cache_dir}/{agent_id}_embeddings.pickle"
+        self.metadata_file = f"{cache_dir}/{agent_id}_metadata.pickle"
+
+        # Create cache directory if it doesn't exist
+        os.makedirs(cache_dir, exist_ok=True)
+
+        # Initialize index and documents
+        self._load_cached_embeddings()
+```
+
+### Agent Integration
+
+The `Agent` class has the following knowledge-related methods:
+
+- `_initialize_knowledge`: Initialize the knowledge handler and add knowledge sources
+- `add_knowledge`: Add a knowledge source to the agent
+- `remove_knowledge`: Remove a knowledge source from the agent
+- `get_knowledge_sources`: Get a list of knowledge sources
+- `search_knowledge`: Search the knowledge base for relevant information
+
+## Usage Guidelines
+
+### Configuration
+
+Define knowledge sources in agent configuration files:
+
+```yaml
+agent_id: product_assistant
+description: A helpful assistant with knowledge about our products.
+model:
+  provider: openai
+  api_key: "${OPENAI_API_KEY}"
+  model: gpt-4o
+knowledge:
+  - path: "knowledge/products.txt"
+    description: "Information about our product catalog"
+  - path: "knowledge/pricing.txt"
+    description: "Pricing information for our products"
+```
+
+### Programmatic Usage
+
+```python
+# Add knowledge to an agent
+from muxi.knowledge.base import FileKnowledge
+
+knowledge = FileKnowledge(
+    path="knowledge/products.txt",
+    description="Product information"
+)
+await agent.add_knowledge(knowledge)
+
+# Search knowledge
+results = await agent.search_knowledge(
+    query="What products do we offer?",
+    top_k=3,
+    threshold=0.7
+)
+```
+
+## Best Practices
+
+1. **Optimize Document Structure**
+   - Break large documents into smaller, topic-focused files
+   - Organize documents by domain and subtopic
+   - Include clear titles and headings in documents
+
+2. **Provide Descriptive Metadata**
+   - Include meaningful descriptions for knowledge sources
+   - Use consistent naming conventions for files
+
+3. **Balance Precision and Recall**
+   - Adjust search parameters based on your use case
+   - Use higher thresholds (0.7-0.8) for precision
+   - Use lower thresholds (0.4-0.6) for recall
+
+4. **Regular Updates**
+   - Keep knowledge sources up-to-date
+   - Remove outdated information promptly
+   - Version knowledge sources when appropriate
+
+5. **Knowledge vs. Memory**
+   - Use domain knowledge for static reference information
+   - Use memory for conversation context and user-specific data
+
+## Common Patterns
+
+### Searching Knowledge Explicitly
+
+```python
+# Search for relevant information
+results = await agent.search_knowledge(
+    query="Tell me about our premium products",
+    top_k=3,
+    threshold=0.7
+)
+
+# Process the results
+for result in results:
+    print(f"Content: {result['content']}")
+    print(f"Source: {result['source']}")
+    print(f"Relevance: {result['relevance']}")
+```
+
+### Managing Knowledge Sources
+
+```python
+# Add knowledge
+await agent.add_knowledge(FileKnowledge(path="knowledge/new_file.txt"))
+
+# List knowledge sources
+sources = agent.get_knowledge_sources()
+for source in sources:
+    print(f"Path: {source.path}, Description: {source.description}")
+
+# Remove knowledge
+success = await agent.remove_knowledge("knowledge/old_file.txt")
+```
+
+### Custom Knowledge Integration
+
+```python
+# In custom agent implementation
+async def process_message(self, message):
+    # Search knowledge based on user query
+    knowledge_results = await self.search_knowledge(message.content)
+
+    # Construct enhanced prompt with knowledge
+    knowledge_context = "Relevant information:\n"
+    for result in knowledge_results:
+        knowledge_context += f"- {result['content']}\n"
+
+    # Add to system message
+    enhanced_message = f"{self.system_message}\n\n{knowledge_context}"
+
+    # Send to LLM
+    response = await self.model.generate(enhanced_message, message.content)
+    return response
+```
+
+## Files and Directories
+
+- **Key Classes**:
+  - `muxi/core/agent.py`: Agent class with knowledge methods
+  - `muxi/knowledge/handler.py`: KnowledgeHandler implementation
+  - `muxi/knowledge/base.py`: Knowledge source classes
+
+- **Cache Directory**:
+  - `.cache/knowledge_embeddings`: Default location for cached embeddings
+
+## Testing
+
+When writing tests for domain knowledge:
+
+1. Mock embedding generation to avoid API calls
+2. Use small test files for knowledge sources
+3. Test knowledge management operations (add, remove, list)
+4. Verify search functionality with controlled inputs
+5. Check embedding caching and loading
+
+```python
+# Example test
+def test_knowledge_search():
+    # Mock embedding generation
+    mock_model = MagicMock()
+    mock_model.embed.return_value = np.random.rand(1536)
+
+    # Create agent with mock model
+    agent = Agent(agent_id="test", model=mock_model)
+
+    # Add test knowledge
+    knowledge = FileKnowledge(path="test_knowledge.txt")
+    await agent.add_knowledge(knowledge)
+
+    # Search knowledge
+    results = await agent.search_knowledge("test query")
+
+    # Verify results
+    assert len(results) > 0
+    assert "content" in results[0]
+    assert "source" in results[0]
+    assert "relevance" in results[0]
+```
