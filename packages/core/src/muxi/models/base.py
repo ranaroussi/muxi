@@ -6,7 +6,17 @@ provider implementations must inherit from.
 """
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
+
+
+@dataclass
+class MCPToolCall:
+    """Tool call information for MCP messages."""
+
+    tool_name: str
+    tool_id: str
+    tool_args: Dict[str, Any]
 
 
 class BaseModel(ABC):
@@ -59,5 +69,19 @@ class BaseModel(ABC):
 
         Returns:
             The embeddings as a list of floats.
+        """
+        pass
+
+    @abstractmethod
+    async def generate_embeddings(self, texts: List[str], **kwargs: Any) -> List[List[float]]:
+        """
+        Generate embeddings for a list of texts.
+
+        Args:
+            texts: List of texts to generate embeddings for.
+            **kwargs: Additional provider-specific parameters.
+
+        Returns:
+            A list of embeddings, each as a list of floats.
         """
         pass

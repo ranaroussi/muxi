@@ -7,23 +7,13 @@ the OpenAI API.
 
 import json
 import os
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import openai
 from loguru import logger
 
 from muxi.server.config import config
-from muxi.models.base import BaseModel
-
-
-@dataclass
-class MCPToolCall:
-    """Tool call information for MCP messages."""
-
-    tool_name: str
-    tool_id: str
-    tool_args: Dict[str, Any]
+from muxi.models.base import BaseModel, MCPToolCall
 
 
 class OpenAIModel(BaseModel):

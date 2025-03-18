@@ -5,21 +5,11 @@ This module provides functionality for communicating with language models using 
 Model Context Protocol (MCP) as defined at https://modelcontextprotocol.io/.
 """
 
-from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from loguru import logger
 
-from muxi.models.base import BaseModel
-
-
-@dataclass
-class MCPToolCall:
-    """Tool call information for MCP messages."""
-
-    tool_name: str
-    tool_id: str
-    tool_args: Dict[str, Any]
+from muxi.models.base import BaseModel, MCPToolCall
 
 
 class MCPMessage:
