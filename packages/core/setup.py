@@ -33,7 +33,6 @@ setup(
             "numpy>=1.24.0",
         ],
         "database": [
-            "aiosqlite>=0.19.0",
             "psycopg2-binary>=2.9.9",
             "SQLAlchemy>=2.0.17",
         ],
@@ -51,7 +50,6 @@ setup(
             "faiss-cpu>=1.10.0",
             "pgvector>=0.3.6",
             "numpy>=1.24.0",
-            "aiosqlite>=0.19.0",
             "psycopg2-binary>=2.9.9",
             "SQLAlchemy>=2.0.17",
             "openai>=0.27.8",

@@ -16,27 +16,108 @@ import uuid
 from typing import Any, Dict, List, Optional, Callable, AsyncGenerator
 import asyncio
 import httpx
+import time
+from datetime import datetime
 from mcp import JSONRPCRequest
 
 logger = logging.getLogger(__name__)
 
 
-class HTTPSSETransport:
+class MCPError(Exception):
+    """Base exception class for MCP-related errors."""
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+        self.message = message
+        self.details = details or {}
+        super().__init__(f"{message}" + (f": {json.dumps(details)}" if details else ""))
+
+
+class MCPConnectionError(MCPError):
+    """Exception raised for connection-related errors."""
+    pass
+
+
+class MCPRequestError(MCPError):
+    """Exception raised for errors when making requests to MCP servers."""
+    pass
+
+
+class MCPTimeoutError(MCPError):
+    """Exception raised when MCP operations time out."""
+    pass
+
+
+class MCPCancelledError(MCPError):
+    """Exception raised when an MCP operation is cancelled."""
+    pass
+
+
+class CancellationToken:
+    """A token that can be used to cancel async operations."""
+
+    def __init__(self):
+        self.cancelled = False
+        self._tasks = set()
+
+    def cancel(self):
+        """Mark the token as cancelled and cancel all registered tasks."""
+        self.cancelled = True
+        for task in self._tasks:
+            if not task.done():
+                task.cancel()
+
+    def register(self, task):
+        """Register a task to be cancelled when this token is cancelled."""
+        self._tasks.add(task)
+
+    def unregister(self, task):
+        """Unregister a task."""
+        if task in self._tasks:
+            self._tasks.remove(task)
+
+    def throw_if_cancelled(self):
+        """Throw an exception if this token has been cancelled."""
+        if self.cancelled:
+            raise MCPCancelledError("Operation was cancelled", {
+                "timestamp": datetime.now().isoformat()
+            })
+
+
+class BaseTransport:
+    """Base class for all MCP transport implementations."""
+
+    async def connect(self) -> bool:
+        """Connect to the MCP server."""
+        raise NotImplementedError("Subclasses must implement connect()")
+
+    async def send_request(self, request_obj: Any) -> Dict[str, Any]:
+        """Send a request to the MCP server."""
+        raise NotImplementedError("Subclasses must implement send_request()")
+
+    async def disconnect(self) -> bool:
+        """Disconnect from the MCP server."""
+        raise NotImplementedError("Subclasses must implement disconnect()")
+
+
+class HTTPSSETransport(BaseTransport):
     """HTTP+SSE transport for MCP servers."""
 
-    def __init__(self, url: str):
+    def __init__(self, url: str, request_timeout: int = 60):
         """Initialize with server URL.
 
         Args:
             url: Base URL of the MCP server
+            request_timeout: Timeout for requests in seconds
         """
         self.base_url = url
         self.sse_url = url if '/sse' in url else f"{url.rstrip('/')}/sse"
         self.message_url = None
         self.session_id = None
-        self.client = httpx.AsyncClient(timeout=60.0)  # Longer timeout for SSE
+        self.client = httpx.AsyncClient(timeout=request_timeout)
         self.sse_connection = None
         self.connected = False
+        self.request_timeout = request_timeout
+        self.connect_time = None
+        self.last_activity = None
 
     async def connect(self) -> bool:
         """Connect to the MCP server."""
@@ -48,28 +129,57 @@ class HTTPSSETransport:
                 "Connection": "keep-alive"
             }
 
-            self.sse_connection = await self.client.stream(
-                'GET', self.sse_url, headers=headers, timeout=60.0
-            )
+            start_time = time.time()
+            logger.info(f"Connecting to SSE endpoint: {self.sse_url}")
 
-            if self.sse_connection.status_code != 200:
-                logger.error(f"Failed to connect to SSE endpoint: {self.sse_connection.status_code}")
-                return False
+            # Use the stream context manager properly
+            async with self.client.stream(
+                'GET', self.sse_url, headers=headers, timeout=self.request_timeout
+            ) as response:
+                self.sse_connection = response
+                connection_time = time.time() - start_time
 
-            # Process SSE events to get endpoint info
-            async for line in self.sse_connection.aiter_lines():
-                if line.startswith("event: endpoint") or "endpoint" in line:
-                    # Try to extract message URL from endpoint event
-                    next_line = await self.sse_connection.aiter_lines().__anext__()
-                    if next_line.startswith("data: "):
-                        message_path = next_line[6:].strip()
+                if response.status_code != 200:
+                    error_details = {
+                        "status_code": response.status_code,
+                        "url": self.sse_url,
+                        "headers": dict(response.headers),
+                        "response_text": response.text[:500] if hasattr(response, 'text') else None,
+                        "connection_time_s": connection_time,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    logger.error(f"Failed to connect to SSE endpoint: {response.status_code}")
+                    raise MCPConnectionError(
+                        f"Failed to connect to SSE endpoint (status {response.status_code})",
+                        error_details
+                    )
+
+                logger.info(f"SSE connection established: {response.status_code} in {connection_time:.2f}s")
+
+                # Process SSE events to get endpoint info
+                found_endpoint = False
+                async for line in response.aiter_lines():
+                    logger.debug(f"SSE event: {line}")
+
+                    if line.startswith("event: endpoint"):
+                        # Next line should contain the data
+                        continue
+
+                    if line.startswith("data:") and self.message_url is None:
+                        message_path = line[5:].strip()
+                        logger.info(f"Found endpoint data: {message_path}")
 
                         # Make sure it's a full URL
                         if message_path.startswith('http'):
                             self.message_url = message_path
                         else:
                             # Handle relative paths
-                            server_base = self.base_url.split('/sse')[0]
+                            server_base = self.base_url
+                            if '/sse' in server_base:
+                                server_base = server_base.split('/sse')[0]
+                            else:
+                                server_base = server_base.rstrip('/')
+
                             if not message_path.startswith('/'):
                                 message_path = '/' + message_path
                             self.message_url = server_base + message_path
@@ -85,17 +195,60 @@ class HTTPSSETransport:
                                 self.session_id = params["session_id"]
 
                             logger.info(f"Connected to MCP server: {self.message_url}")
+                            logger.info(f"Session ID: {self.session_id}")
                             self.connected = True
-                            return True
+                            self.connect_time = datetime.now()
+                            self.last_activity = self.connect_time
+                            found_endpoint = True
+                            break
 
-            logger.error("Failed to extract endpoint information from SSE")
-            return False
+                # If we found the endpoint info, we're connected
+                if found_endpoint:
+                    return True
+
+                # If we got here without finding an endpoint, the connection failed
+                error_details = {
+                    "url": self.sse_url,
+                    "status_code": response.status_code,
+                    "connection_time_s": connection_time,
+                    "timestamp": datetime.now().isoformat()
+                }
+                logger.error("Failed to extract endpoint information from SSE")
+                raise MCPConnectionError(
+                    "Failed to extract endpoint information from SSE stream",
+                    error_details
+                )
+
+        except httpx.TimeoutException as e:
+            error_details = {
+                "url": self.sse_url,
+                "timeout_seconds": self.request_timeout,
+                "error_type": "timeout",
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+            logger.error(f"Timeout connecting to MCP server: {str(e)}")
+            raise MCPTimeoutError("Connection to SSE endpoint timed out", error_details) from e
+
+        except asyncio.CancelledError:
+            logger.info("SSE connection attempt was cancelled")
+            raise MCPCancelledError("SSE connection attempt was cancelled", {
+                "url": self.sse_url,
+                "timestamp": datetime.now().isoformat()
+            })
 
         except Exception as e:
+            error_details = {
+                "url": self.sse_url,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
             logger.error(f"Error connecting to MCP server: {str(e)}")
-            return False
+            raise MCPConnectionError("Error connecting to MCP server", error_details) from e
 
-    async def listen_for_events(self, callback: Callable = None) -> AsyncGenerator:
+    async def listen_for_events(self, callback: Optional[Callable] = None,
+                              cancellation_token: Optional[CancellationToken] = None) -> AsyncGenerator:
         """Listen for SSE events."""
         if not self.sse_connection:
             logger.error("Cannot listen for events: No SSE connection")
@@ -103,19 +256,52 @@ class HTTPSSETransport:
 
         try:
             async for line in self.sse_connection.aiter_lines():
+                if cancellation_token:
+                    cancellation_token.throw_if_cancelled()
+
+                self.last_activity = datetime.now()
                 if callback:
                     await callback(line)
                 yield line
+        except asyncio.CancelledError:
+            logger.info("SSE event listener was cancelled")
+            raise MCPCancelledError("SSE event listener was cancelled", {
+                "url": self.sse_url,
+                "timestamp": datetime.now().isoformat()
+            })
         except Exception as e:
+            error_details = {
+                "url": self.sse_url,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
             logger.error(f"Error listening for SSE events: {str(e)}")
+            raise MCPConnectionError("Error listening for SSE events", error_details) from e
 
-    async def send_request(self, request_obj) -> Dict:
-        """Send request to the server."""
+    async def send_request(self, request_obj: Any,
+                         cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
+        """Send request to the server.
+
+        Args:
+            request_obj: A request object with model_dump() method or a dictionary
+            cancellation_token: Optional token to cancel the operation
+
+        Returns:
+            Dict containing the response or status information
+        """
         if not self.message_url or not self.session_id:
-            raise ValueError("Not connected to MCP server")
+            raise MCPConnectionError("Not connected to MCP server", {
+                "message_url_exists": self.message_url is not None,
+                "session_id_exists": self.session_id is not None,
+                "timestamp": datetime.now().isoformat()
+            })
 
         # Convert request to dictionary
-        request_data = request_obj.model_dump()
+        if hasattr(request_obj, "model_dump"):
+            request_data = request_obj.model_dump()
+        else:
+            request_data = request_obj
 
         # Ensure session ID is included
         url = self.message_url
@@ -123,7 +309,16 @@ class HTTPSSETransport:
             separator = "&" if "?" in url else "?"
             url += f"{separator}sessionId={self.session_id}"
 
+        method_name = request_data.get('method', 'unknown')
+        request_id = request_data.get('id', str(uuid.uuid4()))
+        logger.info(f"Sending request to {url}: {method_name} (id: {request_id})")
+
         try:
+            if cancellation_token:
+                cancellation_token.throw_if_cancelled()
+
+            start_time = time.time()
+
             # Send request and handle 202 Accepted (async processing)
             response = await self.client.post(
                 url,
@@ -131,21 +326,89 @@ class HTTPSSETransport:
                 headers={"Content-Type": "application/json"}
             )
 
+            request_time = time.time() - start_time
+            self.last_activity = datetime.now()
+
+            logger.info(f"Response status: {response.status_code} in {request_time:.2f}s")
+
             if response.status_code == 202:
                 # Server accepted the request asynchronously
-                logger.info(f"Request accepted asynchronously: {request_data['method']}")
-                return {"status": "accepted", "request_id": request_data.get("id")}
+                logger.info(f"Request accepted asynchronously: {method_name} (id: {request_id})")
+                return {
+                    "status": "accepted",
+                    "request_id": request_id,
+                    "method": method_name,
+                    "request_time_s": request_time
+                }
 
             elif response.status_code < 300:
                 # Server returned immediate result
-                return response.json()
+                try:
+                    return response.json()
+                except Exception as json_error:
+                    resp_text = response.text[:100] + "..." if len(response.text) > 100 else response.text
+                    logger.warning(
+                        f"Non-JSON response with status {response.status_code}: {resp_text}"
+                    )
+                    return {
+                        "status": "success",
+                        "response": response.text,
+                        "request_id": request_id,
+                        "method": method_name,
+                        "request_time_s": request_time
+                    }
             else:
+                error_details = {
+                    "status_code": response.status_code,
+                    "url": url,
+                    "method": method_name,
+                    "request_id": request_id,
+                    "response_text": response.text[:500],
+                    "request_time_s": request_time,
+                    "timestamp": datetime.now().isoformat()
+                }
                 logger.error(f"Request failed: {response.status_code}")
-                raise ValueError(f"Request failed with status {response.status_code}: {response.text}")
+                raise MCPRequestError(
+                    f"Request failed with status {response.status_code}",
+                    error_details
+                )
+
+        except httpx.TimeoutException as e:
+            error_details = {
+                "url": url,
+                "method": method_name,
+                "request_id": request_id,
+                "timeout_seconds": self.request_timeout,
+                "error_type": "timeout",
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+            logger.error(f"Request timed out: {str(e)}")
+            raise MCPTimeoutError("Request timed out", error_details) from e
+
+        except asyncio.CancelledError:
+            logger.info(f"Request was cancelled: {method_name} (id: {request_id})")
+            raise MCPCancelledError("Request was cancelled", {
+                "url": url,
+                "method": method_name,
+                "request_id": request_id,
+                "timestamp": datetime.now().isoformat()
+            })
 
         except Exception as e:
+            if isinstance(e, MCPError):
+                raise
+
+            error_details = {
+                "url": url,
+                "method": method_name,
+                "request_id": request_id,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
             logger.error(f"Error sending request: {str(e)}")
-            raise
+            raise MCPRequestError("Error sending request", error_details) from e
 
     async def disconnect(self) -> bool:
         """Disconnect from MCP server."""
@@ -155,16 +418,313 @@ class HTTPSSETransport:
 
             await self.client.aclose()
             self.connected = False
+            logger.info("Disconnected from MCP server")
             return True
         except Exception as e:
+            error_details = {
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
             logger.error(f"Error disconnecting: {str(e)}")
-            return False
+            raise MCPConnectionError("Error disconnecting from MCP server", error_details) from e
+
+    def get_connection_stats(self) -> Dict[str, Any]:
+        """Get statistics about this connection."""
+        stats = {
+            "connected": self.connected,
+            "transport_type": "http_sse",
+            "base_url": self.base_url,
+            "session_id": self.session_id,
+            "current_time": datetime.now().isoformat()
+        }
+
+        if self.connect_time:
+            stats["connect_time"] = self.connect_time.isoformat()
+            stats["connection_age_s"] = (datetime.now() - self.connect_time).total_seconds()
+
+        if self.last_activity:
+            stats["last_activity"] = self.last_activity.isoformat()
+            stats["idle_time_s"] = (datetime.now() - self.last_activity).total_seconds()
+
+        return stats
 
 
-class CommandLineTransport:
-    """Temporary placeholder for CommandLineTransport until we figure out the correct import"""
-    def __init__(self, command):
+class CommandLineTransport(BaseTransport):
+    """Command-line transport for MCP servers."""
+
+    def __init__(self, command: str):
+        """Initialize with command to start the server.
+
+        Args:
+            command: Command to start the server process
+        """
         self.command = command
+        self.process = None
+        self.stdin = None
+        self.stdout = None
+        self.connected = False
+        self.connect_time = None
+        self.last_activity = None
+        self.session_id = str(uuid.uuid4())  # Generate a unique session ID
+
+    async def connect(self) -> bool:
+        """Start the server process and establish connection."""
+        try:
+            logger.info(f"Starting MCP server process: {self.command}")
+            start_time = time.time()
+
+            # Start the process
+            self.process = await asyncio.create_subprocess_shell(
+                self.command,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+
+            connection_time = time.time() - start_time
+
+            if self.process:
+                self.stdin = self.process.stdin
+                self.stdout = self.process.stdout
+                self.connected = True
+                self.connect_time = datetime.now()
+                self.last_activity = self.connect_time
+
+                logger.info(f"MCP server process started with PID {self.process.pid} in {connection_time:.2f}s")
+                return True
+            else:
+                error_details = {
+                    "command": self.command,
+                    "connection_time_s": connection_time,
+                    "timestamp": datetime.now().isoformat()
+                }
+                logger.error("Failed to start MCP server process")
+                raise MCPConnectionError("Failed to start MCP server process", error_details)
+
+        except asyncio.CancelledError:
+            logger.info("Process start was cancelled")
+            raise MCPCancelledError("Process start was cancelled", {
+                "command": self.command,
+                "timestamp": datetime.now().isoformat()
+            })
+
+        except Exception as e:
+            error_details = {
+                "command": self.command,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+            logger.error(f"Error starting MCP server process: {str(e)}")
+            raise MCPConnectionError("Error starting MCP server process", error_details) from e
+
+    async def send_request(self, request_obj: Any,
+                         cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
+        """Send a request to the MCP server process.
+
+        Args:
+            request_obj: A request object with model_dump() method or a dictionary
+            cancellation_token: Optional token to cancel the operation
+
+        Returns:
+            Dict containing the response
+        """
+        if not self.connected or not self.stdin or not self.stdout:
+            raise MCPConnectionError("Not connected to MCP server process", {
+                "connected": self.connected,
+                "stdin_exists": self.stdin is not None,
+                "stdout_exists": self.stdout is not None,
+                "timestamp": datetime.now().isoformat()
+            })
+
+        # Convert request to dictionary
+        if hasattr(request_obj, "model_dump"):
+            request_data = request_obj.model_dump()
+        else:
+            request_data = request_obj
+
+        method_name = request_data.get('method', 'unknown')
+        request_id = request_data.get('id', str(uuid.uuid4()))
+        logger.info(f"Sending request to process: {method_name} (id: {request_id})")
+
+        try:
+            if cancellation_token:
+                cancellation_token.throw_if_cancelled()
+
+            start_time = time.time()
+
+            # Send request to process stdin
+            request_json = json.dumps(request_data) + "\n"
+            self.stdin.write(request_json.encode())
+            await self.stdin.drain()
+
+            # Read response from process stdout
+            response_line = await self.stdout.readline()
+
+            request_time = time.time() - start_time
+            self.last_activity = datetime.now()
+
+            logger.info(f"Received response in {request_time:.2f}s")
+
+            if not response_line:
+                error_details = {
+                    "method": method_name,
+                    "request_id": request_id,
+                    "request_time_s": request_time,
+                    "timestamp": datetime.now().isoformat()
+                }
+                logger.error("Empty response from MCP server process")
+                raise MCPRequestError("Empty response from MCP server process", error_details)
+
+            try:
+                response_data = json.loads(response_line.decode())
+                return response_data
+            except json.JSONDecodeError as e:
+                response_text = response_line.decode()[:100] + "..." if len(response_line) > 100 else response_line.decode()
+                error_details = {
+                    "method": method_name,
+                    "request_id": request_id,
+                    "response_text": response_text,
+                    "request_time_s": request_time,
+                    "error_type": "json_decode_error",
+                    "error_message": str(e),
+                    "timestamp": datetime.now().isoformat()
+                }
+                logger.error(f"Invalid JSON response: {str(e)}")
+                raise MCPRequestError("Invalid JSON response from MCP server process", error_details) from e
+
+        except asyncio.CancelledError:
+            logger.info(f"Request was cancelled: {method_name} (id: {request_id})")
+            raise MCPCancelledError("Request was cancelled", {
+                "method": method_name,
+                "request_id": request_id,
+                "timestamp": datetime.now().isoformat()
+            })
+
+        except Exception as e:
+            if isinstance(e, MCPError):
+                raise
+
+            error_details = {
+                "method": method_name,
+                "request_id": request_id,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+            logger.error(f"Error sending request: {str(e)}")
+            raise MCPRequestError("Error sending request to MCP server process", error_details) from e
+
+    async def disconnect(self) -> bool:
+        """Terminate the server process."""
+        try:
+            if self.process:
+                # Close stdin to signal end of input
+                if self.stdin:
+                    self.stdin.close()
+
+                # Terminate process if it's still running
+                if self.process.returncode is None:
+                    logger.info(f"Terminating MCP server process (PID {self.process.pid})")
+                    self.process.terminate()
+
+                    # Wait for process to terminate
+                    try:
+                        await asyncio.wait_for(self.process.wait(), timeout=5.0)
+                    except asyncio.TimeoutError:
+                        logger.warning(f"Process didn't terminate, killing it (PID {self.process.pid})")
+                        self.process.kill()
+
+                # Reset state
+                self.process = None
+                self.stdin = None
+                self.stdout = None
+                self.connected = False
+
+                logger.info("Disconnected from MCP server process")
+                return True
+
+            return True  # Already disconnected
+
+        except Exception as e:
+            error_details = {
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+            logger.error(f"Error disconnecting from MCP server process: {str(e)}")
+            raise MCPConnectionError("Error disconnecting from MCP server process", error_details) from e
+
+    def get_connection_stats(self) -> Dict[str, Any]:
+        """Get statistics about this connection."""
+        stats = {
+            "connected": self.connected,
+            "transport_type": "command_line",
+            "command": self.command,
+            "session_id": self.session_id,
+            "current_time": datetime.now().isoformat()
+        }
+
+        if self.process:
+            stats["pid"] = self.process.pid
+            stats["returncode"] = self.process.returncode
+
+        if self.connect_time:
+            stats["connect_time"] = self.connect_time.isoformat()
+            stats["connection_age_s"] = (datetime.now() - self.connect_time).total_seconds()
+
+        if self.last_activity:
+            stats["last_activity"] = self.last_activity.isoformat()
+            stats["idle_time_s"] = (datetime.now() - self.last_activity).total_seconds()
+
+        return stats
+
+
+class MCPTransportFactory:
+    """Factory class for creating MCP transport instances."""
+
+    @staticmethod
+    def create_transport(transport_type: str, url_or_command: str, **kwargs) -> BaseTransport:
+        """Create a transport instance based on type.
+
+        Args:
+            transport_type: Type of transport ('http_sse' or 'command_line')
+            url_or_command: URL for HTTP+SSE or command for command-line
+            **kwargs: Additional parameters for transport initialization
+
+        Returns:
+            An instance of BaseTransport
+
+        Raises:
+            ValueError: If transport_type is not supported
+        """
+        logger.info(f"Creating transport of type '{transport_type}'")
+
+        if transport_type == "http_sse":
+            request_timeout = kwargs.get('request_timeout', 60)
+            return HTTPSSETransport(url_or_command, request_timeout)
+        elif transport_type == "command_line":
+            return CommandLineTransport(url_or_command)
+        else:
+            error_details = {
+                "transport_type": transport_type,
+                "supported_types": ["http_sse", "command_line"],
+                "timestamp": datetime.now().isoformat()
+            }
+            raise ValueError(f"Unsupported transport type: {transport_type}", error_details)
+
+    @staticmethod
+    def supports_transport_type(transport_type: str) -> bool:
+        """Check if a transport type is supported.
+
+        Args:
+            transport_type: Type of transport to check
+
+        Returns:
+            True if supported, False otherwise
+        """
+        return transport_type in ["http_sse", "command_line"]
 
 
 class MCPServerClient:
@@ -178,7 +738,8 @@ class MCPServerClient:
         name: str,
         url_or_command: str,
         transport_type: str,
-        credentials: Dict[str, Any]
+        credentials: Dict[str, Any],
+        request_timeout: int = 60
     ):
         """
         Initialize an MCP server client.
@@ -188,6 +749,7 @@ class MCPServerClient:
             url_or_command: The URL or command to connect to the server
             transport_type: The type of transport to use (http_sse or command_line)
             credentials: Credentials for the server
+            request_timeout: Timeout for requests in seconds
         """
         self.name = name
         self.url_or_command = url_or_command
@@ -196,8 +758,8 @@ class MCPServerClient:
         self.client = None
         self.connected = False
         self.transport = None
-
-        # Memory stream setup will be done in the connect method
+        self.request_timeout = request_timeout
+        self.active_requests = {}  # Map of request_id -> CancellationToken
 
     async def connect(self) -> bool:
         """
@@ -205,80 +767,44 @@ class MCPServerClient:
 
         Returns:
             bool: True if connection was successful
+
+        Raises:
+            MCPConnectionError: If connection fails
         """
         try:
-            # Create transport based on type
-            if self.transport_type == "http_sse":
-                self.transport = HTTPSSETransport(self.url_or_command)
-            elif self.transport_type == "command_line":
-                self.transport = CommandLineTransport(self.url_or_command)
-            else:
-                raise ValueError(f"Unsupported transport type: {self.transport_type}")
+            # Create transport using factory
+            self.transport = MCPTransportFactory.create_transport(
+                self.transport_type,
+                self.url_or_command,
+                request_timeout=self.request_timeout
+            )
 
             # Connect the transport
-            await self.transport.connect()
+            connected = await self.transport.connect()
 
-            # Set up memory streams for the client
-            from anyio.streams.memory import (
-                MemoryObjectReceiveStream,
-                MemoryObjectSendStream
-            )
-
-            # Create memory streams for the MCP client communication
-            client_send, server_receive = MemoryObjectSendStream(), MemoryObjectReceiveStream()
-            client_receive, server_send = MemoryObjectReceiveStream(), MemoryObjectSendStream()
-
-            # Create MCP client with the streams
-            self.client = MCPClient(
-                read_stream=client_receive,
-                write_stream=client_send
-            )
-
-            # Start a background task to forward messages between streams and transport
-            asyncio.create_task(self._forward_messages(
-                client_send=client_send,
-                server_receive=server_receive,
-                client_receive=client_receive,
-                server_send=server_send
-            ))
-
-            # Add credentials if provided
-            if self.credentials:
-                # The SDK might have a better way to handle credentials, but for now
-                # we'll store them to be sent with each request
-                pass
-
+            # If we get here, the connection was successful
+            # (otherwise an exception would have been raised)
             self.connected = True
-            logger.info(f"Successfully connected to MCP server: {self.name}")
+            logger.info(f"Successfully connected to MCP server '{self.name}' using {self.transport_type} transport")
+
             return True
+
         except Exception as e:
-            logger.error(f"Failed to connect to MCP server {self.name}: {str(e)}")
-            return False
+            error_details = {
+                "server_name": self.name,
+                "transport_type": self.transport_type,
+                "url_or_command": self.url_or_command,
+                "error_type": type(e).__name__,
+                "error_message": str(e)
+            }
 
-    async def _forward_messages(self, client_send, server_receive, client_receive, server_send):
-        """
-        Forward messages between the memory streams and the transport.
-        This creates the bridge between the MCPClient and our transport implementation.
-        """
-        # Task to forward messages from client to transport
-        async def forward_client_to_transport():
-            while self.connected:
-                try:
-                    # Get message from client_send via server_receive
-                    message = await server_receive.receive()
+            if isinstance(e, MCPError):
+                # Propagate MCP errors with additional context
+                e.details.update({"server_name": self.name})
+                raise
 
-                    # Send via transport
-                    if hasattr(self.transport, "request"):
-                        response = await self.transport.request(message)
-
-                        # Send response back to client
-                        await server_send.send(response)
-                except Exception as e:
-                    logger.error(f"Error forwarding client->transport: {str(e)}")
-                    break
-
-        # Start forwarding task
-        asyncio.create_task(forward_client_to_transport())
+            logger.error(f"Failed to connect to MCP server '{self.name}': {str(e)}")
+            raise MCPConnectionError(f"Failed to connect to MCP server '{self.name}'", error_details) from e
 
     async def disconnect(self) -> bool:
         """
@@ -287,97 +813,192 @@ class MCPServerClient:
         Returns:
             bool: True if disconnection was successful
         """
-        if not self.client:
-            return False
-
         try:
+            # Cancel any active requests
+            for request_id, token in self.active_requests.items():
+                logger.info(f"Cancelling request {request_id} during disconnect")
+                token.cancel()
+
+            self.active_requests.clear()
+
             if self.transport:
                 await self.transport.disconnect()
 
             self.connected = False
-            self.client = None
-            return True
-        except Exception as e:
-            logger.error(f"Error disconnecting from MCP server {self.name}: {str(e)}")
-            return False
+            self.transport = None
+            logger.info(f"Disconnected from MCP server '{self.name}'")
 
-    async def send_message(self, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
+            return True
+
+        except Exception as e:
+            error_details = {
+                "server_name": self.name,
+                "transport_type": self.transport_type,
+                "error_type": type(e).__name__,
+                "error_message": str(e)
+            }
+
+            if isinstance(e, MCPError):
+                # Propagate MCP errors with additional context
+                e.details.update({"server_name": self.name})
+                raise
+
+            logger.error(f"Error disconnecting from MCP server '{self.name}': {str(e)}")
+            raise MCPConnectionError(
+                f"Error disconnecting from MCP server '{self.name}'",
+                error_details
+            ) from e
+
+    async def send_message(self, method: str, params: Dict[str, Any],
+                          cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
         """
         Send a message to the MCP server.
 
         Args:
             method: The method to call
-            params: The parameters for the call
+            params: The parameters to pass to the method
+            cancellation_token: Optional token to cancel the operation
 
         Returns:
-            The response from the server
+            Dict[str, Any]: The response from the server
+
+        Raises:
+            MCPConnectionError: If not connected to an MCP server
+            MCPRequestError: If the request fails
+            MCPTimeoutError: If the request times out
+            MCPCancelledError: If the request is cancelled
         """
-        if not self.client or not self.connected:
-            raise RuntimeError(f"Not connected to MCP server: {self.name}")
+        if not self.connected or not self.transport:
+            raise MCPConnectionError(f"Not connected to MCP server '{self.name}'", {
+                "server_name": self.name,
+                "connected": self.connected,
+                "transport_exists": self.transport is not None
+            })
 
-        # Merge credentials with parameters
-        merged_params = {**params, **self.credentials}
+        # Create a new request ID
+        request_id = str(uuid.uuid4())
 
-        # Create JSON-RPC request
-        request = SDKRequest(
+        # Create a new cancellation token if one wasn't provided
+        own_token = cancellation_token is None
+        if own_token:
+            cancellation_token = CancellationToken()
+
+        # Create the request object
+        request = JSONRPCRequest(
             method=method,
-            params=merged_params,
-            jsonrpc="2.0",
-            id=str(uuid.uuid4())
+            params=params,
+            id=request_id
         )
 
         try:
-            # Send request directly to transport for simplicity
-            if self.transport and hasattr(self.transport, "request"):
-                response = await self.transport.request(request)
-                return response
-            else:
-                # Fall back to using the client if transport doesn't have request method
-                response = await self.client.request(method, merged_params)
-                if hasattr(response, "model_dump"):
-                    return response.model_dump()
-                return response
-        except Exception as e:
-            logger.error(f"Error sending message to MCP server {self.name}: {str(e)}")
-            return {"error": f"Communication error: {str(e)}"}
+            # Track the request
+            self.active_requests[request_id] = cancellation_token
 
-    async def execute_tool(self, **kwargs) -> Dict[str, Any]:
+            # Add credentials if provided
+            if self.credentials and params is not None:
+                # Merge credentials with params
+                for key, value in self.credentials.items():
+                    if key not in params:
+                        request.params[key] = value
+
+            # Send the request
+            logger.info(f"Sending message to MCP server '{self.name}': {method} (id: {request_id})")
+            response = await self.transport.send_request(request, cancellation_token)
+
+            return response
+
+        except Exception as e:
+            error_details = {
+                "server_name": self.name,
+                "method": method,
+                "request_id": request_id,
+                "error_type": type(e).__name__,
+                "error_message": str(e)
+            }
+
+            if isinstance(e, MCPError):
+                # Propagate MCP errors with additional context
+                e.details.update({"server_name": self.name})
+                raise
+
+            logger.error(f"Error sending message to MCP server '{self.name}': {str(e)}")
+            raise MCPRequestError(
+                f"Error sending message to MCP server '{self.name}'",
+                error_details
+            ) from e
+
+        finally:
+            # Clean up
+            if request_id in self.active_requests:
+                del self.active_requests[request_id]
+
+    async def execute_tool(self, tool_name: str, params: Dict[str, Any],
+                          cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
         """
         Execute a tool on the MCP server.
 
         Args:
-            **kwargs: The parameters for the tool
+            tool_name: The name of the tool to execute
+            params: The parameters to pass to the tool
+            cancellation_token: Optional token to cancel the operation
 
         Returns:
-            The result of the tool execution
+            Dict[str, Any]: The result of the tool execution
         """
-        # Use the server name as the method
-        try:
-            # Send to the default MCP tools method for this server
-            result = await self.send_message(self.name, kwargs)
-            return result
-        except Exception as e:
-            logger.error(f"Error executing tool on MCP server {self.name}: {str(e)}")
-            return {"error": f"Tool execution error: {str(e)}"}
+        return await self.send_message(tool_name, params, cancellation_token)
+
+    def get_connection_stats(self) -> Dict[str, Any]:
+        """Get statistics about this connection."""
+        stats = {
+            "server_name": self.name,
+            "connected": self.connected,
+            "transport_type": self.transport_type,
+            "url_or_command": self.url_or_command,
+            "active_requests": len(self.active_requests),
+            "current_time": datetime.now().isoformat()
+        }
+
+        # Add transport-specific stats if available
+        if self.transport and hasattr(self.transport, "get_connection_stats"):
+            transport_stats = self.transport.get_connection_stats()
+            stats.update(transport_stats)
+
+        return stats
+
+    def cancel_all_requests(self) -> int:
+        """Cancel all active requests.
+
+        Returns:
+            int: Number of requests cancelled
+        """
+        count = len(self.active_requests)
+
+        for request_id, token in self.active_requests.items():
+            logger.info(f"Cancelling request {request_id}")
+            token.cancel()
+
+        self.active_requests.clear()
+        return count
 
 
 class MCPHandler:
     """
-    Handler for Model Context Protocol (MCP) communication.
+    Handler for Model Context Protocol (MCP) servers.
 
-    This class manages connections to MCP servers and provides methods for
-    working with them from the agent.
+    This class manages connections to MCP servers and handles message processing.
     """
 
-    def __init__(self, model: BaseModel):
+    def __init__(self, model):
         """
         Initialize the MCP handler.
 
         Args:
-            model: The model to use for context handling
+            model: The model used for extracting tool calls
         """
         self.model = model
-        self.active_connections = {}  # Maps server_name -> MCPServerClient
+        self.active_connections = {}  # Map of server_name -> MCPServerClient
+        self.available_tools = {}  # Map of tool_name -> server_name
+        self.cancellation_tokens = {}  # Map of operation_id -> CancellationToken
 
     async def connect_server(
         self,
@@ -385,44 +1006,68 @@ class MCPHandler:
         url_or_command: str,
         transport_type: str = "http_sse",
         credentials: Optional[Dict[str, Any]] = None,
+        request_timeout: int = 60
     ) -> bool:
         """
         Connect to an MCP server.
 
         Args:
-            name: A unique name for this server
+            name: The name of the server (for identification)
             url_or_command: The URL or command to connect to the server
             transport_type: The type of transport to use (http_sse or command_line)
-            credentials: Optional credentials for authentication
+            credentials: Credentials for the server
+            request_timeout: Timeout for requests in seconds
 
         Returns:
             bool: True if connection was successful
+
+        Raises:
+            MCPConnectionError: If connection fails
+            ValueError: If transport_type is not supported
         """
+        # Check if we're already connected to this server
         if name in self.active_connections:
-            logger.warning(f"Already connected to MCP server: {name}")
-            return True
+            logger.warning(f"Already connected to MCP server '{name}', disconnecting first")
+            await self.disconnect_server(name)
+
+        # Check if transport type is supported
+        if not MCPTransportFactory.supports_transport_type(transport_type):
+            raise ValueError(f"Unsupported transport type: {transport_type}")
 
         try:
-            # Create client
+            # Create a new client
             client = MCPServerClient(
                 name=name,
                 url_or_command=url_or_command,
                 transport_type=transport_type,
                 credentials=credentials or {},
+                request_timeout=request_timeout
             )
 
-            # Connect
-            success = await client.connect()
-            if success:
-                self.active_connections[name] = client
-                logger.info(f"Connected to MCP server: {name}")
-                return True
-            else:
-                logger.error(f"Failed to connect to MCP server: {name}")
-                return False
+            # Connect the client
+            await client.connect()
+
+            # Store the client
+            self.active_connections[name] = client
+
+            logger.info(f"Connected to MCP server '{name}'")
+            return True
+
         except Exception as e:
-            logger.error(f"Error connecting to MCP server {name}: {str(e)}")
-            return False
+            error_details = {
+                "server_name": name,
+                "transport_type": transport_type,
+                "url_or_command": url_or_command,
+                "error_type": type(e).__name__,
+                "error_message": str(e)
+            }
+
+            if isinstance(e, MCPError):
+                # Just propagate MCP errors
+                raise
+
+            logger.error(f"Failed to connect to MCP server '{name}': {str(e)}")
+            raise MCPConnectionError(f"Failed to connect to MCP server '{name}'", error_details) from e
 
     async def disconnect_server(self, name: str) -> bool:
         """
@@ -435,56 +1080,113 @@ class MCPHandler:
             bool: True if disconnection was successful
         """
         if name not in self.active_connections:
-            logger.warning(f"Not connected to MCP server: {name}")
+            logger.warning(f"Not connected to MCP server '{name}'")
             return False
 
         try:
+            # Get the client
             client = self.active_connections[name]
-            success = await client.disconnect()
-            if success:
-                del self.active_connections[name]
-                logger.info(f"Disconnected from MCP server: {name}")
-                return True
-            else:
-                logger.error(f"Failed to disconnect from MCP server: {name}")
-                return False
+
+            # Disconnect the client
+            await client.disconnect()
+
+            # Remove from active connections
+            del self.active_connections[name]
+
+            logger.info(f"Disconnected from MCP server '{name}'")
+            return True
+
         except Exception as e:
-            logger.error(f"Error disconnecting from MCP server {name}: {str(e)}")
-            return False
+            error_details = {
+                "server_name": name,
+                "error_type": type(e).__name__,
+                "error_message": str(e)
+            }
 
-    async def process_message(self, message: MCPMessage) -> MCPMessage:
+            if isinstance(e, MCPError):
+                # Just propagate MCP errors
+                raise
+
+            logger.error(f"Error disconnecting from MCP server '{name}': {str(e)}")
+            raise MCPConnectionError(f"Error disconnecting from MCP server '{name}'", error_details) from e
+
+    async def process_message(self,
+                             message: Dict[str, Any],
+                             cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
         """
-        Process a message through an MCP server.
-
-        This method will:
-        1. Detect if the message contains MCP tool calls
-        2. Execute those tool calls on the appropriate MCP server
-        3. Update the message with the results
+        Process a message that may contain tool calls to MCP servers.
 
         Args:
-            message: The message potentially containing MCP tool calls
+            message: The message to process
+            cancellation_token: Optional token to cancel the operation
 
         Returns:
-            The processed message with tool call results
+            Dict[str, Any]: The processed message
         """
-        logger.debug(f"Processing message through MCP: {message}")
-
-        # Check if we have any connections
-        if not self.active_connections:
-            logger.warning("No active MCP connections")
+        # If message doesn't contain tool calls, just return it
+        if "tool_calls" not in message.get("content", {}):
             return message
 
-        # For now, a simple implementation that just forwards the message to the model
-        # without MCP processing
+        # Create a new cancellation token if one wasn't provided
+        operation_id = str(uuid.uuid4())
+        own_token = cancellation_token is None
+        if own_token:
+            cancellation_token = CancellationToken()
+            self.cancellation_tokens[operation_id] = cancellation_token
+
         try:
-            result = await self.model.chat(message.model_dump())
-            return MCPMessage(**result)
-        except Exception as e:
-            logger.error(f"Error processing message through MCP: {str(e)}")
+            # Get the tool calls
+            tool_calls = message["content"]["tool_calls"]
+
+            # Process each tool call
+            for tool_call in tool_calls:
+                try:
+                    if cancellation_token:
+                        cancellation_token.throw_if_cancelled()
+
+                    # Extract tool details
+                    tool_name = tool_call.get("name", "")
+                    tool_params = tool_call.get("parameters", {})
+
+                    # Find the server for this tool
+                    server_name = self._get_server_for_tool(tool_name)
+                    if not server_name:
+                        logger.warning(f"No server registered for tool '{tool_name}'")
+                        tool_call["output"] = {"error": f"No server registered for tool '{tool_name}'"}
+                        continue
+
+                    # Execute the tool
+                    logger.info(f"Executing tool '{tool_name}' on server '{server_name}'")
+                    result = await self.execute_tool(
+                        server_name,
+                        tool_name,
+                        tool_params,
+                        cancellation_token
+                    )
+
+                    # Store the result
+                    tool_call["output"] = result
+
+                except Exception as e:
+                    error_details = {
+                        "tool_name": tool_name if 'tool_name' in locals() else "unknown",
+                        "error_type": type(e).__name__,
+                        "error_message": str(e)
+                    }
+
+                    logger.error(f"Error executing tool call: {str(e)}")
+                    tool_call["output"] = {"error": str(e), "details": error_details}
+
             return message
+
+        finally:
+            # Clean up
+            if own_token and operation_id in self.cancellation_tokens:
+                del self.cancellation_tokens[operation_id]
 
     async def execute_tool(
-        self, server_name: str, tool_name: str, params: Dict[str, Any]
+        self, server_name: str, tool_name: str, params: Dict[str, Any],
+        cancellation_token: Optional[CancellationToken] = None
     ) -> Dict[str, Any]:
         """
         Execute a tool on an MCP server.
@@ -492,16 +1194,20 @@ class MCPHandler:
         Args:
             server_name: The name of the server to execute the tool on
             tool_name: The name of the tool to execute
-            params: Parameters for the tool execution
+            params: The parameters to pass to the tool
+            cancellation_token: Optional token to cancel the operation
 
         Returns:
-            The result of the tool execution
+            Dict[str, Any]: The result of the tool execution
+
+        Raises:
+            MCPConnectionError: If not connected to the specified server
         """
         if server_name not in self.active_connections:
-            raise ValueError(f"Not connected to MCP server: {server_name}")
+            raise MCPConnectionError(f"Not connected to MCP server '{server_name}'")
 
         client = self.active_connections[server_name]
-        return await client.execute_tool(name=tool_name, arguments=params)
+        return await client.execute_tool(tool_name, params, cancellation_token)
 
     async def list_tools(self, server_name: str) -> List[Dict[str, Any]]:
         """
@@ -511,10 +1217,84 @@ class MCPHandler:
             server_name: The name of the server to list tools for
 
         Returns:
-            A list of available tools
+            List[Dict[str, Any]]: The list of available tools
         """
         if server_name not in self.active_connections:
-            raise ValueError(f"Not connected to MCP server: {server_name}")
+            raise MCPConnectionError(f"Not connected to MCP server '{server_name}'")
 
         client = self.active_connections[server_name]
-        return await client.send_message(method="listTools", params={})
+
+        # The 'list_tools' method is a standard MCP method
+        try:
+            result = await client.send_message("list_tools", {})
+            return result.get("result", [])
+        except Exception as e:
+            logger.error(f"Error listing tools from server '{server_name}': {str(e)}")
+            raise
+
+    def _get_server_for_tool(self, tool_name: str) -> Optional[str]:
+        """
+        Get the server name for a tool.
+
+        Args:
+            tool_name: The name of the tool
+
+        Returns:
+            str: The name of the server for this tool, or None if not found
+        """
+        # First check if we have a mapping for this tool
+        if tool_name in self.available_tools:
+            return self.available_tools[tool_name]
+
+        # Otherwise, assume the tool is on a server with the same name
+        if tool_name in self.active_connections:
+            return tool_name
+
+        # As a fallback, check if any server name is a prefix of the tool name
+        for server_name in self.active_connections:
+            if tool_name.startswith(f"{server_name}."):
+                return server_name
+
+        return None
+
+    def get_connection_stats(self) -> Dict[str, Any]:
+        """Get statistics about all connections."""
+        stats = {
+            "active_connections": len(self.active_connections),
+            "registered_tools": len(self.available_tools),
+            "active_operations": len(self.cancellation_tokens),
+            "current_time": datetime.now().isoformat(),
+            "connections": {}
+        }
+
+        # Add stats for each connection
+        for name, client in self.active_connections.items():
+            if hasattr(client, "get_connection_stats"):
+                stats["connections"][name] = client.get_connection_stats()
+            else:
+                stats["connections"][name] = {"connected": client.connected}
+
+        return stats
+
+    def cancel_all_operations(self) -> int:
+        """Cancel all active operations.
+
+        Returns:
+            int: Number of operations cancelled
+        """
+        count = len(self.cancellation_tokens)
+
+        for operation_id, token in self.cancellation_tokens.items():
+            logger.info(f"Cancelling operation {operation_id}")
+            token.cancel()
+
+        self.cancellation_tokens.clear()
+
+        # Also cancel operations in each client
+        for name, client in self.active_connections.items():
+            if hasattr(client, "cancel_all_requests"):
+                client_count = client.cancel_all_requests()
+                logger.info(f"Cancelled {client_count} requests in client '{name}'")
+                count += client_count
+
+        return count
