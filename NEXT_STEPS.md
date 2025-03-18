@@ -28,6 +28,7 @@ Core components of the muxi framework now implemented:
    - [x] Implement cancellation support for in-progress operations
    - [x] Comprehensive error handling and diagnostics
    - [x] Integration with the official MCP Python SDK
+   - [x] Make credentials optional for MCP servers that don't require them
 4. **Agent Class**: Main interface combining LLM, memory, and MCP servers
    - [x] Agent-level knowledge base for specialized domain knowledge
    - [x] Dynamic embedding generation using the agent's model
