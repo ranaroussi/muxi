@@ -1,9 +1,9 @@
 ---
 layout: default
 title: Domain Knowledge
-parent: Building Agents
+parent: Extending Capabilities
 nav_order: 3
-permalink: /agents/knowledge/
+permalink: /extend/knowledge/
 ---
 
 # Domain Knowledge
