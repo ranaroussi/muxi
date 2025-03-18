@@ -605,6 +605,109 @@ response = orchestrator.chat("assistant", "Where do I like to travel?")
 print(response)  # Should mention "Japan"
 ```
 
+## MCP Server Configuration
+
+MUXI agents connect to specialized MCP (Model Context Protocol) servers to extend their capabilities. MCP servers are external service endpoints that provide specific functionality such as web search, calculator, or weather information.
+
+### Connecting to MCP Servers
+
+<h4>Declarative way</h4>
+
+`configs/mcp_server.json`
+
+```json
+{
+  "agent_id": "assistant",
+  "description": "An assistant with access to external MCP servers.",
+  "model": {
+    "provider": "openai",
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "gpt-4o"
+  },
+  "mcp_servers": [
+    {
+      "name": "weather",
+      "url": "http://localhost:5001",
+      "credentials": [
+        {
+          "id": "weather_api_key",
+          "param_name": "api_key",
+          "required": true,
+          "env_fallback": "WEATHER_API_KEY"
+        }
+      ]
+    },
+    {
+      "name": "calculator",
+      "url": "http://localhost:5002"
+    }
+  ]
+}
+```
+
+<h4>Programmatic way</h4>
+
+```python
+import os
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.models.openai import OpenAIModel
+
+# Initialize components
+orchestrator = Orchestrator()
+model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-4o"
+)
+
+# Create an agent
+agent = orchestrator.create_agent(
+    agent_id="assistant",
+    description="An assistant with access to external MCP servers.",
+    model=model
+)
+
+# Connect to MCP servers
+await agent.connect_mcp_server(
+    name="weather",
+    url="http://localhost:5001",
+    credentials={"api_key": os.getenv("WEATHER_API_KEY")}
+)
+
+await agent.connect_mcp_server(
+    name="calculator",
+    url="http://localhost:5002"
+)
+
+# Chat with the agent
+response = await orchestrator.chat("assistant", "What's the weather in New York?")
+print(response)
+```
+
+### MCP Server Configuration Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `name` | Unique identifier for the MCP server | `"weather"` |
+| `url` | URL endpoint for the MCP server | `"http://localhost:5001"` |
+| `credentials` | Authentication details for the server | `{"api_key": "${WEATHER_API_KEY}"}` |
+
+### Using Environment Variables for Credentials
+
+It's recommended to use environment variables for sensitive credentials:
+
+```json
+"credentials": [
+  {
+    "id": "api_key",
+    "param_name": "api_key",
+    "required": true,
+    "env_fallback": "SERVICE_API_KEY"
+  }
+]
+```
+
+This will automatically retrieve the API key from the `SERVICE_API_KEY` environment variable.
+
 ## Complete Configuration Example
 
 <h4>Declarative way</h4>
@@ -630,7 +733,37 @@ print(response)  # Should mention "Japan"
   "long_term_memory": {
     "type": "long_term",
     "connection_string": "${DATABASE_URL}"
-  }
+  },
+  "mcp_servers": [
+    {
+      "name": "web_search",
+      "url": "http://localhost:5001",
+      "credentials": [
+        {
+          "id": "search_api_key",
+          "param_name": "api_key",
+          "required": true,
+          "env_fallback": "SEARCH_API_KEY"
+        }
+      ]
+    },
+    {
+      "name": "calculator",
+      "url": "http://localhost:5002"
+    },
+    {
+      "name": "weather",
+      "url": "http://localhost:5003",
+      "credentials": [
+        {
+          "id": "weather_api_key",
+          "param_name": "api_key",
+          "required": true,
+          "env_fallback": "WEATHER_API_KEY"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -681,7 +814,7 @@ buffer = BufferMemory(max_tokens=4000)
 long_term = LongTermMemory(connection_string=os.getenv("DATABASE_URL"))
 
 # Create a fully-configured agent
-orchestrator.create_agent(
+agent = orchestrator.create_agent(
     agent_id="expert_assistant",
     description="A comprehensive AI assistant with multiple capabilities.",
     model=model,
@@ -690,8 +823,26 @@ orchestrator.create_agent(
     long_term_memory=long_term,
 )
 
+# Connect to MCP servers
+await agent.connect_mcp_server(
+    name="web_search",
+    url="http://localhost:5001",
+    credentials={"api_key": os.getenv("SEARCH_API_KEY")}
+)
+
+await agent.connect_mcp_server(
+    name="calculator",
+    url="http://localhost:5002"
+)
+
+await agent.connect_mcp_server(
+    name="weather",
+    url="http://localhost:5003",
+    credentials={"api_key": os.getenv("WEATHER_API_KEY")}
+)
+
 # Chat with the agent
-response = orchestrator.chat("expert_assistant", "Tell me about recent advances in AI.")
+response = await orchestrator.chat("expert_assistant", "Tell me about recent advances in AI.")
 print(response)
 ```
 

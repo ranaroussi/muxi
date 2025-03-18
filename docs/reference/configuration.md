@@ -128,16 +128,16 @@ mcp:
               default: "metric"
 ```
 
-## Tools Configuration
+## MCP Servers Configuration
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `tools.enabled` | boolean | `true` | Enable tools system |
-| `tools.search.enabled` | boolean | `true` | Enable search tool |
-| `tools.search.engine` | string | `"duckduckgo"` | Search engine to use |
-| `tools.weather.enabled` | boolean | `false` | Enable weather tool |
-| `tools.weather.api_key` | string | `null` | Weather API key |
-| `tools.calculator.enabled` | boolean | `true` | Enable calculator tool |
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `mcp_servers.enabled` | boolean | `true` | Enable MCP servers system |
+| `mcp_servers.search.url` | string | `"http://localhost:5001"` | URL for the search MCP server |
+| `mcp_servers.search.api_key` | string | `null` | API key for the search MCP server |
+| `mcp_servers.weather.url` | string | `"http://localhost:5002"` | URL for the weather MCP server |
+| `mcp_servers.weather.api_key` | string | `null` | API key for the weather MCP server |
+| `mcp_servers.calculator.url` | string | `"http://localhost:5003"` | URL for the calculator MCP server |
 
 ## WebSocket Configuration
 
