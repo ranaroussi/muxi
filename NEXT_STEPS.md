@@ -115,6 +115,7 @@ Things to do next to enhance the framework:
 - [ ] User feedback integration: Learn from user interactions
 - [ ] Profile the code to identify performance bottlenecks
 - [ ] Optimize memory usage in high-traffic scenarios
+- [ ] Add agent-level knowledge base: Enable agents to have specialized RAG capabilities
 
 ### 6. Multi-Modal Capabilities
 
