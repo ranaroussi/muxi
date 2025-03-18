@@ -87,7 +87,7 @@ class Muxi:
 
         return connection_string
 
-    def add_agent(
+    async def add_agent(
         self,
         name: str,
         path: str,
@@ -140,7 +140,9 @@ class Muxi:
         # Connect MCP servers if specified
         mcp_servers = config.get("mcp_servers", [])
         if mcp_servers:
-            self._connect_mcp_servers(agent, mcp_servers)
+            await self._connect_mcp_servers(agent, mcp_servers)
+
+        return agent
 
     def _create_model(self, model_config: Dict[str, Any]) -> Any:
         """
@@ -179,26 +181,46 @@ class Muxi:
         Returns:
             tuple: (buffer_memory, long_term_memory)
         """
+        # Debug print
+        print(f"Memory config: {memory_config}")
+
         # Create buffer memory
         buffer_size = memory_config.get("buffer", 10)
-        buffer_memory = BufferMemory(buffer_size=buffer_size)
+        if isinstance(buffer_size, dict):
+            # If it's a dict, extract the window_size or max_size parameter
+            buffer_size = buffer_size.get("window_size", buffer_size.get("max_size", 10))
+        buffer_memory = BufferMemory(max_size=int(buffer_size))
 
         # Create long-term memory if enabled
         long_term_memory = None
-        if memory_config.get("long_term", False):
+        long_term_config = memory_config.get("long_term", False)
+
+        # Support both boolean and dict configurations
+        if isinstance(long_term_config, dict):
+            enabled = long_term_config.get("enabled", False)
+        else:
+            enabled = bool(long_term_config)
+
+        if enabled:
             # Get database connection string
-            connection_string = self._get_connection_string(required=True)
+            connection_string = self._get_connection_string(required=False)
 
-            # Create long-term memory with database connection
-            long_term_memory = LongTermMemory(connection_string=connection_string)
+            if connection_string:
+                try:
+                    # Create long-term memory with database connection
+                    long_term_memory = LongTermMemory(connection_string=connection_string)
 
-            # Always wrap with Memobase for multi-user support
-            # (will use user_id=0 when none provided for backwards compatibility)
-            long_term_memory = Memobase(long_term_memory=long_term_memory)
+                    # Always wrap with Memobase for multi-user support
+                    # (will use user_id=0 when none provided for backwards compatibility)
+                    long_term_memory = Memobase(long_term_memory=long_term_memory)
+                except Exception as e:
+                    # Log the error but continue without long-term memory
+                    print(f"Error creating long-term memory: {e}")
+                    long_term_memory = None
 
         return buffer_memory, long_term_memory
 
-    def _connect_mcp_servers(self, agent: Agent, mcp_servers: List[Dict[str, Any]]) -> None:
+    async def _connect_mcp_servers(self, agent: Agent, mcp_servers: List[Dict[str, Any]]) -> None:
         """
         Connect MCP servers to an agent.
 
@@ -218,33 +240,45 @@ class Muxi:
                     cred_id = cred.get("id")
                     param_name = cred.get("param_name")
                     required = cred.get("required", False)
-                    env_fallback = cred.get("env_fallback")
 
-                    # Try to get credential from environment if fallback is specified
-                    if env_fallback and env_fallback in os.environ:
-                        processed_credentials[param_name] = os.environ[env_fallback]
-                    elif required:
+                    # Check for env_fallback
+                    env_var = cred.get("env_fallback")
+                    if env_var:
+                        import os
+                        value = os.getenv(env_var)
+
+                        if value:
+                            processed_credentials[param_name] = value
+                            continue
+
+                    # Missing required credential
+                    if required:
                         logger.warning(
                             f"Required credential {cred_id} for MCP server {name} not found"
                         )
+                        continue
 
-                # Connect MCP server to agent
-                agent.connect_mcp_server(name, url, processed_credentials)
+                # Connect to the MCP server
+                try:
+                    await agent.connect_mcp_server(name, url, processed_credentials)
+                    print(f"Connected to MCP server: {name}")
+                except Exception as e:
+                    logger.error(f"Error connecting to MCP server {name}: {e}")
             else:
-                logger.warning("Invalid MCP server configuration: missing name or url")
+                logger.warning(f"Invalid MCP server configuration: {server}")
 
     async def chat(
         self,
-        message: str,
         agent_name: Optional[str] = None,
+        message: str = "",
         user_id: Optional[str] = None
     ) -> str:
         """
         Send a message to an agent and get a response.
 
         Args:
-            message: The message to send
             agent_name: Optional name of the agent to use (if None, will select automatically)
+            message: The message to send
             user_id: Optional user ID for multi-user support
 
         Returns:
@@ -252,8 +286,8 @@ class Muxi:
         """
         # Process the message through the orchestrator
         response = await self.orchestrator.chat(
-            message=message,
             agent_name=agent_name,
+            message=message,
             user_id=user_id
         )
 
@@ -329,3 +363,18 @@ class Muxi:
 
         # Start the server
         main(**kwargs)
+
+    def get_agent(self, agent_id: str) -> Agent:
+        """
+        Get an agent by ID.
+
+        Args:
+            agent_id: The ID of the agent to get.
+
+        Returns:
+            The requested agent.
+
+        Raises:
+            ValueError: If no agent with the given ID exists.
+        """
+        return self.orchestrator.get_agent(agent_id)
