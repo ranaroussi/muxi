@@ -14,6 +14,7 @@ MUXI Framework is a powerful platform for building AI agents with memory, MCP se
 - 🔄 **Intelligent Message Routing**: Automatically direct messages to the most appropriate agent
 - 📊 **Multi-User Support**: User-specific memory partitioning for multi-tenant applications
 - 📘 **Domain Knowledge**: Store and retrieve structured information to personalize responses
+- 🔍 **Agent-Level Knowledge Base**: Provide agents with specialized domain knowledge via lightweight RAG
 - 🔄 **Hybrid Communication Protocol**: HTTP for standard requests, SSE for streaming, WebSockets for multi-modal
 - 📝 **Declarative Configuration**: Define agents using YAML or JSON files with minimal code
 - 🚀 **Modular Architecture**: Use only the components you need
@@ -122,6 +123,9 @@ model:
 memory:
   buffer: 10  # Buffer window size of 10
   long_term: true  # Enable long-term memory
+  knowledge:
+    - path: "knowledge/domain_facts.txt"
+      description: "Specialized domain knowledge for this agent"
 mcp_servers:
 - name: web_search
   url: http://localhost:5001
@@ -141,18 +145,26 @@ from muxi.core.orchestrator import Orchestrator
 from muxi.models.providers.openai import OpenAIModel
 from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
+from muxi.knowledge.base import FileKnowledge
 
 # Create an orchestrator to manage agents
 orchestrator = Orchestrator()
 
 # Create a basic agent with buffer memory
-orchestrator.create_agent(
+agent = orchestrator.create_agent(
     agent_id="assistant",
     model=OpenAIModel(model="gpt-4o", api_key="your_api_key"),
     buffer_memory=BufferMemory(),
     system_message="You are a helpful AI assistant.",
     description="General-purpose assistant for answering questions and providing information."
 )
+
+# Add domain knowledge to the agent
+product_knowledge = FileKnowledge(
+    path="knowledge/products.txt",
+    description="Product information and specifications"
+)
+await agent.add_knowledge(product_knowledge)
 
 # Create an agent with long-term memory
 orchestrator.create_agent(

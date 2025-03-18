@@ -22,6 +22,9 @@ Core components of the muxi framework now implemented:
    - Tool registry for managing tools
    - Example tools (Calculator, Web Search)
 4. **Agent Class**: Main interface combining LLM, memory, and tools
+   - Agent-level knowledge base for specialized domain knowledge
+   - Dynamic embedding generation using the agent's model
+   - File-based knowledge sources with efficient caching
 5. **Orchestrator**: For managing multiple agents and their interactions
    - Intelligent message routing with LLM-based agent selection
    - Agent descriptions for specialized capabilities
@@ -104,6 +107,7 @@ Things to do next to enhance the framework:
 - [ ] Generate API documentation with Sphinx
 - [ ] Create more usage examples for common agent scenarios
 - [x] Configuration guide
+- [x] Domain knowledge documentation
 
 ### 5. Advanced Features
 
@@ -115,7 +119,7 @@ Things to do next to enhance the framework:
 - [ ] User feedback integration: Learn from user interactions
 - [ ] Profile the code to identify performance bottlenecks
 - [ ] Optimize memory usage in high-traffic scenarios
-- [ ] Add agent-level knowledge base: Enable agents to have specialized RAG capabilities
+- [x] Add agent-level knowledge base: Enable agents to have specialized RAG capabilities
 
 ### 6. Multi-Modal Capabilities
 
@@ -362,6 +366,11 @@ This scenario demonstrates a complete workflow from installation to running an a
    tools:
    - enable_calculator
    - enable_web_search
+   knowledge:
+   - path: "knowledge/weather_facts.txt"
+     description: "Facts about weather patterns and climate"
+   - path: "knowledge/geography.txt"
+     description: "Information about global geography"
    mcp_servers:
    - name: weather
      url: http://localhost:5001
@@ -402,6 +411,11 @@ This scenario demonstrates a complete workflow from installation to running an a
    # Let the orchestrator automatically select the appropriate agent (recommended)
    response = mx.chat("What's the weather like in New York?")
    print(f"Response: {response}")
+
+   # Add knowledge programmatically
+   from muxi.knowledge.base import FileKnowledge
+   new_knowledge = FileKnowledge(path="knowledge/climate_data.txt", description="Climate data for major cities")
+   mx.get_agent("assistant").add_knowledge(new_knowledge)
 
    # Or start a server
    # mx.start_server(port=5050)
