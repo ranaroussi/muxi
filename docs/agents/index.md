@@ -8,6 +8,7 @@ permalink: /agents/
 
 # Building Agents with MUXI
 
+{: .fs-5 .fw-600 }
 This section explains how to build AI agents using the MUXI Framework. Agents are the fundamental building blocks of MUXI applications, providing natural language capabilities powered by large language models.
 
 ## What is an Agent?

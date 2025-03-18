@@ -8,6 +8,7 @@ permalink: /intro/
 
 # Introduction to MUXI
 
+{: .fs-5 .fw-600 }
 Welcome to the MUXI Framework, a powerful, modular system for building AI agents with memory persistence, MCP server integration, and real-time communication capabilities.
 
 ## About This Section
