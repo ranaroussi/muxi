@@ -18,14 +18,13 @@ from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.server.memory.memobase import Memobase
 from muxi.models.base import BaseModel
-from muxi.server.tools.base import BaseTool, tool_registry
 from muxi.knowledge.base import KnowledgeSource
 from muxi.utils.id_generator import get_default_nanoid
 
 
 class Agent:
     """
-    Agent class that combines language model, memory, and tools to create an AI agent.
+    Agent class that combines language model, memory, and MCP servers to create an AI agent.
     """
 
     def __init__(
@@ -203,7 +202,11 @@ class Agent:
             A list of MCP server descriptions.
         """
         return [
-            {"name": name, "url": details["url"]}
+            {
+                "name": name,
+                "url": details["url"],
+                "credentials": details["credentials"],
+            }
             for name, details in self.mcp_servers.items()
         ]
 
@@ -336,22 +339,20 @@ class Agent:
         # Generate response using LLM - needs to be awaited
         response = await self.model.chat([{"role": "user", "content": enhanced_message}])
 
-        # Create MCPHandler (this is what the test is checking for)
-        handler = MCPHandler(self.model)
-
-        # If there are tool calls, process them
+        # Handle function calls (MCP servers)
         if hasattr(response, "get") and response.get("tool_calls"):
-            # Create message with tool calls
+            # Create message with function calls
             content = response.get("content")
             tool_calls = response.get("tool_calls")
-            # Store tool calls in the context
+
+            # Store function calls in the context
             context = {"tool_calls": tool_calls}
             assistant_message = MCPMessage(
                 role="assistant", content=content if content else "", context=context
             )
 
-            # Process the message with the handler
-            result = handler.process_message(assistant_message)
+            # Process the message with the MCP handler
+            result = await self.mcp_handler.process_message(assistant_message)
 
             # Store assistant response in Memobase if available
             if self.is_multi_user and user_id is not None:
@@ -532,56 +533,6 @@ class Agent:
 
         return results
 
-    def add_tool(self, tool: BaseTool) -> None:
-        """
-        Add a tool to the agent.
-
-        Args:
-            tool: The tool to add.
-        """
-        # Add to tools list
-        self.tools[tool.name] = tool
-
-        # Register with tool registry if not already registered
-        if tool.name not in tool_registry._tools:
-            tool_registry.register(tool)
-
-        # Register tool handler
-        self.mcp_handler.register_tool_handler(tool.name, self._create_tool_handler(tool))
-
-        # Update context with new tool
-        context = self.mcp_handler.context
-        context.tools = tool_registry.get_schema()["tools"]
-        self.mcp_handler.set_context(context)
-
-    def remove_tool(self, tool_name: str) -> bool:
-        """
-        Remove a tool from the agent.
-
-        Args:
-            tool_name: The name of the tool to remove.
-
-        Returns:
-            True if the tool was removed, False if not found.
-        """
-        # Find tool in tools list
-        if tool_name in self.tools:
-            # Remove from tools list
-            self.tools.pop(tool_name)
-
-            # Remove tool handler
-            if tool_name in self.mcp_handler.tool_handlers:
-                self.mcp_handler.tool_handlers.pop(tool_name)
-
-            # Update context with removed tool
-            context = self.mcp_handler.context
-            context.tools = [t for t in context.tools if t["name"] != tool_name]
-            self.mcp_handler.set_context(context)
-
-            return True
-
-        return False
-
     def clear_memory(self, clear_long_term: bool = False, user_id: Optional[int] = None) -> None:
         """
         Clear the agent's memory.
@@ -606,15 +557,6 @@ class Agent:
                 self.long_term_memory.default_collection,
                 "Default collection for memories",
             )
-
-    def get_available_tools(self) -> List[Dict[str, Any]]:
-        """
-        Get a list of available tools.
-
-        Returns:
-            A list of tool descriptions.
-        """
-        return tool_registry.get_schema()["tools"]
 
     async def chat(
         self, message: str, user_id: Optional[str] = None
