@@ -17,11 +17,11 @@ Core components of the muxi framework now implemented:
    - Domain knowledge system for user-specific structured information
    - Robust database schema with optimized tables and indexes
    - Migration system for schema version control
-3. **Tool System**:
-   - Base tool interface
-   - Tool registry for managing tools
-   - Example tools (Calculator, Web Search)
-4. **Agent Class**: Main interface combining LLM, memory, and tools
+3. **MCP Server Integration**:
+   - MCP Handler for communication with external services
+   - MCP message processing
+   - Example MCP servers (Calculator, Web Search)
+4. **Agent Class**: Main interface combining LLM, memory, and MCP servers
    - Agent-level knowledge base for specialized domain knowledge
    - Dynamic embedding generation using the agent's model
    - File-based knowledge sources with efficient caching
@@ -79,14 +79,10 @@ Things to do next to enhance the framework:
 - [ ] Add support for local models (e.g., Llama, Mistral, DeepSeek)
 - [ ] Create a model router for fallback and cost optimization
 
-### 2. Additional Tools
+### 2. Build in MCP Servers
 
-- [ ] File operations tool
-- [ ] Email tool
-- [ ] Calendar tool
-- [ ] Document processing tool
-- [ ] Image generation tool
-- [ ] Browser automation tool
+- [ ] File operations
+- [ ] Browser automation
 
 ### 3. Testing
 
@@ -102,7 +98,6 @@ Things to do next to enhance the framework:
 - [ ] Complete CLI documentation
 - [ ] Expand API documentation with practical examples
 - [ ] User guides for advanced use cases
-- [ ] Tool development guide
 - [ ] Example projects
 - [ ] Generate API documentation with Sphinx
 - [ ] Create more usage examples for common agent scenarios
@@ -199,7 +194,7 @@ Transform agents into omni agents capable of handling various media types:
 - [x] CLI interface
 - [x] Web dashboard
   - [ ] Add "view/create/manage orchestrators" page to the webapp
-  - [ ] Add tool listing page to the webapp
+  - [ ] Add MCP server listing page to the webapp
 - [x] API server
 - [x] WebSocket support for real-time communication
   - [x] Message type standardization
@@ -221,7 +216,7 @@ Transform agents into omni agents capable of handling various media types:
 - [ ] Type checking with MyPy to catch type-related errors at development time
 - [ ] Execution log system
   - [ ] Detailed logging of agent actions and decisions
-  - [ ] Tool call tracking with inputs and outputs
+  - [ ] MCP server call tracking with inputs and outputs
   - [ ] Performance metrics collection
   - [ ] Log visualization in web dashboard
   - [ ] Log filtering and search capabilities
@@ -295,12 +290,12 @@ The service-oriented architecture described in ARCHITECTURE_EVOLUTION.md:
 - [ ] Setup build pipeline for each package
 
 #### MCP Server Unification
-- [ ] Refactor tool system to be MCP server based
-- [ ] Create adapters for local Python tools
-- [ ] Update tool registry to handle remote services
+- [x] Refactor tool system to be MCP server based
+- [x] Create adapters for local Python implementations
+- [x] Update tool registry to MCP server registry
 - [ ] Implement service discovery
-- [ ] Extend YAML/JSON schemas for new architecture
-- [ ] Create migration utilities for existing configurations
+- [x] Extend YAML/JSON schemas for new architecture
+- [x] Create migration utilities for existing configurations
 - [ ] Add utilities for spinning up MCP servers
 
 #### Client Applications
@@ -363,21 +358,29 @@ This scenario demonstrates a complete workflow from installation to running an a
    memory:
      buffer: 10  # Buffer window size of 10
      long_term: true  # Enable long-term memory
-   tools:
-   - enable_calculator
-   - enable_web_search
    knowledge:
    - path: "knowledge/weather_facts.txt"
      description: "Facts about weather patterns and climate"
    - path: "knowledge/geography.txt"
      description: "Information about global geography"
    mcp_servers:
+   - name: calculator
+     url: http://localhost:5000
+     credentials: []
    - name: weather
      url: http://localhost:5001
      credentials:
      - id: weather_api_key
        param_name: api_key
        required: true
+       env_fallback: WEATHER_API_KEY
+   - name: web_search
+     url: http://localhost:5002
+     credentials:
+     - id: search_api_key
+       param_name: api_key
+       required: true
+       env_fallback: SEARCH_API_KEY
    ```
 
 3. **Set Up Environment Variables**
@@ -386,6 +389,7 @@ This scenario demonstrates a complete workflow from installation to running an a
    OPENAI_API_KEY=your_openai_key_here
    DATABASE_URL=postgresql://user:password@localhost:5432/muxi
    WEATHER_API_KEY=your_weather_api_key
+   SEARCH_API_KEY=your_search_api_key
    ```
 
 4. **Create a Simple Application**
