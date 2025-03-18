@@ -44,7 +44,7 @@ class ReconnectingMCPHandler(MCPHandler):
         self,
         server_id: str,
         server_url: str,
-        transport_type: str = "http_sse",
+        type: str = "http",
         request_timeout: float = 60.0
     ) -> bool:
         """
@@ -53,7 +53,7 @@ class ReconnectingMCPHandler(MCPHandler):
         Args:
             server_id: Unique identifier for the server
             server_url: URL or identifier for the server
-            transport_type: Transport type to use ("http_sse" or "command_line")
+            type: Transport type to use ("http" or "command")
             request_timeout: Timeout for requests in seconds
 
         Returns:
@@ -81,7 +81,7 @@ class ReconnectingMCPHandler(MCPHandler):
                 retry_exceptions=MCPConnectionError,
                 server_id=server_id,
                 server_url=server_url,
-                transport_type=transport_type,
+                type=type,
                 request_timeout=request_timeout
             )
             return result
@@ -96,7 +96,7 @@ class ReconnectingMCPHandler(MCPHandler):
         self,
         server_id: str,
         server_url: str,
-        transport_type: str,
+        type: str,
         request_timeout: float
     ) -> bool:
         """
@@ -105,7 +105,7 @@ class ReconnectingMCPHandler(MCPHandler):
         Args:
             server_id: Unique identifier for the server
             server_url: URL or identifier for the server
-            transport_type: Transport type to use
+            type: Transport type to use
             request_timeout: Timeout for requests in seconds
 
         Returns:
@@ -117,7 +117,7 @@ class ReconnectingMCPHandler(MCPHandler):
         return await super().connect_server(
             server_id=server_id,
             server_url=server_url,
-            transport_type=transport_type,
+            type=type,
             request_timeout=request_timeout
         )
 
@@ -199,7 +199,7 @@ class ReconnectingMCPHandler(MCPHandler):
                     logger.info(f"Automatic reconnection to server {server_id} triggered")
                     server_info = self.server_info.get(server_id, {})
                     server_url = server_info.get("url", "")
-                    transport_type = server_info.get("transport_type", "http_sse")
+                    type = server_info.get("type", "http")
                     request_timeout = server_info.get("request_timeout", 60.0)
 
                     if not server_url:
@@ -209,7 +209,7 @@ class ReconnectingMCPHandler(MCPHandler):
                     await super().connect_server(
                         server_id=server_id,
                         server_url=server_url,
-                        transport_type=transport_type,
+                        type=type,
                         request_timeout=request_timeout
                     )
                     logger.info(f"Successfully reconnected to server {server_id}")

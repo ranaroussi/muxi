@@ -122,7 +122,7 @@ handler = ReconnectingMCPHandler(retry_config=retry_config)
 await handler.connect_server(
     server_id="my_server",
     server_url="https://mcpify.ai/v1",
-    transport_type="http_sse"
+    type="http"
 )
 
 # Execute tools with automatic reconnection

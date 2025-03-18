@@ -11,22 +11,22 @@ class MCPTransportFactory:
     """Factory class for creating MCP transport instances."""
 
     @staticmethod
-    def create_transport(transport_type: str, url_or_command: str, **kwargs) -> BaseTransport:
+    def create_transport(type: str, url_or_command: str, **kwargs) -> BaseTransport:
         """Create a transport instance based on type."""
-        logger.info(f"Creating transport of type '{transport_type}'")
+        logger.info(f"Creating transport of type '{type}'")
 
-        if transport_type == "http_sse":
+        if type == "http":
             request_timeout = kwargs.get('request_timeout', 60)
             return HTTPSSETransport(url_or_command, request_timeout)
-        elif transport_type == "command_line":
+        elif type == "command":
             return CommandLineTransport(url_or_command)
         else:
             error_details = {
-                "transport_type": transport_type,
-                "supported_types": ["http_sse", "command_line"],
+                "type": type,
+                "supported_types": ["http", "command"],
                 "timestamp": datetime.now().isoformat()
             }
-            raise ValueError(f"Unsupported transport type: {transport_type}", error_details)
+            raise ValueError(f"Unsupported transport type: {type}", error_details)
 ```
 
 Benefits:
@@ -154,7 +154,7 @@ def get_connection_stats(self) -> Dict[str, Any]:
     """Get statistics about this connection."""
     stats = {
         "connected": self.connected,
-        "transport_type": "http_sse",
+        "type": "http",
         "base_url": self.base_url,
         "session_id": self.session_id,
         "current_time": datetime.now().isoformat()

@@ -68,8 +68,8 @@ except ImportError as e:
 # Test results
 results = {
     "transport_factory": False,
-    "http_sse_transport": False,
-    "command_line_transport": False,
+    "http_transport": False,
+    "command_transport": False,
     "cancellation_support": False,
     "error_handling": False
 }
@@ -82,7 +82,7 @@ async def test_transport_factory():
     try:
         # Create HTTP+SSE transport
         http_transport = MCPTransportFactory.create_transport(
-            transport_type="http_sse",
+            type="http",
             url_or_command="https://example.com/sse",
             request_timeout=30
         )
@@ -90,7 +90,7 @@ async def test_transport_factory():
 
         # Create Command Line transport
         cli_transport = MCPTransportFactory.create_transport(
-            transport_type="command_line",
+            type="command",
             url_or_command="npx -y @modelcontextprotocol/server-calculator"
         )
         print(f"✅ Created Command Line transport: {type(cli_transport).__name__}")
@@ -98,7 +98,7 @@ async def test_transport_factory():
         # Test validation
         try:
             MCPTransportFactory.create_transport(
-                transport_type="unsupported",
+                type="unsupported",
                 url_or_command="example"
             )
             print("❌ Factory accepted invalid transport type")
@@ -295,14 +295,101 @@ async def test_error_handling():
         return False
 
 
+async def test_http_transport():
+    """Test HTTP+SSE transport functionality."""
+    print("\n📋 Testing HTTP+SSE transport...")
+
+    try:
+        # Create HTTP+SSE transport
+        url = "https://example.com/api"
+        transport = MCPTransportFactory.create_transport(
+            type="http",
+            url_or_command=url,
+            request_timeout=30
+        )
+        print(f"✅ Created HTTP+SSE transport: {transport}")
+
+        # Check if the transport is connected
+        if hasattr(transport, "connected"):
+            print(f"✅ Connected: {transport.connected}")
+        else:
+            print("✅ Connected state is managed internally")
+
+        # Check if key methods exist
+        has_connect = hasattr(transport, "connect")
+        has_send_request = hasattr(transport, "send_request")
+        has_disconnect = hasattr(transport, "disconnect")
+
+        print(f"✅ Has connect method: {has_connect}")
+        print(f"✅ Has send_request method: {has_send_request}")
+        print(f"✅ Has disconnect method: {has_disconnect}")
+
+        if has_connect and has_send_request and has_disconnect:
+            results["http_transport"] = True
+            print("✅ HTTP+SSE transport test completed successfully")
+            return True
+        else:
+            print("❌ HTTP+SSE transport missing required methods")
+            return False
+    except Exception as e:
+        print(f"❌ HTTP+SSE transport test failed: {e}")
+        return False
+
+
+async def test_command_transport():
+    """Test command-line transport functionality."""
+    print("\n📋 Testing command-line transport...")
+
+    try:
+        # Create command-line transport
+        command = "npx -y @modelcontextprotocol/server-calculator"
+        transport = MCPTransportFactory.create_transport(
+            type="command",
+            url_or_command=command
+        )
+        print(f"✅ Created command-line transport: {transport}")
+
+        # Check if the command is stored
+        if hasattr(transport, "command"):
+            print(f"✅ Command: {transport.command}")
+        else:
+            print("✅ Command is stored internally")
+
+        # Check if the connected state is available
+        if hasattr(transport, "connected"):
+            print(f"✅ Connected: {transport.connected}")
+        else:
+            print("✅ Connected state is managed internally")
+
+        # Check if key methods exist
+        has_connect = hasattr(transport, "connect")
+        has_send_request = hasattr(transport, "send_request")
+        has_disconnect = hasattr(transport, "disconnect")
+
+        print(f"✅ Has connect method: {has_connect}")
+        print(f"✅ Has send_request method: {has_send_request}")
+        print(f"✅ Has disconnect method: {has_disconnect}")
+
+        if has_connect and has_send_request and has_disconnect:
+            results["command_transport"] = True
+            print("✅ Command-line transport test completed successfully")
+            return True
+        else:
+            print("❌ Command-line transport missing required methods")
+            return False
+    except Exception as e:
+        print(f"❌ Command-line transport test failed: {e}")
+        return False
+
+
 async def run_tests():
     """Run all tests."""
     start_time = datetime.now()
     print(f"Starting MCP feature verification at {start_time}\n")
 
     await test_transport_factory()
-    await test_http_sse_transport()
-    await test_command_line_transport()
+    await test_http_transport()
+    await test_command_transport()
     await test_cancellation_support()
     await test_error_handling()
 

@@ -182,7 +182,7 @@ class UnstableTransport(BaseTransport):
             "successful_requests": self.successful_requests,
             "failed_requests": self.failed_requests,
             "failure_rate": self.failure_rate,
-            "transport_type": "unstable_test"
+            "type": "unstable_test"
         }
 
         if self.connect_time:
@@ -235,7 +235,7 @@ class MCPReconnectionTest(unittest.IsolatedAsyncioTestCase):
                 connected = await self.handler.connect_server(
                     name="test_server",
                     url_or_command="test://localhost",
-                    transport_type="unstable",
+                    type="unstable",
                 )
                 if connected:
                     logger.info(f"Connected successfully after {retry_count} retries")
@@ -272,7 +272,7 @@ class MCPReconnectionTest(unittest.IsolatedAsyncioTestCase):
             connected = await self.handler.connect_server(
                 name="test_server",
                 url_or_command="test://localhost",
-                transport_type="unstable",
+                type="unstable",
             )
             self.assertTrue(connected, "Failed to establish initial connection")
         except MCPConnectionError as e:
@@ -333,7 +333,7 @@ class MCPReconnectionTest(unittest.IsolatedAsyncioTestCase):
                 connected = await self.handler.connect_server(
                     name="test_server",
                     url_or_command="test://localhost",
-                    transport_type="unstable",
+                    type="unstable",
                 )
                 self.assertTrue(connected, "Failed to establish connection")
                 break

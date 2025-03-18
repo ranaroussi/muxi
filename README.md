@@ -395,20 +395,18 @@ app = muxi()
 # Add an agent with MCP server capabilities
 app.add_agent("assistant", "configs/assistant.yaml")
 
-# Connect to an MCP server programmatically
+# Connect to an HTTP-based MCP server with credentials
 await app.get_agent("assistant").connect_mcp_server(
     name="weather",
     url="http://localhost:5001",  # For HTTP+SSE transport
-    transport_type="http_sse",    # Explicitly specify transport type
-    credentials={"api_key": "your_weather_api_key"}
+    credentials={"api_key": "your_weather_api_key"}  # Optional: can be omitted if no authentication is needed
 )
 
-# Connect to a command-line based MCP server
+# Connect to a command-line based MCP server without credentials
 await app.get_agent("assistant").connect_mcp_server(
     name="calculator",
-    url="npx -y @modelcontextprotocol/server-calculator",  # Command to start the server
-    transport_type="command_line",
-    credentials={}
+    command="npx -y @modelcontextprotocol/server-calculator",
+    # No credentials parameter needed for servers that don't require authentication
 )
 
 # Chat with the agent using MCP server capabilities
@@ -424,16 +422,14 @@ Example MCP server configuration in YAML:
 ```yaml
 mcp_servers:
 - name: web_search
-  transport_type: http_sse  # or "command_line"
   url: http://localhost:5001
-  credentials:
+  credentials:  # Optional: can be omitted if no authentication is required
   - id: search_api_key
     param_name: api_key
     required: true
     env_fallback: SEARCH_API_KEY
 - name: calculator
-  transport_type: command_line
-  url: npx -y @modelcontextprotocol/server-calculator
-  credentials: []
+  command: npx -y @modelcontextprotocol/server-calculator
+  # No credentials section needed for servers that don't require authentication
 ```
 

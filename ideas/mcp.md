@@ -257,9 +257,9 @@ class MCPTransportFactory:
     @staticmethod
     async def create_transport(server_type: str, url_or_command: str, credentials: Dict[str, Any]) -> MCPTransport:
         """Create the appropriate transport based on server type."""
-        if server_type == "http_sse":
+        if server_type == "http":
             return HTTPSSETransport(url_or_command, credentials)
-        elif server_type == "command_line":
+        elif server_type == "command":
             return CommandLineTransport(url_or_command, credentials)
         elif server_type == "streamable_http":
             return StreamableHTTPTransport(url_or_command, credentials)
@@ -273,13 +273,14 @@ class MCPTransportFactory:
 
 ```python
 # Example agent method for connecting to an MCP server
-async def connect_mcp_server(self, name: str, url: str, credentials: Dict[str, Any] = None) -> bool:
+async def connect_mcp_server(self, name: str, url: Optional[str] = None, command: Optional[str] = None, credentials: Dict[str, Any] = None) -> bool:
     """
     Connect to an MCP server.
 
     Args:
         name: A unique identifier for this MCP server
-        url: The URL or command to start the MCP server
+        url: The URL for HTTP-based MCP servers
+        command: The command to start command-line MCP servers
         credentials: Optional credentials for authentication
 
     Returns:
@@ -288,7 +289,7 @@ async def connect_mcp_server(self, name: str, url: str, credentials: Dict[str, A
     if self.mcp_handler is None:
         self.mcp_handler = MCPHandler(self.agent_id)
 
-    return await self.mcp_handler.connect_mcp_server(name, url, credentials or {})
+    return await self.mcp_handler.connect_server(name, url=url, command=command, credentials=credentials or {})
 
 # Example agent method for handling messages with potential tool calls
 async def process_message(self, message: str) -> MCPMessage:
@@ -327,7 +328,6 @@ model:
   temperature: 0.7
 mcp_servers:
 - name: web_search
-  type: http_sse  # or "command_line" or "streamable_http"
   url: http://localhost:5001
   credentials:
   - id: search_api_key
@@ -335,7 +335,6 @@ mcp_servers:
     required: true
     env_fallback: SEARCH_API_KEY
 - name: calculator
-  type: command_line
   command: npx -y @modelcontextprotocol/server-calculator
   credentials: []
 ```

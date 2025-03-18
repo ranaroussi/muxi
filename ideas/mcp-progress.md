@@ -35,10 +35,12 @@ Implemented a command-line transport for connecting to local MCP servers that ar
 
 #### Transport Factory
 
-Created a `MCPTransportFactory` that centralizes transport creation based on the transport type. This improves:
+Created a `MCPTransportFactory` that centralizes transport creation based on the provided parameters. This improves:
 
 - Code organization with a proper factory pattern
-- Simplified client code that doesn't need to know transport details
+- Simplified client code with clear parameter names (`url` and `command`)
+- Support for both HTTP+SSE and command-line transports
+- Clear differentiation between transport types
 - Extension point for adding new transport types in the future
 
 #### Reconnection with Exponential Backoff

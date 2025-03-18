@@ -92,7 +92,7 @@ class Agent:
         self,
         name: str,
         url_or_command: str,
-        transport_type: str = "http_sse",
+        type: str = "http",
         credentials: Optional[Dict[str, str]] = None
     ) -> bool:
         """
@@ -101,7 +101,7 @@ class Agent:
         Args:
             name: The name of the MCP server
             url_or_command: The URL or command to start the MCP server
-            transport_type: The type of transport to use ("http_sse" or "command_line")
+            type: The type of transport to use ("http" or "command")
             credentials: Optional credentials for the MCP server
 
         Returns:
@@ -114,7 +114,7 @@ class Agent:
             success = await self.mcp_handler.connect_mcp_server(
                 name=name,
                 url_or_command=url_or_command,
-                transport_type=transport_type,
+                type=type,
                 credentials=credentials
             )
 
@@ -122,7 +122,7 @@ class Agent:
                 # Store server details for reference
                 self.mcp_servers[name] = {
                     "url_or_command": url_or_command,
-                    "transport_type": transport_type,
+                    "type": type,
                     "credentials": credentials or {}
                 }
 

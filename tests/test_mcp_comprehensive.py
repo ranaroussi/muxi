@@ -37,11 +37,11 @@ from packages.core.src.muxi.core.mcp_handler import (
 class TestMCPTransportFactory(unittest.TestCase):
     """Test cases for the MCPTransportFactory class."""
 
-    def test_create_transport_http_sse(self):
+    def test_create_transport_http(self):
         """Test creating an HTTP+SSE transport."""
         # Create transport
         transport = MCPTransportFactory.create_transport(
-            transport_type="http_sse",
+            type="http",
             url_or_command="https://server.mcpify.ai/sse?server=test-id",
             request_timeout=30
         )
@@ -51,11 +51,11 @@ class TestMCPTransportFactory(unittest.TestCase):
         self.assertEqual(transport.url, "https://server.mcpify.ai/sse?server=test-id")
         self.assertEqual(transport.request_timeout, 30)
 
-    def test_create_transport_command_line(self):
+    def test_create_transport_command(self):
         """Test creating a command line transport."""
         # Create transport
         transport = MCPTransportFactory.create_transport(
-            transport_type="command_line",
+            type="command",
             url_or_command="npx -y @modelcontextprotocol/server-calculator"
         )
 
@@ -68,7 +68,7 @@ class TestMCPTransportFactory(unittest.TestCase):
         # Attempt to create an unsupported transport
         with self.assertRaises(ValueError):
             MCPTransportFactory.create_transport(
-                transport_type="unsupported_transport",
+                type="unsupported_transport",
                 url_or_command="https://example.com"
             )
 
@@ -326,7 +326,7 @@ class TestMCPServerClient(unittest.IsolatedAsyncioTestCase):
         self.client = MCPServerClient(
             name="test_server",
             url_or_command="http://test-server.com",
-            transport_type="http_sse",
+            type="http",
             credentials={"api_key": "test_key"}
         )
 
@@ -341,7 +341,7 @@ class TestMCPServerClient(unittest.IsolatedAsyncioTestCase):
 
         # Verify factory and transport were used correctly
         self.mock_factory.create_transport.assert_called_with(
-            transport_type="http_sse",
+            type="http",
             url_or_command="http://test-server.com",
             request_timeout=60
         )
@@ -447,14 +447,14 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
         result = await self.handler.connect_server(
             name="test_server",
             url_or_command="http://test-server.com",
-            transport_type="http_sse"
+            type="http"
         )
 
         # Verify client was created and connected
         self.mock_client_class.assert_called_with(
             name="test_server",
             url_or_command="http://test-server.com",
-            transport_type="http_sse",
+            type="http",
             credentials={}
         )
         self.mock_client.connect.assert_called_once()
@@ -535,7 +535,7 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
             await self.handler.connect_server(
                 name="test_server",
                 url_or_command="http://test-server.com",
-                transport_type="http_sse"
+                type="http"
             )
 
         # Verify client was created but not added to active connections

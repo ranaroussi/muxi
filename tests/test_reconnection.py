@@ -212,7 +212,7 @@ class TestReconnection(unittest.TestCase):
         result = await self.handler.connect_server(
             server_id="test_server",
             server_url="http://localhost:8080",
-            transport_type="http_sse"
+            type="http"
         )
 
         self.assertTrue(result)
@@ -236,7 +236,7 @@ class TestReconnection(unittest.TestCase):
             await self.handler.connect_server(
                 server_id="test_server",
                 server_url="http://localhost:8080",
-                transport_type="http_sse"
+                type="http"
             )
 
             # Reset the operation count after initial connection
@@ -246,7 +246,7 @@ class TestReconnection(unittest.TestCase):
             # Setup server_info but don't actually connect
             self.handler.server_info["test_server"] = {
                 "url": "http://localhost:8080",
-                "transport_type": "http_sse"
+                "type": "http"
             }
 
         # Mock the _get_server_for_tool method to return our test server
@@ -286,7 +286,7 @@ class TestReconnection(unittest.TestCase):
             asyncio.run(self.handler.connect_server(
                 server_id="test_server",
                 server_url="http://localhost:8080",
-                transport_type="http_sse"
+                type="http"
             ))
 
     def test_execute_tool_with_reconnection(self):
@@ -306,7 +306,7 @@ class TestReconnection(unittest.TestCase):
         asyncio.run(self.handler.connect_server(
             server_id="test_server",
             server_url="http://localhost:8080",
-            transport_type="http_sse"
+            type="http"
         ))
 
         # Reset the operation count after initial connection
@@ -331,7 +331,7 @@ class TestReconnection(unittest.TestCase):
         asyncio.run(self.handler.connect_server(
             server_id="test_server",
             server_url="http://localhost:8080",
-            transport_type="http_sse"
+            type="http"
         ))
 
         # Get stats

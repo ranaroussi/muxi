@@ -11,9 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from packages.core.src.muxi.core.mcp import MCPMessage
 from packages.core.src.muxi.core.mcp_handler import (
     MCPHandler,
-    MCPServerClient,
-    HTTPSSETransport,
-    CommandLineTransport
+    MCPServerClient
 )
 
 
@@ -32,7 +30,7 @@ class TestMCPServerClient(unittest.IsolatedAsyncioTestCase):
         self.client = MCPServerClient(
             name="test_server",
             url_or_command="http://test-server.com",
-            transport_type="http_sse",
+            type="http",
             credentials={"api_key": "test_key"}
         )
         self.client.client = self.mock_client
@@ -133,7 +131,7 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
         result = await self.handler.connect_mcp_server(
             name="test_server",
             url_or_command="http://test-server.com",
-            transport_type="http_sse",
+            type="http",
             credentials={"api_key": "test_key"}
         )
 

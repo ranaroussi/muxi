@@ -444,7 +444,7 @@ class HTTPSSETransport(BaseTransport):
         """Get statistics about this connection."""
         stats = {
             "connected": self.connected,
-            "transport_type": "http_sse",
+            "type": "http",
             "base_url": self.base_url,
             "session_id": self.session_id,
             "current_time": datetime.now().isoformat()
@@ -691,7 +691,7 @@ class CommandLineTransport(BaseTransport):
         """Get statistics about this connection."""
         stats = {
             "connected": self.connected,
-            "transport_type": "command_line",
+            "type": "command",
             "command": self.command,
             "session_id": self.session_id,
             "current_time": datetime.now().isoformat()
@@ -716,46 +716,60 @@ class MCPTransportFactory:
     """Factory class for creating MCP transport instances."""
 
     @staticmethod
-    def create_transport(transport_type: str, url_or_command: str, **kwargs) -> BaseTransport:
-        """Create a transport instance based on type.
+    def create_transport(
+        url: Optional[str] = None,
+        command: Optional[str] = None,
+        **kwargs
+    ) -> BaseTransport:
+        """Create a transport instance based on parameters.
 
         Args:
-            transport_type: Type of transport ('http_sse' or 'command_line')
-            url_or_command: URL for HTTP+SSE or command for command-line
+            url: URL for HTTP-based MCP servers
+            command: Command for command-line based MCP servers
             **kwargs: Additional parameters for transport initialization
 
         Returns:
             An instance of BaseTransport
 
         Raises:
-            ValueError: If transport_type is not supported
+            ValueError: If neither url nor command is provided, or if both are provided
         """
-        logger.info(f"Creating transport of type '{transport_type}'")
+        logger.info("Creating transport based on provided parameters")
 
-        if transport_type == "http_sse":
+        if url is not None and command is not None:
+            raise ValueError(
+                "Cannot provide both url and command. "
+                "Use url for HTTP servers and command for command-line servers."
+            )
+
+        if url is None and command is None:
+            raise ValueError("Must provide either url or command.")
+
+        if url is not None:
             request_timeout = kwargs.get('request_timeout', 60)
-            return HTTPSSETransport(url_or_command, request_timeout)
-        elif transport_type == "command_line":
-            return CommandLineTransport(url_or_command)
-        else:
-            error_details = {
-                "transport_type": transport_type,
-                "supported_types": ["http_sse", "command_line"],
-                "timestamp": datetime.now().isoformat()
-            }
-            raise ValueError(f"Unsupported transport type: {transport_type}", error_details)
+            return HTTPSSETransport(url, request_timeout)
+        else:  # command is not None
+            return CommandLineTransport(command)
 
     @staticmethod
-    def supports_transport_type(transport_type: str) -> bool:
-        """Check if a transport type is supported.
+    def supports_parameters(
+        url: Optional[str] = None,
+        command: Optional[str] = None
+    ) -> bool:
+        """Check if the provided parameters are supported.
 
         Args:
-            transport_type: Type of transport to check
+            url: URL for HTTP-based MCP servers
+            command: Command for command-line based MCP servers
 
         Returns:
-            True if supported, False otherwise
+            True if parameters are supported, False otherwise
         """
-        return transport_type in ["http_sse", "command_line"]
+        if url is not None and command is not None:
+            return False
+        if url is None and command is None:
+            return False
+        return True
 
 
 class MCPServerClient:
@@ -767,9 +781,9 @@ class MCPServerClient:
     def __init__(
         self,
         name: str,
-        url_or_command: str,
-        transport_type: str,
-        credentials: Dict[str, Any],
+        url: Optional[str] = None,
+        command: Optional[str] = None,
+        credentials: Optional[Dict[str, Any]] = None,
         request_timeout: int = 60
     ):
         """
@@ -777,15 +791,15 @@ class MCPServerClient:
 
         Args:
             name: The name of the server (for identification)
-            url_or_command: The URL or command to connect to the server
-            transport_type: The type of transport to use (http_sse or command_line)
-            credentials: Credentials for the server
+            url: The URL for HTTP-based MCP servers
+            command: The command for command-line MCP servers
+            credentials: Credentials for the server (optional)
             request_timeout: Timeout for requests in seconds
         """
         self.name = name
-        self.url_or_command = url_or_command
-        self.transport_type = transport_type
-        self.credentials = credentials
+        self.url = url
+        self.command = command
+        self.credentials = credentials or {}
         self.client = None
         self.connected = False
         self.transport = None
@@ -805,8 +819,8 @@ class MCPServerClient:
         try:
             # Create transport using factory
             self.transport = MCPTransportFactory.create_transport(
-                self.transport_type,
-                self.url_or_command,
+                url=self.url,
+                command=self.command,
                 request_timeout=self.request_timeout
             )
 
@@ -816,9 +830,11 @@ class MCPServerClient:
             # If we get here, the connection was successful
             # (otherwise an exception would have been raised)
             self.connected = True
+
+            transport_type = "http" if self.url else "command"
             logger.info(
                 f"Successfully connected to MCP server '{self.name}' "
-                f"using {self.transport_type} transport"
+                f"using {transport_type} transport"
             )
 
             return True
@@ -826,8 +842,8 @@ class MCPServerClient:
         except Exception as e:
             error_details = {
                 "server_name": self.name,
-                "transport_type": self.transport_type,
-                "url_or_command": self.url_or_command,
+                "url": self.url,
+                "command": self.command,
                 "error_type": type(e).__name__,
                 "error_message": str(e)
             }
@@ -870,7 +886,8 @@ class MCPServerClient:
         except Exception as e:
             error_details = {
                 "server_name": self.name,
-                "transport_type": self.transport_type,
+                "url": self.url,
+                "command": self.command,
                 "error_type": type(e).__name__,
                 "error_message": str(e)
             }
@@ -997,8 +1014,8 @@ class MCPServerClient:
         stats = {
             "server_name": self.name,
             "connected": self.connected,
-            "transport_type": self.transport_type,
-            "url_or_command": self.url_or_command,
+            "url": self.url,
+            "command": self.command,
             "active_requests": len(self.active_requests),
             "current_time": datetime.now().isoformat()
         }
@@ -1048,8 +1065,8 @@ class MCPHandler:
     async def connect_server(
         self,
         name: str,
-        url_or_command: str,
-        transport_type: str = "http_sse",
+        url: Optional[str] = None,
+        command: Optional[str] = None,
         credentials: Optional[Dict[str, Any]] = None,
         request_timeout: int = 60
     ) -> bool:
@@ -1058,9 +1075,9 @@ class MCPHandler:
 
         Args:
             name: The name of the server (for identification)
-            url_or_command: The URL or command to connect to the server
-            transport_type: The type of transport to use (http_sse or command_line)
-            credentials: Credentials for the server
+            url: The URL for HTTP-based MCP servers
+            command: The command for command-line MCP servers
+            credentials: Credentials for the server (optional)
             request_timeout: Timeout for requests in seconds
 
         Returns:
@@ -1068,24 +1085,30 @@ class MCPHandler:
 
         Raises:
             MCPConnectionError: If connection fails
-            ValueError: If transport_type is not supported
+            ValueError: If neither url nor command is provided, or if both are provided
         """
         # Check if we're already connected to this server
         if name in self.active_connections:
             logger.warning(f"Already connected to MCP server '{name}', disconnecting first")
             await self.disconnect_server(name)
 
-        # Check if transport type is supported
-        if not MCPTransportFactory.supports_transport_type(transport_type):
-            raise ValueError(f"Unsupported transport type: {transport_type}")
+        # Check if parameters are supported
+        if not MCPTransportFactory.supports_parameters(url=url, command=command):
+            if url is not None and command is not None:
+                raise ValueError(
+                    "Cannot provide both url and command. "
+                    "Use url for HTTP servers and command for command-line servers."
+                )
+            else:  # url is None and command is None
+                raise ValueError("Must provide either url or command.")
 
         try:
             # Create a new client
             client = MCPServerClient(
                 name=name,
-                url_or_command=url_or_command,
-                transport_type=transport_type,
-                credentials=credentials or {},
+                url=url,
+                command=command,
+                credentials=credentials,
                 request_timeout=request_timeout
             )
 
@@ -1101,8 +1124,8 @@ class MCPHandler:
         except Exception as e:
             error_details = {
                 "server_name": name,
-                "transport_type": transport_type,
-                "url_or_command": url_or_command,
+                "url": url,
+                "command": command,
                 "error_type": type(e).__name__,
                 "error_message": str(e)
             }
