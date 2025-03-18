@@ -154,7 +154,9 @@ class HTTPSSETransport(BaseTransport):
                         error_details
                     )
 
-                logger.info(f"SSE connection established: {response.status_code} in {connection_time:.2f}s")
+                logger.info(
+                    f"SSE connection established: {response.status_code} in {connection_time:.2f}s"
+                )
 
                 # Process SSE events to get endpoint info
                 found_endpoint = False
@@ -247,8 +249,11 @@ class HTTPSSETransport(BaseTransport):
             logger.error(f"Error connecting to MCP server: {str(e)}")
             raise MCPConnectionError("Error connecting to MCP server", error_details) from e
 
-    async def listen_for_events(self, callback: Optional[Callable] = None,
-                              cancellation_token: Optional[CancellationToken] = None) -> AsyncGenerator:
+    async def listen_for_events(
+            self,
+            callback: Optional[Callable] = None,
+            cancellation_token: Optional[CancellationToken] = None
+    ) -> AsyncGenerator:
         """Listen for SSE events."""
         if not self.sse_connection:
             logger.error("Cannot listen for events: No SSE connection")
@@ -279,8 +284,11 @@ class HTTPSSETransport(BaseTransport):
             logger.error(f"Error listening for SSE events: {str(e)}")
             raise MCPConnectionError("Error listening for SSE events", error_details) from e
 
-    async def send_request(self, request_obj: Any,
-                         cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
+    async def send_request(
+            self,
+            request_obj: Any,
+            cancellation_token: Optional[CancellationToken] = None
+    ) -> Dict[str, Any]:
         """Send request to the server.
 
         Args:
@@ -345,8 +353,11 @@ class HTTPSSETransport(BaseTransport):
                 # Server returned immediate result
                 try:
                     return response.json()
-                except Exception as json_error:
-                    resp_text = response.text[:100] + "..." if len(response.text) > 100 else response.text
+                except Exception:
+                    resp_text = (
+                        response.text[:100] + "..." if len(response.text) > 100
+                        else response.text
+                    )
                     logger.warning(
                         f"Non-JSON response with status {response.status_code}: {resp_text}"
                     )
@@ -491,7 +502,10 @@ class CommandLineTransport(BaseTransport):
                 self.connect_time = datetime.now()
                 self.last_activity = self.connect_time
 
-                logger.info(f"MCP server process started with PID {self.process.pid} in {connection_time:.2f}s")
+                logger.info(
+                    f"MCP server process started with PID {self.process.pid} "
+                    f"in {connection_time:.2f}s"
+                )
                 return True
             else:
                 error_details = {
@@ -519,8 +533,11 @@ class CommandLineTransport(BaseTransport):
             logger.error(f"Error starting MCP server process: {str(e)}")
             raise MCPConnectionError("Error starting MCP server process", error_details) from e
 
-    async def send_request(self, request_obj: Any,
-                         cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
+    async def send_request(
+            self,
+            request_obj: Any,
+            cancellation_token: Optional[CancellationToken] = None
+    ) -> Dict[str, Any]:
         """Send a request to the MCP server process.
 
         Args:
@@ -581,7 +598,10 @@ class CommandLineTransport(BaseTransport):
                 response_data = json.loads(response_line.decode())
                 return response_data
             except json.JSONDecodeError as e:
-                response_text = response_line.decode()[:100] + "..." if len(response_line) > 100 else response_line.decode()
+                response_text = (
+                    response_line.decode()[:100] + "..."
+                    if len(response_line) > 100 else response_line.decode()
+                )
                 error_details = {
                     "method": method_name,
                     "request_id": request_id,
@@ -592,7 +612,10 @@ class CommandLineTransport(BaseTransport):
                     "timestamp": datetime.now().isoformat()
                 }
                 logger.error(f"Invalid JSON response: {str(e)}")
-                raise MCPRequestError("Invalid JSON response from MCP server process", error_details) from e
+                raise MCPRequestError(
+                    "Invalid JSON response from MCP server process",
+                    error_details
+                ) from e
 
         except asyncio.CancelledError:
             logger.info(f"Request was cancelled: {method_name} (id: {request_id})")
@@ -614,7 +637,10 @@ class CommandLineTransport(BaseTransport):
                 "timestamp": datetime.now().isoformat()
             }
             logger.error(f"Error sending request: {str(e)}")
-            raise MCPRequestError("Error sending request to MCP server process", error_details) from e
+            raise MCPRequestError(
+                "Error sending request to MCP server process",
+                error_details
+            ) from e
 
     async def disconnect(self) -> bool:
         """Terminate the server process."""
@@ -633,7 +659,9 @@ class CommandLineTransport(BaseTransport):
                     try:
                         await asyncio.wait_for(self.process.wait(), timeout=5.0)
                     except asyncio.TimeoutError:
-                        logger.warning(f"Process didn't terminate, killing it (PID {self.process.pid})")
+                        logger.warning(
+                            f"Process didn't terminate, killing it (PID {self.process.pid})"
+                        )
                         self.process.kill()
 
                 # Reset state
@@ -654,7 +682,10 @@ class CommandLineTransport(BaseTransport):
                 "timestamp": datetime.now().isoformat()
             }
             logger.error(f"Error disconnecting from MCP server process: {str(e)}")
-            raise MCPConnectionError("Error disconnecting from MCP server process", error_details) from e
+            raise MCPConnectionError(
+                "Error disconnecting from MCP server process",
+                error_details
+            ) from e
 
     def get_connection_stats(self) -> Dict[str, Any]:
         """Get statistics about this connection."""
@@ -780,12 +811,15 @@ class MCPServerClient:
             )
 
             # Connect the transport
-            connected = await self.transport.connect()
+            await self.transport.connect()
 
             # If we get here, the connection was successful
             # (otherwise an exception would have been raised)
             self.connected = True
-            logger.info(f"Successfully connected to MCP server '{self.name}' using {self.transport_type} transport")
+            logger.info(
+                f"Successfully connected to MCP server '{self.name}' "
+                f"using {self.transport_type} transport"
+            )
 
             return True
 
@@ -804,7 +838,10 @@ class MCPServerClient:
                 raise
 
             logger.error(f"Failed to connect to MCP server '{self.name}': {str(e)}")
-            raise MCPConnectionError(f"Failed to connect to MCP server '{self.name}'", error_details) from e
+            raise MCPConnectionError(
+                f"Failed to connect to MCP server '{self.name}'",
+                error_details
+            ) from e
 
     async def disconnect(self) -> bool:
         """
@@ -849,8 +886,12 @@ class MCPServerClient:
                 error_details
             ) from e
 
-    async def send_message(self, method: str, params: Dict[str, Any],
-                          cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
+    async def send_message(
+            self,
+            method: str,
+            params: Dict[str, Any],
+            cancellation_token: Optional[CancellationToken] = None
+    ) -> Dict[str, Any]:
         """
         Send a message to the MCP server.
 
@@ -932,8 +973,12 @@ class MCPServerClient:
             if request_id in self.active_requests:
                 del self.active_requests[request_id]
 
-    async def execute_tool(self, tool_name: str, params: Dict[str, Any],
-                          cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
+    async def execute_tool(
+            self,
+            tool_name: str,
+            params: Dict[str, Any],
+            cancellation_token: Optional[CancellationToken] = None
+    ) -> Dict[str, Any]:
         """
         Execute a tool on the MCP server.
 
@@ -1067,7 +1112,10 @@ class MCPHandler:
                 raise
 
             logger.error(f"Failed to connect to MCP server '{name}': {str(e)}")
-            raise MCPConnectionError(f"Failed to connect to MCP server '{name}'", error_details) from e
+            raise MCPConnectionError(
+                f"Failed to connect to MCP server '{name}'",
+                error_details
+            ) from e
 
     async def disconnect_server(self, name: str) -> bool:
         """
@@ -1108,11 +1156,16 @@ class MCPHandler:
                 raise
 
             logger.error(f"Error disconnecting from MCP server '{name}': {str(e)}")
-            raise MCPConnectionError(f"Error disconnecting from MCP server '{name}'", error_details) from e
+            raise MCPConnectionError(
+                f"Error disconnecting from MCP server '{name}'",
+                error_details
+            ) from e
 
-    async def process_message(self,
-                             message: Dict[str, Any],
-                             cancellation_token: Optional[CancellationToken] = None) -> Dict[str, Any]:
+    async def process_message(
+            self,
+            message: Dict[str, Any],
+            cancellation_token: Optional[CancellationToken] = None
+    ) -> Dict[str, Any]:
         """
         Process a message that may contain tool calls to MCP servers.
 
@@ -1152,7 +1205,9 @@ class MCPHandler:
                     server_name = self._get_server_for_tool(tool_name)
                     if not server_name:
                         logger.warning(f"No server registered for tool '{tool_name}'")
-                        tool_call["output"] = {"error": f"No server registered for tool '{tool_name}'"}
+                        tool_call["output"] = {
+                            "error": f"No server registered for tool '{tool_name}'"
+                        }
                         continue
 
                     # Execute the tool
@@ -1185,8 +1240,11 @@ class MCPHandler:
                 del self.cancellation_tokens[operation_id]
 
     async def execute_tool(
-        self, server_name: str, tool_name: str, params: Dict[str, Any],
-        cancellation_token: Optional[CancellationToken] = None
+            self,
+            server_name: str,
+            tool_name: str,
+            params: Dict[str, Any],
+            cancellation_token: Optional[CancellationToken] = None
     ) -> Dict[str, Any]:
         """
         Execute a tool on an MCP server.
