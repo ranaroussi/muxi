@@ -5,7 +5,7 @@
 
 ## Project Description
 This is an MUXI Framework for building and orchestrating intelligent agents
-with memory, tool integration, and real-time communication capabilities.
+with memory, MCP server integration, and real-time communication capabilities.
 
 ## Repository Structure
 ```
@@ -25,10 +25,15 @@ src/                      # Source code
    ├── long_term.py       # Long-term persistent memory
    ├── memobase.py        # User-aware memory system
    └── utils/             # Memory utilities
- └─ tools/                # Tool system
-   ├── base.py            # Base tool interface
-   ├── registry.py        # Tool registry
-   └── implementations/   # Tool implementations
+ └─ mcp/                  # MCP (Model Context Protocol) implementation
+   ├── base.py            # Base MCP interface
+   ├── handler.py         # MCP message handler
+   ├── message.py         # MCP message format
+   └── servers/           # MCP server implementations
+ └─ knowledge/            # Domain knowledge system
+   ├── base.py            # Knowledge source base classes
+   ├── handler.py         # Knowledge indexing and retrieval
+   └── utils/             # Knowledge utilities
  └─ api/                  # API server
    ├── server.py          # FastAPI server
    ├── routes/            # API routes

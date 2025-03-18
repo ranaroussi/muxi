@@ -50,8 +50,9 @@
 
 ## MCP Server Integration
 
-- Design all tools as MCP servers for consistency
-- Create adapters for local Python tools when needed
+- MUXI exclusively uses MCP servers for specialized capabilities (no direct tool calls)
+- Design all specialized capabilities as MCP servers for consistency
+- Create adapters for local Python implementations when needed
 - Implement service discovery for MCP servers
 - Support both local and remote MCP servers
 - Use standardized error handling across all servers

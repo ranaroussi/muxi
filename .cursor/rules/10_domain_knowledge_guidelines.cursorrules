@@ -121,9 +121,11 @@ results = await agent.search_knowledge(
    - Remove outdated information promptly
    - Version knowledge sources when appropriate
 
-5. **Knowledge vs. Memory**
+5. **Knowledge vs. Memory vs. MCP Servers**
    - Use domain knowledge for static reference information
    - Use memory for conversation context and user-specific data
+   - Use MCP servers for specialized capabilities and external integrations
+   - Note that MUXI exclusively uses MCP servers (not direct tool calls) for specialized capabilities
 
 ## Common Patterns
 
@@ -222,4 +224,10 @@ def test_knowledge_search():
     assert "content" in results[0]
     assert "source" in results[0]
     assert "relevance" in results[0]
+```
+
+## Note on Specialized Capabilities
+
+For specialized capabilities like search, calculations, and external API access, MUXI exclusively uses MCP servers rather than direct tool calls. Domain knowledge is for static reference information, while dynamic capabilities should be implemented as MCP servers.
+
 ```
