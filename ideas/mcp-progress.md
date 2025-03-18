@@ -162,17 +162,7 @@ This should return search results based on the query.
 
 We've discovered there's an official Python SDK for Model Context Protocol (MCP) available at [github.com/modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk).
 
-### Using the Official SDK vs. Custom Implementation
-
-Given this information, we should consider two approaches:
-
-1. **Use the Official SDK**: Integrate the official Python SDK into the MUXI framework, which would give us immediate access to a well-maintained, spec-compliant implementation.
-
-2. **Develop Custom Implementation**: Continue with our planned custom implementation, which gives us more control but requires more development effort.
-
-### Recommendation
-
-**Recommended approach**: Use the official Python SDK as a dependency in our implementation for these reasons:
+We will use the official Python SDK as a dependency in our implementation for these reasons:
 
 1. **Spec Compliance**: The official SDK will stay up-to-date with the latest MCP specification
 2. **Community Support**: Benefit from bug fixes and features from the broader community
