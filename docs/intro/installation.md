@@ -36,12 +36,12 @@ This installs the main `muxi` package, which includes:
 - Server components (API, WebSocket)
 - Command-line interface
 
-### Minimal Installation
+### CLI Installation
 
-If you only need the core functionality without the server or CLI:
+If you only need the CLI functionality to interact with a remote server:
 
 ```bash
-pip install muxi-core
+pip install muxi-cli
 ```
 
 ### Web UI Installation
