@@ -282,20 +282,6 @@ agent = Agent(
     system_message="You are a helpful assistant."
 )
 
-# Add domain knowledge
-agent.add_domain_knowledge({
-    "company": {
-        "name": "Acme Corp",
-        "founded": 1985,
-        "products": ["widgets", "gadgets", "tools"],
-        "headquarters": "New York"
-    },
-    "contact": {
-        "email": "info@acmecorp.example",
-        "phone": "555-123-4567"
-    }
-})
-
 # Agent can use this knowledge
 response = agent.chat("What products does the company sell?")
 print(response)  # Will include widgets, gadgets, and tools
@@ -313,9 +299,6 @@ agent = Agent(
     model=OpenAIModel("gpt-4o"),
     system_message="You are a helpful assistant."
 )
-
-# Add domain knowledge from a text file
-agent.add_domain_knowledge_from_file("company_profile.txt")
 
 # Agent can use this knowledge
 response = agent.chat("What is the company's mission statement?")

@@ -72,9 +72,6 @@ agent = Agent(
     system_message="You are a helpful assistant."
 )
 
-# Add domain knowledge - automatic splitting, embedding, and indexing
-agent.add_domain_knowledge("geography.txt")
-
 # Simple conversation with memory automatically managed
 response = agent.chat("What is the capital of France?")
 ```

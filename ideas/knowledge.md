@@ -116,7 +116,7 @@ Functions for managing agent knowledge:
 
 ```python
 # Add knowledge to an existing agent
-app.add_knowledge_to_agent("financial_advisor", new_knowledge_source)
+app.add_agent_knowledge("financial_advisor", new_knowledge_source)
 
 # Update knowledge
 app.update_agent_knowledge("financial_advisor", "financial_regulations", new_connection_string)
