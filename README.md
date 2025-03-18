@@ -10,6 +10,11 @@ MUXI Framework is a powerful platform for building AI agents with memory, MCP se
 - 🤖 **Multi-Agent Support**: Create and manage multiple AI agents with different capabilities
 - 🧠 **Memory Systems**: Short-term and long-term memory for contextual interactions
 - 🔌 **MCP Server Integration**: Connect to external services via Model Context Protocol servers
+  - Support for HTTP+SSE transport for web-based MCP servers
+  - Support for Command-line transport for local executable servers
+  - Robust reconnection mechanism with exponential backoff
+  - Comprehensive error handling and diagnostics
+  - Cancellation support for long-running operations
 - 🌐 **Multiple Interfaces**: REST API, WebSockets, CLI, Web UI, etc.
 - 🔄 **Intelligent Message Routing**: Automatically direct messages to the most appropriate agent
 - 📊 **Multi-User Support**: User-specific memory partitioning for multi-tenant applications
@@ -376,4 +381,59 @@ When the project reaches version 1.0, it will adopt a more permissive open-sourc
 
 - OpenAI for their LLM technologies
 - The many open-source projects that make this framework possible
+
+### Working with MCP Servers
+
+The framework provides a powerful interface for working with Model Context Protocol (MCP) servers:
+
+```python
+from muxi import muxi
+
+# Initialize MUXI
+app = muxi()
+
+# Add an agent with MCP server capabilities
+app.add_agent("assistant", "configs/assistant.yaml")
+
+# Connect to an MCP server programmatically
+await app.get_agent("assistant").connect_mcp_server(
+    name="weather",
+    url="http://localhost:5001",  # For HTTP+SSE transport
+    transport_type="http_sse",    # Explicitly specify transport type
+    credentials={"api_key": "your_weather_api_key"}
+)
+
+# Connect to a command-line based MCP server
+await app.get_agent("assistant").connect_mcp_server(
+    name="calculator",
+    url="npx -y @modelcontextprotocol/server-calculator",  # Command to start the server
+    transport_type="command_line",
+    credentials={}
+)
+
+# Chat with the agent using MCP server capabilities
+response = await app.chat(
+    "What's the weather in New York? Also, what's 123 * 456?",
+    user_id="user123"
+)
+print(response.content)  # Agent will use both MCP servers to answer
+```
+
+Example MCP server configuration in YAML:
+
+```yaml
+mcp_servers:
+- name: web_search
+  transport_type: http_sse  # or "command_line"
+  url: http://localhost:5001
+  credentials:
+  - id: search_api_key
+    param_name: api_key
+    required: true
+    env_fallback: SEARCH_API_KEY
+- name: calculator
+  transport_type: command_line
+  url: npx -y @modelcontextprotocol/server-calculator
+  credentials: []
+```
 

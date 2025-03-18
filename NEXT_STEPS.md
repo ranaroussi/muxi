@@ -7,70 +7,89 @@ This document provides a detailed task tracker for developers working on the MUX
 Core components of the muxi framework now implemented:
 
 1. **Model Context Protocol (MCP)**: Standardized communication with LLMs
-   - Fixed message handling to properly use role/content attributes
-   - Improved process_message and process_tool_call methods
-   - Standardized message structure for compatibility with all LLM providers
+   - [x] Fixed message handling to properly use role/content attributes
+   - [x] Improved process_message and process_tool_call methods
+   - [x] Standardized message structure for compatibility with all LLM providers
 2. **Memory System**:
-   - Buffer memory using FAISS for short-term context
-   - Long-term memory using PostgreSQL with pgvector
-   - Memobase system for multi-user support with partitioned memories
-   - Domain knowledge system for user-specific structured information
-   - Robust database schema with optimized tables and indexes
-   - Migration system for schema version control
+   - [x] Buffer memory using FAISS for short-term context
+   - [x] Long-term memory using PostgreSQL with pgvector
+   - [x] Memobase system for multi-user support with partitioned memories
+   - [x] Domain knowledge system for user-specific structured information
+   - [x] Robust database schema with optimized tables and indexes
+   - [x] Migration system for schema version control
 3. **MCP Server Integration**:
-   - MCP Handler for communication with external services
-   - MCP message processing
-   - Example MCP servers (Calculator, Web Search)
+   - [x] MCP Handler for communication with external services
+   - [x] MCP message processing
+   - [x] Example MCP servers (Calculator, Web Search)
+   - [x] Implement proper transport abstraction with factory pattern
+   - [x] Support for HTTP+SSE transport
+   - [x] Support for Command-line transport
+   - [x] Implement reconnection with exponential backoff
+   - [x] Implement cancellation support for in-progress operations
+   - [x] Comprehensive error handling and diagnostics
+   - [x] Integration with the official MCP Python SDK
 4. **Agent Class**: Main interface combining LLM, memory, and MCP servers
-   - Agent-level knowledge base for specialized domain knowledge
-   - Dynamic embedding generation using the agent's model
-   - File-based knowledge sources with efficient caching
+   - [x] Agent-level knowledge base for specialized domain knowledge
+   - [x] Dynamic embedding generation using the agent's model
+   - [x] File-based knowledge sources with efficient caching
 5. **Orchestrator**: For managing multiple agents and their interactions
-   - Intelligent message routing with LLM-based agent selection
-   - Agent descriptions for specialized capabilities
-   - Automatic caching of routing decisions for performance
+   - [x] Intelligent message routing with LLM-based agent selection
+   - [x] Agent descriptions for specialized capabilities
+   - [x] Automatic caching of routing decisions for performance
 6. **Configuration System**: For loading and managing configuration
-   - Support for YAML and JSON configuration files
-   - Environment variable substitution in configurations
-   - Robust validation of configuration parameters
+   - [x] Support for YAML and JSON configuration files
+   - [x] Environment variable substitution in configurations
+   - [x] Robust validation of configuration parameters
 7. **Example Script**: To demonstrate how to use the framework
 8. **Real-Time Communication**:
-   - WebSocket server for real-time agent interaction
-   - Proper message serialization for MCP messages
-   - Shared orchestrator instance between REST API and WebSocket server
-   - Resilient connection handling with automatic reconnection
-   - Comprehensive error handling
-   - Support for multi-user WebSocket connections
+   - [x] WebSocket server for real-time agent interaction
+   - [x] Proper message serialization for MCP messages
+   - [x] Shared orchestrator instance between REST API and WebSocket server
+   - [x] Resilient connection handling with automatic reconnection
+   - [x] Comprehensive error handling
+   - [x] Support for multi-user WebSocket connections
 9. **API Improvements**:
-   - REST API for agent management and interaction
-   - Multi-user support endpoints
-   - Memory management endpoints including search and clear
-   - Comprehensive test coverage
+   - [x] REST API for agent management and interaction
+   - [x] Multi-user support endpoints
+   - [x] Memory management endpoints including search and clear
+   - [x] Comprehensive test coverage
 10. **Command Line Interface**:
-    - Rich terminal-based interface for agent interaction
-    - Commands for chat, one-off messages, and server management
-    - Colored output with Markdown support
-    - Convenient launcher for API server and web UI
+    - [x] Rich terminal-based interface for agent interaction
+    - [x] Commands for chat, one-off messages, and server management
+    - [x] Colored output with Markdown support
+    - [x] Convenient launcher for API server and web UI
 11. **Code Quality**:
-    - Resolved deprecation warnings for SQLAlchemy and FastAPI
-    - Standardized line length configuration across linting tools
-    - Improved VS Code integration with consistent formatting rules
+    - [x] Resolved deprecation warnings for SQLAlchemy and FastAPI
+    - [x] Standardized line length configuration across linting tools
+    - [x] Improved VS Code integration with consistent formatting rules
 12. **Developer Tools**:
-    - MCP Server Generator with interactive CLI wizard
-    - Template-based code generation system
-    - Flattened template structure for simpler maintenance
+    - [x] MCP Server Generator with interactive CLI wizard
+    - [x] Template-based code generation system
+    - [x] Flattened template structure for simpler maintenance
 13. **Architecture Evolution**:
-    - Restructured codebase into modular packages
-    - Created setup.py for each package with appropriate dependencies
-    - Implemented proper monorepo structure
-    - Created development installation scripts
-    - Fixed cross-package imports
+    - [x] Restructured codebase into modular packages
+    - [x] Created setup.py for each package with appropriate dependencies
+    - [x] Implemented proper monorepo structure
+    - [x] Created development installation scripts
+    - [x] Fixed cross-package imports
 
 ## Todo List
 
 Things to do next to enhance the framework:
 
-### 1. LLM Providers
+### 1. User Interfaces
+
+- [ ] CLI interface
+- [ ] Web interface
+- [ ] API server
+- [ ] WebSocket support for real-time communication
+  - [ ] Message type standardization
+  - [ ] Proper MCP message serialization
+  - [ ] Shared orchestrator instance
+  - [ ] Connection lifecycle management
+  - [ ] Error handling and recovery
+
+### 2. LLM Providers
 
 - [x] Implement OpenAI LLM provider
 - [ ] Implement Anthropic LLM provider
@@ -78,11 +97,6 @@ Things to do next to enhance the framework:
 - [ ] Implement Grok LLM provider
 - [ ] Add support for local models (e.g., Llama, Mistral, DeepSeek)
 - [ ] Create a model router for fallback and cost optimization
-
-### 2. Build in MCP Servers
-
-- [ ] File operations
-- [ ] Browser automation
 
 ### 3. Testing
 
@@ -189,21 +203,7 @@ Transform agents into omni agents capable of handling various media types:
 - [ ] Continuous integration workflow with GitHub Actions or similar tools
 - [ ] Automatic version bumping for releases
 
-### 8. User Interfaces
-
-- [x] CLI interface
-- [x] Web dashboard
-  - [ ] Add "view/create/manage orchestrators" page to the webapp
-  - [ ] Add MCP server listing page to the webapp
-- [x] API server
-- [x] WebSocket support for real-time communication
-  - [x] Message type standardization
-  - [x] Proper MCP message serialization
-  - [x] Shared orchestrator instance
-  - [x] Connection lifecycle management
-  - [x] Error handling and recovery
-
-### 9. Stability and Performance
+### 8. Stability and Performance
 
 - [x] Comprehensive error monitoring
 - [x] Database schema optimization and indexing
@@ -221,7 +221,7 @@ Transform agents into omni agents capable of handling various media types:
   - [ ] Log visualization in web dashboard
   - [ ] Log filtering and search capabilities
 
-### 10. Multi-User Support
+### 9. Multi-User Support
 
 - [x] Implement Memobase for user-specific memory partitioning
 - [x] Add user_id parameter to API endpoints
@@ -233,7 +233,7 @@ Transform agents into omni agents capable of handling various media types:
 - [ ] User preference management
 - [ ] User activity logging and analytics
 
-### 11. Package Distribution
+### 10. Package Distribution
 
 - [x] Create proper Python package for PyPI distribution
 - [x] Versioning strategy
@@ -241,7 +241,7 @@ Transform agents into omni agents capable of handling various media types:
 - [x] Package documentation
 - [ ] Installation guides
 
-### 12. Development Workflow
+### 11. Development Workflow
 
 - [ ] Set up pre-commit hooks to automatically run linters/formatters before committing
 - [ ] Implement comprehensive code review guidelines
@@ -249,7 +249,7 @@ Transform agents into omni agents capable of handling various media types:
 - [ ] Set up automated release pipeline
 - [x] Automated test environment setup to handle API key loading
 
-### 13. Architecture Evolution
+### 12. Architecture Evolution
 
 The service-oriented architecture described in ARCHITECTURE_EVOLUTION.md:
 
@@ -275,6 +275,16 @@ The service-oriented architecture described in ARCHITECTURE_EVOLUTION.md:
   - [x] Create WebSocket session management API (open_socket/close)
   - [x] Support multi-modal streaming over WebSockets
   - [x] Implement binary data handling for audio/video
+
+#### MCP Server Integration
+- [x] Refactor MCP handler to use SDK-based approach
+- [x] Implement transport factory for different transport types
+- [x] Support HTTP+SSE transport with proper reconnection
+- [x] Support Command-line transport for local servers
+- [x] Implement cancellation support for MCP operations
+- [x] Improve error handling and diagnostics
+- [x] Add comprehensive logging
+- [ ] Design with forward compatibility for upcoming Streamable HTTP transport
 
 #### Packaging Strategy
 - [x] Structure the codebase for modular packaging:
@@ -319,7 +329,7 @@ Guidelines for contributing to the framework:
 4. **Pull Requests**: Create a pull request with a clear description of changes
 5. **Issues**: Use GitHub issues for bug reports and feature requests
 
-## 7. Developer Tools
+## Developer Tools
 
 - [ ] Streamline plugin development
 - [ ] Add more diagnostic tools
@@ -336,6 +346,7 @@ Guidelines for contributing to the framework:
 This scenario demonstrates a complete workflow from installation to running an agent using the new configuration-based approach:
 
 1. **Install the Framework**
+
    ```bash
    # Clone the repository
    git clone https://github.com/your-org/muxi.git
@@ -346,7 +357,9 @@ This scenario demonstrates a complete workflow from installation to running an a
    ```
 
 2. **Create a Configuration File**
+
    Create a file `configs/my_agent.yaml`:
+
    ```yaml
    name: my_assistant
    system_message: You are a helpful assistant with weather capabilities.
@@ -384,7 +397,9 @@ This scenario demonstrates a complete workflow from installation to running an a
    ```
 
 3. **Set Up Environment Variables**
+
    Create a `.env` file:
+
    ```
    OPENAI_API_KEY=your_openai_key_here
    DATABASE_URL=postgresql://user:password@localhost:5432/muxi
@@ -393,7 +408,9 @@ This scenario demonstrates a complete workflow from installation to running an a
    ```
 
 4. **Create a Simple Application**
+
    Create a file `app.py`:
+
    ```python
    from dotenv import load_dotenv
    from muxi import muxi
@@ -426,6 +443,7 @@ This scenario demonstrates a complete workflow from installation to running an a
    ```
 
 5. **Run the Application**
+
    ```bash
    python app.py
    ```
@@ -436,12 +454,14 @@ This approach significantly reduces the amount of code needed while providing po
 This scenario demonstrates connecting to a remote MUXI server:
 
 1. **Install the Client Library**
+
    ```bash
    # Install just the client component
    pip install muxi-cli
    ```
 
 2. **Connect to a Remote Server**
+
    ```python
    from muxi import muxi
 
@@ -458,6 +478,7 @@ This scenario demonstrates connecting to a remote MUXI server:
    ```
 
 3. **Use Streaming Responses**
+
    ```python
    # Streaming - yields chunks as they arrive via SSE
    for chunk in app.chat("Tell me a short story", stream=True):
