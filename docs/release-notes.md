@@ -7,6 +7,53 @@ permalink: /release-notes/
 
 # Release Notes
 
+## v0.3.0 (March 2025) - Domain Knowledge Expansion
+
+The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilities, enhancing agents with specialized domain knowledge and improved contextual awareness.
+
+### Major Features
+
+- **Agent-Level Knowledge Base**: Agents can now have dedicated knowledge sources specific to their domains of expertise
+  - File-based knowledge sources with automatic embedding generation
+  - Efficient in-memory vector storage using FAISS
+  - Persistent caching of embeddings for cost optimization
+  - Dynamic embedding dimension detection based on the agent's model
+- **Enhanced Knowledge API**: Comprehensive API for managing agent knowledge
+  - Add and remove knowledge sources programmatically
+  - Search knowledge with relevance controls
+  - List and manage knowledge sources
+- **Declarative Knowledge Configuration**: Define knowledge sources in YAML/JSON configurations
+  - Specify file paths and descriptions
+  - Automatic loading and embedding on agent initialization
+- **Improved Documentation**: Comprehensive guides for all knowledge features
+
+### Benefits
+
+- Create specialized agents with domain-specific knowledge
+- Provide more accurate and contextual responses
+- Reduce hallucinations by grounding responses in factual information
+- Simplify RAG (Retrieval-Augmented Generation) implementation
+
+### Example Usage
+
+```python
+# Add knowledge programmatically
+from muxi.knowledge.base import FileKnowledge
+
+knowledge = FileKnowledge(
+    path="knowledge/products.txt",
+    description="Product catalog and specifications"
+)
+await agent.add_knowledge(knowledge)
+
+# Search knowledge
+results = await agent.search_knowledge(
+    query="What are our best-selling products?",
+    top_k=3,
+    threshold=0.7
+)
+```
+
 ## v0.2.0 (March 2025) - Architecture Migration
 
 The MUXI Framework v0.2.0 marks a significant milestone with the completion of our architectural migration to a modular, package-based structure. This release focuses on improving the framework's architecture, maintainability, and extensibility rather than adding new features.
