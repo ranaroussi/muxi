@@ -26,6 +26,10 @@ The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilit
   - Specify file paths and descriptions
   - Automatic loading and embedding on agent initialization
 - **Improved Documentation**: Comprehensive guides for all knowledge features
+- **MCP Server Enhancements**: Improved MCP server integration
+  - Made credentials optional for MCP servers to simplify configuration
+  - Better documentation on MCP server configuration
+  - Updated examples to demonstrate credential-optional usage patterns
 
 ### Benefits
 
@@ -33,6 +37,7 @@ The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilit
 - Provide more accurate and contextual responses
 - Reduce hallucinations by grounding responses in factual information
 - Simplify RAG (Retrieval-Augmented Generation) implementation
+- Easier MCP server integration with fewer required configuration parameters
 
 ### Example Usage
 
