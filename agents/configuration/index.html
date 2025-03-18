@@ -419,7 +419,75 @@ Focus on best practices and readability."""</span>
 <span class="c1"># The agent should still remember the information
 </span><span class="n">response</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">chat</span><span class="p">(</span><span class="s">"assistant"</span><span class="p">,</span> <span class="s">"Where do I like to travel?"</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>  <span class="c1"># Should mention "Japan"
-</span></code></pre></div></div> <h2 id="complete-configuration-example"> <a href="#complete-configuration-example" class="anchor-heading" aria-labelledby="complete-configuration-example"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Complete Configuration Example </h2> <h4> <a href="#complete-configuration-example" class="anchor-heading" aria-labelledby="complete-configuration-example"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Declarative way </h4> <p><code class="language-plaintext highlighter-rouge">configs/complete_configuration.yaml</code></p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+</span></code></pre></div></div> <h2 id="mcp-server-configuration"> <a href="#mcp-server-configuration" class="anchor-heading" aria-labelledby="mcp-server-configuration"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> MCP Server Configuration </h2> <p>MUXI agents connect to specialized MCP (Model Context Protocol) servers to extend their capabilities. MCP servers are external service endpoints that provide specific functionality such as web search, calculator, or weather information.</p> <h3 id="connecting-to-mcp-servers"> <a href="#connecting-to-mcp-servers" class="anchor-heading" aria-labelledby="connecting-to-mcp-servers"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Connecting to MCP Servers </h3> <h4> <a href="#connecting-to-mcp-servers" class="anchor-heading" aria-labelledby="connecting-to-mcp-servers"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Declarative way </h4> <p><code class="language-plaintext highlighter-rouge">configs/mcp_server.json</code></p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"An assistant with access to external MCP servers."</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"model"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"provider"</span><span class="p">:</span><span class="w"> </span><span class="s2">"openai"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"api_key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"${OPENAI_API_KEY}"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gpt-4o"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"mcp_servers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"weather"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5001"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"credentials"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"weather_api_key"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"param_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"api_key"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"env_fallback"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WEATHER_API_KEY"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calculator"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5002"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h4> <a href="#connecting-to-mcp-servers" class="anchor-heading" aria-labelledby="connecting-to-mcp-servers"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Programmatic way </h4> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">muxi.core.orchestrator</span> <span class="kn">import</span> <span class="n">Orchestrator</span>
+<span class="kn">from</span> <span class="nn">muxi.core.models.openai</span> <span class="kn">import</span> <span class="n">OpenAIModel</span>
+
+<span class="c1"># Initialize components
+</span><span class="n">orchestrator</span> <span class="o">=</span> <span class="n">Orchestrator</span><span class="p">()</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">OpenAIModel</span><span class="p">(</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">"OPENAI_API_KEY"</span><span class="p">),</span>
+    <span class="n">model</span><span class="o">=</span><span class="s">"gpt-4o"</span>
+<span class="p">)</span>
+
+<span class="c1"># Create an agent
+</span><span class="n">agent</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">create_agent</span><span class="p">(</span>
+    <span class="n">agent_id</span><span class="o">=</span><span class="s">"assistant"</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s">"An assistant with access to external MCP servers."</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span>
+<span class="p">)</span>
+
+<span class="c1"># Connect to MCP servers
+</span><span class="k">await</span> <span class="n">agent</span><span class="p">.</span><span class="n">connect_mcp_server</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">"weather"</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s">"http://localhost:5001"</span><span class="p">,</span>
+    <span class="n">credentials</span><span class="o">=</span><span class="p">{</span><span class="s">"api_key"</span><span class="p">:</span> <span class="n">os</span><span class="p">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">"WEATHER_API_KEY"</span><span class="p">)}</span>
+<span class="p">)</span>
+
+<span class="k">await</span> <span class="n">agent</span><span class="p">.</span><span class="n">connect_mcp_server</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">"calculator"</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s">"http://localhost:5002"</span>
+<span class="p">)</span>
+
+<span class="c1"># Chat with the agent
+</span><span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">chat</span><span class="p">(</span><span class="s">"assistant"</span><span class="p">,</span> <span class="s">"What's the weather in New York?"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div></div> <h3 id="mcp-server-configuration-parameters"> <a href="#mcp-server-configuration-parameters" class="anchor-heading" aria-labelledby="mcp-server-configuration-parameters"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> MCP Server Configuration Parameters </h3> <div class="table-wrapper"><table> <thead> <tr> <th>Parameter</th> <th>Description</th> <th>Example</th> </tr> </thead> <tbody> <tr> <td><code class="language-plaintext highlighter-rouge">name</code></td> <td>Unique identifier for the MCP server</td> <td><code class="language-plaintext highlighter-rouge">"weather"</code></td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">url</code></td> <td>URL endpoint for the MCP server</td> <td><code class="language-plaintext highlighter-rouge">"http://localhost:5001"</code></td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">credentials</code></td> <td>Authentication details for the server</td> <td><code class="language-plaintext highlighter-rouge">{"api_key": "${WEATHER_API_KEY}"}</code></td> </tr> </tbody> </table></div> <h3 id="using-environment-variables-for-credentials"> <a href="#using-environment-variables-for-credentials" class="anchor-heading" aria-labelledby="using-environment-variables-for-credentials"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Using Environment Variables for Credentials </h3> <p>It’s recommended to use environment variables for sensitive credentials:</p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"credentials"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"api_key"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"param_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"api_key"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"env_fallback"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SERVICE_API_KEY"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div> <p>This will automatically retrieve the API key from the <code class="language-plaintext highlighter-rouge">SERVICE_API_KEY</code> environment variable.</p> <h2 id="complete-configuration-example"> <a href="#complete-configuration-example" class="anchor-heading" aria-labelledby="complete-configuration-example"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Complete Configuration Example </h2> <h4> <a href="#complete-configuration-example" class="anchor-heading" aria-labelledby="complete-configuration-example"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Declarative way </h4> <p><code class="language-plaintext highlighter-rouge">configs/complete_configuration.yaml</code></p> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
   </span><span class="nl">"agent_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"expert_assistant"</span><span class="p">,</span><span class="w">
   </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A comprehensive AI assistant with multiple capabilities."</span><span class="p">,</span><span class="w">
   </span><span class="nl">"model"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -437,7 +505,37 @@ Focus on best practices and readability."""</span>
   </span><span class="nl">"long_term_memory"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"long_term"</span><span class="p">,</span><span class="w">
     </span><span class="nl">"connection_string"</span><span class="p">:</span><span class="w"> </span><span class="s2">"${DATABASE_URL}"</span><span class="w">
-  </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"mcp_servers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"web_search"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5001"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"credentials"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"search_api_key"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"param_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"api_key"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"env_fallback"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SEARCH_API_KEY"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calculator"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5002"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"weather"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:5003"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"credentials"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"weather_api_key"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"param_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"api_key"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"env_fallback"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WEATHER_API_KEY"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">app.py</code></p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">muxi</span> <span class="kn">import</span> <span class="n">muxi</span>
 <span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
@@ -478,7 +576,7 @@ Focus on best practices and readability."""</span>
 <span class="n">long_term</span> <span class="o">=</span> <span class="n">LongTermMemory</span><span class="p">(</span><span class="n">connection_string</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">"DATABASE_URL"</span><span class="p">))</span>
 
 <span class="c1"># Create a fully-configured agent
-</span><span class="n">orchestrator</span><span class="p">.</span><span class="n">create_agent</span><span class="p">(</span>
+</span><span class="n">agent</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">create_agent</span><span class="p">(</span>
     <span class="n">agent_id</span><span class="o">=</span><span class="s">"expert_assistant"</span><span class="p">,</span>
     <span class="n">description</span><span class="o">=</span><span class="s">"A comprehensive AI assistant with multiple capabilities."</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
@@ -487,7 +585,25 @@ Focus on best practices and readability."""</span>
     <span class="n">long_term_memory</span><span class="o">=</span><span class="n">long_term</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="c1"># Connect to MCP servers
+</span><span class="k">await</span> <span class="n">agent</span><span class="p">.</span><span class="n">connect_mcp_server</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">"web_search"</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s">"http://localhost:5001"</span><span class="p">,</span>
+    <span class="n">credentials</span><span class="o">=</span><span class="p">{</span><span class="s">"api_key"</span><span class="p">:</span> <span class="n">os</span><span class="p">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">"SEARCH_API_KEY"</span><span class="p">)}</span>
+<span class="p">)</span>
+
+<span class="k">await</span> <span class="n">agent</span><span class="p">.</span><span class="n">connect_mcp_server</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">"calculator"</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s">"http://localhost:5002"</span>
+<span class="p">)</span>
+
+<span class="k">await</span> <span class="n">agent</span><span class="p">.</span><span class="n">connect_mcp_server</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">"weather"</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s">"http://localhost:5003"</span><span class="p">,</span>
+    <span class="n">credentials</span><span class="o">=</span><span class="p">{</span><span class="s">"api_key"</span><span class="p">:</span> <span class="n">os</span><span class="p">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">"WEATHER_API_KEY"</span><span class="p">)}</span>
+<span class="p">)</span>
+
 <span class="c1"># Chat with the agent
-</span><span class="n">response</span> <span class="o">=</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">chat</span><span class="p">(</span><span class="s">"expert_assistant"</span><span class="p">,</span> <span class="s">"Tell me about recent advances in AI."</span><span class="p">)</span>
+</span><span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">orchestrator</span><span class="p">.</span><span class="n">chat</span><span class="p">(</span><span class="s">"expert_assistant"</span><span class="p">,</span> <span class="s">"Tell me about recent advances in AI."</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 </code></pre></div></div> <h2 id="configuration-best-practices"> <a href="#configuration-best-practices" class="anchor-heading" aria-labelledby="configuration-best-practices"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Configuration Best Practices </h2> <ol> <li><strong>Use Environment Variables for API Keys</strong> <ul> <li>Always use environment variables for sensitive information like API keys</li> <li>Example: <code class="language-plaintext highlighter-rouge">"api_key": "${OPENAI_API_KEY}"</code></li> </ul> </li> <li><strong>Set Appropriate Temperature</strong> <ul> <li>Use lower values (0.0-0.3) for factual tasks</li> <li>Use moderate values (0.3-0.7) for balanced responses</li> <li>Use higher values (0.7-1.0) for creative tasks</li> </ul> </li> <li><strong>Craft Detailed System Messages</strong> <ul> <li>Be specific about the agent’s role, capabilities, and limitations</li> <li>Include examples of desired behavior when possible</li> <li>Structure long system messages with clear sections</li> </ul> </li> <li><strong>Balance Memory Configuration</strong> <ul> <li>Set appropriate token limits for buffer memory based on your model’s context window</li> <li>Use long-term memory for important information that needs to persist</li> <li>Use domain knowledge for static information that doesn’t change</li> </ul> </li> <li><strong>Use Descriptive Agent IDs</strong> <ul> <li>Choose agent IDs that clearly reflect their purpose</li> <li>Follow a consistent naming convention</li> </ul> </li> </ol> <h2 id="next-steps"> <a href="#next-steps" class="anchor-heading" aria-labelledby="next-steps"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Next Steps </h2> <p>Now that you’ve learned about agent configuration, you can:</p> <ul> <li>Add memory capabilities to your agent - see <a href="../memory/">Adding Memory</a></li> <li>Create multi-agent systems - see <a href="../multi-agent/">Multi-Agent Systems</a></li> <li>Learn about advanced agent capabilities - see <a href="../../advanced-features/">Advanced Features</a></li> </ul> </main> <hr> <footer> <p><a href="#top" id="back-to-top">Back to top</a></p> <p class="text-small text-grey-dk-100 mb-0">Copyright &copy; 2025 Ran Aroussi.<br>Licensed under Creative's Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0) license.</p> </footer> </div> </div> <div class="search-overlay"></div> </div> <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.6/dist/mermaid.min.js"></script> <script> var config = {} ; mermaid.initialize(config); window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid')); </script> </body> </html>
