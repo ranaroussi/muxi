@@ -1,0 +1,19 @@
+The MUXI Framework is an open-source toolkit for building AI assistants and agents. It provides a flexible architecture for creating both simple and complex AI systems.
+
+Key features of the MUXI Framework include:
+1. Agent-based architecture
+2. Memory systems for short-term and long-term context
+3. Knowledge integration for domain-specific information
+4. Multi-agent collaboration capabilities
+5. Tool integration for enhanced capabilities
+
+MUXI agents can be created using both declarative and programmatic approaches. The declarative approach uses YAML configuration files, while the programmatic approach uses Python code.
+
+The framework supports multiple LLM providers including OpenAI, Anthropic, Google, and Azure OpenAI. It also supports local models for privacy-focused applications.
+
+Best practices for using the MUXI Framework:
+- Start with a simple agent before adding complexity
+- Use memory for maintaining context in conversations
+- Add knowledge sources for domain-specific expertise
+- Consider multi-agent systems for complex tasks
+- Implement proper error handling and logging
