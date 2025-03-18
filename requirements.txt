@@ -1,39 +1,45 @@
 # Core dependencies
-aiohttp>=3.8.5
-asyncio>=3.4.3
-click>=8.1.3
-fastapi>=0.95.0
-loguru>=0.7.0
+pyyaml>=6.0
 pydantic>=2.0.0
-python-dotenv>=1.0.0
-rich>=13.4.2
-uvicorn>=0.22.0
-websockets>=11.0.0
+httpx>=0.24.0
 
-# LLM providers
-openai>=1.0.0
+# HTTP streaming
+starlette>=0.27.0
+uvicorn>=0.23.1
+python-dotenv>=1.0.0
+fastapi>=0.104.0
+sse-starlette>=1.6.1
+fastapi-utils>=0.2.1
+
+# Websockets
+websockets>=11.0.3
+
+# Database
+aiosqlite>=0.19.0
+
+# Celery
+celery>=5.3.1
+
+# Plugins and extensions
+openai>=0.27.8
 anthropic>=0.5.0
 
-# Memory
-faiss-cpu>=1.7.4
-pgvector>=0.2.0
-psycopg2-binary>=2.9.6
-sqlalchemy>=2.0.0
+# Memory storage
+redis>=4.6.0
+duckdb>=0.9.1
 
-# Tools
-beautifulsoup4>=4.12.2
-duckduckgo-search>=3.8.0
-playwright>=1.38.0
-requests>=2.31.0
-nanoid>=2.0.0
+# Embedding and vector search
+numba>=0.58.0
+numpy>=1.24.0
 
-# Testing
-pytest>=7.4.0
-pytest-asyncio>=0.21.1
-pytest-cov>=4.1.0
+# Command-line tools
+typer>=0.9.0
+rich>=13.6.0
+colorama>=0.4.6
 
-# Development
-black>=23.7.0
-flake8>=6.1.0
-isort>=5.12.0
-mypy>=1.5.0
+# Model Context Protocol - we're using the package from GitHub since it's not on PyPI yet
+# This is version 1.4.2.dev4+6b6f34e
+git+https://github.com/modelcontextprotocol/python-sdk.git
+
+# Development tools
+pytest>=7.0.0

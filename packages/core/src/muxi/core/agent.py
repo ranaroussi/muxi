@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-from muxi.core.mcp import MCPHandler, MCPMessage
+from muxi.core.mcp import MCPMessage
 from muxi.server.memory.base import BaseMemory
 from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
@@ -80,7 +80,8 @@ class Agent:
         if knowledge:
             self._initialize_knowledge(knowledge)
 
-        # Initialize MCPHandler with no tools - we'll use MCP servers instead
+        # Initialize MCP handler with no tools - we'll use MCP servers instead
+        from muxi.core.mcp_handler import MCPHandler
         self.mcp_handler = MCPHandler(self.model)
         self.mcp_handler.set_system_message(self.system_message)
 
@@ -90,59 +91,77 @@ class Agent:
     async def connect_mcp_server(
         self,
         name: str,
-        url: str,
+        url_or_command: str,
+        transport_type: str = "http_sse",
         credentials: Optional[Dict[str, str]] = None
-    ) -> None:
+    ) -> bool:
         """
         Connect to an MCP server.
 
         Args:
             name: The name of the MCP server
-            url: The URL of the MCP server
+            url_or_command: The URL or command to start the MCP server
+            transport_type: The type of transport to use ("http_sse" or "command_line")
             credentials: Optional credentials for the MCP server
+
+        Returns:
+            bool: True if connection was successful
         """
         try:
-            # Register MCP server with the MCP handler
-            # Implementation depends on how MCPHandler integrates with external servers
-            # This is a placeholder for the actual implementation
-            logger.info(f"Connecting to MCP server {name} at {url}")
+            # Connect to MCP server
+            logger.info(f"Connecting to MCP server {name} at {url_or_command}")
 
-            # Store server details
-            self.mcp_servers[name] = {
-                "url": url,
-                "credentials": credentials or {}
-            }
-
-            # Register with MCP handler
-            tool_definition = {
-                "type": "function",
-                "function": {
-                    "name": name,
-                    "description": f"Access to {name} MCP server functionality",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
-                }
-            }
-
-            # Register the MCP server as a tool handler
-            self.mcp_handler.register_tool_handler(
-                name,
-                lambda **kwargs: self._handle_mcp_server_call(name, kwargs)
+            success = await self.mcp_handler.connect_mcp_server(
+                name=name,
+                url_or_command=url_or_command,
+                transport_type=transport_type,
+                credentials=credentials
             )
 
-            # Add tool definition to context
-            if not hasattr(self.mcp_handler.context, "tools"):
-                self.mcp_handler.context.tools = []
+            if success:
+                # Store server details for reference
+                self.mcp_servers[name] = {
+                    "url_or_command": url_or_command,
+                    "transport_type": transport_type,
+                    "credentials": credentials or {}
+                }
 
-            self.mcp_handler.context.tools.append(tool_definition)
-
-            logger.info(f"Successfully connected to MCP server: {name}")
+                logger.info(f"Successfully connected to MCP server: {name}")
+                return True
+            else:
+                logger.error(f"Failed to connect to MCP server: {name}")
+                return False
         except Exception as e:
-            logger.error(f"Failed to connect to MCP server {name}: {str(e)}")
-            raise
+            logger.error(f"Error connecting to MCP server {name}: {str(e)}")
+            return False
+
+    async def disconnect_mcp_server(self, name: str) -> bool:
+        """
+        Disconnect from an MCP server.
+
+        Args:
+            name: The name of the MCP server
+
+        Returns:
+            bool: True if disconnection was successful
+        """
+        if name not in self.mcp_servers:
+            logger.warning(f"Attempted to disconnect from non-existent MCP server: {name}")
+            return False
+
+        try:
+            success = await self.mcp_handler.disconnect_mcp_server(name)
+
+            if success:
+                del self.mcp_servers[name]
+                logger.info(f"Successfully disconnected from MCP server: {name}")
+                return True
+            else:
+                logger.error(f"Failed to disconnect from MCP server: {name}")
+                return False
+        except Exception as e:
+            logger.error(f"Error disconnecting from MCP server {name}: {str(e)}")
+            return False
 
     async def _handle_mcp_server_call(
         self,
@@ -168,7 +187,7 @@ class Agent:
             f"Calling MCP server {server_name} with parameters: {parameters}"
         )
 
-        url = server["url"]
+        url = server["url_or_command"]
         credentials = server["credentials"]
 
         try:
@@ -201,14 +220,8 @@ class Agent:
         Returns:
             A list of MCP server descriptions.
         """
-        return [
-            {
-                "name": name,
-                "url": details["url"],
-                "credentials": details["credentials"],
-            }
-            for name, details in self.mcp_servers.items()
-        ]
+        # Use the mcp_handler's implementation which contains additional status info
+        return await self.mcp_handler.get_available_mcp_servers()
 
     async def _enhance_with_domain_knowledge(
         self,
@@ -336,46 +349,22 @@ class Agent:
         # Enhance message with domain knowledge if available
         enhanced_message = await self._enhance_with_domain_knowledge(message, user_id)
 
-        # Generate response using LLM - needs to be awaited
-        response = await self.model.chat([{"role": "user", "content": enhanced_message}])
+        # Create a user message using MCPMessage format
+        user_message = MCPMessage(role="user", content=enhanced_message)
 
-        # Handle function calls (MCP servers)
-        if hasattr(response, "get") and response.get("tool_calls"):
-            # Create message with function calls
-            content = response.get("content")
-            tool_calls = response.get("tool_calls")
+        # Process the message using the MCP handler
+        # This will handle tool calls automatically if the model's response includes them
+        response = await self.mcp_handler.process_message(user_message)
 
-            # Store function calls in the context
-            context = {"tool_calls": tool_calls}
-            assistant_message = MCPMessage(
-                role="assistant", content=content if content else "", context=context
-            )
-
-            # Process the message with the MCP handler
-            result = await self.mcp_handler.process_message(assistant_message)
-
-            # Store assistant response in Memobase if available
-            if self.is_multi_user and user_id is not None:
-                await self.long_term_memory.add(
-                    content=result.content,
-                    metadata={"role": "assistant", "timestamp": timestamp},
-                    user_id=user_id,
-                )
-
-            return result
-
-        # Store assistant response in Memobase if available
-        response_content = response if isinstance(response, str) else "I'm a helpful assistant."
-
+        # Store assistant response in memory if using multi-user support
         if self.is_multi_user and user_id is not None:
             await self.long_term_memory.add(
-                content=response_content,
+                content=response.content,
                 metadata={"role": "assistant", "timestamp": timestamp},
                 user_id=user_id,
             )
 
-        # Return response as MCPMessage
-        return MCPMessage(role="assistant", content=response_content)
+        return response
 
     def get_memory(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """
