@@ -862,7 +862,7 @@
   },"123": {
     "doc": "Extending Capabilities",
     "title": "Extending Capabilities",
-    "content": "The Extending Capabilities section covers ways to enhance your agents with external services, domain knowledge, and advanced features. ",
+    "content": "The Extending Capabilities section covers ways to enhance your agents with external services, domain knowledge, and advanced features. By connecting agents to external servers, integrating specialized knowledge, and supporting multi-modal interactions, you can create more powerful and versatile agents. ",
     "url": "/muxi/extend/",
     
     "relUrl": "/extend/"
@@ -876,7 +876,7 @@
   },"125": {
     "doc": "Extending Capabilities",
     "title": "What’s In This Section",
-    "content": ". | Using MCP Servers - Connect your agents to existing MCP servers | Creating Custom MCP Servers - Build your own MCP servers for specialized functionality | Domain Knowledge Integration - Add specialized knowledge to your agents | Multi-Modal Support - Work with images, audio, and other non-text formats | . ",
+    "content": ". | Using MCP Servers - Connect your agents to existing MCP servers | Domain Knowledge Integration - Add specialized knowledge to your agents | Multi-Modal Support - Work with images, audio, and other non-text formats | . ",
     "url": "/muxi/extend/#whats-in-this-section",
     
     "relUrl": "/extend/#whats-in-this-section"
@@ -889,943 +889,936 @@
     "relUrl": "/extend/#prerequisites"
   },"127": {
     "doc": "Extending Capabilities",
-    "title": "Getting Started",
-    "content": "If you’re looking to use existing MCP servers, start with the Using MCP Servers guide. If you need to create your own custom functionality, the Creating Custom MCP Servers guide will walk you through the process. ",
-    "url": "/muxi/extend/#getting-started",
-    
-    "relUrl": "/extend/#getting-started"
-  },"128": {
-    "doc": "Extending Capabilities",
     "title": "Next Steps After Extending Capabilities",
     "content": "Once you’ve extended your agents’ capabilities, you might want to: . | Build multi-agent systems that combine different capabilities | Explore client interfaces to interact with your enhanced agents | Learn about advanced memory techniques to improve contextual understanding | . ",
     "url": "/muxi/extend/#next-steps-after-extending-capabilities",
     
     "relUrl": "/extend/#next-steps-after-extending-capabilities"
-  },"129": {
+  },"128": {
     "doc": "Communication",
     "title": "Communication",
     "content": "This section provides technical deep dives into the communication systems of the MUXI Framework. ",
     "url": "/muxi/technical/communication/",
     
     "relUrl": "/technical/communication/"
-  },"130": {
+  },"129": {
     "doc": "Communication",
     "title": "About This Section",
     "content": "The communication layer is how users and applications interact with the MUXI Framework. This section explores the technical details of the various communication interfaces, including the REST API, WebSocket interface, command-line interface, and web UI. ",
     "url": "/muxi/technical/communication/#about-this-section",
     
     "relUrl": "/technical/communication/#about-this-section"
-  },"131": {
+  },"130": {
     "doc": "Communication",
     "title": "What’s In This Section",
     "content": ". | REST API - The HTTP API for interacting with MUXI | WebSocket Interface - Real-time, bi-directional communication | CLI - Command-line interface implementation details | Web UI - Web dashboard architecture and implementation | . ",
     "url": "/muxi/technical/communication/#whats-in-this-section",
     
     "relUrl": "/technical/communication/#whats-in-this-section"
-  },"132": {
+  },"131": {
     "doc": "Communication",
     "title": "Prerequisites",
     "content": "Before diving into this section, we recommend: . | Understanding the basics of interfaces and clients | Familiarity with HTTP, REST, and WebSocket protocols | Knowledge of authentication and security practices | Experience with client-server architectures | . ",
     "url": "/muxi/technical/communication/#prerequisites",
     
     "relUrl": "/technical/communication/#prerequisites"
-  },"133": {
+  },"132": {
     "doc": "Communication",
     "title": "Implementation Details",
     "content": "The communication system includes several key technical features: . | JSON-based API for standardized communication | WebSocket streaming for real-time updates | Server-Sent Events (SSE) for one-way streaming | Authentication and authorization mechanisms | Cross-Origin Resource Sharing (CORS) support | Error handling and status codes | . ",
     "url": "/muxi/technical/communication/#implementation-details",
     
     "relUrl": "/technical/communication/#implementation-details"
-  },"134": {
+  },"133": {
     "doc": "Communication",
     "title": "Related Topics",
     "content": "These topics are closely related to the communication system: . | Server Deployment - How to deploy the server | MCP Fundamentals - How MCP servers communicate | Agent Fundamentals - How agents process incoming messages | . ",
     "url": "/muxi/technical/communication/#related-topics",
     
     "relUrl": "/technical/communication/#related-topics"
-  },"135": {
+  },"134": {
     "doc": "Agents & Models",
     "title": "Agents &amp; Models",
     "content": "This section provides technical deep dives into the agent architecture and language model integration within the MUXI Framework. ",
     "url": "/muxi/technical/agents/#agents--models",
     
     "relUrl": "/technical/agents/#agents--models"
-  },"136": {
+  },"135": {
     "doc": "Agents & Models",
     "title": "About This Section",
     "content": "The Agents &amp; Models subsystem is the core of the MUXI Framework. This section explores the technical details of agent implementation, language model integration, multi-modal support, and orchestration mechanics. ",
     "url": "/muxi/technical/agents/#about-this-section",
     
     "relUrl": "/technical/agents/#about-this-section"
-  },"137": {
+  },"136": {
     "doc": "Agents & Models",
     "title": "What’s In This Section",
     "content": ". | Agent Fundamentals - Core agent architecture and implementation | Language Models - Model integration and provider interfaces | Multi-Modal Support - Handling images, audio, and other modalities | Orchestration - Multi-agent coordination and message routing | . ",
     "url": "/muxi/technical/agents/#whats-in-this-section",
     
     "relUrl": "/technical/agents/#whats-in-this-section"
-  },"138": {
+  },"137": {
     "doc": "Agents & Models",
     "title": "Prerequisites",
     "content": "Before diving into this section, we recommend: . | Understanding the basics of building agents | Familiarity with language models like GPT-4, Claude, etc. | Basic knowledge of Python programming | Understanding of prompt engineering concepts | . ",
     "url": "/muxi/technical/agents/#prerequisites",
     
     "relUrl": "/technical/agents/#prerequisites"
-  },"139": {
+  },"138": {
     "doc": "Agents & Models",
     "title": "Implementation Details",
     "content": "The agent system includes several key technical features: . | Agent lifecycle management | Message handling and processing | Memory integration | Tool and function calling | Model provider abstraction | Multi-agent orchestration | . ",
     "url": "/muxi/technical/agents/#implementation-details",
     
     "relUrl": "/technical/agents/#implementation-details"
-  },"140": {
+  },"139": {
     "doc": "Agents & Models",
     "title": "Related Topics",
     "content": "These topics are closely related to the agent system: . | MCP Fundamentals - How agents use external services | Buffer Memory - Short-term agent memory | REST API - API endpoints for agent management | . ",
     "url": "/muxi/technical/agents/#related-topics",
     
     "relUrl": "/technical/agents/#related-topics"
-  },"141": {
+  },"140": {
     "doc": "Agents & Models",
     "title": "Agents & Models",
     "content": " ",
     "url": "/muxi/technical/agents/",
     
     "relUrl": "/technical/agents/"
-  },"142": {
+  },"141": {
     "doc": "MCP System",
     "title": "MCP System",
     "content": "This section provides technical deep dives into the Model Context Protocol (MCP) system of the MUXI Framework. ",
     "url": "/muxi/technical/mcp/",
     
     "relUrl": "/technical/mcp/"
-  },"143": {
+  },"142": {
     "doc": "MCP System",
     "title": "About This Section",
     "content": "The Model Context Protocol (MCP) is the standardized communication layer that enables agents to access external services and functionality. This section explores the technical details of the MCP system, how to create MCP servers, and best practices for security. ",
     "url": "/muxi/technical/mcp/#about-this-section",
     
     "relUrl": "/technical/mcp/#about-this-section"
-  },"144": {
+  },"143": {
     "doc": "MCP System",
     "title": "What’s In This Section",
     "content": ". | MCP Fundamentals - The core concepts and architecture of the MCP system | Creating MCP Servers - Technical details for building custom MCP servers | Security Considerations - Best practices for secure MCP server implementation | . ",
     "url": "/muxi/technical/mcp/#whats-in-this-section",
     
     "relUrl": "/technical/mcp/#whats-in-this-section"
-  },"145": {
+  },"144": {
     "doc": "MCP System",
     "title": "Prerequisites",
     "content": "Before diving into this section, we recommend: . | Understanding the basics of using MCP servers | Familiarity with RESTful API design | Knowledge of web server frameworks like FastAPI or Flask | Understanding of JSON request/response formats | . ",
     "url": "/muxi/technical/mcp/#prerequisites",
     
     "relUrl": "/technical/mcp/#prerequisites"
-  },"146": {
+  },"145": {
     "doc": "MCP System",
     "title": "Implementation Details",
     "content": "The MCP system includes several key technical features: . | Standardized request/response format | Function calling and parameter serialization | Result parsing and error handling | Authentication and security mechanisms | Service discovery and registration | . ",
     "url": "/muxi/technical/mcp/#implementation-details",
     
     "relUrl": "/technical/mcp/#implementation-details"
-  },"147": {
+  },"146": {
     "doc": "MCP System",
     "title": "Related Topics",
     "content": "These topics are closely related to the MCP system: . | Agent Fundamentals - How agents use MCP servers | Creating Custom MCP Servers - A practical guide to creating MCP servers | WebSocket Interface - Real-time streaming with MCP servers | . ",
     "url": "/muxi/technical/mcp/#related-topics",
     
     "relUrl": "/technical/mcp/#related-topics"
-  },"148": {
+  },"147": {
     "doc": "Memory System",
     "title": "Memory System",
     "content": "This section provides technical deep dives into the memory architecture of the MUXI Framework. ",
     "url": "/muxi/technical/memory/",
     
     "relUrl": "/technical/memory/"
-  },"149": {
+  },"148": {
     "doc": "Memory System",
     "title": "About This Section",
     "content": "The memory system is a key component that enables agents to maintain context over time and store important information. This section explores the different memory subsystems, their internal implementations, and how they work together to provide a comprehensive memory solution. ",
     "url": "/muxi/technical/memory/#about-this-section",
     
     "relUrl": "/technical/memory/#about-this-section"
-  },"150": {
+  },"149": {
     "doc": "Memory System",
     "title": "What’s In This Section",
     "content": ". | Buffer Memory - Short-term contextual memory for conversations | Long-Term Memory - Persistent storage of important information | Multi-User Memory (Memobase) - Partitioning memory by user | Domain Knowledge - Structured knowledge integration | . ",
     "url": "/muxi/technical/memory/#whats-in-this-section",
     
     "relUrl": "/technical/memory/#whats-in-this-section"
-  },"151": {
+  },"150": {
     "doc": "Memory System",
     "title": "Prerequisites",
     "content": "Before diving into this section, we recommend: . | Understanding the basics of agent memory | Familiarity with vector embeddings and vector databases | Knowledge of PostgreSQL and the pgvector extension | Understanding of semantic search concepts | . ",
     "url": "/muxi/technical/memory/#prerequisites",
     
     "relUrl": "/technical/memory/#prerequisites"
-  },"152": {
+  },"151": {
     "doc": "Memory System",
     "title": "Implementation Details",
     "content": "MUXI’s memory system includes several key technical features: . | Vector embeddings for semantic search | Automatic text chunking and processing | PostgreSQL with pgvector for long-term storage | Efficient buffer management with automatic summarization | Memory partitioning for multi-user scenarios | . ",
     "url": "/muxi/technical/memory/#implementation-details",
     
     "relUrl": "/technical/memory/#implementation-details"
-  },"153": {
+  },"152": {
     "doc": "Memory System",
     "title": "Related Topics",
     "content": "These topics are closely related to the memory system: . | Agent Fundamentals - How agents use memory | MCP Fundamentals - How MCP servers can access memory | REST API - How to interact with memory through the API | . ",
     "url": "/muxi/technical/memory/#related-topics",
     
     "relUrl": "/technical/memory/#related-topics"
-  },"154": {
+  },"153": {
     "doc": "Technical Deep Dives",
     "title": "Technical Deep Dives",
     "content": "The Technical Deep Dives section provides detailed, technical explanations of the MUXI Framework’s components and subsystems. ",
     "url": "/muxi/technical/",
     
     "relUrl": "/technical/"
-  },"155": {
+  },"154": {
     "doc": "Technical Deep Dives",
     "title": "About This Section",
     "content": "This section is intended for developers who want to understand the internal workings of MUXI or who want to extend or modify the framework itself. Here you’ll find in-depth explanations of the core components, detailed architecture diagrams, and technical discussions of implementation choices. ",
     "url": "/muxi/technical/#about-this-section",
     
     "relUrl": "/technical/#about-this-section"
-  },"156": {
+  },"155": {
     "doc": "Technical Deep Dives",
     "title": "What’s In This Section",
     "content": ". | Agents &amp; Models . | Agent Fundamentals | Language Models | Multi-Modal Support | Orchestration | . | Memory System . | Buffer Memory | Long-Term Memory | Multi-User Memory (Memobase) | Domain Knowledge | . | MCP System . | MCP Fundamentals | Creating MCP Servers | Security Considerations | . | Communication . | REST API | WebSocket Interface | CLI | Web UI | . | . ",
     "url": "/muxi/technical/#whats-in-this-section",
     
     "relUrl": "/technical/#whats-in-this-section"
-  },"157": {
+  },"156": {
     "doc": "Technical Deep Dives",
     "title": "Prerequisites",
     "content": "Before diving into this section, we recommend: . | Completing the Introduction section | Having experience building and using MUXI agents | Familiarity with advanced Python concepts | Understanding of LLM and AI agent architectures | . ",
     "url": "/muxi/technical/#prerequisites",
     
     "relUrl": "/technical/#prerequisites"
-  },"158": {
+  },"157": {
     "doc": "Technical Deep Dives",
     "title": "Getting Started",
     "content": "The subsections can be read in any order depending on your interests. If you’re looking to understand how agents work internally, start with Agent Fundamentals. If you’re interested in memory systems, check out Buffer Memory first. ",
     "url": "/muxi/technical/#getting-started",
     
     "relUrl": "/technical/#getting-started"
-  },"159": {
+  },"158": {
     "doc": "Technical Deep Dives",
     "title": "Next Steps After Technical Deep Dives",
     "content": "After exploring the technical details, you might want to: . | Contribute to the project by following the Development guides | Reference the API Documentation for detailed interface specifications | Explore advanced examples that demonstrate sophisticated use cases | . ",
     "url": "/muxi/technical/#next-steps-after-technical-deep-dives",
     
     "relUrl": "/technical/#next-steps-after-technical-deep-dives"
-  },"160": {
+  },"159": {
     "doc": "Home",
     "title": "MUXI Framework Documentation",
     "content": "Welcome to the official documentation for MUXI, an extensible framework for building AI agents with real-time communication capabilities, memory persistence, and MCP server integration. This project is a work in progress and is not yet ready for production use. The framework is actively being developed with new features being added regularly. Please refer to the roadmap for information about the current state of the project and where it’s headed. ",
     "url": "/muxi/#muxi-framework-documentation",
     
     "relUrl": "/#muxi-framework-documentation"
-  },"161": {
+  },"160": {
     "doc": "Home",
     "title": "Documentation Structure",
     "content": "Our documentation is organized to serve both newcomers and experienced developers: . Introduction . Start here to understand the MUXI Framework, its core concepts, and how to get started: . | Overview &amp; Key Concepts | Why MUXI? | Quick Start Guide | Architecture | Installation | . Building Agents . Learn how to create and configure agents for different purposes: . | Simple Agents | Multi-Agent Systems | Adding Memory | Agent Configuration | . Extending Capabilities . Enhance your agents with external services and domain knowledge: . | Using MCP Servers | Creating Custom MCP Servers | Domain Knowledge Integration | Multi-Modal Support | . Interfaces &amp; Clients . Discover the different ways to interact with MUXI: . | Command-Line Interface | Server Deployment | Web Dashboard | WebSocket Communication | . Technical Deep Dives . Detailed information for developers who want to understand the framework at a deeper level: . | Agents &amp; Models | Memory System | MCP System | Communication | . Reference . Detailed reference material: . | API Documentation | Configuration Options | Package Structure | Examples Library | . Development . Information for contributors and developers: . | Contributing Guidelines | Testing Strategies | Codebase Organization | Changelog | . ",
     "url": "/muxi/#documentation-structure",
     
     "relUrl": "/#documentation-structure"
-  },"162": {
+  },"161": {
     "doc": "Home",
     "title": "Key Features",
     "content": ". | Multi-Agent Orchestration: Create and manage multiple AI agents with different capabilities | Intelligent Message Routing: Automatically select the most appropriate agent based on message content | Model Context Protocol (MCP): Connect to external services via standardized MCP servers | Memory Systems: Short-term buffer memory and long-term persistent memory | Multi-User Support: Memobase provides user-specific memory partitioning | Domain Knowledge: Store and retrieve structured information to personalize agent responses | Real-Time Communication: WebSocket support for streaming responses | Flexible Configuration: Define agents using YAML or JSON with minimal code | . ",
     "url": "/muxi/#key-features",
     
     "relUrl": "/#key-features"
-  },"163": {
+  },"162": {
     "doc": "Home",
     "title": "Getting Started",
     "content": "The fastest way to get started with MUXI is to follow our Quick Start Guide. ",
     "url": "/muxi/#getting-started",
     
     "relUrl": "/#getting-started"
-  },"164": {
+  },"163": {
     "doc": "Home",
     "title": "Community &amp; Support",
     "content": ". | GitHub Repository | Issue Tracker | . ",
     "url": "/muxi/#community--support",
     
     "relUrl": "/#community--support"
-  },"165": {
+  },"164": {
     "doc": "Home",
     "title": "License",
     "content": "This project is licensed under a dual licensing model to balance open-source collaboration with sustainable business practices. During the development phase, the software is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0) license. ",
     "url": "/muxi/#license",
     
     "relUrl": "/#license"
-  },"166": {
+  },"165": {
     "doc": "Home",
     "title": "Home",
     "content": " ",
     "url": "/muxi/",
     
     "relUrl": "/"
-  },"167": {
+  },"166": {
     "doc": "Installation",
     "title": "Installation",
     "content": " ",
     "url": "/muxi/intro/installation/",
     
     "relUrl": "/intro/installation/"
-  },"168": {
+  },"167": {
     "doc": "Installation",
     "title": "What You’ll Learn",
     "content": ". | How to install MUXI using different methods | How to set up your development environment | How to configure MUXI with environment variables | Different installation options for various usage scenarios | . ",
     "url": "/muxi/intro/installation/#what-youll-learn",
     
     "relUrl": "/intro/installation/#what-youll-learn"
-  },"169": {
+  },"168": {
     "doc": "Installation",
     "title": "Prerequisites",
     "content": ". | Python 3.10 or later | pip (Python package manager) | A basic understanding of Python environments (recommended) | . ",
     "url": "/muxi/intro/installation/#prerequisites",
     
     "relUrl": "/intro/installation/#prerequisites"
-  },"170": {
+  },"169": {
     "doc": "Installation",
     "title": "Installation Options",
     "content": "MUXI provides several installation options depending on your needs. Standard Installation . For most users, the standard installation includes everything you need to get started: . pip install muxi . This installs the main muxi package, which includes: . | Core functionality (agents, memory, MCP) | Server components (API, WebSocket) | Command-line interface | . CLI Installation . If you only need the CLI functionality to interact with a remote server: . pip install muxi-cli . Web UI Installation . To use the web interface: . pip install muxi-web . Development Installation . For contributors or developers who want to modify the framework: . git clone https://github.com/yourusername/muxi-framework.git cd muxi-framework ./install_dev.sh . The development installation: . | Installs all packages in editable mode | Sets up pre-commit hooks | Prepares the development environment | . ",
     "url": "/muxi/intro/installation/#installation-options",
     
     "relUrl": "/intro/installation/#installation-options"
-  },"171": {
+  },"170": {
     "doc": "Installation",
     "title": "Environment Setup",
     "content": "Environment Variables . Create a .env file in your project root with the following variables: . # Required for most functionality OPENAI_API_KEY=your-openai-api-key # Optional but recommended for persistence DATABASE_URL=postgresql://user:password@localhost:5432/muxi # Optional for specific MCP servers WEATHER_API_KEY=your-weather-api-key SERPER_API_KEY=your-serper-api-key # Server configuration (optional) MUXI_HOST=0.0.0.0 MUXI_PORT=5050 MUXI_API_KEY=your-custom-api-key # Memory configuration (optional) MUXI_BUFFER_SIZE=10 MUXI_ENABLE_LONG_TERM=true . Loading Environment Variables . In your Python code: . from dotenv import load_dotenv # Load variables from .env file load_dotenv() # Now you can use MUXI from muxi import muxi app = muxi() . ",
     "url": "/muxi/intro/installation/#environment-setup",
     
     "relUrl": "/intro/installation/#environment-setup"
-  },"172": {
+  },"171": {
     "doc": "Installation",
     "title": "Database Setup",
     "content": "For long-term memory functionality, MUXI requires a PostgreSQL database with the pgvector extension. Local PostgreSQL Setup . | Install PostgreSQL (version 14 or higher recommended) . | Install the pgvector extension: . | . # On Ubuntu/Debian sudo apt-get install postgresql-14-pgvector # On macOS with Homebrew brew install pgvector . | Create a database and enable the extension: | . CREATE DATABASE muxi; CREATE EXTENSION IF NOT EXISTS pgvector; . | Set the DATABASE_URL environment variable: | . DATABASE_URL=postgresql://username:password@localhost:5432/muxi . Using Docker . You can also use Docker to run PostgreSQL with pgvector: . docker run -d \\ --name muxi-postgres \\ -e POSTGRES_PASSWORD=password \\ -e POSTGRES_USER=user \\ -e POSTGRES_DB=muxi \\ -p 5432:5432 \\ pgvector/pgvector:pg14 . Then set your DATABASE_URL: . DATABASE_URL=postgresql://user:password@localhost:5432/muxi . ",
     "url": "/muxi/intro/installation/#database-setup",
     
     "relUrl": "/intro/installation/#database-setup"
-  },"173": {
+  },"172": {
     "doc": "Installation",
     "title": "Verifying Installation",
     "content": "To verify that MUXI was installed correctly: . # Check the installed version muxi --version # Start the interactive CLI muxi chat # Run a simple test muxi send \"Hello, world!\" . ",
     "url": "/muxi/intro/installation/#verifying-installation",
     
     "relUrl": "/intro/installation/#verifying-installation"
-  },"174": {
+  },"173": {
     "doc": "Installation",
     "title": "Package Structure",
     "content": "After installation, the MUXI framework will have the following structure: . muxi/ ├── core/ # Core components ├── server/ # Server implementation ├── cli/ # Command-line interface └── __init__.py # Main entry point . ",
     "url": "/muxi/intro/installation/#package-structure",
     
     "relUrl": "/intro/installation/#package-structure"
-  },"175": {
+  },"174": {
     "doc": "Installation",
     "title": "Troubleshooting",
     "content": "Common Issues . Missing API Key: . Error: OpenAI API key not found . Solution: Set the OPENAI_API_KEY environment variable. Database Connection Error: . Error: Could not connect to database . Solution: Verify your DATABASE_URL and ensure PostgreSQL is running. Port Already in Use: . Error: Address already in use . Solution: Change the port using MUXI_PORT environment variable or the port parameter in app.run(). Getting Help . If you encounter issues not covered here: . | Check the GitHub Issues for known problems | Join the Discord community for real-time help | Visit the Troubleshooting Guide for detailed solutions | . ",
     "url": "/muxi/intro/installation/#troubleshooting",
     
     "relUrl": "/intro/installation/#troubleshooting"
-  },"176": {
+  },"175": {
     "doc": "Installation",
     "title": "Advanced Installation",
     "content": "Installing Specific Versions . pip install muxi==0.1.0 . Installing from Source . pip install git+https://github.com/yourusername/muxi-framework.git . Virtual Environments . It’s recommended to use virtual environments: . python -m venv venv source venv/bin/activate # On Windows: venv\\Scripts\\activate pip install muxi . ",
     "url": "/muxi/intro/installation/#advanced-installation",
     
     "relUrl": "/intro/installation/#advanced-installation"
-  },"177": {
+  },"176": {
     "doc": "Installation",
     "title": "What’s Next",
     "content": ". | Quick Start Guide - Build your first MUXI application | Simple Agents - Learn how to create agents | Using MCP Servers - Extend your agents with external capabilities | . ",
     "url": "/muxi/intro/installation/#whats-next",
     
     "relUrl": "/intro/installation/#whats-next"
-  },"178": {
+  },"177": {
     "doc": "Domain Knowledge",
     "title": "Domain Knowledge",
     "content": "This guide explains how to enhance your MUXI agents with domain knowledge, allowing them to access and utilize information from external sources when responding to user queries. ",
     "url": "/muxi/extend/knowledge/",
     
     "relUrl": "/extend/knowledge/"
-  },"179": {
+  },"178": {
     "doc": "Domain Knowledge",
     "title": "Understanding Domain Knowledge",
     "content": "Domain knowledge in MUXI represents static information that agents can reference during conversations, providing them with: . | Factual information from documents, files, and other sources | Context-specific data for specialized applications | Up-to-date information without relying solely on model training data | . Unlike memory which tracks conversation history, domain knowledge provides agents with external information they can search and reference. ",
     "url": "/muxi/extend/knowledge/#understanding-domain-knowledge",
     
     "relUrl": "/extend/knowledge/#understanding-domain-knowledge"
-  },"180": {
+  },"179": {
     "doc": "Domain Knowledge",
     "title": "Knowledge Types in MUXI",
     "content": "Currently, MUXI supports the following knowledge source types: . | File Knowledge: Text-based documents containing domain-specific information | . ",
     "url": "/muxi/extend/knowledge/#knowledge-types-in-muxi",
     
     "relUrl": "/extend/knowledge/#knowledge-types-in-muxi"
-  },"181": {
+  },"180": {
     "doc": "Domain Knowledge",
     "title": "Adding Knowledge to Agents",
     "content": "You can enhance agents with knowledge sources in both declarative and programmatic ways. Basic Knowledge Example . Declarative way . configs/knowledge_agent.yaml . --- agent_id: product_assistant description: A helpful assistant with knowledge about our products. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o knowledge: - path: \"knowledge/products.txt\" description: \"Information about our product catalog\" - path: \"knowledge/pricing.txt\" description: \"Pricing information for our products\" - path: \"knowledge/faq.txt\" description: \"Frequently asked questions about our products\" . app.py . from muxi import muxi from dotenv import load_dotenv import os import asyncio # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add agent with knowledge from configuration app.add_agent(\"configs/knowledge_agent.yaml\") async def main(): # The agent can now answer questions based on the knowledge sources response = await app.chat(\"What products do you offer?\") print(response) # The agent will use relevant knowledge to answer specific questions response = await app.chat(\"What is the price of the Premium Plan?\") print(response) if __name__ == \"__main__\": asyncio.run(main()) . Programmatic way . import os import asyncio from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel from muxi.knowledge.base import FileKnowledge async def main(): # Initialize components orchestrator = Orchestrator() model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) # Create an agent agent = orchestrator.create_agent( agent_id=\"product_assistant\", description=\"A helpful assistant with knowledge about our products.\", model=model ) # Add knowledge sources to the agent product_knowledge = FileKnowledge( path=\"knowledge/products.txt\", description=\"Information about our product catalog\" ) pricing_knowledge = FileKnowledge( path=\"knowledge/pricing.txt\", description=\"Pricing information for our products\" ) faq_knowledge = FileKnowledge( path=\"knowledge/faq.txt\", description=\"Frequently asked questions about our products\" ) # Add knowledge sources to the agent await agent.add_knowledge(product_knowledge) await agent.add_knowledge(pricing_knowledge) await agent.add_knowledge(faq_knowledge) # The agent can now answer questions based on the knowledge sources response = await orchestrator.chat(\"product_assistant\", \"What products do you offer?\") print(response) # The agent will use relevant knowledge to answer specific questions response = await orchestrator.chat(\"product_assistant\", \"What is the price of the Premium Plan?\") print(response) if __name__ == \"__main__\": asyncio.run(main()) . ",
     "url": "/muxi/extend/knowledge/#adding-knowledge-to-agents",
     
     "relUrl": "/extend/knowledge/#adding-knowledge-to-agents"
-  },"182": {
+  },"181": {
     "doc": "Domain Knowledge",
     "title": "Searching Knowledge Explicitly",
     "content": "You can explicitly search an agent’s knowledge base to retrieve relevant information: . Declarative way . # app.py from muxi import muxi from dotenv import load_dotenv import asyncio # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add agent with knowledge app.add_agent(\"configs/knowledge_agent.yaml\") async def main(): # Get the agent instance to access knowledge methods agent = app.get_agent(\"product_assistant\") # Search the knowledge base explicitly results = await agent.search_knowledge( query=\"Premium Plan features\", top_k=3, # Return top 3 most relevant results threshold=0.7 # Minimum relevance score (0-1) ) # Display search results print(\"Knowledge search results:\") for result in results: print(f\"Content: {result['content']}\") print(f\"Source: {result['source']}\") print(f\"Relevance: {result['relevance']:.2f}\") print(\"---\") if __name__ == \"__main__\": asyncio.run(main()) . Programmatic way . import os import asyncio from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel from muxi.knowledge.base import FileKnowledge async def main(): # Initialize orchestrator orchestrator = Orchestrator() model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) # Create an agent agent = orchestrator.create_agent( agent_id=\"product_assistant\", description=\"A helpful assistant with knowledge about our products.\", model=model ) # Add knowledge sources product_knowledge = FileKnowledge( path=\"knowledge/products.txt\", description=\"Information about our product catalog\" ) await agent.add_knowledge(product_knowledge) # Search the knowledge base explicitly results = await agent.search_knowledge( query=\"Premium Plan features\", top_k=3, # Return top 3 most relevant results threshold=0.7 # Minimum relevance score (0-1) ) # Display search results print(\"Knowledge search results:\") for result in results: print(f\"Content: {result['content']}\") print(f\"Source: {result['source']}\") print(f\"Relevance: {result['relevance']:.2f}\") print(\"---\") if __name__ == \"__main__\": asyncio.run(main()) . ",
     "url": "/muxi/extend/knowledge/#searching-knowledge-explicitly",
     
     "relUrl": "/extend/knowledge/#searching-knowledge-explicitly"
-  },"183": {
+  },"182": {
     "doc": "Domain Knowledge",
     "title": "Managing Knowledge Sources",
     "content": "You can add, remove, and list knowledge sources dynamically: . Adding Knowledge Sources . Programmatic way . # Add a new knowledge source to an existing agent new_knowledge = FileKnowledge( path=\"knowledge/new_products.txt\", description=\"Information about newly launched products\" ) await agent.add_knowledge(new_knowledge) . Removing Knowledge Sources . Programmatic way . # Remove a knowledge source by file path success = await agent.remove_knowledge(\"knowledge/outdated_products.txt\") if success: print(\"Knowledge source removed successfully\") else: print(\"Failed to remove knowledge source or file not found\") . Listing Knowledge Sources . Programmatic way . # Get a list of all knowledge sources sources = agent.get_knowledge_sources() print(\"Current knowledge sources:\") for source in sources: print(f\"- {source}\") . ",
     "url": "/muxi/extend/knowledge/#managing-knowledge-sources",
     
     "relUrl": "/extend/knowledge/#managing-knowledge-sources"
-  },"184": {
+  },"183": {
     "doc": "Domain Knowledge",
     "title": "Knowledge Embedding and Retrieval",
     "content": "Behind the scenes, MUXI: . | Processes knowledge sources: Documents are loaded and split into chunks | Generates embeddings: Text chunks are converted to vector embeddings | Builds vector index: Embeddings are stored in a FAISS index for fast retrieval | Implements semantic search: Relevance-based retrieval of information | . MUXI automatically determines the appropriate embedding dimension based on the agent’s model. ",
     "url": "/muxi/extend/knowledge/#knowledge-embedding-and-retrieval",
     
     "relUrl": "/extend/knowledge/#knowledge-embedding-and-retrieval"
-  },"185": {
+  },"184": {
     "doc": "Domain Knowledge",
     "title": "Knowledge Caching",
     "content": "For efficiency, MUXI caches knowledge embeddings: . | Embeddings are stored in .cache/knowledge_embeddings directory | Cached embeddings are reused when the same knowledge source is added again | Embeddings are regenerated when the source file is modified | . ",
     "url": "/muxi/extend/knowledge/#knowledge-caching",
     
     "relUrl": "/extend/knowledge/#knowledge-caching"
-  },"186": {
+  },"185": {
     "doc": "Domain Knowledge",
     "title": "Best Practices for Domain Knowledge",
     "content": ". | Focus on Quality: Include high-quality, relevant information in knowledge sources | Right-Size Documents: Break large documents into smaller, topic-focused files | Descriptive Metadata: Provide clear descriptions for knowledge sources | Regular Updates: Keep knowledge sources up-to-date with the latest information | Knowledge vs. Memory: Use domain knowledge for static information, memory for conversation context | Strategic Search: Set appropriate threshold and top_k values for your use case | . ",
     "url": "/muxi/extend/knowledge/#best-practices-for-domain-knowledge",
     
     "relUrl": "/extend/knowledge/#best-practices-for-domain-knowledge"
-  },"187": {
+  },"186": {
     "doc": "Domain Knowledge",
     "title": "Next Steps",
     "content": "Now that you’ve added domain knowledge to your agents, you might want to: . | Combine domain knowledge with memory - see User Context Memory | Create multi-agent systems with specialized knowledge - see Multi-Agent Systems | Configure your agents with specific settings - see Agent Configuration | . ",
     "url": "/muxi/extend/knowledge/#next-steps",
     
     "relUrl": "/extend/knowledge/#next-steps"
-  },"188": {
+  },"187": {
     "doc": "Context Memory",
     "title": "Context Memory",
     "content": "This guide explains how to enhance your MUXI agents with user-level memory capabilities, allowing them to remember previous interactions with users, maintain chat context, and store important information across conversations. ",
     "url": "/muxi/agents/memory/",
     
     "relUrl": "/agents/memory/"
-  },"189": {
+  },"188": {
     "doc": "Context Memory",
     "title": "Memory Types in MUXI",
     "content": "MUXI provides several memory systems: . | Buffer Memory: Short-term memory for recent conversations | Long-Term Memory: Persistent storage for important information | Memobase: User-specific memory management for multi-user applications | . ",
     "url": "/muxi/agents/memory/#memory-types-in-muxi",
     
     "relUrl": "/agents/memory/#memory-types-in-muxi"
-  },"190": {
+  },"189": {
     "doc": "Context Memory",
     "title": "Buffer Memory",
     "content": "Buffer memory is a short-term memory system that stores recent conversation history, enabling agents to maintain context within a single session. Buffer memory is turned on by default (with a buffer size of 5). If you want to turn it off, set the buffer to zero. Basic Buffer Memory Example . Declarative way . configs/buffer_memory_agent.json . { \"agent_id\": \"assistant\", \"description\": \"A helpful assistant with short-term memory for conversations.\", \"model\": { \"provider\": \"openai\", \"api_key\": \"${OPENAI_API_KEY}\", \"model\": \"gpt-4o\" }, \"memory\": { \"buffer\": 20 } } . app.py . from muxi import muxi from dotenv import load_dotenv # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add agent from configuration app.add_agent(\"configs/buffer_memory_agent.json\") # The agent will remember the conversation context response1 = await app.chat(\"assistant\", \"My name is Alice.\") print(response1) # The agent acknowledges and remembers the name response2 = await app.chat(\"assistant\", \"What's my name?\") print(response2) # The agent should respond with \"Alice\" . Programmatic way . import os from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel from muxi.core.memory.buffer import BufferMemory # Initialize components orchestrator = Orchestrator() model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) buffer = BufferMemory() # Create an agent with buffer memory orchestrator.create_agent( agent_id=\"assistant\", description=\"A helpful assistant with short-term memory for conversations.\", model=model, buffer_memory=buffer ) # The agent will remember the conversation context response1 = orchestrator.chat(\"assistant\", \"My name is Alice.\") print(response1) # The agent acknowledges and remembers the name response2 = orchestrator.chat(\"assistant\", \"What's my name?\") print(response2) # The agent should respond with \"Alice\" . ",
     "url": "/muxi/agents/memory/#buffer-memory",
     
     "relUrl": "/agents/memory/#buffer-memory"
-  },"191": {
+  },"190": {
     "doc": "Context Memory",
     "title": "Long-Term Memory",
     "content": "Long-term memory provides persistent storage for important information across sessions. MUXI uses vector databases to store and retrieve memories semantically. Long-term memory requires database access. Please ensure you set DATABASE_URL in your environment variables. Basic Long-Term Memory Example . Declarative way . # configs/long_term_memory_agent.yaml --- agent_id: assistant description: A helpful assistant with both short-term and long-term memory capabilities. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o memory: buffer: 15 long_term: true # &lt;= set this to true . # app1.py from muxi import muxi from dotenv import load_dotenv # Load environment variables load_dotenv() # Initialize MUXI with database configuration app = muxi() # Set up database for long-term memory (or use environment variables) app.configure_database(connection_string=os.getenv(\"DATABASE_URL\")) # Add agent with long-term memory app.add_agent(\"configs/long_term_memory_agent.yaml\") # The agent will store important information in long-term memory await app.chat(\"assistant\", \"Remember that my favorite color is blue.\") . &lt;-- restart the application --&gt; . # app2.py from muxi import muxi from dotenv import load_dotenv # Load environment variables load_dotenv() # Initialize MUXI with database configuration app = muxi() # Set up database for long-term memory (or use environment variables) app.configure_database(connection_string=os.getenv(\"DATABASE_URL\")) # Add agent with long-term memory app.add_agent(\"configs/long_term_memory_agent.yaml\") # The agent can recall information from long-term memory response = await app.chat(\"assistant\", \"What's my favorite color?\") print(response) # Should mention \"blue\" . Programmatic way . import os from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel from muxi.core.memory.buffer import BufferMemory from muxi.core.memory.long_term import LongTermMemory # Initialize components orchestrator = Orchestrator() model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) buffer = BufferMemory() long_term = LongTermMemory( connection_string=os.getenv(\"DATABASE_URL\") ) # This requires a database connection # Create an agent with both buffer and long-term memory orchestrator.create_agent( agent_id=\"assistant\", description=\"A helpful assistant with both short-term and long-term memory capabilities.\", model=model, buffer_memory=buffer, long_term_memory=long_term ) # The agent will store important information in long-term memory orchestrator.chat(\"assistant\", \"Remember that my favorite color is blue.\") # Later, even after restarting the application... # (Simulated by clearing the buffer memory) buffer.clear() # The agent can recall information from long-term memory response = orchestrator.chat(\"assistant\", \"What's my favorite color?\") print(response) # Should mention \"blue\" . Searching Long-Term Memory . You can explicitly search an agent’s memory: . Declarative way . # Search the memory explicitly search_results = await app.search_memory( agent_id=\"assistant\", query=\"What do I like?\", k=3, # Return top 3 results threshold=0.7 # Minimum similarity threshold (0-1) ) print(\"Memory search results:\") for result in search_results: print(f\"Memory: {result['content']}\") print(f\"Relevance: {result['similarity']}\") print(\"---\") . Programmatic way . # Search the agent's memory for relevant information results = agent.search_memory( query=\"What do I like?\", k=3, # Return top 3 results threshold=0.7 # Minimum similarity threshold (0-1) ) # Or, search the all agents' memory for relevant information # results = orchestrator.search_memory( # query=\"What do I like?\", # k=3, # Return top 3 results # threshold=0.7 # Minimum similarity threshold (0-1) # ) print(\"Memory search results:\") for result in results: print(f\"Memory: {result['content']}\") print(f\"Relevance: {result['similarity']}\") print(\"---\") . ",
     "url": "/muxi/agents/memory/#long-term-memory",
     
     "relUrl": "/agents/memory/#long-term-memory"
-  },"192": {
+  },"191": {
     "doc": "Context Memory",
     "title": "Multi-User Memory with Memobase",
     "content": "For applications serving multiple users, MUXI provides the Memobase system, which partitions memory by user ID. Setting Up Memobase . Declarative way . # app.py from muxi import muxi from dotenv import load_dotenv import os # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add multi-user agent app.add_agent(\"configs/long_term_memory_agent.yaml\") # Chat with the agent as different users user_1_response = await app.chat( message=\"My name is Bob and I like hiking.\", user_id=\"user_1\" ) user_2_response = await app.chat( message=\"My name is Carol and I like painting.\", user_id=\"user_2\" ) # Later, the agent will remember each user's specific information user_1_question = await app.chat( message=\"What hobby do I enjoy?\", user_id=\"user_1\" ) print(f\"User 1 response: {user_1_question}\") # Should mention hiking user_2_question = await app.chat( message=\"What hobby do I enjoy?\", user_id=\"user_2\" ) print(f\"User 2 response: {user_2_question}\") # Should mention painting . Programmatic way ... # Chat with the agent as different users user_1_response = orchestrator.chat( message=\"My name is Bob and I like hiking.\", user_id=\"user_1\" ) user_2_response = orchestrator.chat( message=\"My name is Carol and I like painting.\", user_id=\"user_2\" ) # Later, the agent will remember each user's specific information user_1_question = orchestrator.chat( message=\"What hobby do I enjoy?\", user_id=\"user_1\" ) print(f\"User 1 response: {user_1_question}\") # Should mention hiking user_2_question = orchestrator.chat( message=\"What hobby do I enjoy?\", user_id=\"user_2\" ) print(f\"User 2 response: {user_2_question}\") # Should mention painting . ",
     "url": "/muxi/agents/memory/#multi-user-memory-with-memobase",
     
     "relUrl": "/agents/memory/#multi-user-memory-with-memobase"
-  },"193": {
+  },"192": {
     "doc": "Context Memory",
     "title": "Best Practices for Memory Management",
     "content": ". | Balance Buffer Size: Keep buffer memory large enough for context but not too large for model context limits | Prioritize Important Information: Store only significant information in long-term memory | Use Domain Knowledge for Static Information: Domain knowledge is perfect for unchanging facts | Separate Concerns with Memobase: Always use Memobase for multi-user applications | Regular Memory Maintenance: Implement policies to clear or archive old memories | Security and Privacy: Be mindful of what information you store and for how long | . ",
     "url": "/muxi/agents/memory/#best-practices-for-memory-management",
     
     "relUrl": "/agents/memory/#best-practices-for-memory-management"
-  },"194": {
+  },"193": {
     "doc": "Context Memory",
     "title": "Next Steps",
     "content": "Now that you’ve added memory to your agents, you might want to: . | Learn how to create multi-agent systems - see Multi-Agent Systems | Configure your agents with specific settings - see Agent Configuration | Explore deep dives into memory architecture - see Memory System | . ",
     "url": "/muxi/agents/memory/#next-steps",
     
     "relUrl": "/agents/memory/#next-steps"
-  },"195": {
+  },"194": {
     "doc": "Multi-Agent Systems",
     "title": "Multi-Agent Systems",
     "content": "This guide explores how to create multi-agent systems with the MUXI Framework, where multiple specialized agents work together to handle complex tasks. ",
     "url": "/muxi/agents/multi-agent/",
     
     "relUrl": "/agents/multi-agent/"
-  },"196": {
+  },"195": {
     "doc": "Multi-Agent Systems",
     "title": "Why Use Multiple Agents?",
     "content": "Multi-agent systems offer several advantages: . | Specialization: Create agents with different expertise and capabilities | Division of Labor: Distribute complex tasks among specialized agents | Scalability: Handle more requests by distributing them across agents | Redundancy: Provide fallback options if one agent cannot handle a task | . ",
     "url": "/muxi/agents/multi-agent/#why-use-multiple-agents",
     
     "relUrl": "/agents/multi-agent/#why-use-multiple-agents"
-  },"197": {
+  },"196": {
     "doc": "Multi-Agent Systems",
     "title": "Setting Up a Multi-Agent System",
     "content": "Basic Multi-Agent Setup . The Orchestrator class makes it easy to create and manage multiple agents: . Declarative way . # configs/general_assistant.yaml --- agent_id: general_assistant description: A helpful assistant for general questions about various topics. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-3.5-turbo system_message: You are a helpful assistant that can answer general questions. # configs/code_assistant.yaml --- agent_id: code_assistant description: A specialized coding assistant that can help with programming tasks and code examples. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o system_message: You are a specialized coding assistant with expertise in Python, JavaScript, and other popular languages. Provide code examples and explanations. # configs/data_science_assistant.yaml --- agent_id: data_science_assistant description: A specialized assistant for data science, statistics, and machine learning topics. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o system_message: You are a specialized data science assistant with expertise in statistics, machine learning, and data analysis. Provide detailed technical advice. # app.py from muxi import muxi from dotenv import load_dotenv import asyncio # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add agents from individual configuration files app.add_agent(\"configs/general_assistant.yaml\") app.add_agent(\"configs/code_assistant.yaml\") app.add_agent(\"configs/data_science_assistant.yaml\") async def main(): # Chat with specific agents general_response = await app.chat(\"general_assistant\", \"What is climate change?\") print(f\"General Assistant: {general_response}\") code_response = await app.chat(\"code_assistant\", \"How do I implement a binary search in Python?\") print(f\"Code Assistant: {code_response}\") data_response = await app.chat(\"data_science_assistant\", \"Explain the difference between precision and recall.\") print(f\"Data Science Assistant: {data_response}\") if __name__ == \"__main__\": asyncio.run(main()) . Programmatic way . # multi_agent_setup.py import os import asyncio from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel from dotenv import load_dotenv async def main(): # Load environment variables load_dotenv() # Initialize the orchestrator orchestrator = Orchestrator() # Create models for different agents general_model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-3.5-turbo\" ) expert_model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) # Create a general assistant orchestrator.create_agent( agent_id=\"general_assistant\", description=\"A helpful assistant for general questions about various topics.\", model=general_model, system_message=\"You are a helpful assistant that can answer general questions.\" ) # Create a coding assistant orchestrator.create_agent( agent_id=\"code_assistant\", description=\"A specialized coding assistant that can help with programming tasks and code examples.\", model=expert_model, system_message=\"You are a specialized coding assistant with expertise in Python, JavaScript, and other popular languages. Provide code examples and explanations.\" ) # Create a data science assistant orchestrator.create_agent( agent_id=\"data_science_assistant\", description=\"A specialized assistant for data science, statistics, and machine learning topics.\", model=expert_model, system_message=\"You are a specialized data science assistant with expertise in statistics, machine learning, and data analysis. Provide detailed technical advice.\" ) # Chat with specific agents general_response = await orchestrator.chat(\"general_assistant\", \"What is climate change?\") print(f\"General Assistant: {general_response}\") code_response = await orchestrator.chat(\"code_assistant\", \"How do I implement a binary search in Python?\") print(f\"Code Assistant: {code_response}\") data_response = await orchestrator.chat(\"data_science_assistant\", \"Explain the difference between precision and recall.\") print(f\"Data Science Assistant: {data_response}\") if __name__ == \"__main__\": asyncio.run(main()) . ",
     "url": "/muxi/agents/multi-agent/#setting-up-a-multi-agent-system",
     
     "relUrl": "/agents/multi-agent/#setting-up-a-multi-agent-system"
-  },"198": {
+  },"197": {
     "doc": "Multi-Agent Systems",
     "title": "Intelligent Message Routing",
     "content": "MUXI provides intelligent routing to direct messages to the most appropriate agent based on content: . Declarative way . # configs/multi_agent_system.yaml --- routing: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o . # routing_app.py from muxi import muxi from dotenv import load_dotenv import asyncio # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add agents from individual configuration files app.add_agent(\"configs/general_assistant.yaml\") app.add_agent(\"configs/code_assistant.yaml\") app.add_agent(\"configs/creative_assistant.yaml\") # Configure routing from file app.configure_routing(\"configs/multi_agent_system.yaml\") async def main(): # The system will automatically route messages to the appropriate agent response1 = await app.chat(\"How do I implement binary search in Python?\") print(f\"Response (likely from coding agent): {response1}\") response2 = await app.chat(\"Tell me about the history of Rome.\") print(f\"Response (likely from general agent): {response2}\") response3 = await app.chat(\"Write a short poem about autumn.\") print(f\"Response (likely from creative agent): {response3}\") if __name__ == \"__main__\": asyncio.run(main()) . Programmatic way . # intelligent_routing.py import os import asyncio from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel from muxi.core.routing import Routing from dotenv import load_dotenv async def main(): # Load environment variables load_dotenv() # Initialize the orchestrator orchestrator = Orchestrator() # Create models for different agents general_model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-3.5-turbo\" ) expert_model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) # Create a general assistant orchestrator.create_agent( agent_id=\"general_assistant\", description=\"A helpful assistant for general questions about various topics.\", model=general_model, system_message=\"You are a helpful assistant that can answer general questions.\" ) # Create a coding assistant orchestrator.create_agent( agent_id=\"code_assistant\", description=\"A specialized coding assistant that can help with programming tasks and code examples.\", model=expert_model, system_message=\"You are a specialized coding assistant with expertise in Python, JavaScript, and other popular languages. Provide code examples and explanations.\" ) # Create a creative assistant orchestrator.create_agent( agent_id=\"creative_assistant\", description=\"A creative assistant that specializes in writing and creative content generation.\", model=expert_model, system_message=\"You are a creative assistant that specializes in writing stories, poems, and generating creative content.\" ) # Configure routing routing_model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) orchestrator.set_routing(Routing(model=routing_model)) # The orchestrator will automatically route the message to the most appropriate agent response1 = await orchestrator.chat(message=\"How do I implement binary search in Python?\") print(f\"Response (likely from coding agent): {response1}\") response2 = await orchestrator.chat(message=\"Tell me about the history of Rome.\") print(f\"Response (likely from general agent): {response2}\") response3 = await orchestrator.chat(message=\"Write a short poem about autumn.\") print(f\"Response (likely from creative agent): {response3}\") if __name__ == \"__main__\": asyncio.run(main()) . ",
     "url": "/muxi/agents/multi-agent/#intelligent-message-routing",
     
     "relUrl": "/agents/multi-agent/#intelligent-message-routing"
-  },"199": {
+  },"198": {
     "doc": "Multi-Agent Systems",
     "title": "Agent Collaboration",
     "content": "You can implement collaboration between agents by passing information between them: . Declarative way . # configs/research_team/researcher.yaml --- agent_id: researcher description: An agent specialized in gathering and analyzing information on various topics. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o system_message: You are a research specialist. Your role is to gather comprehensive information on requested topics, providing well-researched, factual analysis. # configs/research_team/writer.yaml --- agent_id: writer description: An agent specialized in creating well-structured, engaging content based on information. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o system_message: You are a professional content writer. Your role is to take information and transform it into engaging, well-structured articles or reports. # configs/research_team/critic.yaml --- agent_id: critic description: An agent specialized in evaluating and improving content quality, accuracy, and clarity. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o system_message: You are a content critic and editor. Your role is to review content for accuracy, clarity, and quality, providing constructive feedback and suggested improvements. # collaborative_agents.py from muxi import muxi from dotenv import load_dotenv import asyncio # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add research team agents app.add_agent(\"configs/research_team/researcher.yaml\") app.add_agent(\"configs/research_team/writer.yaml\") app.add_agent(\"configs/research_team/critic.yaml\") async def collaborative_workflow(): # Use the researcher for gathering information research_response = await app.chat(\"researcher\", \"What are the latest developments in renewable energy?\") print(f\"Research findings: {research_response}\") # Use the writer to create content based on research writing_response = await app.chat(\"writer\", f\"Create an article about renewable energy based on this research: {research_response}\") print(f\"Draft article: {writing_response}\") # Use the critic to review the article critique_response = await app.chat(\"critic\", f\"Review this article for accuracy and quality: {writing_response}\") print(f\"Critique: {critique_response}\") # Optionally, have the writer revise based on feedback revised_article = await app.chat(\"writer\", f\"Revise this article based on the following critique: {critique_response}\\n\\nOriginal article: {writing_response}\") print(f\"Revised article: {revised_article}\") if __name__ == \"__main__\": asyncio.run(collaborative_workflow()) . Programmatic way . # collaborative_research_team.py import os import asyncio from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel from dotenv import load_dotenv async def main(): # Load environment variables load_dotenv() # Initialize the orchestrator orchestrator = Orchestrator() # Create model for all agents expert_model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) # Create the research team agents orchestrator.create_agent( agent_id=\"researcher\", description=\"An agent specialized in gathering and analyzing information on various topics.\", model=expert_model, system_message=\"You are a research specialist. Your role is to gather comprehensive information on requested topics, providing well-researched, factual analysis.\" ) orchestrator.create_agent( agent_id=\"writer\", description=\"An agent specialized in creating well-structured, engaging content based on information.\", model=expert_model, system_message=\"You are a professional content writer. Your role is to take information and transform it into engaging, well-structured articles or reports.\" ) orchestrator.create_agent( agent_id=\"critic\", description=\"An agent specialized in evaluating and improving content quality, accuracy, and clarity.\", model=expert_model, system_message=\"You are a content critic and editor. Your role is to review content for accuracy, clarity, and quality, providing constructive feedback and suggested improvements.\" ) # Execute a collaborative research and writing workflow research_response = await orchestrator.chat(\"researcher\", \"What are the latest developments in renewable energy?\") print(f\"Research findings: {research_response}\") writing_response = await orchestrator.chat(\"writer\", f\"Create an article about renewable energy based on this research: {research_response}\") print(f\"Draft article: {writing_response}\") critique_response = await orchestrator.chat(\"critic\", f\"Review this article for accuracy and quality: {writing_response}\") print(f\"Critique: {critique_response}\") # Optionally, have the writer revise based on feedback revised_article = await orchestrator.chat(\"writer\", f\"Revise this article based on the following critique: {critique_response}\\n\\nOriginal article: {writing_response}\") print(f\"Revised article: {revised_article}\") if __name__ == \"__main__\": asyncio.run(main()) . ",
     "url": "/muxi/agents/multi-agent/#agent-collaboration",
     
     "relUrl": "/agents/multi-agent/#agent-collaboration"
-  },"200": {
+  },"199": {
     "doc": "Multi-Agent Systems",
     "title": "Best Practices for Multi-Agent Systems",
     "content": ". | Clear Specialization: Define clear roles and expertise for each agent | Consistent System Messages: Make system messages detailed and non-overlapping | Appropriate Model Selection: Use more powerful models for complex tasks | Memory Management: Consider whether agents should share memory or maintain separate contexts | Error Handling: Implement fallback mechanisms if routing fails | Observability: Add logging to track which agent handles which messages | . ",
     "url": "/muxi/agents/multi-agent/#best-practices-for-multi-agent-systems",
     
     "relUrl": "/agents/multi-agent/#best-practices-for-multi-agent-systems"
-  },"201": {
+  },"200": {
     "doc": "Multi-Agent Systems",
     "title": "Next Steps",
     "content": "Now that you’ve set up a multi-agent system, you might want to: . | Add memory to your agents - see Adding Memory | Configure your agents with specific settings - see Agent Configuration | Explore how to connect your agents to external services - see Using MCP Servers | . ",
     "url": "/muxi/agents/multi-agent/#next-steps",
     
     "relUrl": "/agents/multi-agent/#next-steps"
-  },"202": {
+  },"201": {
     "doc": "Overview & Key Concepts",
     "title": "Overview &amp; Key Concepts",
     "content": " ",
     "url": "/muxi/intro/overview/#overview--key-concepts",
     
     "relUrl": "/intro/overview/#overview--key-concepts"
-  },"203": {
+  },"202": {
     "doc": "Overview & Key Concepts",
     "title": "What You’ll Learn",
     "content": ". | What the MUXI Framework is and what problems it solves | The key components of the framework | How these components work together | Core architectural principles | . ",
     "url": "/muxi/intro/overview/#what-youll-learn",
     
     "relUrl": "/intro/overview/#what-youll-learn"
-  },"204": {
+  },"203": {
     "doc": "Overview & Key Concepts",
     "title": "Prerequisites",
     "content": ". | None - this is a starting point for all users | . ",
     "url": "/muxi/intro/overview/#prerequisites",
     
     "relUrl": "/intro/overview/#prerequisites"
-  },"205": {
+  },"204": {
     "doc": "Overview & Key Concepts",
     "title": "MUXI Framework Overview",
     "content": "MUXI is an extensible framework for building AI agents with real-time communication capabilities, memory persistence, and MCP server integration. It simplifies the process of creating sophisticated AI systems by providing a modular, well-structured foundation. This project is a work in progress and is not yet ready for production use. The framework is actively being developed with new features being added regularly. Please refer to the roadmap for information about the current state of the project and where it’s headed. ",
     "url": "/muxi/intro/overview/#muxi-framework-overview",
     
     "relUrl": "/intro/overview/#muxi-framework-overview"
-  },"206": {
+  },"205": {
     "doc": "Overview & Key Concepts",
     "title": "Key Features",
     "content": ". | Multi-Agent Orchestration: Create and manage multiple AI agents with different capabilities | Intelligent Message Routing: Automatically select the most appropriate agent based on message content | Model Context Protocol (MCP): Connect to external services via standardized MCP servers | Standardized LLM Communication: Use a consistent protocol across different LLM providers | Memory Systems: Short-term buffer memory and long-term persistent memory | Multi-User Support: Memobase provides user-specific memory partitioning for multi-tenant applications | Domain Knowledge: Store and retrieve structured information to personalize agent responses | Real-Time Communication: WebSocket support for instant messaging | REST API: Comprehensive API for managing agents, MCP servers, and conversations | Command Line Interface: Rich terminal-based interface for creating and interacting with agents | Flexible Configuration: Define agents using YAML or JSON with minimal code | . ",
     "url": "/muxi/intro/overview/#key-features",
     
     "relUrl": "/intro/overview/#key-features"
-  },"207": {
+  },"206": {
     "doc": "Overview & Key Concepts",
     "title": "Core Architecture",
     "content": "MUXI follows a modular design where specialized components work together to enable complex agent behaviors: . ┌───────────────────┐ │ Clients │ │ (CLI/Web/SDK) │ └─────────┬─────────┘ │ │ (API/SSE/WS) │ ┌─────────│───────────────────────────────────────────┐ │ │ MUXI Server (Local/Remote) │ │ │ │ │ │ ┌───────────────┐ │ │ └───────&gt;│ Orchestrator │ │ │ └───────┬───────┘ │ │ ┌────────────────┼────────────────┐ │ │ │ │ │ │ │ ▼ ▼ ▼ │ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │ ┌───────────┐ │ │ Agent 1 │ │ Agent 2 │ │ Agent N │-------│ Knowledge │ │ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ │ └───────────┘ │ ↓ ↓ ↓ │ │ └────────┬───────┴────────┬───────┘ │ │ ↓ : │ │ ┌──────┴──────┐ ┌──────┴──────┐ │ │ │ MCP Handler │ │ Memory │ │ │ └──────┬──────┘ └─────────────┘ │ └──────────────────│──────────────────────────────────┘ │ │ (HTTP) ▼ ┌─────────────────────────────────────────────────────┐ │ MCP Servers (via Command/SSE) │ │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │ │ │ Weather │ │ Web Search │ │ .... │ │ │ └─────────────┘ └─────────────┘ └─────────────┘ │ └─────────────────────────────────────────────────────┘ . ",
     "url": "/muxi/intro/overview/#core-architecture",
     
     "relUrl": "/intro/overview/#core-architecture"
-  },"208": {
+  },"207": {
     "doc": "Overview & Key Concepts",
     "title": "Key Components",
     "content": "1. Server Layer . The Server layer is the entry point for all external communication with the framework: . | REST API: Endpoints for agent management, chat operations, and memory interactions | WebSocket Server: Real-time, bidirectional communication for streaming responses | Web App: Frontend interface for visual interaction | CLI: Command-line interface for text-based interaction | . 2. Orchestrator . The Orchestrator is the central coordinator that: . | Manages the lifecycle of all agents in the system | Routes messages to the appropriate agent | Handles agent creation, configuration, and removal | Provides a unified interface for all client applications | . 3. Agents . Agents are the intelligent entities that process information and produce responses: . | Integrate with a specific LLM provider | Maintain their own memory systems | Access MCP servers for extended capabilities | Process messages according to their system instructions | . 4. Model Context Protocol (MCP) . The MCP is a standardized communication layer between agents and external services: . | Provides a consistent interface for integrating external functionality | Handles specialized message formatting | Manages request/response parsing and serialization | Supports function execution and result handling | . 5. Memory Systems . MUXI includes a sophisticated memory architecture: . | Buffer Memory: Short-term contextual memory for conversation flow | Long-Term Memory: Persistent storage of important information | Memobase: Multi-user aware memory system that partitions by user ID | . 6. LLM Providers . The framework supports multiple LLM providers: . | OpenAI (GPT models) | Anthropic (Claude models) | Local models via Ollama | Expandable to additional providers | . ",
     "url": "/muxi/intro/overview/#key-components",
     
     "relUrl": "/intro/overview/#key-components"
-  },"209": {
+  },"208": {
     "doc": "Overview & Key Concepts",
     "title": "How Everything Works Together",
     "content": ". | Client Requests: Enter through one of the interfaces (REST, WebSocket, CLI, Web App) | Server Processing: The server layer validates and routes requests to the Orchestrator | Orchestration: The Orchestrator identifies the target agent and forwards the message | Agent Processing: . | The agent retrieves relevant context from memory | Formulates a prompt for the LLM | Sends the prompt to the LLM provider | . | LLM Interaction: . | The LLM processes the prompt and generates a response | If MCP requests are needed, they are identified and extracted | . | MCP Server Execution: . | MCP requests are routed to the appropriate servers | Servers execute with the provided parameters | Results are returned to the agent | . | Response Formulation: . | The agent incorporates results if applicable | Formulates the final response | . | Memory Updates: . | The conversation is stored in buffer memory | Important information is persisted to long-term memory | . | Client Response: The response is returned to the client through the original interface | . ",
     "url": "/muxi/intro/overview/#how-everything-works-together",
     
     "relUrl": "/intro/overview/#how-everything-works-together"
-  },"210": {
+  },"209": {
     "doc": "Overview & Key Concepts",
     "title": "What Makes MUXI Different?",
     "content": "MUXI sets itself apart from other frameworks by: . | Simplicity First: MUXI abstracts away the complexity of text splitting, embeddings, and prompt engineering, letting you focus on building great agents | Truly Multi-Agent: Built from the ground up with multi-agent orchestration in mind | Standardized External Services: The MCP provides a clean, standard way to integrate external services | Multi-User by Design: User-specific memory partitioning is built into the core architecture | Hybrid Communication: Support for both request-response and real-time communication patterns | . ",
     "url": "/muxi/intro/overview/#what-makes-muxi-different",
     
     "relUrl": "/intro/overview/#what-makes-muxi-different"
-  },"211": {
+  },"210": {
     "doc": "Overview & Key Concepts",
     "title": "Advanced Topics",
     "content": "For a deeper understanding of each component, explore these technical deep dives: . | Agent Fundamentals | Memory Systems | MCP Fundamentals | Orchestration | . ",
     "url": "/muxi/intro/overview/#advanced-topics",
     
     "relUrl": "/intro/overview/#advanced-topics"
-  },"212": {
+  },"211": {
     "doc": "Overview & Key Concepts",
     "title": "What’s Next",
     "content": ". | Why MUXI? - Learn why MUXI is the right choice for your AI projects | Quick Start Guide - Get up and running with MUXI | Architecture - Dive deeper into the framework’s architecture | . ",
     "url": "/muxi/intro/overview/#whats-next",
     
     "relUrl": "/intro/overview/#whats-next"
-  },"213": {
+  },"212": {
     "doc": "Overview & Key Concepts",
     "title": "Overview & Key Concepts",
     "content": " ",
     "url": "/muxi/intro/overview/",
     
     "relUrl": "/intro/overview/"
-  },"214": {
+  },"213": {
     "doc": "Package Structure",
     "title": "Package Structure",
     "content": "This page provides a detailed overview of the MUXI Framework’s package organization and internal structure. ",
     "url": "/muxi/reference/package/",
     
     "relUrl": "/reference/package/"
-  },"215": {
+  },"214": {
     "doc": "Package Structure",
     "title": "Overview",
     "content": "MUXI is organized as a modular monorepo with multiple packages that can be used independently or together. This approach provides several advantages: . | Separation of Concerns: Each package has a clear, focused responsibility | Independent Versioning: Packages can evolve at different rates | Reduced Dependencies: Users can install only what they need | Clearer Boundaries: Interfaces between components are well-defined | Focused Testing: Each package can be tested in isolation | . ",
     "url": "/muxi/reference/package/#overview",
     
     "relUrl": "/reference/package/#overview"
-  },"216": {
+  },"215": {
     "doc": "Package Structure",
     "title": "Package Organization",
     "content": "The MUXI framework is structured as follows: . muxi-framework/ ├── packages/ │ ├── core/ # Core components: agents, memory, MCP interface │ │ └── src/muxi/core/ │ │ ├── agent/ # Agent implementation │ │ ├── memory/ # Memory subsystems │ │ ├── models/ # LLM provider interfaces │ │ ├── mcp/ # Model Context Protocol │ │ ├── orchestrator/ # Multi-agent coordination │ │ └── tools/ # Built-in tools │ │ │ ├── server/ # REST API and WebSocket server │ │ └── src/muxi/server/ │ │ ├── api/ # REST API endpoints │ │ ├── websocket/ # WebSocket implementation │ │ ├── auth/ # Authentication │ │ └── middleware/ # Server middleware │ │ │ ├── cli/ # Command-line interface │ │ └── src/muxi/cli/ │ │ ├── commands/ # CLI commands │ │ ├── terminal/ # Terminal UI │ │ └── mcp_generator/ # MCP server template generator │ │ │ ├── web/ # Web user interface │ │ ├── src/muxi/web/ │ │ │ ├── api/ # Web-specific API │ │ │ └── server/ # Web server │ │ └── frontend/ # React-based frontend │ │ │ └── muxi/ # Meta-package that integrates all components │ └── src/muxi/ │ ├── __init__.py # Main entry point │ └── client.py # Client implementation │ ├── examples/ # Example scripts and applications ├── docs/ # Documentation └── tests/ # Test suite for all components . ",
     "url": "/muxi/reference/package/#package-organization",
     
     "relUrl": "/reference/package/#package-organization"
-  },"217": {
+  },"216": {
     "doc": "Package Structure",
     "title": "Package Descriptions",
     "content": "Core Package (muxi-core) . The foundation of the MUXI framework, containing all essential components: . | Agent: Implements the agent architecture and LLM integration | Memory: Buffer memory, long-term memory, and Memobase implementations | Models: Interfaces to LLM providers like OpenAI, Anthropic, and Ollama | MCP: The Model Context Protocol client implementation | Orchestrator: Multi-agent coordination system | Tools: Built-in tool implementations for common tasks | . Key features: . | Minimal dependencies for lightweight usage | Can be used without the server, CLI, or web UI | Provides programmatic API for integration into other applications | . Server Package (muxi-server) . Implements the server components for exposing MUXI functionality via APIs: . | API: REST API endpoints for agent management, chat, memory, etc. | WebSocket: Real-time, bidirectional communication | Authentication: JWT-based auth system | Middleware: Request validation, error handling, rate limiting | . Key features: . | FastAPI-based implementation | WebSocket support for streaming responses | Server-Sent Events (SSE) for one-way streaming | Comprehensive API for all MUXI functionality | . CLI Package (muxi-cli) . Command-line interface for interacting with MUXI: . | Commands: Implementation of CLI commands like chat, run, mcp | Terminal: Rich terminal UI for interactive sessions | MCP Generator: Utilities for creating new MCP server templates | . Key features: . | Rich terminal UI with syntax highlighting | Interactive chat mode with history | Command completion and help documentation | MCP server scaffolding | . Web Package (muxi-web) . Web-based interface for MUXI: . | API: Web-specific API endpoints | Server: Web server implementation | Frontend: React-based UI with streaming support | . Key features: . | Modern React-based interface | Real-time communication via WebSockets | Agent configuration UI | Chat history visualization | . Meta Package (muxi) . The main package that integrates all components: . | Provides a unified API for the entire framework | Handles package coordination and initialization | Simplifies installation and usage | . This is the recommended package for most users who want the full MUXI experience. ",
     "url": "/muxi/reference/package/#package-descriptions",
     
     "relUrl": "/reference/package/#package-descriptions"
-  },"218": {
+  },"217": {
     "doc": "Package Structure",
     "title": "Import Structure",
     "content": "MUXI uses a consistent import structure across all packages: . # Core imports from muxi.core.agent import Agent from muxi.core.memory import BufferMemory, LongTermMemory from muxi.core.models.openai import OpenAIModel from muxi.core.mcp import MCPHandler from muxi.core.orchestrator import Orchestrator from muxi.core.tools.weather import WeatherTool # Server imports from muxi.server.api import create_app from muxi.server.websocket import WebSocketManager # CLI imports from muxi.cli.commands import chat_command # Meta-package imports (includes all of the above) from muxi import muxi # Main entry point . ",
     "url": "/muxi/reference/package/#import-structure",
     
     "relUrl": "/reference/package/#import-structure"
-  },"219": {
+  },"218": {
     "doc": "Package Structure",
     "title": "Dependency Graph",
     "content": "The packages have the following dependency relationships: . muxi (meta-package) ├── muxi-core # No external package dependencies ├── muxi-server # Depends on muxi-core ├── muxi-cli # Depends on muxi-core └── muxi-web # Depends on muxi-core and muxi-server . This structure ensures that: . | muxi-core can be used independently without installing server, CLI, or web components | Each higher-level package only depends on what it needs | . ",
     "url": "/muxi/reference/package/#dependency-graph",
     
     "relUrl": "/reference/package/#dependency-graph"
-  },"220": {
+  },"219": {
     "doc": "Package Structure",
     "title": "Installation Options",
     "content": "Users can install packages based on their needs: . # Full installation (recommended) pip install muxi # Core functionality only pip install muxi-core # Server functionality pip install muxi-server # CLI functionality pip install muxi-cli # Web UI pip install muxi-web # Development installation git clone https://github.com/yourusername/muxi-framework.git cd muxi-framework ./install_dev.sh . ",
     "url": "/muxi/reference/package/#installation-options",
     
     "relUrl": "/reference/package/#installation-options"
-  },"221": {
+  },"220": {
     "doc": "Package Structure",
     "title": "Development Guidelines",
     "content": "When contributing to MUXI, consider these package-related guidelines: . | Respect Package Boundaries: Don’t create circular dependencies between packages | Minimize Dependencies: Each package should only depend on what it absolutely needs | Consistent Interfaces: Public APIs should be consistent across packages | Proper Re-exporting: The meta-package should re-export all important interfaces | Version Compatibility: Be mindful of version compatibility between packages | . ",
     "url": "/muxi/reference/package/#development-guidelines",
     
     "relUrl": "/reference/package/#development-guidelines"
-  },"222": {
+  },"221": {
     "doc": "Package Structure",
     "title": "Testing Structure",
     "content": "Tests are organized to match the package structure: . tests/ ├── core/ # Tests for the core package ├── server/ # Tests for the server package ├── cli/ # Tests for the CLI package ├── web/ # Tests for the web package └── integration/ # Cross-package integration tests . Each package has its own test suite that can be run independently: . # Run core tests pytest tests/core # Run all tests pytest . ",
     "url": "/muxi/reference/package/#testing-structure",
     
     "relUrl": "/reference/package/#testing-structure"
-  },"223": {
+  },"222": {
     "doc": "Package Structure",
     "title": "Related Resources",
     "content": ". | API Documentation - Detailed API reference | Configuration Options - Configuration parameters | Codebase Organization - Further details on code organization | . ",
     "url": "/muxi/reference/package/#related-resources",
     
     "relUrl": "/reference/package/#related-resources"
-  },"224": {
+  },"223": {
     "doc": "Quick Start Guide",
     "title": "Quick Start Guide",
     "content": " ",
     "url": "/muxi/intro/quick-start/",
     
     "relUrl": "/intro/quick-start/"
-  },"225": {
+  },"224": {
     "doc": "Quick Start Guide",
     "title": "What You’ll Learn",
     "content": ". | How to install MUXI | How to create agents using configuration files | How to build a simple multi-agent application | How to interact with agents and MCP servers | How to support multiple users | . ",
     "url": "/muxi/intro/quick-start/#what-youll-learn",
     
     "relUrl": "/intro/quick-start/#what-youll-learn"
-  },"226": {
+  },"225": {
     "doc": "Quick Start Guide",
     "title": "Prerequisites",
     "content": ". | Python 3.10 or later | An OpenAI API key (for the examples in this guide) | Basic Python knowledge | . ",
     "url": "/muxi/intro/quick-start/#prerequisites",
     
     "relUrl": "/intro/quick-start/#prerequisites"
-  },"227": {
+  },"226": {
     "doc": "Quick Start Guide",
     "title": "Installation",
     "content": "Install the MUXI Framework using pip: . pip install muxi . For development installations, you can clone the repository and install in development mode: . git clone https://github.com/yourusername/muxi-framework.git cd muxi-framework ./install_dev.sh . ",
     "url": "/muxi/intro/quick-start/#installation",
     
     "relUrl": "/intro/quick-start/#installation"
-  },"228": {
+  },"227": {
     "doc": "Quick Start Guide",
     "title": "Set Up Environment Variables",
     "content": "Create a .env file with your API keys: . OPENAI_API_KEY=your-openai-key DATABASE_URL=your-database-connection-string WEATHER_API_KEY=your-weather-api-key . ",
     "url": "/muxi/intro/quick-start/#set-up-environment-variables",
     
     "relUrl": "/intro/quick-start/#set-up-environment-variables"
-  },"229": {
+  },"228": {
     "doc": "Quick Start Guide",
     "title": "Creating Your First Agent",
     "content": "The easiest way to get started with MUXI is to use declarative configuration files. These can be in YAML or JSON format. YAML Configuration Example . Create a file agents/weather_agent.yaml: . name: weather_assistant description: \"Specialized in providing weather forecasts and current conditions.\" system_message: You are a helpful assistant that can check the weather. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o temperature: 0.7 memory: buffer_size: 10 # Sets buffer window size to 10 enable_long_term: true # Enables long-term memory mcp_servers: - name: weather_api url: http://localhost:5001 api_key: \"${WEATHER_API_KEY}\" . JSON Configuration Example . Alternatively, create agents/finance_agent.json: . { \"name\": \"finance_assistant\", \"description\": \"Expert in financial analysis, investments, and market trends.\", \"system_message\": \"You are a helpful finance assistant.\", \"model\": { \"provider\": \"openai\", \"api_key\": \"${OPENAI_API_KEY}\", \"model\": \"gpt-4o\", \"temperature\": 0.2 }, \"memory\": { \"buffer_size\": 5, \"enable_long_term\": false }, \"mcp_servers\": [ { \"name\": \"finance_api\", \"url\": \"http://localhost:5002\", \"api_key\": \"${FINANCE_API_KEY}\" } ] } . ",
     "url": "/muxi/intro/quick-start/#creating-your-first-agent",
     
     "relUrl": "/intro/quick-start/#creating-your-first-agent"
-  },"230": {
+  },"229": {
     "doc": "Quick Start Guide",
     "title": "Create a Multi-Agent Application",
     "content": "Create a new Python file with minimal code: . from dotenv import load_dotenv from muxi import muxi # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add agents from configuration files app.add_agent(\"weather\", \"agents/weather_agent.yaml\") app.add_agent(\"finance\", \"agents/finance_agent.json\") # Chat with a specific agent response = app.chat(\"What's the weather in New York?\", agent_name=\"weather\") print(response) # Let the orchestrator automatically select the appropriate agent response = app.chat(\"What's the current stock market trend?\") print(response) # Will be handled by the finance agent # Start the server app.run() . ",
     "url": "/muxi/intro/quick-start/#create-a-multi-agent-application",
     
     "relUrl": "/intro/quick-start/#create-a-multi-agent-application"
-  },"231": {
+  },"230": {
     "doc": "Quick Start Guide",
     "title": "Automatic Agent Selection",
     "content": "When you add multiple agents to your application, MUXI will automatically route messages to the most appropriate agent based on their descriptions: . # Let the orchestrator automatically select the appropriate agent response = app.chat(\"What's the current stock market trend?\") print(response) # Will likely be handled by the finance agent response = app.chat(\"What's the weather in New York?\") print(response) # Will likely be handled by the weather agent . The routing system uses an LLM to analyze the message content and agent descriptions to determine the best match. ",
     "url": "/muxi/intro/quick-start/#automatic-agent-selection",
     
     "relUrl": "/intro/quick-start/#automatic-agent-selection"
-  },"232": {
+  },"231": {
     "doc": "Quick Start Guide",
     "title": "Adding Domain Knowledge",
     "content": "You can enhance your agents with domain knowledge: . # Add domain knowledge for the agent app.add_domain_knowledge(\"geography.txt\") # Or for a specific user app.add_user_domain_knowledge( user_id=\"user123\", knowledge={ \"name\": \"Alice\", \"location\": {\"city\": \"New York\"} } ) . ",
     "url": "/muxi/intro/quick-start/#adding-domain-knowledge",
     
     "relUrl": "/intro/quick-start/#adding-domain-knowledge"
-  },"233": {
+  },"232": {
     "doc": "Quick Start Guide",
     "title": "Multi-User Support",
     "content": "For multi-user applications: . # Chat with user-specific context response = app.chat( \"What's the weather in my city?\", user_id=\"user123\" ) print(response) # Will use Alice's location data # Another user with different context response = app.chat( \"What's the weather in my city?\", user_id=\"user456\" ) print(response) # Will use Bob's location data if available . ",
     "url": "/muxi/intro/quick-start/#multi-user-support",
     
     "relUrl": "/intro/quick-start/#multi-user-support"
-  },"234": {
+  },"233": {
     "doc": "Quick Start Guide",
     "title": "Using the CLI",
     "content": "MUXI provides a convenient command-line interface: . # Start a chat session with the default agent muxi chat # Send a one-off message muxi send \"What is the capital of France?\" # Run the server muxi run . ",
     "url": "/muxi/intro/quick-start/#using-the-cli",
     
     "relUrl": "/intro/quick-start/#using-the-cli"
-  },"235": {
+  },"234": {
     "doc": "Quick Start Guide",
     "title": "Using the REST API",
     "content": "After starting the server: . muxi run . You can interact with the API: . # Send a message to an agent curl -X POST http://localhost:5050/agents/assistant/messages \\ -H \"Content-Type: application/json\" \\ -d '{\"content\": \"What is the capital of France?\"}' . ",
     "url": "/muxi/intro/quick-start/#using-the-rest-api",
     
     "relUrl": "/intro/quick-start/#using-the-rest-api"
-  },"236": {
+  },"235": {
     "doc": "Quick Start Guide",
     "title": "Using WebSockets",
     "content": "For real-time applications, you can use the WebSocket interface: . import asyncio import websockets import json async def chat_with_agent(): async with websockets.connect(\"ws://localhost:5050/ws\") as websocket: # Send a message await websocket.send(json.dumps({ \"type\": \"message\", \"content\": \"Tell me about the weather in Paris\", \"agent\": \"weather_assistant\" })) # Receive streaming response while True: response = await websocket.recv() response_data = json.loads(response) if response_data[\"type\"] == \"chunk\": # Process streaming chunk print(response_data[\"content\"], end=\"\") elif response_data[\"type\"] == \"done\": # Response complete break asyncio.run(chat_with_agent()) . ",
     "url": "/muxi/intro/quick-start/#using-websockets",
     
     "relUrl": "/intro/quick-start/#using-websockets"
-  },"237": {
+  },"236": {
     "doc": "Quick Start Guide",
     "title": "Using MCP Servers",
     "content": "MCP servers extend agent capabilities by providing specialized functionality. To use them: . | Add them to your agent configuration as shown in the examples above | The agent will automatically use the appropriate server based on the query | . Creating Your Own MCP Server . You can create your own MCP server to extend agent capabilities: . # Generate a new MCP server template muxi mcp create my_custom_server cd my_custom_server # Install dependencies and start the server pip install -r requirements.txt python server.py . Once your MCP server is running, add it to your agent configuration: . mcp_servers: - name: custom_server url: http://localhost:5010 api_key: \"${CUSTOM_API_KEY}\" . ",
     "url": "/muxi/intro/quick-start/#using-mcp-servers",
     
     "relUrl": "/intro/quick-start/#using-mcp-servers"
-  },"238": {
+  },"237": {
     "doc": "Quick Start Guide",
     "title": "Advanced Topics",
     "content": "For more detailed information: . | Creating MCP Servers | Multi-Agent Systems | Memory Systems | . ",
     "url": "/muxi/intro/quick-start/#advanced-topics",
     
     "relUrl": "/intro/quick-start/#advanced-topics"
-  },"239": {
+  },"238": {
     "doc": "Quick Start Guide",
     "title": "What’s Next",
     "content": ". | Architecture - Understand the framework’s architecture | Simple Agents - Learn more about creating agents | Server Deployment - Deploy your application as a server | . ",
     "url": "/muxi/intro/quick-start/#whats-next",
     
     "relUrl": "/intro/quick-start/#whats-next"
-  },"240": {
+  },"239": {
     "doc": "Release Notes",
     "title": "Release Notes",
     "content": " ",
     "url": "/muxi/release-notes/",
     
     "relUrl": "/release-notes/"
-  },"241": {
+  },"240": {
     "doc": "Release Notes",
     "title": "v0.3.0 (March 2025) - Domain Knowledge Expansion",
     "content": "The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilities, enhancing agents with specialized domain knowledge and improved contextual awareness. Major Features . | Agent-Level Knowledge Base: Agents can now have dedicated knowledge sources specific to their domains of expertise . | File-based knowledge sources with automatic embedding generation | Efficient in-memory vector storage using FAISS | Persistent caching of embeddings for cost optimization | Dynamic embedding dimension detection based on the agent’s model | . | Enhanced Knowledge API: Comprehensive API for managing agent knowledge . | Add and remove knowledge sources programmatically | Search knowledge with relevance controls | List and manage knowledge sources | . | Declarative Knowledge Configuration: Define knowledge sources in YAML/JSON configurations . | Specify file paths and descriptions | Automatic loading and embedding on agent initialization | . | Improved Documentation: Comprehensive guides for all knowledge features | . Benefits . | Create specialized agents with domain-specific knowledge | Provide more accurate and contextual responses | Reduce hallucinations by grounding responses in factual information | Simplify RAG (Retrieval-Augmented Generation) implementation | . Example Usage . # Add knowledge programmatically from muxi.knowledge.base import FileKnowledge knowledge = FileKnowledge( path=\"knowledge/products.txt\", description=\"Product catalog and specifications\" ) await agent.add_knowledge(knowledge) # Search knowledge results = await agent.search_knowledge( query=\"What are our best-selling products?\", top_k=3, threshold=0.7 ) . ",
     "url": "/muxi/release-notes/#v030-march-2025---domain-knowledge-expansion",
     
     "relUrl": "/release-notes/#v030-march-2025---domain-knowledge-expansion"
-  },"242": {
+  },"241": {
     "doc": "Release Notes",
     "title": "v0.2.0 (March 2025) - Architecture Migration",
     "content": "The MUXI Framework v0.2.0 marks a significant milestone with the completion of our architectural migration to a modular, package-based structure. This release focuses on improving the framework’s architecture, maintainability, and extensibility rather than adding new features. Major Changes . | Modular Package Structure: Reorganized from a monolithic structure to a modular, package-based architecture | Import Path Migration: Changed imports from src.* to muxi.core.*, muxi.cli.*, etc. | Independent Packages: Created separately installable packages for core functionality, CLI, server, and web interface | Clearer Subsystem Boundaries: Established well-defined interfaces between subsystems | . Benefits of the New Architecture . | Independent Versioning: Components can be versioned independently | Clearer Module Boundaries: Better separation of concerns with well-defined interfaces | Focused Testing: Tests can target specific packages | Flexible Deployment: Support for installing only needed components | Enhanced Maintainability: Easier to understand and modify codebase | . Breaking Changes . | Import paths have changed from src.* to muxi.core.*, etc. | Configuration files now use the new package structure | Extensions and custom components need to be updated to the new import structure | . Migration Guide . To upgrade from v0.1.x to v0.2.0: . | Update your Python package: pip install -U muxi | Update any custom code to use the new import paths: . | Replace from src.core... with from muxi.core... | Replace from src.models... with from muxi.core.models... | Replace from src.memory... with from muxi.core.memory... | . | For web UI support, install the web module: pip install muxi-web | For server deployments, install the server module: pip install muxi-server | . What’s Next . With this architectural foundation in place, future releases will focus on: . | Enhanced multi-agent coordination | Expanded tool capabilities | Improved memory systems | More sophisticated domain knowledge management | Additional model providers and support for local models | . Stay tuned for these exciting developments in upcoming releases! . ",
     "url": "/muxi/release-notes/#v020-march-2025---architecture-migration",
     
     "relUrl": "/release-notes/#v020-march-2025---architecture-migration"
-  },"243": {
+  },"242": {
     "doc": "Simple Agent",
     "title": "Creating a Simple Agent",
     "content": "This guide walks you through creating a basic agent using the MUXI Framework. ",
     "url": "/muxi/agents/simple/#creating-a-simple-agent",
     
     "relUrl": "/agents/simple/#creating-a-simple-agent"
-  },"244": {
+  },"243": {
     "doc": "Simple Agent",
     "title": "Basic Agent Creation",
     "content": "Declarative way . # configs/assistant.yaml --- agent_id: assistant description: A helpful assistant that answers questions and performs tasks. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o system_message: You are a helpful AI assistant. # app.py from muxi import muxi from dotenv import load_dotenv # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add an agent from a configuration file app.add_agent(\"assistant\", \"configs/assistant.yaml\") # Chat with the agent response = await app.chat(\"Hello, who are you?\") print(response) . Programmatic way . import os from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel # Initialize the orchestrator orchestrator = Orchestrator() # Create an OpenAI model model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) # Create an agent orchestrator.create_agent( agent_id=\"assistant\", description=\"A helpful assistant that answers questions and performs tasks.\", model=model, system_message=\"You are a helpful AI assistant.\" ) # Chat with the agent response = orchestrator.chat(\"Hello, who are you?\") print(response) . ",
     "url": "/muxi/agents/simple/#basic-agent-creation",
     
     "relUrl": "/agents/simple/#basic-agent-creation"
-  },"245": {
+  },"244": {
     "doc": "Simple Agent",
     "title": "Customizing Agent Settings",
     "content": "Declarative way . --- agent_id: creative_writer description: A creative assistant that can help with writing and generating creative content. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o temperature: 0.8 top_p: 0.9 max_tokens: 1000 system_message: You are a creative assistant specializing in fiction writing. Help users craft stories, characters, and engaging narratives. Programmatic way . # ... # Create a model with custom parameters model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\", temperature=0.8, top_p=0.9, max_tokens=1000 ) # Create a creative agent orchestrator.create_agent( agent_id=\"creative_writer\", description=\"...\", model=model, system_message=\"...\" ) # ... ",
     "url": "/muxi/agents/simple/#customizing-agent-settings",
     
     "relUrl": "/agents/simple/#customizing-agent-settings"
-  },"246": {
+  },"245": {
     "doc": "Simple Agent",
     "title": "Using Different Model Providers",
     "content": "MUXI supports multiple model providers including OpenAI, Anthropic, Google, and more. Anthropic Agent Example . Declarative way . --- agent_id: claude description: An intelligent assistant powered by Claude. model: provider: anthropic api_key: \"${ANTHROPIC_API_KEY}\" model: claude-3-opus-20240229 system_message: You are Claude, a helpful AI assistant created by Anthropic. Programmatic way . # Create an Anthropic model model = AnthropicModel( api_key=os.getenv(\"ANTHROPIC_API_KEY\"), model=\"claude-3-opus-20240229\" ) # Create a Claude agent orchestrator.create_agent( agent_id=\"claude\", description=\"...\", model=model, system_message=\"...\" ) . Google Agent Example . Declarative way . --- agent_id: gemini description: An intelligent assistant powered by Google's Gemini model. model: provider: google api_key: \"${GOOGLE_API_KEY}\" model: gemini-1.5-pro system_message: You are Gemini, a helpful AI assistant created by Google. Programmatic way . # Create a Google model model = GoogleModel( api_key=os.getenv(\"GOOGLE_API_KEY\"), model=\"gemini-1.5-pro\" ) # Create a Gemini agent orchestrator.create_agent( agent_id=\"gemini\", description=\"...\", model=model, system_message=\"...\" ) . ",
     "url": "/muxi/agents/simple/#using-different-model-providers",
     
     "relUrl": "/agents/simple/#using-different-model-providers"
-  },"247": {
+  },"246": {
     "doc": "Simple Agent",
     "title": "Azure OpenAI Support",
     "content": "MUXI also supports Azure OpenAI services: . Declarative way . --- agent_id: azure_assistant description: A helpful assistant using Azure-hosted OpenAI models. model: provider: azure_openai api_key: \"${AZURE_OPENAI_API_KEY}\" api_version: 2023-12-01-preview api_base: \"${AZURE_OPENAI_ENDPOINT}\" deployment_name: gpt-4 system_message: You are a helpful AI assistant running on Azure infrastructure. Programmatic way . # Create an Azure OpenAI model model = AzureOpenAIModel( api_key=os.getenv(\"AZURE_OPENAI_API_KEY\"), api_version=\"2023-12-01-preview\", api_base=os.getenv(\"AZURE_OPENAI_ENDPOINT\"), deployment_name=\"gpt-4\" ) # Create an Azure agent orchestrator.create_agent( agent_id=\"azure_assistant\", description=\"...\", model=model, system_message=\"...\" ) . ",
     "url": "/muxi/agents/simple/#azure-openai-support",
     
     "relUrl": "/agents/simple/#azure-openai-support"
-  },"248": {
+  },"247": {
     "doc": "Simple Agent",
     "title": "Local Models",
     "content": "MUXI supports running models locally using the local provider: . Declarative way . --- agent_id: local_assistant description: A locally-hosted AI assistant running on your own hardware. model: provider: local model_path: \"/path/to/local/model\" model_type: llama2 context_window: 4096 system_message: You are a locally-hosted AI assistant. Programmatic way . # Create a local model model = LocalModel( model_path=\"/path/to/local/model\", model_type=\"llama2\", context_window=4096 ) # Create a local agent orchestrator.create_agent( agent_id=\"local_assistant\", description=\"...\", model=model, system_message=\"...\" ) . ",
     "url": "/muxi/agents/simple/#local-models",
     
     "relUrl": "/agents/simple/#local-models"
-  },"249": {
+  },"248": {
     "doc": "Simple Agent",
     "title": "Next Steps",
     "content": "Now that you’ve created a simple agent, you can: . | Learn how to configure agent settings in detail - see Agent Configuration | Add memory capabilities to your agent - see Adding Memory | Create multi-agent systems - see Multi-Agent Systems | . ",
     "url": "/muxi/agents/simple/#next-steps",
     
     "relUrl": "/agents/simple/#next-steps"
-  },"250": {
+  },"249": {
     "doc": "Simple Agent",
     "title": "Troubleshooting",
     "content": "Common Issues . | API Key Issues: If you receive authentication errors, check that your API key is correct and properly set. | Model Availability: Ensure you have access to the model you’re trying to use (e.g., GPT-4o might require special access). | Rate Limiting: If you encounter rate limiting, consider adding delays between requests or using a different API key. | . Getting Help . If you run into issues, check the GitHub Issues or create a new issue with detailed information about your problem. ",
     "url": "/muxi/agents/simple/#troubleshooting",
     
     "relUrl": "/agents/simple/#troubleshooting"
-  },"251": {
+  },"250": {
     "doc": "Simple Agent",
     "title": "Simple Agent",
     "content": " ",
     "url": "/muxi/agents/simple/",
     
     "relUrl": "/agents/simple/"
-  },"252": {
+  },"251": {
     "doc": "Why MUXI?",
     "title": "Why MUXI?",
     "content": " ",
     "url": "/muxi/intro/why-muxi/",
     
     "relUrl": "/intro/why-muxi/"
-  },"253": {
+  },"252": {
     "doc": "Why MUXI?",
     "title": "What You’ll Learn",
     "content": ". | The advantages of MUXI compared to other frameworks | How MUXI simplifies AI agent development | Where MUXI excels and what problems it best solves | Why you might choose MUXI for your next project | . ",
     "url": "/muxi/intro/why-muxi/#what-youll-learn",
     
     "relUrl": "/intro/why-muxi/#what-youll-learn"
-  },"254": {
+  },"253": {
     "doc": "Why MUXI?",
     "title": "Prerequisites",
     "content": ". | Basic understanding of AI agent frameworks (optional) | . ",
     "url": "/muxi/intro/why-muxi/#prerequisites",
     
     "relUrl": "/intro/why-muxi/#prerequisites"
-  },"255": {
+  },"254": {
     "doc": "Why MUXI?",
     "title": "The AI Agent Framework Landscape",
     "content": "The landscape of AI agent frameworks is becoming increasingly crowded. There are many options available for building LLM-powered applications. With so many choices, why should you consider MUXI? . ",
     "url": "/muxi/intro/why-muxi/#the-ai-agent-framework-landscape",
     
     "relUrl": "/intro/why-muxi/#the-ai-agent-framework-landscape"
-  },"256": {
+  },"255": {
     "doc": "Why MUXI?",
     "title": "MUXI’s Core Advantages",
     "content": "1. Simplicity Without Sacrifice . The Challenge: Many frameworks require complex manual implementation and management of various components. MUXI’s Solution: MUXI handles these complexities automatically: . # Traditional approach (pseudo-code) from other_framework.text_splitter import TextSplitter from other_framework.embeddings import EmbeddingGenerator from other_framework.vector_store import VectorDatabase from other_framework.llm import LanguageModel from other_framework.memory import ConversationMemory # Manual text splitting splitter = TextSplitter(chunk_size=1000, chunk_overlap=100) chunks = splitter.split_documents(documents) # Manual embedding creation embedding_generator = EmbeddingGenerator(api_key=\"YOUR_API_KEY\") embeddings = embedding_generator.generate(chunks) vector_db = VectorDatabase.create(embeddings) # Manual memory setup memory = ConversationMemory(history_key=\"chat_history\", return_as_messages=True) # Manual chain setup llm = LanguageModel(model_name=\"large-model\", api_key=\"YOUR_API_KEY\") retriever = vector_db.as_retriever(search_type=\"similarity\") chain = QueryChain.from_components( llm=llm, retriever=retriever, memory=memory ) response = chain.run(query=\"What is the capital of France?\") . # MUXI approach from muxi.core.agent import Agent from muxi.core.models.openai import OpenAIModel # Create an agent - memory and embeddings are handled automatically agent = Agent( model=OpenAIModel(\"gpt-4o\"), system_message=\"You are a helpful assistant.\" ) # Simple conversation with memory automatically managed response = agent.chat(\"What is the capital of France?\") . 2. Truly Multi-Agent by Design . The Challenge: Coordinating multiple specialized agents can be complex. MUXI’s Solution: Multi-agent orchestration is a core feature: . # MUXI multi-agent approach from muxi.core.orchestrator import Orchestrator from muxi.core.agent import Agent from muxi.core.models.openai import OpenAIModel # Create orchestrator orchestrator = Orchestrator() # Add specialized agents orchestrator.add_agent( Agent( name=\"travel_agent\", model=OpenAIModel(\"gpt-4o\"), system_message=\"You specialize in travel recommendations.\" ) ) orchestrator.add_agent( Agent( name=\"finance_agent\", model=OpenAIModel(\"gpt-4o\"), system_message=\"You specialize in financial advice.\" ) ) # Automatic message routing to the right agent response = orchestrator.chat(\"What's the best way to budget for a trip to Paris?\") . 3. Modern, Hybrid Communication . The Challenge: Most frameworks support limited communication protocols. MUXI’s Solution: Support for both REST API and WebSocket: . # WebSocket client example (simplified) import asyncio import websockets import json async def chat_with_agent(): async with websockets.connect(\"ws://localhost:5050/ws\") as websocket: # Send a message await websocket.send(json.dumps({ \"type\": \"message\", \"content\": \"Tell me about the weather in Paris\", \"agent\": \"weather_agent\" })) # Receive streaming response while True: response = await websocket.recv() response_data = json.loads(response) if response_data[\"type\"] == \"chunk\": # Process streaming chunk print(response_data[\"content\"], end=\"\") elif response_data[\"type\"] == \"done\": # Response complete break elif response_data[\"type\"] == \"mcp_call\": # MCP server being called print(f\"\\nFetching data from: {response_data['name']}\") asyncio.run(chat_with_agent()) . 4. Multi-User Support Built-In . The Challenge: Adding multi-user support to LLM applications often requires extensive custom code. MUXI’s Solution: Multi-user memory partitioning is built into the framework: . # Multi-user support in MUXI from muxi.core.agent import Agent from muxi.core.models.openai import OpenAIModel from muxi.core.memory.memobase import Memobase # Create a multi-user memory system memobase = Memobase(connection_string=\"postgresql://user:pass@localhost/db\") # Create an agent with multi-user memory agent = Agent( model=OpenAIModel(\"gpt-4o\"), long_term_memory=memobase, system_message=\"You are a personal assistant.\" ) # Chat with user-specific context response1 = agent.chat(\"Tell me about my upcoming trip\", user_id=\"user123\") response2 = agent.chat(\"What meetings do I have tomorrow?\", user_id=\"user456\") . 5. Declarative Configuration . The Challenge: Many frameworks require extensive code for even simple agent configurations. MUXI’s Solution: Declarative configuration with YAML or JSON: . # agent_config.yaml name: travel_assistant description: An agent specializing in travel advice and recommendations system_message: | You are a travel assistant that specializes in providing travel advice, destination recommendations, itinerary planning, and information about tourist attractions worldwide. model: provider: openai model: gpt-4o temperature: 0.7 api_key: ${OPENAI_API_KEY} memory: buffer_size: 10 enable_long_term: true mcp_servers: - name: travel_api url: http://localhost:5003 api_key: ${TRAVEL_API_KEY} . # Load agent from configuration from muxi.core.orchestrator import Orchestrator orchestrator = Orchestrator() orchestrator.add_agent_from_config(\"agent_config.yaml\") . ",
     "url": "/muxi/intro/why-muxi/#muxis-core-advantages",
     
     "relUrl": "/intro/why-muxi/#muxis-core-advantages"
-  },"257": {
+  },"256": {
     "doc": "Why MUXI?",
     "title": "Where MUXI Excels",
     "content": "MUXI is particularly well-suited for: . | Multi-Agent Applications: Systems where specialized agents handle different domains or tasks | Real-Time AI Interfaces: Applications requiring streaming responses and immediate feedback | Multi-User Platforms: Services where each user needs personalized, private context | Extending LLM Capabilities: Projects requiring integration with external services and APIs | Rapid Prototyping: Getting from concept to working prototype with minimal boilerplate | . ",
     "url": "/muxi/intro/why-muxi/#where-muxi-excels",
     
     "relUrl": "/intro/why-muxi/#where-muxi-excels"
-  },"258": {
+  },"257": {
     "doc": "Why MUXI?",
     "title": "MUXI’s Key Capabilities",
     "content": "MUXI offers a comprehensive set of features that make it stand out: . | Automatic Text Processing: Handles text chunking, embedding generation, and vector storage automatically | Multi-Agent Orchestration: Built-in support for creating and coordinating specialized agents | Real-Time Communication: Supports WebSocket and Server-Sent Events (SSE) for real-time interactions | Multi-User Memory Management: Automatic partitioning of memory by user ID | Declarative Configuration: Define agents using YAML or JSON configuration files | Standardized External Service Integration: MCP (Model Context Protocol) for consistent service access | Automatic Memory Management: Buffer and long-term memory with automatic summarization | Multi-Modal Support: Handle images, audio, and other modalities alongside text input | Streaming Response Processing: Process token-by-token responses for real-time applications | PostgreSQL/pgvector Integration: Built-in support for industry-standard vector storage | Hybrid Deployment Options: Use as a server, CLI tool, or Python library | . ",
     "url": "/muxi/intro/why-muxi/#muxis-key-capabilities",
     
     "relUrl": "/intro/why-muxi/#muxis-key-capabilities"
-  },"259": {
+  },"258": {
     "doc": "Why MUXI?",
     "title": "When to Consider Alternatives",
     "content": "While MUXI is powerful and flexible, it might not be the best choice for: . | Simple, One-Off Scripts: For quick scripts with minimal requirements, lighter libraries might be more appropriate | Highly Specialized Use Cases: If you need very specific functionality that MUXI doesn’t address | Production-Critical Systems: As MUXI is still in active development, very critical systems might need more mature frameworks | . ",
     "url": "/muxi/intro/why-muxi/#when-to-consider-alternatives",
     
     "relUrl": "/intro/why-muxi/#when-to-consider-alternatives"
-  },"260": {
+  },"259": {
     "doc": "Why MUXI?",
     "title": "Advanced Topics",
     "content": "For a deeper look at how MUXI compares to other frameworks: . | Framework Comparisons | . ",
     "url": "/muxi/intro/why-muxi/#advanced-topics",
     
     "relUrl": "/intro/why-muxi/#advanced-topics"
-  },"261": {
+  },"260": {
     "doc": "Why MUXI?",
     "title": "What’s Next",
     "content": ". | Quick Start Guide - Get up and running with MUXI | Simple Agents - Learn how to create your first agent | Using MCP Servers - Extend your agents with external capabilities | . ",
