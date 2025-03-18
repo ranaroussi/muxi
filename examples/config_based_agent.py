@@ -1,55 +1,65 @@
 """
-Configuration-based agent example with the MUXI Framework.
+Config-based agent example with the MUXI Framework.
 
 This example demonstrates how to create agents from YAML/JSON configuration files.
 """
 
 import asyncio
+from pathlib import Path
+
 from dotenv import load_dotenv
+
 from muxi import muxi
 
-# Load environment variables (including API keys)
+
+# Load environment variables from .env file
 load_dotenv()
 
+
 async def main():
-    # Create a new MUXI instance
+    """Run the config-based agent example."""
+    print("=== Config-based Agent Example ===\n")
+
+    # Create the MUXI app
     app = muxi()
 
-    # Create an agent from a configuration file (YAML)
-    # This would be a file like:
-    # name: assistant
-    # system_message: You are a helpful AI assistant.
-    # model:
-    #   provider: openai
-    #   api_key: "${OPENAI_API_KEY}"
-    #   model: gpt-4o
-    #   temperature: 0.7
-    # memory:
-    #   buffer: 10
-    #   long_term: true
-    # tools:
-    # - enable_calculator
-    # - enable_web_search
-    await app.add_agent("assistant", "configs/assistant.yaml")
+    # Determine the correct path to the config file
+    examples_dir = Path(__file__).parent
+    config_path = examples_dir / "configs" / "assistant.yaml"
 
-    # You can also create an agent from a JSON file
-    # await app.add_agent("researcher", "configs/researcher.json")
+    print(f"Loading agent from config file: {config_path}")
 
-    # Send a message to the agent and get the response
-    response = await app.chat("Hello, who are you?")
+    # Add agent from config file
+    await app.add_agent("assistant", str(config_path))
+
+    # Get a reference to the agent for manual use
+    agent = app.get_agent("assistant")
+    print(f"Agent loaded successfully: {agent.name}")
+    print(f"MCP Servers: {list(agent.mcp_servers.keys())}")
+
+    # Chat with the agent
+    print("\n--- Conversation ---")
+
+    # Ask a general question
+    question1 = "Tell me a fun fact about AI."
+    response = await app.chat(message=question1, agent_name="assistant")
+    print(f"User: {question1}")
     print(f"Agent: {response}")
 
-    # Continue the conversation with conversation memory
-    response = await app.chat("What can you help me with?")
+    # Ask a question that might use web search
+    question2 = "What is the tallest mountain in the world?"
+    response = await app.chat(message=question2, agent_name="assistant")
+    print(f"\nUser: {question2}")
     print(f"Agent: {response}")
 
-    # Ask something that requires tool use
-    response = await app.chat("What is the square root of 144?")
+    # Ask a math question that might use the calculator
+    question3 = "What is the square root of 169?"
+    response = await app.chat(message=question3, agent_name="assistant")
+    print(f"\nUser: {question3}")
     print(f"Agent: {response}")
 
-    # Ask something that requires web search
-    response = await app.chat("What is the current weather in New York?")
-    print(f"Agent: {response}")
+    print("\n=== Example Completed ===")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
