@@ -60,7 +60,7 @@ MUXI follows a modular design where specialized components work together to enab
 │         │                │                │         │
 │         ▼                ▼                ▼         │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │    ┌───────────┐
-│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │·······│  Domain   │
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │-------│  Domain   │
 │  │    (YAML)   │  │    (JSON)   │  │    (YAML)   │  │    │ Knowledge │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │    └───────────┘
 │         ↓                ↓                ↓         │
