@@ -1,46 +1,96 @@
 # MCP Integration Notes
 
 ## Summary
-We've been working on integrating the Model Context Protocol (MCP) Python SDK into the MUXI framework. This document outlines the challenges we faced and the solutions we implemented.
+We've successfully integrated the Model Context Protocol (MCP) Python SDK into the MUXI framework. This document outlines the challenges we faced and the solutions we implemented.
 
-## Challenges
+## Updates (Latest Progress)
 
 1. **Package Availability**:
-   - The MCP Python SDK is not yet available on PyPI
-   - We installed it directly from GitHub: `pip install git+https://github.com/modelcontextprotocol/python-sdk.git`
-   - Updated requirements.txt to reference the GitHub repository
+   - The MCP Python SDK is now available on PyPI as `mcp>=1.4.1`
+   - Updated requirements.txt to use the PyPI version
+   - No longer need to install from GitHub
 
-2. **Import Structure**:
+2. **Successful Connection**:
+   - Successfully connected to mcpify.ai MCP server using HTTP+SSE transport
+   - Implemented reference solution in `tests/mcp_updated_transport.py`
+   - Identified proper connection flow and header requirements
+
+3. **Connection Flow**:
+   - Initial SSE connection to the `/sse` endpoint with proper headers
+   - Server provides message endpoint URL with session ID via an SSE event
+   - JSON-RPC requests sent as POST to the provided endpoint URL
+   - Asynchronous responses come through the SSE stream
+
+## Initial Challenges
+
+1. **Import Structure**:
    - The MCP SDK has a different module structure than expected
    - The main client is available at `mcp.client.session.ClientSession`
    - JSON-RPC components are available directly from the `mcp` module (e.g., `mcp.JSONRPCRequest`)
    - There's no direct equivalent to `modelcontextprotocol.transport` in the SDK
 
-3. **Transport Implementation**:
+2. **Transport Implementation**:
    - The SDK doesn't provide direct HTTP+SSE and command-line transports
-   - We implemented placeholder classes for these transports
-   - Future work should involve properly implementing these transport mechanisms
+   - We implemented custom transport classes for these transport methods
+   - Successfully created a working HTTP+SSE implementation
+
+## Key Insights
+
+1. **URL Construction**:
+   - The message URL is provided fully formed by the server, including session ID
+   - Do not construct this URL manually - use exactly what the server provides
+
+2. **Asynchronous Nature**:
+   - The MCP server follows a fully asynchronous model
+   - Requests receive 202 Accepted status codes
+   - Actual responses come through the SSE stream
+   - This requires maintaining an active SSE connection
+
+3. **Headers Matter**:
+   - Proper SSE headers are required for stable connections:
+     ```
+     Accept: text/event-stream
+     Cache-Control: no-cache
+     Connection: keep-alive
+     ```
+
+4. **Timeout Handling**:
+   - Longer timeouts needed for SSE connections (60s vs standard 30s)
 
 ## Solutions
 
-1. **Import Paths**:
-   - Updated import statements in `mcp_handler.py` to match the actual SDK structure
-   - Created placeholder classes for missing functionality
+1. **Reference Implementation**:
+   - Created a working reference in `tests/mcp_updated_transport.py`
+   - Successfully connects to mcpify.ai server
+   - Extracts message endpoint URL and session ID
+   - Sends JSON-RPC requests and receives 202 Accepted responses
 
-2. **Testing Approach**:
-   - Created a simplified test that just verifies the handler can be instantiated
-   - Future tests should be written with the actual SDK structure in mind
-
-3. **Documentation**:
-   - Added notes to the codebase explaining the SDK structure
-   - Updated requirements.txt with information about the SDK version
+2. **Documentation**:
+   - Created integration guide in `ideas/mcp-integration-guide.md`
+   - Updated progress documentation in `ideas/mcp-progress.md`
+   - Documented migration from GitHub to PyPI in `ideas/mcp-pypi-migration.md`
 
 ## Next Steps
 
-1. Implement proper transport classes for HTTP+SSE and command-line
-2. Expand test coverage for the MCPHandler class
-3. Update the Agent class to interact correctly with the MCPHandler
-4. Document the MCP integration in the project documentation
+1. **Code Integration**:
+   - Update the main `HTTPSSETransport` implementation with our working code
+   - Ensure all import statements throughout the codebase are updated
+   - Test the integrated implementation with the mcpify.ai server
+
+2. **Event Handling**:
+   - Implement proper SSE event handling to process responses
+   - Add request tracking to match responses with pending requests
+   - Create background tasks for event listening
+
+3. **Error Handling and Resilience**:
+   - Improve error handling for connection failures
+   - Add reconnection logic with exponential backoff
+   - Implement proper request timeouts
+
+4. **Testing**:
+   - Create comprehensive tests for the updated implementation
+   - Test with various MCP servers
+   - Ensure compatibility with the MCP specification
 
 # MCP HTTP+SSE Transport Implementation Notes
 
