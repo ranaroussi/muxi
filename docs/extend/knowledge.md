@@ -8,6 +8,7 @@ permalink: /extend/knowledge/
 
 # Domain Knowledge
 
+{: .fs-5 .fw-600 }
 This guide explains how to enhance your MUXI agents with domain knowledge, allowing them to access and utilize information from external sources when responding to user queries.
 
 ## Understanding Domain Knowledge
