@@ -41,8 +41,7 @@ MUXI has a flexible, service-oriented approach:
 │         │                │                │         │
 │         ▼                ▼                ▼         │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │    ┌───────────┐
-│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │-------│  Domain   │
-│  │    (YAML)   │  │    (JSON)   │  │    (YAML)   │  │    │ Knowledge │
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │-------│ Knowledge │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │    └───────────┘
 │         ↓                ↓                ↓         │
 │         └────────┬───────┴────────┬───────┘         │
