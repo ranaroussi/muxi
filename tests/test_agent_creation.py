@@ -38,8 +38,14 @@ model:
 memory:
   buffer: 5
   long_term: false
-tools:
-- enable_calculator
+mcp_servers:
+- name: weather_api
+  url: http://localhost:5001
+  credentials:
+  - id: weather_api_key
+    param_name: api_key
+    required: true
+    env_fallback: WEATHER_API_KEY
 """)
 
     # Finance agent (JSON)
@@ -59,8 +65,19 @@ tools:
         "buffer": 5,
         "long_term": false
     },
-    "tools": [
-        "enable_calculator"
+    "mcp_servers": [
+        {
+            "name": "stock_api",
+            "url": "http://localhost:5002",
+            "credentials": [
+                {
+                    "id": "stock_api_key",
+                    "param_name": "api_key",
+                    "required": true,
+                    "env_fallback": "STOCK_API_KEY"
+                }
+            ]
+        }
     ]
 }
 """)
@@ -119,12 +136,18 @@ def test_agent_creation():
         api_key=api_key
     )
 
+    # Create the agent
     orchestrator.create_agent(
         agent_id="weather",
         model=weather_model,
         system_message=weather_config["system_message"],
         description=weather_config["description"]
     )
+
+    # 3. Connect to MCP server (in a real scenario, this would be an async context)
+    if weather_config.get("mcp_servers"):
+        print(f"Would connect to {len(weather_config['mcp_servers'])} MCP servers")
+
     print("Weather agent created successfully!")
 
     # Create finance agent from JSON config
@@ -141,12 +164,18 @@ def test_agent_creation():
         api_key=api_key
     )
 
+    # Create the agent
     orchestrator.create_agent(
         agent_id="finance",
         model=finance_model,
         system_message=finance_config["system_message"],
         description=finance_config["description"]
     )
+
+    # 3. Connect to MCP server (in a real scenario, this would be an async context)
+    if finance_config.get("mcp_servers"):
+        print(f"Would connect to {len(finance_config['mcp_servers'])} MCP servers")
+
     print("Finance agent created successfully!")
 
     # List all agents

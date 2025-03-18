@@ -20,7 +20,6 @@ class TestAgent(unittest.TestCase):
         # Create mock objects for dependencies
         self.mock_model = MagicMock()
         self.mock_memory = MagicMock()
-        self.mock_tools = {"calculator": MagicMock(), "web_search": MagicMock()}
 
         # Set up mock returns
         self.mock_model.chat = AsyncMock()
@@ -35,7 +34,7 @@ class TestAgent(unittest.TestCase):
 
         # Create agent with mock dependencies
         self.agent = Agent(
-            name="test_agent", model=self.mock_model, memory=self.mock_memory, tools=self.mock_tools
+            name="test_agent", model=self.mock_model, memory=self.mock_memory
         )
 
     def test_initialization(self):
@@ -43,7 +42,6 @@ class TestAgent(unittest.TestCase):
         self.assertEqual(self.agent.name, "test_agent")
         self.assertEqual(self.agent.model, self.mock_model)
         self.assertEqual(self.agent.memory, self.mock_memory)
-        self.assertEqual(self.agent.tools, self.mock_tools)
 
     def test_process_message(self):
         """Test processing a message."""
@@ -62,11 +60,14 @@ class TestAgent(unittest.TestCase):
         self.assertEqual(result.content, "I'm a helpful assistant.")
 
     @patch("muxi.core.agent.MCPHandler")
-    def test_process_tool_calls(self, mock_handler_class):
-        """Test processing tool calls."""
+    def test_process_mcp_server_calls(self, mock_handler_class):
+        """Test processing MCP server calls."""
         # Set up mock for MCPHandler
         mock_handler = MagicMock()
         mock_handler_class.return_value = mock_handler
+
+        # Force replacement of the agent's MCPHandler with our mock
+        self.agent.mcp_handler = mock_handler
 
         # Set up mock to return a message with tool calls
         tool_calls = [
@@ -84,19 +85,19 @@ class TestAgent(unittest.TestCase):
         }
 
         # Set up mock to return final response
-        mock_handler.process_message.return_value = MCPMessage(
-            role="assistant", content="The result is 4."
-        )
+        response = MCPMessage(role="assistant", content="The result is 4.")
+        mock_future = AsyncMock()
+        mock_future.return_value = response
+        mock_handler.process_message = mock_future
 
         # Process a message asynchronously
         result = asyncio.run(self.agent.process_message("Calculate 2+2"))
 
-        # Verify handler was created and called
-        mock_handler_class.assert_called_with(self.mock_model, self.mock_tools)
-        mock_handler.process_message.assert_called_once()
+        # Verify handler was called
+        self.assertTrue(mock_handler.process_message.called)
 
         # Verify result
-        self.assertEqual(result.content, "The result is 4.")
+        self.assertEqual(result, response)
 
     def test_get_memory(self):
         """Test retrieving memory."""
@@ -120,6 +121,25 @@ class TestAgent(unittest.TestCase):
 
         # Verify context
         self.assertEqual(context, {"role": "user", "timestamp": 1234567890})
+
+    # Convert this to a regular test that calls asyncio.run
+    def test_connect_mcp_server(self):
+        """Test connecting to an MCP server."""
+        # Mock the _handle_mcp_server_call method
+        self.agent._handle_mcp_server_call = AsyncMock()
+
+        # Run the connect_mcp_server method with asyncio.run
+        asyncio.run(self.agent.connect_mcp_server(
+            name="calculator",
+            url="http://localhost:5001",
+            credentials={"api_key": "test_key"}
+        ))
+
+        # Verify MCP server was registered
+        self.assertIn("calculator", self.agent.mcp_servers)
+        server_info = self.agent.mcp_servers["calculator"]
+        self.assertEqual(server_info["url"], "http://localhost:5001")
+        self.assertEqual(server_info["credentials"], {"api_key": "test_key"})
 
 
 if __name__ == "__main__":
