@@ -99,3 +99,59 @@
 - Optimize container size and performance
 - Support horizontal scaling
 - Implement resource constraints
+
+## Transport Implementation
+- Implement the Transport Factory pattern for managing different transport types
+- Support HTTP+SSE transport for web-based MCP servers
+- Support Command-line transport for local executable MCP servers
+- Design with forward compatibility for upcoming Streamable HTTP transport
+- Implement proper connection lifecycle management (connect, send, receive, disconnect)
+- Handle transport-specific error conditions
+- Abstract transport details from higher-level code
+- Provide consistent API across different transport types
+- Test each transport implementation individually
+- Document transport-specific requirements and limitations
+- Support secure communication for each transport type
+- Implement proper resource cleanup for each transport
+
+## Reconnection and Resilience
+- Implement reconnection with exponential backoff
+- Add jitter to backoff calculations to prevent thundering herd
+- Track and expose reconnection statistics
+- Implement configurable retry policies
+- Handle temporary disconnections gracefully
+- Preserve state across reconnections when possible
+- Implement proper cancellation support for in-progress operations
+- Log detailed diagnostic information for connection failures
+- Implement circuit breakers for persistent failures
+- Support graceful degradation when servers are unavailable
+- Provide clear error messages for connection issues
+- Test reconnection behavior thoroughly
+
+## SDK Integration
+- Use the official MCP Python SDK (version >=1.4.1)
+- Follow SDK best practices for message handling
+- Properly handle SDK version compatibility
+- Contribute improvements back to the SDK when appropriate
+- Document SDK integration requirements
+- Implement proper error handling for SDK-related issues
+- Test with different SDK versions
+- Keep SDK dependencies updated
+- Handle breaking changes in SDK appropriately
+- Document any extensions or custom implementations
+- Properly initialize SDK components
+- Handle SDK lifecycle appropriately
+
+## Performance Optimization
+- Profile and optimize the transport layer
+- Implement connection pooling for HTTP transport
+- Optimize message serialization and deserialization
+- Minimize latency overhead
+- Handle streaming responses efficiently
+- Optimize resource usage
+- Implement appropriate caching mechanisms
+- Monitor and log performance metrics
+- Implement performance testing
+- Document performance characteristics
+- Optimize for different deployment scenarios
+- Balance reliability and performance
