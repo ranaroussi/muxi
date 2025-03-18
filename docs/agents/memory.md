@@ -1,14 +1,14 @@
 ---
 layout: default
-title: Adding Memory
+title: Context Memory
 parent: Building Agents
-nav_order: 3
+nav_order: 4
 permalink: /agents/memory/
 ---
 
-# Adding Memory
+# Context Memory
 
-This guide explains how to enhance your MUXI agents with memory capabilities, allowing them to remember previous interactions and store important information.
+This guide explains how to enhance your MUXI agents with user-level memory capabilities, allowing them to remember previous interactions with users, maintain chat context, and store important information across conversations.
 
 ## Memory Types in MUXI
 
