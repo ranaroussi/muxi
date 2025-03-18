@@ -2,8 +2,8 @@
 layout: default
 title: Agent Configuration
 parent: Building Agents
-nav_order: 2
-permalink: /agents/configuration/
+nav_order: 3
+permalink: /agents/configuration
 ---
 
 # Agent Configuration

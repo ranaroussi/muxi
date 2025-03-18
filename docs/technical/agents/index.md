@@ -4,7 +4,7 @@ title: Agents & Models
 parent: Technical Deep Dives
 has_children: true
 nav_order: 1
-permalink: /technical/agents/
+permalink: /technical/agents
 ---
 
 # Agents & Models

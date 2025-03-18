@@ -3,7 +3,7 @@ layout: default
 title: Installation
 parent: Introduction
 nav_order: 5
-permalink: /intro/installation/
+permalink: /intro/installation
 ---
 
 # Installation

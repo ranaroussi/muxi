@@ -2,7 +2,7 @@
 layout: default
 title: Release Notes
 nav_order: 8
-permalink: /release-notes/
+permalink: /release-notes
 ---
 
 # Release Notes

@@ -2,8 +2,8 @@
 layout: default
 title: Multi-Agent Systems
 parent: Building Agents
-nav_order: 2
-permalink: /agents/multi-agent/
+nav_order: 4
+permalink: /agents/multi-agent
 ---
 
 # Multi-Agent Systems

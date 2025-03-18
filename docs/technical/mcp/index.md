@@ -4,7 +4,7 @@ title: MCP System
 parent: Technical Deep Dives
 has_children: true
 nav_order: 3
-permalink: /technical/mcp/
+permalink: /technical/mcp
 ---
 
 # MCP System

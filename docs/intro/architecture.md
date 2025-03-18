@@ -3,7 +3,7 @@ layout: default
 title: Architecture
 parent: Introduction
 nav_order: 4
-permalink: /intro/architecture/
+permalink: /intro/architecture
 ---
 
 # Architecture

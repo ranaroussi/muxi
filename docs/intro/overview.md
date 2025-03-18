@@ -3,7 +3,7 @@ layout: default
 title: Overview & Key Concepts
 parent: Introduction
 nav_order: 1
-permalink: /intro/overview/
+permalink: /intro/overview
 ---
 
 # Overview & Key Concepts

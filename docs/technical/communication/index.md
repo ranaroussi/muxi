@@ -4,7 +4,7 @@ title: Communication
 parent: Technical Deep Dives
 has_children: true
 nav_order: 4
-permalink: /technical/communication/
+permalink: /technical/communication
 ---
 
 # Communication

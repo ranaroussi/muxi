@@ -3,7 +3,7 @@ layout: default
 title: Examples Library
 parent: Reference
 nav_order: 4
-permalink: /reference/examples/
+permalink: /reference/examples
 ---
 
 # Examples Library

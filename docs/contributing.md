@@ -4,7 +4,7 @@ title: Contributing to MUXI
 parent: Resources
 has_children: false
 nav_order: 4
-permalink: /contributing/
+permalink: /contributing
 ---
 # Contributing to the MUXI Framework
 

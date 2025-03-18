@@ -2,8 +2,8 @@
 layout: default
 title: Context Memory
 parent: Building Agents
-nav_order: 4
-permalink: /agents/memory/
+nav_order: 2
+permalink: /agents/memory
 ---
 
 # Context Memory

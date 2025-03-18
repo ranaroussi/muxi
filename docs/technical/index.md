@@ -3,7 +3,7 @@ layout: default
 title: Technical Deep Dives
 nav_order: 6
 has_children: true
-permalink: /technical/
+permalink: /technical
 ---
 
 # Technical Deep Dives

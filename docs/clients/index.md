@@ -3,7 +3,7 @@ layout: default
 title: Interfaces & Clients
 nav_order: 5
 has_children: true
-permalink: /clients/
+permalink: /clients
 ---
 
 # Interfaces & Clients

@@ -3,7 +3,7 @@ layout: default
 title: Extending Capabilities
 nav_order: 4
 has_children: true
-permalink: /extend/
+permalink: /extend
 ---
 
 # Extending Capabilities
@@ -20,7 +20,7 @@ While basic agents are powerful on their own, MUXI really shines when you extend
 ## What's In This Section
 
 - [Using MCP Servers](../extend/mcp) - Connect your agents to existing MCP servers
-- [Domain Knowledge Integration](../extend/domain-knowledge) - Add specialized knowledge to your agents
+- [Domain Knowledge Integration](../extend/knowledge) - Add specialized knowledge to your agents
 - [Multi-Modal Support](../extend/multi-modal) - Work with images, audio, and other non-text formats
 
 ## Prerequisites

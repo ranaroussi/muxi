@@ -3,7 +3,7 @@ layout: default
 title: Why MUXI?
 parent: Introduction
 nav_order: 2
-permalink: /intro/why-muxi/
+permalink: /intro/why-muxi
 ---
 
 # Why MUXI?

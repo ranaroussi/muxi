@@ -3,7 +3,7 @@ layout: default
 title: Framework Comparisons
 parent: Reference
 nav_order: 5
-permalink: /reference/comparisons/
+permalink: /reference/comparisons
 ---
 
 # Framework Comparisons

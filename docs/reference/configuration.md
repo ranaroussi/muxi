@@ -3,7 +3,7 @@ layout: default
 title: Configuration Options
 parent: Reference
 nav_order: 2
-permalink: /reference/configuration/
+permalink: /reference/configuration
 ---
 
 # Configuration Options

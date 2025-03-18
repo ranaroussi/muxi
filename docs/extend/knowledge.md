@@ -3,7 +3,7 @@ layout: default
 title: Domain Knowledge
 parent: Extending Capabilities
 nav_order: 3
-permalink: /extend/knowledge/
+permalink: /extend/knowledge
 ---
 
 # Domain Knowledge

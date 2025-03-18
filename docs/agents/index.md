@@ -3,7 +3,7 @@ layout: default
 title: Building Agents
 has_children: true
 nav_order: 3
-permalink: /agents/
+permalink: /agents
 ---
 
 # Building Agents with MUXI

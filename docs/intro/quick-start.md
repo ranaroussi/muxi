@@ -3,7 +3,7 @@ layout: default
 title: Quick Start Guide
 parent: Introduction
 nav_order: 3
-permalink: /intro/quick-start/
+permalink: /intro/quick-start
 ---
 
 # Quick Start Guide

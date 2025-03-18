@@ -3,7 +3,7 @@ layout: default
 title: Development
 nav_order: 7
 has_children: true
-permalink: /development/
+permalink: /development
 ---
 
 # Development

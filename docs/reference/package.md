@@ -3,7 +3,7 @@ layout: default
 title: Package Structure
 parent: Reference
 nav_order: 3
-permalink: /reference/package/
+permalink: /reference/package
 ---
 
 # Package Structure

@@ -4,7 +4,7 @@ title: Buffer Memory
 parent: Memory System
 grand_parent: Technical Deep Dives
 nav_order: 1
-permalink: /technical/memory/buffer/
+permalink: /technical/memory/buffer
 ---
 
 # Buffer Memory

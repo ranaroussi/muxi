@@ -4,7 +4,7 @@ title: Memory System
 parent: Technical Deep Dives
 has_children: true
 nav_order: 2
-permalink: /technical/memory/
+permalink: /technical/memory
 ---
 
 # Memory System

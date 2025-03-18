@@ -3,7 +3,7 @@ layout: default
 title: Simple Agent
 parent: Building Agents
 nav_order: 1
-permalink: /agents/simple/
+permalink: /agents/simple
 ---
 
 # Creating a Simple Agent

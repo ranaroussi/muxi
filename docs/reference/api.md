@@ -3,7 +3,7 @@ layout: default
 title: API Documentation
 parent: Reference
 nav_order: 1
-permalink: /reference/api/
+permalink: /reference/api
 ---
 
 # API Documentation
