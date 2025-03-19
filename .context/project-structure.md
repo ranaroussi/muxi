@@ -2,11 +2,19 @@
 
 ```
 muxi-framework/
+├── .context/                  # Project context and continuity documentation
+│   ├── project-brief.md       # Foundation document with core project goals and requirements
+│   ├── product-context.md     # Why the project exists and problems it solves
+│   ├── system-patterns.md     # System architecture and design patterns
+│   ├── tech-context.md        # Technologies used and development setup
+│   ├── active-context.md      # Current work focus and next steps
+│   ├── progress.md            # What works and what's left to build
+│   ├── project-structure.md   # This file - project structure documentation
+│   └── scratchpad/            # Work-in-progress documentation and notes
 ├── .cursor/                   # Cursor editor configuration files
 ├── .github/                   # GitHub configuration (actions, templates, etc.)
 ├── .git/                      # Git repository data
 ├── .pytest_cache/             # Pytest cache directory
-├── brainstorm/                # Development ideas and brainstorming documents
 ├── docs/                      # Documentation files
 │   ├── _includes/             # Jekyll includes for documentation site
 │   ├── _site/                 # Generated documentation site
@@ -16,14 +24,6 @@ muxi-framework/
 ├── examples/                  # Example code for using the framework
 │   ├── configs/               # Example configuration files
 │   └── [various .py files]    # Example Python scripts
-├── memory-bank/               # Memory Bank for project context and continuity
-│   ├── project-brief.md       # Foundation document with core project goals and requirements
-│   ├── product-context.md     # Why the project exists and problems it solves
-│   ├── system-patterns.md     # System architecture and design patterns
-│   ├── tech-context.md        # Technologies used and development setup
-│   ├── active-context.md      # Current work focus and next steps
-│   ├── progress.md            # What works and what's left to build
-│   └── scratchpad/            # Work-in-progress documentation and notes
 ├── migrations/                # Database migration scripts
 ├── packages/                  # Modular packages structure
 │   ├── cli/                   # Command-line interface package
@@ -53,7 +53,6 @@ muxi-framework/
 ├── install_dev.sh             # Script to install packages in development mode
 ├── LICENSE.txt                # License information
 ├── NEXT_STEPS.md              # Development tasks and implementation checklist
-├── PROJECT_STRUCTURE.md       # This file
 ├── pyproject.toml             # Python project configuration
 ├── pytest.ini                 # Pytest configuration
 ├── README.md                  # Project overview and documentation
@@ -79,14 +78,15 @@ muxi-framework/
 - `LICENSE.txt` - Project license information.
 - `NEXT_STEPS.md` - Detailed task tracker for developers with completed work and todo items.
 
-### Memory Bank Files
-- `project-brief.md` - Foundation document defining core requirements and project scope.
-- `product-context.md` - Explains why the project exists and what problems it solves.
-- `system-patterns.md` - Documents system architecture, design patterns, and component relationships.
-- `tech-context.md` - Details technologies used, development setup, and technical constraints.
-- `active-context.md` - Tracks current work focus, recent changes, and next steps.
-- `progress.md` - Documents what works, what's left to build, and current status.
-- `scratchpad/api.md` - API specification for REST endpoints and WebSocket communication.
+### Context Files
+- `.context/project-brief.md` - Foundation document defining core requirements and project scope.
+- `.context/product-context.md` - Explains why the project exists and what problems it solves.
+- `.context/system-patterns.md` - Documents system architecture, design patterns, and component relationships.
+- `.context/tech-context.md` - Details technologies used, development setup, and technical constraints.
+- `.context/active-context.md` - Tracks current work focus, recent changes, and next steps.
+- `.context/progress.md` - Documents what works, what's left to build, and current status.
+- `.context/project-structure.md` - This file - documents the project structure.
+- `.context/scratchpad/api.md` - API specification for REST endpoints and WebSocket communication.
 
 ### Utility Scripts
 - `env_check.py` - Validates environment variables and their configuration.
@@ -102,6 +102,14 @@ muxi-framework/
 - `.git/` - Git repository data.
 - `.pytest_cache/` - Cache directory for pytest.
 
+### Project Context
+- `.context/` - Structured documentation for project continuity and context:
+  - Core context files in a clear hierarchy (from project-brief to progress)
+  - Project structure documentation (this file)
+  - Scratchpad for works-in-progress like API specifications
+  - Serves as the comprehensive knowledge repository for the project
+  - Maintains continuity and shared understanding across development
+
 ### Documentation
 - `docs/` - Contains all project documentation in Markdown format, including:
   - Architecture documentation
@@ -110,13 +118,6 @@ muxi-framework/
   - Configuration guides
   - Development guidelines
   - Jekyll configuration for documentation site
-
-### Memory Bank
-- `memory-bank/` - Structured documentation for project continuity and context:
-  - Core context files in a clear hierarchy (from project-brief to progress)
-  - Scratchpad for works-in-progress like API specifications
-  - Serves as the comprehensive knowledge repository for the project
-  - Maintains continuity and shared understanding across development
 
 ### Code and Examples
 - `examples/` - Sample code demonstrating how to use the framework:
@@ -146,7 +147,6 @@ muxi-framework/
     - Provides a unified interface to all components
 
 ### Supporting Directories
-- `brainstorm/` - Contains early-stage ideas and development notes.
 - `migrations/` - Database schema migration scripts.
 - `scripts/` - Utility scripts for project management and automation.
 - `tests/` - Test files and directories for unit and integration tests.
