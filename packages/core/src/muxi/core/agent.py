@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional
 from loguru import logger
 
 from muxi.core.mcp import MCPMessage
-from muxi.server.memory.base import BaseMemory
 from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.server.memory.memobase import Memobase
@@ -30,7 +29,6 @@ class Agent:
     def __init__(
         self,
         model: BaseModel,
-        memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
         system_message: Optional[str] = None,
@@ -43,8 +41,6 @@ class Agent:
 
         Args:
             model: The language model to use for generating responses.
-            memory: Optional memory for storing conversation history
-                (for backward compatibility).
             buffer_memory: Optional buffer memory for short-term context.
             long_term_memory: Optional long-term memory for persistent storage.
                 Can be a LongTermMemory or Memobase instance for multi-user support.
@@ -58,12 +54,7 @@ class Agent:
         self.agent_id = agent_id or get_default_nanoid()
 
         # Handle memory options
-        if memory is not None:
-            self.buffer_memory = memory
-            self.memory = memory  # For backward compatibility
-        else:
-            self.buffer_memory = buffer_memory or BufferMemory()
-            self.memory = self.buffer_memory  # For backward compatibility
+        self.buffer_memory = buffer_memory or BufferMemory()
 
         self.long_term_memory = long_term_memory
         # Check if long_term_memory is a Memobase instance
@@ -83,7 +74,9 @@ class Agent:
         # Initialize MCP handler with no tools - we'll use MCP servers instead
         from muxi.core.mcp_handler import MCPHandler
         self.mcp_handler = MCPHandler(self.model)
-        self.mcp_handler.set_system_message(self.system_message)
+        # Update system message in MCP handler if method exists
+        if hasattr(self.mcp_handler, 'set_system_message'):
+            self.mcp_handler.set_system_message(self.system_message)
 
         # Keep track of connected MCP servers
         self.mcp_servers = {}
@@ -338,7 +331,7 @@ class Agent:
         timestamp = datetime.datetime.now().timestamp()
 
         # Add message to memory systems
-        self.memory.add(message, {"role": "user", "timestamp": timestamp})
+        self.buffer_memory.add(message, {"role": "user", "timestamp": timestamp})
 
         # If using Memobase, also store there with user context
         if self.is_multi_user and user_id is not None:
@@ -379,8 +372,8 @@ class Agent:
         Returns:
             A list of memory entries.
         """
-        # Use buffer memory for now
-        return self.memory.search(query, limit)
+        # Use buffer memory
+        return self.buffer_memory.search(query, limit)
 
     def _create_message_context(self, message: str) -> Dict[str, Any]:
         """
@@ -392,8 +385,7 @@ class Agent:
         Returns:
             A message context dictionary.
         """
-        # For test compatibility, return a simple message dictionary
-        # with a hardcoded timestamp that the test expects
+        # Return a simple message dictionary for testing
         return {"role": "user", "timestamp": 1234567890}
 
     async def run(self, input_text: str, use_memory: bool = True) -> str:

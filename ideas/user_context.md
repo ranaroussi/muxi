@@ -8,7 +8,7 @@ Currently, the MUXI Framework uses the term "user domain knowledge" to refer to 
 
 1. Clearly distinguish between agent knowledge and user-specific information
 2. Maintain consistent terminology across all code, APIs, and documentation
-3. Ensure backward compatibility during transition
+3. Remove all references to the old terminology
 4. Update all relevant files: Python code, documentation, examples, and tests
 
 ## Implementation Plan
@@ -42,7 +42,6 @@ Currently, the MUXI Framework uses the term "user domain knowledge" to refer to 
 
 2. **Request/Response Structures**
    - Update JSON field names in API schemas to use "context_memory" terminology
-   - Maintain backward compatibility with deprecated endpoint support
 
 ### Phase 3: Documentation Updates
 
@@ -68,10 +67,6 @@ Currently, the MUXI Framework uses the term "user domain knowledge" to refer to 
 
 2. **Integration Tests**
    - Ensure API tests are updated for new endpoints
-   - Verify backward compatibility
-
-## Backward Compatibility Strategy IS NOT RELEVANT
-
 
 ## Files to Update
 
@@ -98,7 +93,7 @@ Currently, the MUXI Framework uses the term "user domain knowledge" to refer to 
 
 1. **Planning & Preparation**: 1 day
    - Create detailed inventory of all references
-   - Design backward compatibility approach
+   - Design migration approach
 
 2. **Implementation**: 2-3 days
    - Code changes
@@ -107,7 +102,6 @@ Currently, the MUXI Framework uses the term "user domain knowledge" to refer to 
 
 3. **Testing**: 1-2 days
    - Unit and integration testing
-   - Verify backward compatibility
 
 4. **Release**: 1 day
    - Update changelog

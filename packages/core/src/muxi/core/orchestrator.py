@@ -13,7 +13,6 @@ from loguru import logger
 from muxi.server.config import config
 from muxi.core.agent import Agent
 from muxi.core.mcp import MCPMessage
-from muxi.server.memory.base import BaseMemory
 from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.models.base import BaseModel
@@ -85,7 +84,6 @@ class Orchestrator:
         self,
         agent_id: str,
         model: BaseModel,
-        memory: Optional[BaseMemory] = None,
         buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[LongTermMemory] = None,
         system_message: Optional[str] = None,
@@ -98,8 +96,6 @@ class Orchestrator:
         Args:
             agent_id: Unique identifier for the agent.
             model: The language model to use for the agent.
-            memory: Optional memory for storing conversation history
-                (for backward compatibility).
             buffer_memory: Optional buffer memory for short-term context.
             long_term_memory: Optional long-term memory for persistent storage.
                 Can be a LongTermMemory or Memobase instance for multi-user support.

@@ -210,8 +210,7 @@ class Muxi:
                     # Create long-term memory with database connection
                     long_term_memory = LongTermMemory(connection_string=connection_string)
 
-                    # Always wrap with Memobase for multi-user support
-                    # (will use user_id=0 when none provided for backwards compatibility)
+                    # Wrap with Memobase for multi-user support
                     long_term_memory = Memobase(long_term_memory=long_term_memory)
                 except Exception as e:
                     # Log the error but continue without long-term memory
