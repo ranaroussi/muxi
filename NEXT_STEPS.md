@@ -63,6 +63,7 @@ Core components of the muxi framework now implemented:
     - [x] Resolved deprecation warnings for SQLAlchemy and FastAPI
     - [x] Standardized line length configuration across linting tools
     - [x] Improved VS Code integration with consistent formatting rules
+    - [x] Fixed all test warnings and errors
 12. **Developer Tools**:
     - [x] MCP Server Generator with interactive CLI wizard
     - [x] Template-based code generation system
@@ -78,19 +79,52 @@ Core components of the muxi framework now implemented:
 
 Things to do next to enhance the framework:
 
-### 1. User Interfaces
+### 1. REST API Implementation (High Priority)
 
-- [ ] CLI interface
-- [ ] Web interface
-- [ ] API server
-- [ ] WebSocket support for real-time communication
-  - [ ] Message type standardization
-  - [ ] Proper MCP message serialization
-  - [ ] Shared orchestrator instance
-  - [ ] Connection lifecycle management
-  - [ ] Error handling and recovery
+Based on the api.md specifications, implement the full REST API for MUXI:
 
-### 2. LLM Providers
+- [ ] Implement standard REST API endpoints according to api.md spec
+  - [ ] Agent management endpoints (GET/POST/PATCH/DELETE /agents)
+  - [ ] Conversation management endpoints (POST /agents/{agent_id}/chat)
+  - [ ] Memory operations endpoints (GET/DELETE /agents/{agent_id}/memory)
+  - [ ] Context memory CRUD operations
+  - [ ] MCP server management endpoints
+  - [ ] Knowledge management endpoints
+  - [ ] System information endpoints
+- [ ] Implement authentication with API keys
+  - [ ] Add API key generation mechanism
+  - [ ] Implement bearer token authentication
+  - [ ] Add support for IP-based restrictions
+- [ ] Add streaming support for chat endpoints with SSE
+- [ ] Implement proper error handling with standardized error format
+- [ ] Add API versioning support
+- [ ] Implement rate limiting and throttling
+- [ ] Create API documentation using OpenAPI/Swagger
+
+### 2. WebSocket API Implementation
+
+Building on the api.md specifications, enhance the WebSocket API:
+
+- [ ] Implement WebSocket protocol for real-time communication
+- [ ] Add support for multi-modal messages (text, images, audio)
+- [ ] Implement proper error handling and recovery
+- [ ] Add reconnection logic with exponential backoff
+- [ ] Support for attachments as specified in api.md
+
+### 3. User Interfaces
+
+- [ ] Enhance CLI interface
+  - [ ] Add support for all API operations described in api.md
+  - [ ] Improve user experience with better formatting and colors
+- [ ] Develop web interface
+  - [ ] Create responsive UI for mobile and desktop
+  - [ ] Implement real-time updates using WebSocket
+  - [ ] Add support for multi-modal interactions
+- [ ] Improve API server based on api.md specifications
+  - [ ] Implement all endpoints described in the spec
+  - [ ] Add comprehensive test coverage
+
+### 4. LLM Providers
 
 - [x] Implement OpenAI LLM provider
 - [ ] Implement Anthropic LLM provider
@@ -99,41 +133,20 @@ Things to do next to enhance the framework:
 - [ ] Add support for local models (e.g., Llama, Mistral, DeepSeek)
 - [ ] Create a model router for fallback and cost optimization
 
-### 3. Testing
+### 5. Testing and Documentation
 
-- [ ] Unit tests for all components
-- [ ] Integration tests
-- [ ] Performance benchmarks
-- [ ] Test different LLM providers
-- [ ] Run security scans with Bandit to identify potential vulnerabilities
-- [ ] Increase test coverage for untested parts of the codebase
-
-### 4. Documentation
-
+- [ ] Unit tests for all new API endpoints
+- [ ] Integration tests for API and WebSocket endpoints
+- [ ] Performance benchmarks for API endpoints
 - [ ] Complete CLI documentation
-- [ ] Expand API documentation with practical examples
+- [ ] Expand API documentation beyond api.md with practical examples
 - [ ] User guides for advanced use cases
-- [ ] Example projects
+- [ ] Example projects showcasing API usage
 - [ ] Generate API documentation with Sphinx
-- [ ] Create more usage examples for common agent scenarios
-- [x] Configuration guide
-- [x] Domain knowledge documentation
-
-### 5. Advanced Features
-
-- [ ] Multi-agent collaboration: Enable agents to work together
-- [ ] Planning and reasoning: Implement planning capabilities
-- [ ] Continuous learning: Update agent knowledge over time
-- [ ] Evaluation framework: Measure agent performance
-- [ ] Security enhancements: Implement sandboxing and permissions
-- [ ] User feedback integration: Learn from user interactions
-- [ ] Profile the code to identify performance bottlenecks
-- [ ] Optimize memory usage in high-traffic scenarios
-- [x] Add agent-level knowledge base: Enable agents to have specialized RAG capabilities
 
 ### 6. Multi-Modal Capabilities
 
-Transform agents into omni agents capable of handling various media types:
+Transform agents into omni agents capable of handling various media types as specified in api.md WebSocket section:
 
 #### Image Processing
 - [ ] Extend MCPMessage to support image attachments
@@ -162,38 +175,12 @@ Transform agents into omni agents capable of handling various media types:
 - [ ] Streaming audio capabilities
   - [ ] Design WebSocket protocol for audio streaming
   - [ ] Implement real-time audio processing
-  - [ ] Create buffering mechanisms for smooth playback
-  - [ ] Develop audio session management
 
 #### Document Processing
 - [ ] PDF processing and text extraction
 - [ ] Support for Office documents (Word, Excel, etc.)
 - [ ] OCR for scanned documents
 - [ ] Document summarization tools
-- [ ] Semantic parsing of document structure
-
-#### Video Support (Long-term)
-- [ ] Video file processing
-- [ ] Frame extraction and analysis
-- [ ] Video content understanding
-- [ ] Streaming video protocol
-  - [ ] WebRTC integration
-  - [ ] Video compression and optimization
-  - [ ] Bandwidth management
-
-#### Media Storage System
-- [ ] Design efficient storage architecture for media files
-- [ ] Implement caching for frequently accessed media
-- [ ] Support cloud storage options (S3, GCS, etc.)
-- [ ] Create media reference system for conversations
-- [ ] Develop cleanup policies for temporary media
-
-#### Unified Media API
-- [ ] Standardize media handling across the framework
-- [ ] Create consistent interfaces for all media types
-- [ ] Design streaming protocols for real-time media
-- [ ] Implement media type detection and handling
-- [ ] Develop fallback mechanisms for unsupported media
 
 ### 7. Deployment
 
@@ -214,25 +201,22 @@ Transform agents into omni agents capable of handling various media types:
 - [ ] Benchmarking WebSocket message throughput
 - [ ] Connection pooling for database access
 - [ ] Caching strategies for frequent requests
-- [ ] Type checking with MyPy to catch type-related errors at development time
-- [ ] Execution log system
+- [ ] Implement the execution log system as described in api.md
   - [ ] Detailed logging of agent actions and decisions
   - [ ] MCP server call tracking with inputs and outputs
   - [ ] Performance metrics collection
   - [ ] Log visualization in web dashboard
-  - [ ] Log filtering and search capabilities
 
-### 9. Multi-User Support
+### 9. Security Enhancements
 
-- [x] Implement Memobase for user-specific memory partitioning
-- [x] Add user_id parameter to API endpoints
-- [x] Update WebSocket handler for multi-user support
-- [x] Add memory clearing for specific users
-- [x] Comprehensive test coverage for multi-user features
-- [x] Implement domain knowledge for user-specific structured information
-- [ ] User authentication and authorization system
-- [ ] User preference management
-- [ ] User activity logging and analytics
+Based on api.md security considerations:
+- [ ] Ensure all API endpoints use HTTPS in production
+- [ ] Implement secure API key storage and rotation
+- [ ] Add comprehensive rate limiting to prevent abuse
+- [ ] Implement request validation to prevent injection attacks
+- [ ] Add input sanitization to prevent XSS
+- [ ] Implement proper security logging for auditing
+- [ ] Add IP-based restrictions for sensitive operations
 
 ### 10. Package Distribution
 
@@ -242,83 +226,28 @@ Transform agents into omni agents capable of handling various media types:
 - [x] Package documentation
 - [ ] Installation guides
 
-### 11. Development Workflow
+## Implementation Roadmap
 
-- [ ] Set up pre-commit hooks to automatically run linters/formatters before committing
-- [ ] Implement comprehensive code review guidelines
-- [ ] Create contribution templates
-- [ ] Set up automated release pipeline
-- [x] Automated test environment setup to handle API key loading
+Based on api.md roadmap and current progress:
 
-### 12. Architecture Evolution
+### Phase 1: Core API (v0.3.0) - In Progress
+- [x] Authentication system
+- [x] Agent management endpoints (basic)
+- [x] Basic conversation endpoints
+- [x] Memory search and management
+- [ ] Complete API as outlined in api.md
 
-The service-oriented architecture described in ARCHITECTURE_EVOLUTION.md:
+### Phase 2: Advanced Features (v0.4.0)
+- [ ] Complete MCP server management endpoints
+- [ ] Knowledge management endpoints
+- [ ] WebSocket support for real-time communication
+- [ ] Streaming responses
 
-#### Core Architecture Refactoring
-- [x] Separate local mode from server mode
-- [x] Create unified server component
-- [x] Ensure programmatic API remains backward compatible
-- [x] Implement flexible API key authentication
-  - [x] Support auto-generated keys with one-time display
-  - [x] Allow environment variable configuration
-  - [x] Add explicit auth configuration options
-- [x] Implement client-side connector for remote servers
-- [x] Create connection management utilities
-- [x] Update facade to handle local and remote operation
-- [x] Ensure connection state persistence
-
-#### Communication Protocol
-- [x] Implement standard HTTP for all API requests
-- [x] Add SSE (Server-Sent Events) support for streaming responses
-  - [x] Implement auto-closing SSE connections when responses complete
-  - [x] Add fallback for unsupported clients
-- [x] Enable WebSocket support for Omni capabilities
-  - [x] Create WebSocket session management API (open_socket/close)
-  - [x] Support multi-modal streaming over WebSockets
-  - [x] Implement binary data handling for audio/video
-
-#### MCP Server Integration
-- [x] Refactor MCP handler to use SDK-based approach
-- [x] Implement transport factory for different transport types
-- [x] Support HTTP+SSE transport with proper reconnection
-- [x] Support Command-line transport for local servers
-- [x] Implement cancellation support for MCP operations
-- [x] Improve error handling and diagnostics
-- [x] Add comprehensive logging
-- [ ] Design with forward compatibility for upcoming Streamable HTTP transport
-
-#### Packaging Strategy
-- [x] Structure the codebase for modular packaging:
-  - [x] muxi-core: Core functionality and shared components
-  - [x] muxi-server: Server implementation
-  - [x] muxi-cli: Command-line interface
-  - [x] muxi-web: Web application
-- [x] Setup installation options:
-  - [x] Full installation (all components except web)
-  - [x] Minimal CLI for working with remote servers only
-  - [x] Standalone web app for connecting to remote servers
-- [x] Create setup.py files with appropriate dependencies
-- [ ] Setup build pipeline for each package
-
-#### MCP Server Unification
-- [x] Refactor tool system to be MCP server based
-- [x] Create adapters for local Python implementations
-- [x] Update tool registry to MCP server registry
-- [ ] Implement service discovery
-- [x] Extend YAML/JSON schemas for new architecture
-- [x] Create migration utilities for existing configurations
-- [ ] Add utilities for spinning up MCP servers
-
-#### Client Applications
-- [x] Update CLI to support server connections
-- [x] Add commands for managing remote servers
-- [x] Implement connection profiles
-- [ ] Convert web UI to standalone SPA
-- [ ] Add server connection screen
-- [ ] Implement connection state management
-- [ ] Create settings for managing multiple servers
-- [x] Update Python SDK for remote operation
-- [ ] Create client libraries for other languages
+### Phase 3: Scaling & Monitoring (v0.5.0)
+- [ ] System status and monitoring
+- [ ] API usage statistics
+- [ ] Rate limiting and quotas
+- [ ] Multi-modal content support
 
 ## Contribution Guidelines
 
@@ -330,17 +259,7 @@ Guidelines for contributing to the framework:
 4. **Pull Requests**: Create a pull request with a clear description of changes
 5. **Issues**: Use GitHub issues for bug reports and feature requests
 
-## Developer Tools
-
-- [ ] Streamline plugin development
-- [ ] Add more diagnostic tools
-- [x] Create MCP Server Generator Tool
-  - [x] Interactive CLI wizard for creating MCP servers
-  - [x] Template-based code generation
-  - [ ] Built-in testing utilities
-  - [ ] Documentation generator
-
-## End-to-End Scenarios
+## Example Scenarios
 
 ### Simple Agent with Configuration Files
 
@@ -449,7 +368,27 @@ This scenario demonstrates a complete workflow from installation to running an a
    python app.py
    ```
 
-This approach significantly reduces the amount of code needed while providing powerful configuration options through YAML or JSON files.
+### RESTful API Server
+
+According to the api.md specification, starting a MUXI API server:
+
+```python
+from muxi import muxi
+
+app = muxi()
+
+# Load agents from configurations
+app.add_agent("assistant", "configs/assistant.yaml")
+app.add_agent("weather_expert", "configs/weather_agent.yaml")
+app.add_agent("finance_expert", "configs/finance_agent.yaml")
+
+# Start the server with authentication
+app.run_server(
+    port=5050,
+    api_key=True,  # Auto-generate an API key and display it once
+    # Or provide a specific key: api_key="sk_muxi_your_custom_key"
+)
+```
 
 ### Client-Server Connection
 This scenario demonstrates connecting to a remote MUXI server:
