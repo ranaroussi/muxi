@@ -1,7 +1,9 @@
 
 name: weather_assistant
-description: "Specialized in providing weather forecasts and meteorological information."
-system_message: You are a weather assistant that provides forecasts.
+description: "Specialized in providing weather forecasts, current weather conditions,
+  and meteorological information for locations worldwide."
+system_message: You are a weather assistant. You provide accurate information
+  about weather conditions and forecasts.
 model:
   provider: openai
   api_key: "${OPENAI_API_KEY}"
@@ -10,11 +12,5 @@ model:
 memory:
   buffer: 5
   long_term: false
-mcp_servers:
-- name: weather_api
-  url: http://localhost:5001
-  credentials:
-  - id: weather_api_key
-    param_name: api_key
-    required: true
-    env_fallback: WEATHER_API_KEY
+tools:
+- enable_calculator

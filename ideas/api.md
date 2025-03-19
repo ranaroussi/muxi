@@ -550,14 +550,14 @@ DELETE /agents/{agent_id}/memory?user_id=user123
 #### Add Context Memory for User
 
 ```http
-POST /users/{user_id}/context
+POST /users/{user_id}/context_memory
 ```
 
 **Request Body**:
 
 ```json
 {
-  "context": {
+  "knowledge": {
     "name": "John Smith",
     "location": {
       "city": "New York",
@@ -584,7 +584,7 @@ POST /users/{user_id}/context
 #### Get Context Memory for User
 
 ```http
-GET /users/{user_id}/context
+GET /users/{user_id}/context_memory
 ```
 
 **Response**:
@@ -592,7 +592,7 @@ GET /users/{user_id}/context
 ```json
 {
   "user_id": "user123",
-  "context": {
+  "knowledge": {
     "name": "John Smith",
     "location": {
       "city": "New York",
@@ -610,14 +610,14 @@ GET /users/{user_id}/context
 #### Update Context Memory for User
 
 ```http
-PATCH /users/{user_id}/context
+PATCH /users/{user_id}/context_memory
 ```
 
 **Request Body**:
 
 ```json
 {
-  "context": {
+  "knowledge": {
     "location": {
       "city": "Boston"
     },
@@ -641,7 +641,7 @@ PATCH /users/{user_id}/context
 #### Delete Context Memory for User
 
 ```http
-DELETE /users/{user_id}/context?fields=preferences
+DELETE /users/{user_id}/context_memory?fields=preferences
 ```
 
 **Response**:

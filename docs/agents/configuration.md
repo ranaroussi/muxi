@@ -717,7 +717,7 @@ from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.openai import OpenAIModel
 from muxi.core.memory.buffer import BufferMemory
 from muxi.core.memory.long_term import LongTermMemory
-from muxi.core.memory.domain_knowledge import DomainKnowledge
+from muxi.core.memory.context_memory import ContextMemory
 
 # Initialize the orchestrator
 orchestrator = Orchestrator()

@@ -300,13 +300,13 @@ class Muxi:
             # Fallback to string representation
             return str(response.content)
 
-    def add_user_domain_knowledge(
+    def add_user_context_memory(
         self,
         user_id: int,
         knowledge: Dict[str, Any]
     ) -> None:
         """
-        Add domain knowledge for a specific user.
+        Add context memory for a specific user.
 
         Args:
             user_id: User ID to associate the knowledge with
@@ -323,13 +323,13 @@ class Muxi:
             if hasattr(agent, "long_term_memory") and isinstance(
                 agent.long_term_memory, Memobase
             ):
-                # Add domain knowledge
-                agent.long_term_memory.add_domain_knowledge(user_id, knowledge)
+                # Add context memory
+                agent.long_term_memory.add_context_memory(user_id, knowledge)
                 return
 
         raise ValueError(
             "No agent with Memobase found. Add at least one agent with long-term "
-            "memory enabled before adding domain knowledge."
+            "memory enabled before adding context memory."
         )
 
     def start_server(

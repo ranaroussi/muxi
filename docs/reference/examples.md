@@ -273,7 +273,7 @@ print(response2)  # Handled by finance_agent
 ```python
 from muxi.core.agent import Agent
 from muxi.core.models.openai import OpenAIModel
-from muxi.core.memory.domain_knowledge import DomainKnowledge
+from muxi.core.memory.context_memory import ContextMemory
 
 # Create an agent
 agent = Agent(

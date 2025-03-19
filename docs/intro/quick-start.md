@@ -146,22 +146,16 @@ print(response)  # Will likely be handled by the weather agent
 
 The routing system uses an LLM to analyze the message content and agent descriptions to determine the best match.
 
-## Adding Domain Knowledge
+## Adding Context Memory
 
-You can enhance your agents with domain knowledge:
+You can enhance your agents with context memory:
 
 ```python
 # Add domain knowledge for the agent
 app.add_domain_knowledge("geography.txt")
 
-# Or for a specific user
-app.add_user_domain_knowledge(
-    user_id="user123",
-    knowledge={
-        "name": "Alice",
-        "location": {"city": "New York"}
-    }
-)
+# Add user-specific context memory
+app.add_user_context_memory(user_id=123, knowledge={"name": "John", "location": "New York"})
 ```
 
 ## Multi-User Support

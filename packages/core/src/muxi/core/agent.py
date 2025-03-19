@@ -223,28 +223,30 @@ class Agent:
         # Use the mcp_handler's implementation which contains additional status info
         return await self.mcp_handler.get_available_mcp_servers()
 
-    async def _enhance_with_domain_knowledge(
-        self,
-        message: str,
-        user_id: Optional[int] = None
+    async def _enhance_with_context_memory(
+        self, message: str, user_id: Optional[int] = None
     ) -> str:
         """
-        Enhance a user message with relevant domain knowledge.
+        Enhance the message with user context memory if available.
 
         Args:
-            message: The original user message.
-            user_id: Optional user ID for multi-user support.
+            message: The original message to enhance
+            user_id: User ID to retrieve context memory for
 
         Returns:
-            Enhanced message with domain knowledge context.
+            Enhanced message with user context information
         """
-        # Only enhance if we have multi-user support and a user_id
-        if not (self.is_multi_user and user_id is not None):
+        # Skip if no long-term memory
+        if not hasattr(self, "long_term_memory"):
+            return message
+
+        # Skip if no user ID
+        if user_id is None:
             return message
 
         try:
-            # Get domain knowledge for the user
-            knowledge = await self.long_term_memory.get_user_domain_knowledge(user_id=user_id)
+            # Get context memory for the user
+            knowledge = await self.long_term_memory.get_user_context_memory(user_id=user_id)
 
             # If no knowledge found, return original message
             if not knowledge:
@@ -318,7 +320,7 @@ class Agent:
 
         except Exception as e:
             # If anything goes wrong, just return the original message
-            print(f"Error enhancing message with domain knowledge: {e}")
+            print(f"Error enhancing message with context memory: {e}")
             return message
 
     async def process_message(self, message: str, user_id: Optional[int] = None) -> MCPMessage:
@@ -346,8 +348,8 @@ class Agent:
                 user_id=user_id,
             )
 
-        # Enhance message with domain knowledge if available
-        enhanced_message = await self._enhance_with_domain_knowledge(message, user_id)
+        # Enhance message with context memory if available
+        enhanced_message = await self._enhance_with_context_memory(message, user_id)
 
         # Create a user message using MCPMessage format
         user_message = MCPMessage(role="user", content=enhanced_message)

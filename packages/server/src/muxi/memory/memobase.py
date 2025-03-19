@@ -22,9 +22,9 @@ class Memobase:
     users while providing a unified interface for memory operations.
     """
 
-    # Constants for domain knowledge
-    DOMAIN_KNOWLEDGE_COLLECTION = "domain_knowledge"
-    DOMAIN_KNOWLEDGE_TYPE = "domain_knowledge"
+    # Constants for context memory
+    CONTEXT_MEMORY_COLLECTION = "context_memory"
+    CONTEXT_MEMORY_TYPE = "context_memory"
 
     def __init__(self, long_term_memory: LongTermMemory, default_user_id: int = 0):
         """
@@ -222,7 +222,7 @@ class Memobase:
             for memory in memories
         ]
 
-    async def add_user_domain_knowledge(
+    async def add_user_context_memory(
         self,
         user_id: Optional[int] = None,
         knowledge: Dict[str, Any] = None,
@@ -230,7 +230,7 @@ class Memobase:
         importance: float = 0.9,
     ) -> List[str]:
         """
-        Add or update domain knowledge about a user.
+        Add or update context memory about a user.
 
         Args:
             user_id: The user's ID. If None, uses the default user.
@@ -247,14 +247,14 @@ class Memobase:
         knowledge = knowledge or {}
         memory_ids = []
 
-        # Ensure domain knowledge collection exists
-        collection_name = f"{self.DOMAIN_KNOWLEDGE_COLLECTION}_{user_id}"
+        # Ensure context memory collection exists
+        collection_name = f"{self.CONTEXT_MEMORY_COLLECTION}_{user_id}"
         try:
             self.long_term_memory._ensure_collection_exists(None, collection_name)
         except Exception:
             self.long_term_memory.create_collection(
                 collection_name,
-                f"Domain knowledge for user {user_id}"
+                f"Context memory for user {user_id}"
             )
 
         # Process each knowledge item
@@ -270,7 +270,7 @@ class Memobase:
 
             # Add metadata
             metadata = {
-                "type": self.DOMAIN_KNOWLEDGE_TYPE,
+                "type": self.CONTEXT_MEMORY_TYPE,
                 "key": key,
                 "source": source,
                 "importance": importance,
@@ -289,19 +289,19 @@ class Memobase:
 
         return memory_ids
 
-    async def get_user_domain_knowledge(
+    async def get_user_context_memory(
         self,
         user_id: Optional[int] = None,
         keys: Optional[List[str]] = None,
         limit: int = 100,
     ) -> Dict[str, Any]:
         """
-        Retrieve domain knowledge about a user.
+        Retrieve context memory about a user.
 
         Args:
             user_id: The user's ID. If None, uses the default user.
             keys: Optional list of specific knowledge keys to retrieve.
-                If None, retrieves all domain knowledge.
+                If None, retrieves all context memory.
             limit: Maximum number of knowledge items to retrieve.
 
         Returns:
@@ -309,7 +309,7 @@ class Memobase:
             and values are the corresponding information.
         """
         user_id = user_id if user_id is not None else self.default_user_id
-        collection_name = f"{self.DOMAIN_KNOWLEDGE_COLLECTION}_{user_id}"
+        collection_name = f"{self.CONTEXT_MEMORY_COLLECTION}_{user_id}"
 
         # Check if collection exists
         try:
@@ -320,7 +320,7 @@ class Memobase:
 
         # Prepare filter
         filter_params = {
-            "type": self.DOMAIN_KNOWLEDGE_TYPE,
+            "type": self.CONTEXT_MEMORY_TYPE,
             "user_id": user_id,
         }
 
@@ -342,7 +342,7 @@ class Memobase:
 
                 results.extend(key_results)
         else:
-            # Get all domain knowledge
+            # Get all context memory
             # Use empty query to match all items
             results = await self.search(
                 query="",
@@ -375,7 +375,7 @@ class Memobase:
 
         return knowledge
 
-    async def import_user_domain_knowledge(
+    async def import_user_context_memory(
         self,
         data_source: Union[str, Dict[str, Any]],
         user_id: Optional[int] = None,
@@ -384,7 +384,7 @@ class Memobase:
         importance: float = 0.9,
     ) -> List[str]:
         """
-        Import domain knowledge from a file or data structure.
+        Import context memory from a file or data structure.
 
         Args:
             data_source: Path to file or data structure containing knowledge.
@@ -412,38 +412,38 @@ class Memobase:
             raise ValueError(f"Unsupported format: {format}")
 
         # Add the knowledge
-        return await self.add_user_domain_knowledge(
+        return await self.add_user_context_memory(
             user_id=user_id,
             knowledge=data,
             source=source,
             importance=importance,
         )
 
-    async def clear_user_domain_knowledge(
+    async def clear_user_context_memory(
         self,
         user_id: Optional[int] = None,
         keys: Optional[List[str]] = None,
     ) -> bool:
         """
-        Clear domain knowledge for a specific user.
+        Clear context memory for a specific user.
 
         Args:
             user_id: The user's ID. If None, uses the default user.
             keys: Optional list of specific knowledge keys to clear.
-                If None, clears all domain knowledge.
+                If None, clears all context memory.
 
         Returns:
             True if the operation was successful, False otherwise.
         """
         user_id = user_id if user_id is not None else self.default_user_id
-        collection_name = f"{self.DOMAIN_KNOWLEDGE_COLLECTION}_{user_id}"
+        collection_name = f"{self.CONTEXT_MEMORY_COLLECTION}_{user_id}"
 
         if keys:
             # Clear specific keys
             for key in keys:
                 # Find memories with this key
                 filter_params = {
-                    "type": self.DOMAIN_KNOWLEDGE_TYPE,
+                    "type": self.CONTEXT_MEMORY_TYPE,
                     "key": key,
                     "user_id": user_id,
                 }
@@ -464,12 +464,12 @@ class Memobase:
                             memory_id=item["id"],
                         )
         else:
-            # Clear all domain knowledge by recreating the collection
+            # Clear all context memory by recreating the collection
             try:
                 self.long_term_memory.delete_collection(collection_name)
                 self.long_term_memory.create_collection(
                     collection_name,
-                    f"Domain knowledge for user {user_id}"
+                    f"Context memory for user {user_id}"
                 )
                 return True
             except Exception:

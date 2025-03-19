@@ -6,7 +6,7 @@ This document outlines the agent-specific domain knowledge capabilities in the M
 
 ## Problem Statement
 
-Currently, MUXI supports domain knowledge at the user level, which allows for personalization based on user-specific data. However, agents lack dedicated knowledge bases that align with their specialized roles and expertise. This limitation means that agents rely solely on their pre-trained knowledge, which may be outdated or insufficient for specific domains.
+Currently, MUXI supports context memory at the user level, which allows for personalization based on user-specific data. However, agents lack dedicated knowledge bases that align with their specialized roles and expertise. This limitation means that agents rely solely on their pre-trained knowledge, which may be outdated or insufficient for specific domains.
 
 ## Scope and Implementation
 
@@ -229,7 +229,7 @@ if __name__ == "__main__":
 2. **Right-Size Documents**: Break large documents into smaller, topic-focused files
 3. **Descriptive Metadata**: Provide clear descriptions for knowledge sources
 4. **Regular Updates**: Keep knowledge sources up-to-date with the latest information
-5. **Knowledge vs. Memory**: Use domain knowledge for static information, memory for conversation context
+5. **Knowledge vs. Memory**: Use domain knowledge for static information, context memory for conversation context
 6. **Strategic Search**: Set appropriate threshold and top_k values for your use case
 
 ## Conclusion

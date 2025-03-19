@@ -310,7 +310,7 @@ MUXI implements a hybrid protocol approach for optimal performance and flexibili
 - **Server-Sent Events (SSE)**: For streaming responses token-by-token
 - **WebSockets**: For multi-modal capabilities with bi-directional communication
 
-## Working with Memory and Domain Knowledge
+## Working with Memory and Context Memory
 
 ```python
 from muxi import muxi
@@ -322,14 +322,14 @@ app = muxi()
 await app.add_agent("weather", "configs/weather_agent.yaml")
 await app.add_agent("assistant", "configs/assistant.yaml")
 
-# Add domain knowledge for a specific user
+# Add context memory for a specific user
 user_id = "user123"
 knowledge = {
     "name": "Alice",
     "location": {"city": "New York", "country": "USA"},
     "preferences": {"language": "English", "units": "metric"}
 }
-await app.add_user_domain_knowledge(user_id, knowledge)
+await app.add_user_context_memory(user_id, knowledge)
 
 # Chat with personalized context
 # Note: No need to specify agent_id - the orchestrator will select the appropriate agent
@@ -337,7 +337,7 @@ response = await app.chat(
     "What's the weather like in my city?",
     user_id=user_id
 )
-print(response.content)  # Uses Alice's location data from domain knowledge
+print(response.content)  # Uses Alice's location data from context memory
 
 # For memory operations that are specific to an agent, you can specify agent_id
 memory_results = await app.search_memory(
