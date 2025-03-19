@@ -331,8 +331,7 @@ class TestMCPServerClient(unittest.IsolatedAsyncioTestCase):
         # Create client
         self.client = MCPServerClient(
             name="test_server",
-            url_or_command="http://test-server.com",
-            type="http",
+            url="http://test-server.com",
             credentials={"api_key": "test_key"}
         )
 
@@ -452,14 +451,14 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
         # Connect server
         result = await self.handler.connect_server(
             name="test_server",
-            url_or_command="http://test-server.com",
+            url="http://test-server.com",
             type="http"
         )
 
         # Verify client was created and connected
         self.mock_client_class.assert_called_with(
             name="test_server",
-            url_or_command="http://test-server.com",
+            url="http://test-server.com",
             type="http",
             credentials={}
         )
@@ -484,6 +483,7 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
 
         # Execute tool
         result = await self.handler.execute_tool(
+            server_name="test_server",
             tool_name="test_tool",
             params={"param1": "value1"},
             cancellation_token=token
@@ -540,7 +540,7 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(MCPConnectionError):
             await self.handler.connect_server(
                 name="test_server",
-                url_or_command="http://test-server.com",
+                url="http://test-server.com",
                 type="http"
             )
 
@@ -560,6 +560,7 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
         # Attempt to execute tool
         with self.assertRaises(MCPRequestError):
             await self.handler.execute_tool(
+                server_name="test_server",
                 tool_name="test_tool",
                 params={"param1": "value1"}
             )

@@ -23,14 +23,15 @@ class ReconnectingMCPHandler(MCPHandler):
     capabilities using exponential backoff.
     """
 
-    def __init__(self, retry_config: Optional[RetryConfiguration] = None):
+    def __init__(self, model, retry_config: Optional[RetryConfiguration] = None):
         """
         Initialize the reconnecting MCP handler.
 
         Args:
+            model: The LLM model to use for processing
             retry_config: Configuration for retry behavior, or None to use defaults
         """
-        super().__init__()
+        super().__init__(model=model)
         self.retry_config = retry_config or RetryConfiguration(
             max_retries=3,
             initial_delay=1.0,
@@ -42,32 +43,39 @@ class ReconnectingMCPHandler(MCPHandler):
 
     async def connect_server(
         self,
-        server_id: str,
-        server_url: str,
-        type: str = "http",
+        name: str,
+        url: Optional[str] = None,
+        command: Optional[str] = None,
+        credentials: Optional[Dict[str, Any]] = None,
         request_timeout: float = 60.0
     ) -> bool:
         """
         Connect to an MCP server with automatic reconnection support.
 
         Args:
-            server_id: Unique identifier for the server
-            server_url: URL or identifier for the server
-            type: Transport type to use ("http" or "command")
+            name: Unique identifier for the server
+            url: URL for the HTTP+SSE server
+            command: Command line for local MCP server
+            credentials: Optional credentials for authentication
             request_timeout: Timeout for requests in seconds
 
         Returns:
             True if connection was successful, False otherwise
 
         Raises:
-            ValueError: If server_id or server_url is empty
+            ValueError: If name is empty or both url and command are missing
             MCPConnectionError: If connection failed after retries
         """
-        if not server_id or not server_url:
-            raise ValueError("Server ID and URL must be provided")
+        if not name:
+            raise ValueError("Server name must be provided")
+
+        if not url and not command:
+            raise ValueError("Either url or command must be provided")
+
+        server_url = url or command
 
         log_msg = (
-            f"Connecting to MCP server {server_id} at {server_url} "
+            f"Connecting to MCP server {name} at {server_url} "
             f"with reconnection support"
         )
         logger.info(log_msg)
@@ -75,37 +83,40 @@ class ReconnectingMCPHandler(MCPHandler):
         # Use the retry mechanism for connection
         try:
             result = await with_retries(
-                f"Connect to MCP server {server_id}",
+                f"Connect to MCP server {name}",
                 self._connect_server_impl,
                 retry_config=self.retry_config,
                 retry_exceptions=MCPConnectionError,
-                server_id=server_id,
-                server_url=server_url,
-                type=type,
+                name=name,
+                url=url,
+                command=command,
+                credentials=credentials,
                 request_timeout=request_timeout
             )
             return result
         except MCPConnectionError as e:
             error_msg = (
-                f"Failed to connect to MCP server {server_id} after retries: {str(e)}"
+                f"Failed to connect to MCP server {name} after retries: {str(e)}"
             )
             logger.error(error_msg)
             raise
 
     async def _connect_server_impl(
         self,
-        server_id: str,
-        server_url: str,
-        type: str,
-        request_timeout: float
+        name: str,
+        url: Optional[str] = None,
+        command: Optional[str] = None,
+        credentials: Optional[Dict[str, Any]] = None,
+        request_timeout: float = 60.0
     ) -> bool:
         """
         Implementation of server connection used by the retry mechanism.
 
         Args:
-            server_id: Unique identifier for the server
-            server_url: URL or identifier for the server
-            type: Transport type to use
+            name: Unique identifier for the server
+            url: URL for the HTTP+SSE server
+            command: Command line for local MCP server
+            credentials: Optional credentials for authentication
             request_timeout: Timeout for requests in seconds
 
         Returns:
@@ -115,14 +126,16 @@ class ReconnectingMCPHandler(MCPHandler):
             MCPConnectionError: If connection failed
         """
         return await super().connect_server(
-            server_id=server_id,
-            server_url=server_url,
-            type=type,
+            name=name,
+            url=url,
+            command=command,
+            credentials=credentials,
             request_timeout=request_timeout
         )
 
     async def execute_tool(
         self,
+        server_name: str,
         tool_name: str,
         params: Dict[str, Any],
         cancellation_token: Any = None
@@ -131,6 +144,7 @@ class ReconnectingMCPHandler(MCPHandler):
         Execute a tool with automatic retry on connection errors.
 
         Args:
+            server_name: Name of the server to execute the tool on
             tool_name: Name of the tool to execute
             params: Parameters for the tool
             cancellation_token: Token to cancel the operation
@@ -144,10 +158,11 @@ class ReconnectingMCPHandler(MCPHandler):
             MCPRequestError: If the request failed
             MCPTimeoutError: If the request timed out
         """
-        server_id = await self._get_server_for_tool(tool_name)
-        if not server_id:
-            error_msg = f"Tool {tool_name} is not available on any connected server"
-            raise ValueError(error_msg)
+        if not server_name:
+            server_name = await self._get_server_for_tool(tool_name)
+            if not server_name:
+                error_msg = f"Tool {tool_name} is not available on any connected server"
+                raise ValueError(error_msg)
 
         # Only retry on connection errors, not on request errors or timeouts
         try:
@@ -156,10 +171,10 @@ class ReconnectingMCPHandler(MCPHandler):
                 self._execute_tool_impl,
                 retry_config=self.retry_config,
                 retry_exceptions=MCPConnectionError,
+                server_name=server_name,
                 tool_name=tool_name,
                 params=params,
-                cancellation_token=cancellation_token,
-                server_id=server_id
+                cancellation_token=cancellation_token
             )
             return result
         except MCPConnectionError as e:
@@ -169,19 +184,19 @@ class ReconnectingMCPHandler(MCPHandler):
 
     async def _execute_tool_impl(
         self,
+        server_name: str,
         tool_name: str,
         params: Dict[str, Any],
         cancellation_token: Any,
-        server_id: str
     ) -> Dict[str, Any]:
         """
         Implementation of tool execution used by the retry mechanism.
 
         Args:
+            server_name: Name of the server to use
             tool_name: Name of the tool to execute
             params: Parameters for the tool
             cancellation_token: Token to cancel the operation
-            server_id: ID of the server to use
 
         Returns:
             Tool execution result
@@ -192,46 +207,56 @@ class ReconnectingMCPHandler(MCPHandler):
             MCPTimeoutError: If the request timed out
         """
         # Check if we need to reconnect
-        if server_id not in self.servers or not self.servers[server_id].is_connected():
-            if server_id not in self._reconnection_in_progress:
-                self._reconnection_in_progress[server_id] = True
+        if (server_name not in self.active_connections or
+                not self.active_connections[server_name].connected):
+            if server_name not in self._reconnection_in_progress:
+                self._reconnection_in_progress[server_name] = True
                 try:
-                    logger.info(f"Automatic reconnection to server {server_id} triggered")
-                    server_info = self.server_info.get(server_id, {})
-                    server_url = server_info.get("url", "")
-                    type = server_info.get("type", "http")
+                    logger.info(f"Automatic reconnection to server {server_name} triggered")
+                    server_info = self.server_info.get(server_name, {})
+                    url = server_info.get("url")
+                    command = server_info.get("command")
+                    credentials = server_info.get("credentials")
                     request_timeout = server_info.get("request_timeout", 60.0)
 
-                    if not server_url:
-                        error_msg = f"Cannot reconnect to server {server_id}: URL not found"
+                    if not url and not command:
+                        error_msg = (
+                            f"Cannot reconnect to server {server_name}: "
+                            f"URL or command not found"
+                        )
                         raise MCPConnectionError(error_msg)
 
                     await super().connect_server(
-                        server_id=server_id,
-                        server_url=server_url,
-                        type=type,
+                        name=server_name,
+                        url=url,
+                        command=command,
+                        credentials=credentials,
                         request_timeout=request_timeout
                     )
-                    logger.info(f"Successfully reconnected to server {server_id}")
+                    logger.info(f"Successfully reconnected to server {server_name}")
                 finally:
-                    self._reconnection_in_progress[server_id] = False
+                    self._reconnection_in_progress[server_name] = False
             else:
                 # Another reconnection is in progress, wait for it
                 for _ in range(10):  # Wait for up to ~1 second
                     reconnection_done = (
-                        server_id not in self._reconnection_in_progress or
-                        not self._reconnection_in_progress[server_id]
+                        server_name not in self._reconnection_in_progress or
+                        not self._reconnection_in_progress[server_name]
                     )
                     if reconnection_done:
                         break
                     await asyncio.sleep(0.1)
 
-                if server_id not in self.servers or not self.servers[server_id].is_connected():
-                    error_msg = f"Server {server_id} is not connected after reconnection attempt"
+                if (server_name not in self.active_connections or
+                        not self.active_connections[server_name].connected):
+                    error_msg = (
+                        f"Server {server_name} is not connected "
+                        f"after reconnection attempt"
+                    )
                     raise MCPConnectionError(error_msg)
 
         # Now execute the tool
-        return await super().execute_tool(tool_name, params, cancellation_token)
+        return await super().execute_tool(server_name, tool_name, params, cancellation_token)
 
     async def list_tools(self, refresh: bool = False) -> List[Dict[str, Any]]:
         """

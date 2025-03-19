@@ -943,6 +943,7 @@ class MCPServerClient:
 
         # Create the request object
         request = JSONRPCRequest(
+            jsonrpc="2.0",
             method=method,
             params=params,
             id=request_id
@@ -961,7 +962,9 @@ class MCPServerClient:
 
             # Send the request
             logger.info(f"Sending message to MCP server '{self.name}': {method} (id: {request_id})")
-            response = await self.transport.send_request(request, cancellation_token)
+            # Convert the request to a dict for the transport
+            request_dict = request.model_dump()
+            response = await self.transport.send_request(request_dict, cancellation_token)
 
             return response
 

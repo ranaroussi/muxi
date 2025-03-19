@@ -83,16 +83,28 @@ class TestBufferMemory(unittest.TestCase):
 
 
 class MockLLM(BaseModel):
-    """Mock LLM for testing vector memory."""
+    """Mock LLM for testing."""
 
     def chat(self, messages, **kwargs):
-        """Mock implementation of chat method."""
+        """Mock implementation that always returns a fixed response."""
         return "This is a mock response."
 
     def embed(self, text):
         """Mock implementation that returns a simple embedding."""
         # Just return a vector of 1s with the requested dimension
         return np.ones(5) / np.sqrt(5)  # Unit vector
+
+    def generate_embeddings(self, texts):
+        """Generate embeddings for a list of texts.
+
+        Args:
+            texts: List of texts to generate embeddings for
+
+        Returns:
+            List of embeddings, one for each input text
+        """
+        # Generate a simple embedding for each text
+        return [np.ones(5) / np.sqrt(5) for _ in texts]  # Unit vectors
 
 
 class TestVectorMemory(unittest.TestCase):
