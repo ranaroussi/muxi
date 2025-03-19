@@ -16,6 +16,14 @@ muxi-framework/
 ├── examples/                  # Example code for using the framework
 │   ├── configs/               # Example configuration files
 │   └── [various .py files]    # Example Python scripts
+├── memory-bank/               # Memory Bank for project context and continuity
+│   ├── project-brief.md       # Foundation document with core project goals and requirements
+│   ├── product-context.md     # Why the project exists and problems it solves
+│   ├── system-patterns.md     # System architecture and design patterns
+│   ├── tech-context.md        # Technologies used and development setup
+│   ├── active-context.md      # Current work focus and next steps
+│   ├── progress.md            # What works and what's left to build
+│   └── scratchpad/            # Work-in-progress documentation and notes
 ├── migrations/                # Database migration scripts
 ├── packages/                  # Modular packages structure
 │   ├── cli/                   # Command-line interface package
@@ -71,6 +79,15 @@ muxi-framework/
 - `LICENSE.txt` - Project license information.
 - `NEXT_STEPS.md` - Detailed task tracker for developers with completed work and todo items.
 
+### Memory Bank Files
+- `project-brief.md` - Foundation document defining core requirements and project scope.
+- `product-context.md` - Explains why the project exists and what problems it solves.
+- `system-patterns.md` - Documents system architecture, design patterns, and component relationships.
+- `tech-context.md` - Details technologies used, development setup, and technical constraints.
+- `active-context.md` - Tracks current work focus, recent changes, and next steps.
+- `progress.md` - Documents what works, what's left to build, and current status.
+- `scratchpad/api.md` - API specification for REST endpoints and WebSocket communication.
+
 ### Utility Scripts
 - `env_check.py` - Validates environment variables and their configuration.
 - `install_dev.sh` - Installs all MUXI packages in development mode for easier modification.
@@ -93,6 +110,13 @@ muxi-framework/
   - Configuration guides
   - Development guidelines
   - Jekyll configuration for documentation site
+
+### Memory Bank
+- `memory-bank/` - Structured documentation for project continuity and context:
+  - Core context files in a clear hierarchy (from project-brief to progress)
+  - Scratchpad for works-in-progress like API specifications
+  - Serves as the comprehensive knowledge repository for the project
+  - Maintains continuity and shared understanding across development
 
 ### Code and Examples
 - `examples/` - Sample code demonstrating how to use the framework:
