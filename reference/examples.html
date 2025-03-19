@@ -203,7 +203,7 @@
 <span class="k">print</span><span class="p">(</span><span class="n">response2</span><span class="p">)</span>  <span class="c1"># Handled by finance_agent
 </span></code></pre></div></div> <h2 id="domain-knowledge"> <a href="#domain-knowledge" class="anchor-heading" aria-labelledby="domain-knowledge"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Domain Knowledge </h2> <h3 id="adding-structured-knowledge"> <a href="#adding-structured-knowledge" class="anchor-heading" aria-labelledby="adding-structured-knowledge"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Adding Structured Knowledge </h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">muxi.core.agent</span> <span class="kn">import</span> <span class="n">Agent</span>
 <span class="kn">from</span> <span class="nn">muxi.core.models.openai</span> <span class="kn">import</span> <span class="n">OpenAIModel</span>
-<span class="kn">from</span> <span class="nn">muxi.core.memory.domain_knowledge</span> <span class="kn">import</span> <span class="n">DomainKnowledge</span>
+<span class="kn">from</span> <span class="nn">muxi.core.memory.context_memory</span> <span class="kn">import</span> <span class="n">ContextMemory</span>
 
 <span class="c1"># Create an agent
 </span><span class="n">agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span>

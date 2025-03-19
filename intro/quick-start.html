@@ -71,17 +71,11 @@
 </span>
 <span class="n">response</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="n">chat</span><span class="p">(</span><span class="s">"What's the weather in New York?"</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>  <span class="c1"># Will likely be handled by the weather agent
-</span></code></pre></div></div> <p>The routing system uses an LLM to analyze the message content and agent descriptions to determine the best match.</p> <h2 id="adding-domain-knowledge"> <a href="#adding-domain-knowledge" class="anchor-heading" aria-labelledby="adding-domain-knowledge"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Adding Domain Knowledge </h2> <p>You can enhance your agents with domain knowledge:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Add domain knowledge for the agent
+</span></code></pre></div></div> <p>The routing system uses an LLM to analyze the message content and agent descriptions to determine the best match.</p> <h2 id="adding-context-memory"> <a href="#adding-context-memory" class="anchor-heading" aria-labelledby="adding-context-memory"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Adding Context Memory </h2> <p>You can enhance your agents with context memory:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Add domain knowledge for the agent
 </span><span class="n">app</span><span class="p">.</span><span class="n">add_domain_knowledge</span><span class="p">(</span><span class="s">"geography.txt"</span><span class="p">)</span>
 
-<span class="c1"># Or for a specific user
-</span><span class="n">app</span><span class="p">.</span><span class="n">add_user_domain_knowledge</span><span class="p">(</span>
-    <span class="n">user_id</span><span class="o">=</span><span class="s">"user123"</span><span class="p">,</span>
-    <span class="n">knowledge</span><span class="o">=</span><span class="p">{</span>
-        <span class="s">"name"</span><span class="p">:</span> <span class="s">"Alice"</span><span class="p">,</span>
-        <span class="s">"location"</span><span class="p">:</span> <span class="p">{</span><span class="s">"city"</span><span class="p">:</span> <span class="s">"New York"</span><span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">)</span>
+<span class="c1"># Add user-specific context memory
+</span><span class="n">app</span><span class="p">.</span><span class="n">add_user_context_memory</span><span class="p">(</span><span class="n">user_id</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">knowledge</span><span class="o">=</span><span class="p">{</span><span class="s">"name"</span><span class="p">:</span> <span class="s">"John"</span><span class="p">,</span> <span class="s">"location"</span><span class="p">:</span> <span class="s">"New York"</span><span class="p">})</span>
 </code></pre></div></div> <h2 id="multi-user-support"> <a href="#multi-user-support" class="anchor-heading" aria-labelledby="multi-user-support"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Multi-User Support </h2> <p>For multi-user applications:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Chat with user-specific context
 </span><span class="n">response</span> <span class="o">=</span> <span class="n">app</span><span class="p">.</span><span class="n">chat</span><span class="p">(</span>
     <span class="s">"What's the weather in my city?"</span><span class="p">,</span>
