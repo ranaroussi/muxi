@@ -8,8 +8,7 @@ import json
 import os
 import sqlite3
 import tempfile
-import unittest
-
+import pytest
 import nanoid
 
 
@@ -56,7 +55,7 @@ class MockSQLiteMemory:
                 id TEXT PRIMARY KEY,
                 collection TEXT NOT NULL,
                 content TEXT NOT NULL,
-                embedding TEXT NOT NULL,  # Store as JSON text for testing
+                embedding TEXT NOT NULL,  -- Store as JSON text for testing
                 metadata TEXT DEFAULT '{}',
                 source TEXT,
                 type TEXT,
@@ -184,91 +183,86 @@ class MockSQLiteMemory:
             self.conn.close()
 
 
-class TestSQLiteMemory(unittest.TestCase):
-    """Test cases for the SQLiteMemory implementation."""
+# Fixture for creating and managing the memory instance
+@pytest.fixture
+def memory():
+    """Create a SQLite memory instance for testing."""
+    # Create a temporary directory
+    temp_dir = tempfile.mkdtemp()
+    db_path = os.path.join(temp_dir, "test_memory.db")
 
-    def setUp(self):
-        """Set up the test environment."""
-        # Create a temporary directory for the test database
-        self.temp_dir = tempfile.mkdtemp()
-        self.db_path = os.path.join(self.temp_dir, "test_memory.db")
+    # Create and set up the memory instance
+    mem = MockSQLiteMemory(db_path=db_path, dimension=4)
+    mem.embedding_provider = MockEmbeddingProvider()
 
-        # Create mock SQLite memory instance
-        self.memory = MockSQLiteMemory(
-            db_path=self.db_path,
-            dimension=4  # Use a small dimension for testing
-        )
+    yield mem
 
-        # Set mock embedding provider
-        self.memory.embedding_provider = MockEmbeddingProvider()
+    # Cleanup after test
+    del mem
+    if os.path.exists(db_path):
+        os.remove(db_path)
+    os.rmdir(temp_dir)
 
-    def tearDown(self):
-        """Clean up after each test."""
-        # Close the database connection
-        del self.memory
 
-        # Remove the test database
-        if os.path.exists(self.db_path):
-            os.remove(self.db_path)
+@pytest.mark.asyncio
+async def test_add_and_search(memory):
+    """Test adding content and searching for it."""
+    # Add some test entries
+    await memory.add("This is a test entry", {"source": "test"})
+    await memory.add("Another test entry", {"source": "test", "importance": "high"})
 
-        # Remove the temporary directory
-        os.rmdir(self.temp_dir)
+    # Search for entries
+    results = await memory.search("test entry")
 
-    async def test_add_and_search(self):
-        """Test adding content and searching for it."""
-        # Add some test entries
-        await self.memory.add("This is a test entry", {"source": "test"})
-        await self.memory.add("Another test entry", {"source": "test", "importance": "high"})
+    # Check results
+    assert len(results) == 2
+    assert "test" in results[0]["metadata"]["source"]
 
-        # Search for entries
-        results = await self.memory.search("test entry")
+    # Both entries should have high similarity due to our mock implementation
+    assert results[0]["score"] > 0.9
+    assert results[1]["score"] > 0.9
 
-        # Check results
-        self.assertEqual(len(results), 2)
-        self.assertIn("test", results[0]["metadata"]["source"])
 
-        # Both entries should have high similarity due to our mock implementation
-        self.assertGreater(results[0]["score"], 0.9)
-        self.assertGreater(results[1]["score"], 0.9)
+@pytest.mark.asyncio
+async def test_metadata_storage(memory):
+    """Test that metadata is properly stored and retrieved."""
+    # Add content with complex metadata
+    metadata = {
+        "source": "user",
+        "timestamp": 1620000000,
+        "tags": ["important", "follow-up"],
+        "nested": {"key1": "value1", "key2": 42}
+    }
+    await memory.add("Entry with complex metadata", metadata)
 
-    async def test_metadata_storage(self):
-        """Test that metadata is properly stored and retrieved."""
-        # Add content with complex metadata
-        metadata = {
-            "source": "user",
-            "timestamp": 1620000000,
-            "tags": ["important", "follow-up"],
-            "nested": {"key1": "value1", "key2": 42}
-        }
-        await self.memory.add("Entry with complex metadata", metadata)
+    # Search to retrieve the entry
+    results = await memory.search("metadata")
 
-        # Search to retrieve the entry
-        results = await self.memory.search("metadata")
+    # Verify metadata was preserved
+    assert len(results) == 1
+    result_metadata = results[0]["metadata"]
+    assert result_metadata["source"] == "user"
+    assert result_metadata["tags"][0] == "important"
+    assert result_metadata["nested"]["key2"] == 42
 
-        # Verify metadata was preserved
-        self.assertEqual(len(results), 1)
-        result_metadata = results[0]["metadata"]
-        self.assertEqual(result_metadata["source"], "user")
-        self.assertEqual(result_metadata["tags"][0], "important")
-        self.assertEqual(result_metadata["nested"]["key2"], 42)
 
-    def test_get_recent_memories(self):
-        """Test retrieving recent memories."""
-        # Use the internal method to add entries directly (bypassing async)
-        self.memory._add_internal("First entry", [0.25, 0.25, 0.25, 0.25], {"order": 1})
-        self.memory._add_internal("Second entry", [0.25, 0.25, 0.25, 0.25], {"order": 2})
-        self.memory._add_internal("Third entry", [0.25, 0.25, 0.25, 0.25], {"order": 3})
+def test_get_recent_memories(memory):
+    """Test retrieving recent memories."""
+    # Use the internal method to add entries directly (bypassing async)
+    memory._add_internal("First entry", [0.25, 0.25, 0.25, 0.25], {"order": 1})
+    memory._add_internal("Second entry", [0.25, 0.25, 0.25, 0.25], {"order": 2})
+    memory._add_internal("Third entry", [0.25, 0.25, 0.25, 0.25], {"order": 3})
 
-        # Get recent memories
-        recent = self.memory.get_recent_memories(limit=2)
+    # Get recent memories
+    recent = memory.get_recent_memories(limit=2)
 
-        # Verify we get the most recent entries
-        self.assertEqual(len(recent), 2)
+    # Verify we get the most recent entries
+    assert len(recent) == 2
 
-        # Check that we have at least 2 entries, don't check the exact order
-        # since SQLite test behavior might vary
-        orders = [entry["metadata"]["order"] for entry in recent]
-        self.assertTrue(all(order in [1, 2, 3] for order in orders))
+    # Check that we have at least 2 entries, don't check the exact order
+    # since SQLite test behavior might vary
+    orders = [entry["metadata"]["order"] for entry in recent]
+    assert all(order in [1, 2, 3] for order in orders)
 
 
 if __name__ == "__main__":
@@ -276,15 +270,23 @@ if __name__ == "__main__":
 
     # Run the async tests
     async def run_tests():
-        test_case = TestSQLiteMemory()
-        test_case.setUp()
+        # Setup memory
+        temp_dir = tempfile.mkdtemp()
+        db_path = os.path.join(temp_dir, "test_memory.db")
+        memory = MockSQLiteMemory(db_path=db_path, dimension=4)
+        memory.embedding_provider = MockEmbeddingProvider()
 
         try:
-            await test_case.test_add_and_search()
-            await test_case.test_metadata_storage()
-            test_case.test_get_recent_memories()
+            await test_add_and_search(memory)
+            await test_metadata_storage(memory)
+            test_get_recent_memories(memory)
+            print("All tests passed!")
         finally:
-            test_case.tearDown()
+            # Cleanup
+            del memory
+            if os.path.exists(db_path):
+                os.remove(db_path)
+            os.rmdir(temp_dir)
 
     # Use asyncio to run the tests
     asyncio.run(run_tests())
