@@ -95,6 +95,8 @@ OPENAI_API_KEY=your_openai_key_here
 POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
 # Or use SQLite
 USE_LONG_TERM_MEMORY=sqlite:///path/to/memory.db
+# Or just enable with default SQLite in app's root directory
+USE_LONG_TERM_MEMORY=true
 
 # MCP Configurations
 MCP_WEATHER_API_KEY=your_weather_api_key

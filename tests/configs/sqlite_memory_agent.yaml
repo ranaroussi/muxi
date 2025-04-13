@@ -8,4 +8,4 @@ model:
   temperature: 0.2
 memory:
   buffer: 15
-  long_term: ${SQLITE_DATABASE_PATH}
+  long_term: "sqlite:///${SQLITE_DATABASE_PATH}"

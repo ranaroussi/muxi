@@ -16,6 +16,9 @@ The following components of the MUXI Framework have been successfully implemente
    - ✅ Buffer memory using FAISS for short-term context
    - ✅ Long-term memory using PostgreSQL with pgvector
    - ✅ Long-term memory using SQLite with sqlite-vec for local deployments
+   - ✅ Simplified configuration with direct connection string format (postgresql://, sqlite:///)
+   - ✅ Automatic detection of database type from connection string
+   - ✅ Default SQLite database in app's root directory when using `long_term: true`
    - ✅ Memobase system for multi-user memory partitioning
    - ✅ Context memory for user-specific structured information
 

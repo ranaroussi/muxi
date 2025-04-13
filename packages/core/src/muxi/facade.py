@@ -207,8 +207,19 @@ class Muxi:
                     except Exception as e:
                         # Log the error but continue without long-term memory
                         logger.error(f"Error creating Postgres long-term memory: {e}")
+                elif long_term_config.startswith('sqlite:///'):
+                    # SQLite connection string format (sqlite:///path/to/db)
+                    try:
+                        from muxi.server.memory.sqlite import SQLiteMemory
+                        # Extract the path: remove 'sqlite:///' prefix
+                        db_path = long_term_config[10:]
+                        long_term_memory = SQLiteMemory(db_path=db_path)
+                        logger.info(f"Created SQLite long-term memory at {db_path}")
+                    except Exception as e:
+                        # Log the error but continue without long-term memory
+                        logger.error(f"Error creating SQLite long-term memory: {e}")
                 else:
-                    # SQLite path
+                    # Plain SQLite path
                     try:
                         from muxi.server.memory.sqlite import SQLiteMemory
                         long_term_memory = SQLiteMemory(db_path=long_term_config)

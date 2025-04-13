@@ -18,6 +18,15 @@
 
 ## Long-Term Memory - Database Options
 
+### Configuration Options
+- For simplified configuration, use direct connection string format:
+  - PostgreSQL: `long_term: "postgresql://user:password@localhost:5432/dbname"`
+  - SQLite: `long_term: "sqlite:///path/to/database.db"`
+  - Default SQLite: `long_term: true` (creates muxi.db in app root)
+- The system automatically detects database type based on the connection string prefix
+- Maintain backward compatibility with legacy configuration format
+- Use environment variables for connection strings in production: `long_term: "${DATABASE_URL}"`
+
 ### PostgreSQL with pgvector
 - Recommended for production and multi-user deployments
 - Implement proper schema design for memory storage

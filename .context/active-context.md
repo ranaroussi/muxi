@@ -17,7 +17,14 @@ The current development focus is on implementing the complete REST API as define
 
 ### Major Changes
 
-1. **SQLite Vector Integration**:
+1. **Memory Configuration Simplification**:
+   - Simplified long-term memory configuration with direct connection string format
+   - Added support for both `postgresql://` URLs and `sqlite:///` paths in config
+   - Enhanced backward compatibility with legacy configuration format
+   - Made muxi.db in the app's root directory the default when using `long_term: true`
+   - Updated all documentation and test configurations to reflect the new format
+
+2. **SQLite Vector Integration**:
    - Added support for sqlite-vec Python package for vector similarity search
    - Simplified extensions handling by using Python package instead of binary extensions
    - Reorganized extension directory structure to improve clarity and maintainability
@@ -25,27 +32,27 @@ The current development focus is on implementing the complete REST API as define
    - Improved vector serialization for compatibility with sqlite-vec
    - Enhanced resilience with fallback mechanisms when package is unavailable
 
-2. **Breaking Changes in Version 1.0**:
+3. **Breaking Changes in Version 1.0**:
    - Removed deprecated methods like `_enhance_with_domain_knowledge()` (replaced by `_enhance_with_context_memory()`)
    - Removed `add_user_domain_knowledge()` (replaced by `add_user_context_memory()`)
    - Updated API signatures by removing the `memory` parameter from the `Agent` class (replaced by `buffer_memory`)
    - Removed backward compatibility for user_id=0 handling
    - Renamed all "domain knowledge" terminology to "context memory" throughout the codebase
 
-3. **Test Improvements**:
+4. **Test Improvements**:
    - Fixed all test warnings and errors
    - Implemented pytest.ini configuration to filter FAISS-related DeprecationWarnings
    - Improved test coverage across all components
    - Made tests more robust to handle differences in database behaviors
 
-4. **Architectural Evolution**:
+5. **Architectural Evolution**:
    - Restructured codebase into modular packages
    - Created setup.py for each package with appropriate dependencies
    - Implemented proper monorepo structure
    - Created development installation scripts
    - Fixed cross-package imports
 
-5. **MCP Integration**:
+6. **MCP Integration**:
    - Enhanced MCP server integration with proper reconnection logic
    - Implemented transport abstraction with factory pattern
    - Added support for both HTTP+SSE and Command-line transports

@@ -9,3 +9,4 @@ model:
 memory:
   buffer: 15
   long_term: ${POSTGRES_DATABASE_URL}
+# Note: Ensure POSTGRES_DATABASE_URL includes the postgresql:// prefix

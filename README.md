@@ -393,14 +393,18 @@ Ideal for local development, small-scale deployments, or edge environments:
 ```python
 # In your environment variables (.env file)
 USE_LONG_TERM_MEMORY=sqlite:///data/memory.db
+# Or for default SQLite database in app's root directory
+USE_LONG_TERM_MEMORY=true
 
 # Or in your configuration file (YAML)
 memory:
   buffer: 10
   long_term: "sqlite:///data/memory.db"
+  # Or for default SQLite database in app's root directory
+  # long_term: true
 
 # Or programmatically
-from muxi.server.memory.long_term import LongTermMemory
+from muxi.core.memory.long_term import LongTermMemory
 
 memory = LongTermMemory(connection_string="sqlite:///data/memory.db")
 ```
@@ -419,7 +423,7 @@ memory:
   long_term: "postgresql://user:password@localhost:5432/muxi"
 
 # Or programmatically
-from muxi.server.memory.long_term import LongTermMemory
+from muxi.core.memory.long_term import LongTermMemory
 
 memory = LongTermMemory(connection_string="postgresql://user:password@localhost:5432/muxi")
 ```

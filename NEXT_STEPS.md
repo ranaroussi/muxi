@@ -311,8 +311,9 @@ This scenario demonstrates a complete workflow from installation to running an a
      temperature: 0.7
    memory:
      buffer: 10  # Buffer window size of 10
-     long_term: true  # Enable long-term memory
+     long_term: true  # Enable long-term memory with default SQLite in app's root
      # Or use SQLite explicitly: long_term: "sqlite:///data/memory.db"
+     # Or PostgreSQL: long_term: "postgresql://user:password@localhost:5432/muxi"
    knowledge:
    - path: "knowledge/weather_facts.txt"
      description: "Facts about weather patterns and climate"
@@ -344,9 +345,12 @@ This scenario demonstrates a complete workflow from installation to running an a
 
    ```
    OPENAI_API_KEY=your_openai_key_here
+   # PostgreSQL connection
    POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
-   # Or use SQLite
+   # Or SQLite connection
    # USE_LONG_TERM_MEMORY=sqlite:///data/memory.db
+   # Or just enable default SQLite in app's root directory
+   # USE_LONG_TERM_MEMORY=true
    WEATHER_API_KEY=your_weather_api_key
    SEARCH_API_KEY=your_search_api_key
    ```
