@@ -64,7 +64,7 @@ MUXI has a flexible, service-oriented approach:
 ```
 ┌───────────────────┐
 │      Clients      │
-│   (CLI/Web/SDK)   │
+│ (CLI/MCP/Web/SDK) │
 └─────────┬─────────┘
           │
           │ (API/SSE/WS)
