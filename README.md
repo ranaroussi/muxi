@@ -27,6 +27,9 @@ MUXI Framework is a powerful platform for building AI agents with memory, MCP se
 
 - 🤖 **Multi-Agent Support**: Create and manage multiple AI agents with different capabilities
 - 🧠 **Memory Systems**: Short-term and long-term memory for contextual interactions
+  - FAISS for short-term buffer memory
+  - PostgreSQL with pgvector for scalable long-term memory
+  - SQLite with sqlite-vec for local or lightweight deployments
 - 🔌 **MCP Server Integration**: Connect to external services via Model Context Protocol servers
   - Support for HTTP+SSE transport for web-based MCP servers
   - Support for Command-line transport for local executable servers
@@ -144,7 +147,9 @@ model:
   temperature: 0.7
 memory:
   buffer: 10  # Buffer window size of 10
-  long_term: true  # Enable long-term memory
+  long_term: true  # Enable long-term memory using default database
+  # Or specify SQLite: long_term: "sqlite:///data/memory.db"
+  # Or specify PostgreSQL: long_term: "postgresql://user:pass@localhost/muxi"
   knowledge:
     - path: "knowledge/domain_facts.txt"
       description: "Specialized domain knowledge for this agent"
@@ -188,14 +193,24 @@ product_knowledge = FileKnowledge(
 )
 await agent.add_knowledge(product_knowledge)
 
-# Create an agent with long-term memory
+# Create an agent with long-term memory using PostgreSQL
 orchestrator.create_agent(
     agent_id="researcher",
     model=OpenAIModel(model="gpt-4o", api_key="your_api_key"),
     buffer_memory=BufferMemory(),
-    long_term_memory=LongTermMemory(connection_string="your_db_connection"),
+    long_term_memory=LongTermMemory(connection_string="postgresql://user:pass@localhost/muxi"),
     system_message="You are a helpful research assistant.",
     description="Specialized in research tasks, data analysis, and information retrieval."
+)
+
+# Create an agent with long-term memory using SQLite
+orchestrator.create_agent(
+    agent_id="local_assistant",
+    model=OpenAIModel(model="gpt-4o", api_key="your_api_key"),
+    buffer_memory=BufferMemory(),
+    long_term_memory=LongTermMemory(connection_string="sqlite:///data/memory.db"),
+    system_message="You are a helpful personal assistant.",
+    description="Personal assistant for tasks, reminders, and general information."
 )
 
 # Add MCP server to the agent
@@ -365,6 +380,48 @@ memory_results = await app.search_memory(
     limit=5
 )
 print("Related memories:", memory_results)
+```
+
+## Vector Database Support
+
+MUXI supports multiple vector database backends for long-term memory:
+
+### Using SQLite with sqlite-vec
+
+Ideal for local development, small-scale deployments, or edge environments:
+
+```python
+# In your environment variables (.env file)
+USE_LONG_TERM_MEMORY=sqlite:///data/memory.db
+
+# Or in your configuration file (YAML)
+memory:
+  buffer: 10
+  long_term: "sqlite:///data/memory.db"
+
+# Or programmatically
+from muxi.server.memory.long_term import LongTermMemory
+
+memory = LongTermMemory(connection_string="sqlite:///data/memory.db")
+```
+
+### Using PostgreSQL with pgvector
+
+Recommended for production deployments or multi-user environments:
+
+```python
+# In your environment variables (.env file)
+POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+
+# Or in your configuration file (YAML)
+memory:
+  buffer: 10
+  long_term: "postgresql://user:password@localhost:5432/muxi"
+
+# Or programmatically
+from muxi.server.memory.long_term import LongTermMemory
+
+memory = LongTermMemory(connection_string="postgresql://user:password@localhost:5432/muxi")
 ```
 
 ## Documentation

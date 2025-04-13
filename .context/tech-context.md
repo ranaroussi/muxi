@@ -14,6 +14,7 @@
 - **SQLAlchemy**: ORM for database interactions
 - **FAISS**: Vector similarity search for buffer memory
 - **pgvector**: PostgreSQL extension for vector operations
+- **sqlite-vec**: SQLite extension for vector similarity search
 - **pydantic**: Data validation and settings management
 - **websockets**: WebSocket protocol implementation
 - **httpx**: HTTP client for Python with async support
@@ -33,6 +34,8 @@
 
 - **PostgreSQL**: Primary database for long-term memory
 - **pgvector**: PostgreSQL extension for vector operations
+- **SQLite**: Alternative database for long-term memory in local deployments
+- **sqlite-vec**: SQLite extension for vector similarity search
 
 ### Web Technologies
 
@@ -54,7 +57,7 @@
 ### Environment Requirements
 
 - Python 3.10+ installed
-- PostgreSQL 13+ with pgvector extension
+- PostgreSQL 13+ with pgvector extension or SQLite with vector support
 - Node.js 18+ (for web UI development)
 
 ### Installation Process
@@ -89,7 +92,9 @@
 OPENAI_API_KEY=your_openai_key_here
 
 # Database Configuration
-DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+# Or use SQLite
+USE_LONG_TERM_MEMORY=sqlite:///path/to/memory.db
 
 # MCP Configurations
 MCP_WEATHER_API_KEY=your_weather_api_key
@@ -108,15 +113,26 @@ API_KEY=your_api_key_here
 
 ### Database Setup
 
-1. Install PostgreSQL and pgvector extension
-2. Create a database:
-   ```sql
-   CREATE DATABASE muxi;
-   ```
-3. Run migrations:
-   ```bash
-   python -m alembic upgrade head
-   ```
+1. For PostgreSQL:
+   - Install PostgreSQL and pgvector extension
+   - Create a database:
+     ```sql
+     CREATE DATABASE muxi;
+     ```
+   - Run migrations:
+     ```bash
+     python -m alembic upgrade head
+     ```
+
+2. For SQLite:
+   - Ensure sqlite-vec is installed:
+     ```bash
+     pip install sqlite-vec
+     ```
+   - Set appropriate environment variables to use SQLite:
+     ```
+     USE_LONG_TERM_MEMORY=sqlite:///path/to/memory.db
+     ```
 
 ### Running Tests
 
@@ -144,6 +160,8 @@ python -m pytest --cov=muxi
    - Long-term memory operations can be I/O bound
    - Use connection pooling for database access
    - Consider read replicas for high-traffic deployments
+   - SQLite with sqlite-vec has lower resource usage, suitable for local deployments
+   - PostgreSQL with pgvector offers better scaling for large deployments
 
 3. **LLM API Latency**:
    - External LLM API calls introduce latency
@@ -154,12 +172,15 @@ python -m pytest --cov=muxi
    - Async I/O is used throughout for concurrent request handling
    - Be mindful of potential race conditions in shared state
    - Monitor event loop blocking operations
+   - SQLite has concurrency limitations due to file locking
 
 ### Scalability Constraints
 
 1. **Stateful Components**:
    - Agent memory requires state persistence
    - Consider distributed memory architecture for horizontal scaling
+   - SQLite suitable for single-instance deployments
+   - PostgreSQL recommended for multi-instance deployments
 
 2. **External Rate Limits**:
    - LLM APIs impose rate limits
@@ -169,13 +190,15 @@ python -m pytest --cov=muxi
 3. **Database Scaling**:
    - Long-term memory requires database scaling strategies
    - Plan for sharding or read replicas as needed
+   - SQLite is limited to single-node scaling
 
 ### Compatibility Requirements
 
 1. **Python Version**: 3.10+ required (uses modern async features)
 2. **PostgreSQL**: 13+ with pgvector extension
-3. **Browser Support**: Modern browsers with WebSocket and SSE support
-4. **Operating Systems**: Cross-platform (Linux, macOS, Windows)
+3. **SQLite**: 3.38+ with sqlite-vec
+4. **Browser Support**: Modern browsers with WebSocket and SSE support
+5. **Operating Systems**: Cross-platform (Linux, macOS, Windows)
 
 ## Dependencies
 
@@ -188,6 +211,7 @@ pydantic>=2.3.0
 SQLAlchemy>=2.0.20
 asyncpg>=0.28.0
 pgvector>=0.2.1
+sqlite-vec>=0.1.7
 faiss-cpu>=1.7.4
 httpx>=0.24.1
 websockets>=11.0.3
@@ -251,7 +275,7 @@ See `api.md` for the complete API specification.
 
 Dockerization is supported with:
 - Python base image
-- PostgreSQL with pgvector as a separate service
+- PostgreSQL with pgvector as a separate service or SQLite with sqlite-vec for simpler deployments
 - Volume mounts for configuration and persistent data
 
 ### Cloud Considerations
@@ -260,6 +284,7 @@ Dockerization is supported with:
 - Implement proper API key rotation and management
 - Use load balancers for high-availability deployments
 - Consider serverless options for cost efficiency
+- Use SQLite with sqlite-vec for serverless functions with size/memory constraints
 
 ## Future Technology Considerations
 

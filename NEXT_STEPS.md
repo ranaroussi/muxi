@@ -13,6 +13,8 @@ Core components of the muxi framework now implemented:
 2. **Memory System**:
    - [x] Buffer memory using FAISS for short-term context
    - [x] Long-term memory using PostgreSQL with pgvector
+   - [x] Long-term memory using SQLite with sqlite-vec extension
+   - [x] Added proper error handling and fallback mechanisms for vector extensions
    - [x] Memobase system for multi-user support with partitioned memories
    - [x] Domain knowledge system for user-specific structured information
    - [x] Robust database schema with optimized tables and indexes
@@ -74,6 +76,12 @@ Core components of the muxi framework now implemented:
     - [x] Implemented proper monorepo structure
     - [x] Created development installation scripts
     - [x] Fixed cross-package imports
+14. **Vector Database Support**:
+    - [x] SQLite with sqlite-vec integration for local deployments
+    - [x] Reorganized extensions directory structure
+    - [x] Added proper Python package for easier installation
+    - [x] Implemented automatic fallback from package to binary extensions
+    - [x] Enhanced compatibility with various platforms and architectures
 
 ## Todo List
 
@@ -133,7 +141,17 @@ Building on the api.md specifications, enhance the WebSocket API:
 - [ ] Add support for local models (e.g., Llama, Mistral, DeepSeek)
 - [ ] Create a model router for fallback and cost optimization
 
-### 5. Testing and Documentation
+### 5. Vector Database Enhancements
+
+- [x] SQLite with sqlite-vec integration for local deployments
+- [ ] Optimize vector operations for improved performance
+- [ ] Add support for additional vector databases (e.g., Milvus, Qdrant)
+- [ ] Add migration tools for transferring between database types
+- [ ] Create performance benchmarks for different vector database options
+- [ ] Develop guidance for choosing between SQLite and PostgreSQL
+- [ ] Support for vector database clustering and sharding
+
+### 6. Testing and Documentation
 
 - [ ] Unit tests for all new API endpoints
 - [ ] Integration tests for API and WebSocket endpoints
@@ -143,8 +161,9 @@ Building on the api.md specifications, enhance the WebSocket API:
 - [ ] User guides for advanced use cases
 - [ ] Example projects showcasing API usage
 - [ ] Generate API documentation with Sphinx
+- [ ] Create SQLite vector extension usage guide
 
-### 6. Multi-Modal Capabilities
+### 7. Multi-Modal Capabilities
 
 Transform agents into omni agents capable of handling various media types as specified in api.md WebSocket section:
 
@@ -182,7 +201,7 @@ Transform agents into omni agents capable of handling various media types as spe
 - [ ] OCR for scanned documents
 - [ ] Document summarization tools
 
-### 7. Deployment
+### 8. Deployment
 
 - [ ] Docker containerization
 - [ ] Kubernetes deployment
@@ -190,8 +209,9 @@ Transform agents into omni agents capable of handling various media types as spe
 - [ ] Monitoring and logging integration
 - [ ] Continuous integration workflow with GitHub Actions or similar tools
 - [ ] Automatic version bumping for releases
+- [ ] SQLite deployment guides for serverless and edge environments
 
-### 8. Stability and Performance
+### 9. Stability and Performance
 
 - [x] Comprehensive error monitoring
 - [x] Database schema optimization and indexing
@@ -207,7 +227,7 @@ Transform agents into omni agents capable of handling various media types as spe
   - [ ] Performance metrics collection
   - [ ] Log visualization in web dashboard
 
-### 9. Security Enhancements
+### 10. Security Enhancements
 
 Based on api.md security considerations:
 - [ ] Ensure all API endpoints use HTTPS in production
@@ -218,7 +238,7 @@ Based on api.md security considerations:
 - [ ] Implement proper security logging for auditing
 - [ ] Add IP-based restrictions for sensitive operations
 
-### 10. Package Distribution
+### 11. Package Distribution
 
 - [x] Create proper Python package for PyPI distribution
 - [x] Versioning strategy
@@ -235,6 +255,7 @@ Based on api.md roadmap and current progress:
 - [x] Agent management endpoints (basic)
 - [x] Basic conversation endpoints
 - [x] Memory search and management
+- [x] SQLite vector integration
 - [ ] Complete API as outlined in api.md
 
 ### Phase 2: Advanced Features (v0.4.0)
@@ -291,6 +312,7 @@ This scenario demonstrates a complete workflow from installation to running an a
    memory:
      buffer: 10  # Buffer window size of 10
      long_term: true  # Enable long-term memory
+     # Or use SQLite explicitly: long_term: "sqlite:///data/memory.db"
    knowledge:
    - path: "knowledge/weather_facts.txt"
      description: "Facts about weather patterns and climate"
@@ -322,7 +344,9 @@ This scenario demonstrates a complete workflow from installation to running an a
 
    ```
    OPENAI_API_KEY=your_openai_key_here
-   DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+   POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+   # Or use SQLite
+   # USE_LONG_TERM_MEMORY=sqlite:///data/memory.db
    WEATHER_API_KEY=your_weather_api_key
    SEARCH_API_KEY=your_search_api_key
    ```
@@ -339,7 +363,7 @@ This scenario demonstrates a complete workflow from installation to running an a
    load_dotenv()
 
    # Initialize MUXI - the database connection will be loaded
-   # automatically from DATABASE_URL when needed
+   # automatically from POSTGRES_DATABASE_URL when needed
    mx = muxi()
 
    # Add agent from configuration

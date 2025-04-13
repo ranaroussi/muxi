@@ -11,31 +11,40 @@ The current development focus is on implementing the complete REST API as define
 3. **Error Handling**: Standardizing error responses across all endpoints
 4. **Streaming Support**: Enhancing SSE streaming for chat responses
 5. **Documentation**: Creating comprehensive API documentation with Swagger/OpenAPI
+6. **SQLite Vector Integration**: Enhancing local deployment capabilities with sqlite-vec extension
 
 ## Recent Changes
 
 ### Major Changes
 
-1. **Breaking Changes in Version 1.0**:
+1. **SQLite Vector Integration**:
+   - Added support for sqlite-vec Python package for vector similarity search
+   - Reorganized extensions directory structure for future expandability
+   - Updated memory system to work with both PostgreSQL and SQLite databases
+   - Improved vector serialization for compatibility with sqlite-vec
+   - Enhanced resilience with fallback to binary extensions when package is unavailable
+
+2. **Breaking Changes in Version 1.0**:
    - Removed deprecated methods like `_enhance_with_domain_knowledge()` (replaced by `_enhance_with_context_memory()`)
    - Removed `add_user_domain_knowledge()` (replaced by `add_user_context_memory()`)
    - Updated API signatures by removing the `memory` parameter from the `Agent` class (replaced by `buffer_memory`)
    - Removed backward compatibility for user_id=0 handling
    - Renamed all "domain knowledge" terminology to "context memory" throughout the codebase
 
-2. **Test Improvements**:
+3. **Test Improvements**:
    - Fixed all test warnings and errors
    - Implemented pytest.ini configuration to filter FAISS-related DeprecationWarnings
    - Improved test coverage across all components
+   - Made tests more robust to handle differences in database behaviors
 
-3. **Architectural Evolution**:
+4. **Architectural Evolution**:
    - Restructured codebase into modular packages
    - Created setup.py for each package with appropriate dependencies
    - Implemented proper monorepo structure
    - Created development installation scripts
    - Fixed cross-package imports
 
-4. **MCP Integration**:
+5. **MCP Integration**:
    - Enhanced MCP server integration with proper reconnection logic
    - Implemented transport abstraction with factory pattern
    - Added support for both HTTP+SSE and Command-line transports
@@ -48,6 +57,7 @@ The current development focus is on implementing the complete REST API as define
 - Updated `ClientSession` implementation to use streams appropriately
 - Addressed linter issues and code formatting across the codebase
 - Improved API key handling for tests with standardized environment loading
+- Added sqlite-vec Python package to simplify SQLite extension loading
 
 ## Next Steps
 
@@ -98,6 +108,12 @@ Based on the updated NEXT_STEPS.md document, the following tasks have been prior
    - Add support for local models (e.g., Llama, Mistral, DeepSeek)
    - Create a model router for fallback and cost optimization
 
+4. **Vector Database Improvements**:
+   - Enhance SQLite vector integration for improved performance
+   - Add support for additional vector databases (e.g., Milvus, Qdrant)
+   - Implement more vector functions and operations
+   - Create database migration tools for SQLite to PostgreSQL transitions
+
 ## Active Decisions and Considerations
 
 ### API Design Decisions
@@ -114,7 +130,10 @@ Based on the updated NEXT_STEPS.md document, the following tasks have been prior
 
 ### Technical Considerations
 
-1. **Database Structure**: PostgreSQL with pgvector is confirmed as the primary database for long-term memory storage. Consider adding support for alternative vector databases in the future.
+1. **Database Structure**:
+   - PostgreSQL with pgvector is confirmed as the primary database for high-scale deployments
+   - SQLite with sqlite-vec now supported for local and lightweight deployments
+   - Both use the same vector operations and interfaces
 
 2. **Concurrency Model**: The async/await pattern with asyncio is used throughout the codebase. Be mindful of potential race conditions in shared state when implementing new features.
 
@@ -135,6 +154,8 @@ Based on the updated NEXT_STEPS.md document, the following tasks have been prior
 4. **Security Assessment**: What security assessment procedures should be established before the 1.0 release?
 
 5. **Deployment Strategy**: What containerization and orchestration approaches should be recommended for production deployments?
+
+6. **Vector Database Choice**: Should we provide more guidance on choosing between SQLite and PostgreSQL for different use cases?
 
 ## Blockers and Dependencies
 

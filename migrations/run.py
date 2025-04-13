@@ -37,20 +37,20 @@ class MigrationUtility:
         # Initialize SQLite database for tracking migrations
         self.init_sqlite_db()
 
-        # Connect to the main PostgreSQL database using DATABASE_URL
+        # Connect to the main PostgreSQL database using POSTGRES_DATABASE_URL
         self.pg_connection = self.connect_to_postgres()
 
     def connect_to_postgres(self):
         """
-        Connect to the PostgreSQL database using DATABASE_URL from .env file.
+        Connect to the PostgreSQL database using POSTGRES_DATABASE_URL from .env file.
         """
-        database_url = os.getenv('DATABASE_URL')
+        database_url = os.getenv('POSTGRES_DATABASE_URL')
 
         if not database_url:
-            print("[!] DATABASE_URL not found in .env file. Cannot proceed.")
+            print("[!] POSTGRES_DATABASE_URL not found in .env file. Cannot proceed.")
             sys.exit(1)
 
-        # Parse the DATABASE_URL
+        # Parse the POSTGRES_DATABASE_URL
         parsed_url = urllib.parse.urlparse(database_url)
 
         # Check if it's a PostgreSQL URL

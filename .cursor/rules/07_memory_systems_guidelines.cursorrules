@@ -16,19 +16,53 @@
 - Implement memory summarization when needed
 - Properly handle updates to existing memories
 
-## Long-Term Memory
-- Use PostgreSQL with pgvector for persistent storage
+## Long-Term Memory - Database Options
+
+### PostgreSQL with pgvector
+- Recommended for production and multi-user deployments
 - Implement proper schema design for memory storage
 - Use appropriate indexes for vector columns
 - Implement proper query optimization for vector searches
 - Handle large volumes of data efficiently
+- Implement connection pooling
+- Support sharding and horizontal scaling for large deployments
+- Use transactions for related operations
+
+### SQLite with sqlite-vec
+- Recommended for local development and single-user deployments
+- Use the sqlite-vec Python package for vector operations
+- Implement proper error handling with fallback to binary extensions
+- Use appropriate indexes for vector columns
+- Optimize queries for vector searches
+- Consider performance limitations for large datasets
+- Be aware of concurrency limitations due to file locking
+- Suitable for edge deployments and resource-constrained environments
+
+### Common Database Practices
 - Implement memory cleanup and archiving
 - Support metadata filtering in searches
 - Implement proper error handling for database operations
-- Use transactions for related operations
-- Implement connection pooling
 - Handle concurrent access properly
 - Support memory exports and imports
+- Implement connection timeout and retry logic
+- Use appropriate database pooling based on deployment size
+
+## Vector Database Selection Guidelines
+- Use SQLite with sqlite-vec for:
+  - Local development
+  - Single-user applications
+  - Edge computing
+  - Serverless functions
+  - Deployments with resource constraints
+  - Situations where a simple file-based database is preferred
+
+- Use PostgreSQL with pgvector for:
+  - Production environments
+  - Multi-user applications
+  - High-throughput systems
+  - Situations requiring horizontal scaling
+  - Enterprise deployments with high availability requirements
+  - When using other PostgreSQL features
 
 ## Memobase (User-Aware Memory)
 - Properly partition memories by user_id
@@ -57,6 +91,8 @@
 - Support different embedding models
 - Implement fallbacks for embedding generation failures
 - Document vector format and dimensionality
+- Handle vector serialization appropriately for different databases
+- Use float32 format for vectors to balance precision and size
 
 ## Memory Retrieval
 - Implement relevance scoring for retrieved memories
@@ -91,14 +127,15 @@
 - Implement appropriate caching strategies
 - Use batch operations for efficiency
 - Monitor memory system performance
-- Implement sharding for large memory stores
+- Implement sharding for large memory stores (PostgreSQL)
 - Optimize database queries for vector operations
-- Use connection pooling for database access
+- Use connection pooling for database access (PostgreSQL)
 - Implement proper indexing for frequent queries
 - Benchmark memory operations with realistic workloads
 - Implement circuit breakers for external dependencies
-- Support horizontal scaling of memory systems
-- Document performance characteristics
+- Support horizontal scaling of memory systems (PostgreSQL)
+- Document performance characteristics for each database option
+- Consider memory constraints when choosing between SQLite and PostgreSQL
 
 ## Database Structure
 - Structure database around users as the central entity
@@ -108,9 +145,11 @@
 - Implement proper foreign key relationships with cascade deletes
 - Include created_at and updated_at timestamps on all tables
 - Index all columns used for filtering, sorting and joining
-- Use JSONB for flexible metadata storage with GIN indexes
+- Use JSONB for flexible metadata storage with GIN indexes (PostgreSQL)
+- Use JSON for metadata storage in SQLite
 - Implement composite indexes for common query patterns (e.g., user_id + created_at)
-- Use the pgvector extension for embedding storage with IVFFLAT indexes
+- Use the pgvector extension for embedding storage with IVFFLAT indexes (PostgreSQL)
+- Use the sqlite-vec extension for embedding storage in SQLite
 - Set appropriate vector dimensions based on embedding models (e.g., 1536 for OpenAI)
 - Create separate indexes for timestamp columns to optimize time-based queries
 - Structure the core schema around these key tables:
@@ -123,3 +162,4 @@
 - Use transactions for operations that affect multiple tables
 - Use PostgreSQL's JSONB features for flexible schema evolution
 - Implement proper migrations for all schema changes
+- Keep schema compatible between PostgreSQL and SQLite where possible

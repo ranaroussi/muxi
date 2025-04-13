@@ -28,6 +28,7 @@ starlette>=0.27.0
 faiss-cpu>=1.10.0
 pgvector>=0.3.6
 numpy>=1.24.0
+sqlite-vec>=0.1.7  # SQLite vector extension for similarity search
 
 # Database
 psycopg2-binary>=2.9.9

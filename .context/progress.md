@@ -15,6 +15,7 @@ The following components of the MUXI Framework have been successfully implemente
 2. **Memory Systems**:
    - ✅ Buffer memory using FAISS for short-term context
    - ✅ Long-term memory using PostgreSQL with pgvector
+   - ✅ Long-term memory using SQLite with sqlite-vec for local deployments
    - ✅ Memobase system for multi-user memory partitioning
    - ✅ Context memory for user-specific structured information
 
@@ -49,6 +50,12 @@ The following components of the MUXI Framework have been successfully implemente
    - ✅ Commands for chat and one-off messages
    - ✅ Server management commands
    - ✅ Colored output with Markdown support
+
+8. **Vector Database Integrations**:
+   - ✅ PostgreSQL with pgvector for high-scale deployments
+   - ✅ SQLite with sqlite-vec for local deployments
+   - ✅ Automatic handling of vector serialization based on database type
+   - ✅ Fallback mechanisms for vector extensions
 
 ### Infrastructure
 
@@ -121,6 +128,18 @@ The following components are partially implemented or planned for future develop
    - ⏳ OCR for scanned documents
    - ⏳ Document summarization
 
+### Vector Database Enhancements
+
+1. **Performance Optimizations**:
+   - ⏳ Improved indexing for vector operations
+   - ⏳ Caching strategies for frequent queries
+   - ⏳ Batch operations for efficient insertions
+
+2. **Additional Integrations**:
+   - ⏳ Support for other vector databases (Milvus, Qdrant, etc.)
+   - ⏳ Migration tools between database types
+   - ⏳ Advanced vector operations (clustering, etc.)
+
 ### Deployment Infrastructure
 
 1. **Containerization**:
@@ -150,6 +169,8 @@ The following components are partially implemented or planned for future develop
 
 The MUXI Framework is currently in an alpha stage of development. All tests are passing, and the core functionality is implemented and working correctly. The framework is usable for basic agent creation and interaction, but the standardized API implementation is still in progress.
 
+SQLite vector support has been added, providing a simpler deployment option for local or resource-constrained environments, complementing the existing PostgreSQL with pgvector option for larger-scale deployments.
+
 ### Version Status
 
 - Current version: Pre-1.0 development phase
@@ -161,6 +182,7 @@ The MUXI Framework is currently in an alpha stage of development. All tests are 
 - **Core Components**: Stable (Agent, Memory, MCP)
 - **Configuration System**: Stable
 - **CLI Interface**: Stable
+- **Vector Database Support**: Stable (PostgreSQL, SQLite)
 - **API Implementation**: In Development
 - **WebSocket Implementation**: Partial
 - **Multi-Modal Support**: Planned
@@ -179,6 +201,7 @@ The MUXI Framework is currently in an alpha stage of development. All tests are 
 3. **Documentation**:
    - API documentation is incomplete
    - Example code needs updating for recent changes
+   - Documentation for SQLite vector usage needs expansion
 
 4. **MCP Integration**:
    - Streaming HTTP transport not yet supported (awaiting protocol updates)
