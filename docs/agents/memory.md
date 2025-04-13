@@ -106,7 +106,7 @@ print(response2)  # The agent should respond with "Alice"
 Long-term memory provides persistent storage for important information across sessions. MUXI uses vector databases to store and retrieve memories semantically.
 
 {: .warning }
-> Long-term memory requires database access. Please ensure you set `DATABASE_URL` in your environment variables.
+> Long-term memory requires database access. Please ensure you set `POSTGRES_DATABASE_URL` in your environment variables.
 
 ### Basic Long-Term Memory Example
 
@@ -141,7 +141,7 @@ load_dotenv()
 app = muxi()
 
 # Set up database for long-term memory (or use environment variables)
-app.configure_database(connection_string=os.getenv("DATABASE_URL"))
+app.configure_database(connection_string=os.getenv("POSTGRES_DATABASE_URL"))
 
 # Add agent with long-term memory
 app.add_agent("configs/long_term_memory_agent.yaml")
@@ -164,7 +164,7 @@ load_dotenv()
 app = muxi()
 
 # Set up database for long-term memory (or use environment variables)
-app.configure_database(connection_string=os.getenv("DATABASE_URL"))
+app.configure_database(connection_string=os.getenv("POSTGRES_DATABASE_URL"))
 
 # Add agent with long-term memory
 app.add_agent("configs/long_term_memory_agent.yaml")
@@ -191,7 +191,7 @@ model = OpenAIModel(
 )
 buffer = BufferMemory()
 long_term = LongTermMemory(
-    connection_string=os.getenv("DATABASE_URL")
+    connection_string=os.getenv("POSTGRES_DATABASE_URL")
 )  # This requires a database connection
 
 # Create an agent with both buffer and long-term memory

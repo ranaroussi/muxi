@@ -14,7 +14,7 @@ class DatabaseConfig(BaseModel):
 
     connection_string: str = Field(
         default_factory=lambda: os.getenv(
-            "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ai_agent_db"
+            "POSTGRES_DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ai_agent_db"
         )
     )
 

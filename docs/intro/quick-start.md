@@ -42,7 +42,7 @@ Create a `.env` file with your API keys:
 
 ```bash
 OPENAI_API_KEY=your-openai-key
-DATABASE_URL=your-database-connection-string
+POSTGRES_DATABASE_URL=your-database-connection-string
 WEATHER_API_KEY=your-weather-api-key
 ```
 

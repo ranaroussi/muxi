@@ -78,7 +78,7 @@ Create a `.env` file in your project root with the following variables:
 OPENAI_API_KEY=your-openai-api-key
 
 # Optional but recommended for persistence
-DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
 
 # Optional for specific MCP servers
 WEATHER_API_KEY=your-weather-api-key
@@ -134,10 +134,10 @@ CREATE DATABASE muxi;
 CREATE EXTENSION IF NOT EXISTS pgvector;
 ```
 
-4. Set the DATABASE_URL environment variable:
+4. Set the POSTGRES_DATABASE_URL environment variable:
 
 ```bash
-DATABASE_URL=postgresql://username:password@localhost:5432/muxi
+POSTGRES_DATABASE_URL=postgresql://username:password@localhost:5432/muxi
 ```
 
 ### Using Docker
@@ -154,10 +154,10 @@ docker run -d \
   pgvector/pgvector:pg14
 ```
 
-Then set your DATABASE_URL:
+Then set your POSTGRES_DATABASE_URL:
 
 ```bash
-DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
 ```
 
 ## Verifying Installation
@@ -201,7 +201,7 @@ Solution: Set the OPENAI_API_KEY environment variable.
 ```
 Error: Could not connect to database
 ```
-Solution: Verify your DATABASE_URL and ensure PostgreSQL is running.
+Solution: Verify your POSTGRES_DATABASE_URL and ensure PostgreSQL is running.
 
 **Port Already in Use**:
 ```

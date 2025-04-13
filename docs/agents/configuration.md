@@ -558,7 +558,7 @@ print(response)  # Should mention "Sam"
   },
   "long_term_memory": {
     "type": "long_term",
-    "connection_string": "${DATABASE_URL}",
+    "connection_string": "${POSTGRES_DATABASE_URL}",
     "collection": "agent_memories"
   }
 }
@@ -581,7 +581,7 @@ model = OpenAIModel(
 
 # Configure long-term memory
 long_term = LongTermMemory(
-    connection_string=os.getenv("DATABASE_URL"),
+    connection_string=os.getenv("POSTGRES_DATABASE_URL"),
     collection="agent_memories"
 )
 
@@ -653,7 +653,7 @@ Each MCP server can have optional credentials for authentication, though many se
   },
   "long_term_memory": {
     "type": "long_term",
-    "connection_string": "${DATABASE_URL}"
+    "connection_string": "${POSTGRES_DATABASE_URL}"
   },
   "mcp_servers": [
     {
@@ -732,7 +732,7 @@ model = OpenAIModel(
 
 # Configure memory
 buffer = BufferMemory(max_tokens=4000)
-long_term = LongTermMemory(connection_string=os.getenv("DATABASE_URL"))
+long_term = LongTermMemory(connection_string=os.getenv("POSTGRES_DATABASE_URL"))
 
 # Create a fully-configured agent
 agent = orchestrator.create_agent(
