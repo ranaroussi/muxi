@@ -1,50 +1,22 @@
-# SQLite Vector Extensions
+# MUXI Framework Extensions
 
-This directory contains pre-compiled SQLite vector extension binaries (`sqlite-vec`) for different platforms and architectures. These extensions enable vector similarity search capabilities in SQLite databases, which is used by Muxi for local-first vector storage and semantic search.
+This directory contains extension modules for the MUXI Framework, organized by extension type. Each subdirectory contains a different type of extension.
 
-## Directory Structure
+## Current Extensions
 
-The binaries are organized by architecture and operating system:
+### sqlite-vec
 
-```
-extensions/
-├── x86_64-darwin/    # macOS (Intel)
-│   └── sqlite-vec.dylib
-├── arm64-darwin/     # macOS (Apple Silicon)
-│   └── sqlite-vec.dylib
-├── x86_64-linux/     # Linux (x86_64)
-│   └── sqlite-vec.so
-├── arm64-linux/      # Linux (ARM64)
-│   └── sqlite-vec.so
-└── x86_64-windows/   # Windows (x86_64)
-    └── sqlite-vec.dll
-```
+The `sqlite-vec` directory contains pre-compiled SQLite extensions for vector similarity search across different platforms and architectures. These extensions enable vector search capabilities in the MUXI Framework's long-term memory system.
 
-## Supported Platforms
+See the `sqlite-vec/README.md` for specific details about the SQLite vector extension.
 
-The following platforms are currently supported:
+## Adding New Extensions
 
-- **macOS**: Intel (x86_64) and Apple Silicon (arm64)
-- **Linux**: x86_64 and arm64
-- **Windows**: x86_64
+To add a new extension:
 
-## Usage
+1. Create a new subdirectory under `/extensions` with a descriptive name for your extension
+2. Include all necessary binaries, libraries, or source files in that directory
+3. Update the appropriate loader function in the codebase to use your extension
+4. Document the extension in a README.md file within your extension directory
 
-The Muxi framework automatically detects the current operating system and architecture, and loads the appropriate extension binary at runtime.
-
-## Adding Custom Binaries
-
-If you need to add support for a new platform or update an existing binary:
-
-1. Compile the SQLite vector extension for your target platform
-2. Place the compiled binary in the appropriate directory (or create a new one if needed)
-3. Update the `load_sqlite_vec_extension` function in `packages/server/src/muxi/memory/sqlite.py` if necessary
-
-## Building from Source
-
-Instructions for building the SQLite vector extension from source can be found at:
-[sqlite-vec GitHub repository](https://github.com/asg017/sqlite-vec)
-
-## License
-
-The SQLite vector extension is distributed under the MIT license.
+This organization allows for clean separation between different types of extensions while maintaining a consistent structure for the framework.
