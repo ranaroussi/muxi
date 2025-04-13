@@ -104,7 +104,7 @@ MUXI has a flexible, service-oriented approach:
 └─────────────────────────────────────────────────────┘
 ```
 
-For more details, see [Architecture Documentation](docs/architecture.md).
+For more details, see [Architecture Documentation](docs/intro/architecture.md).
 
 ## Installation
 
