@@ -1785,145 +1785,222 @@
     "relUrl": "/release-notes"
   },"255": {
     "doc": "Release Notes",
+    "title": "Upcoming Releases",
+    "content": "v0.5.0 (Planned Q2 2025) - Scaling &amp; Communication . The MUXI Framework v0.5.0 will focus on advanced agent communication, enhanced MCP server capabilities, and performance improvements to support larger-scale deployments. Planned Features . | Advanced Agent-to-Agent (A2A) Communication: . | Capability discovery mechanism for automatic service detection | Robust task delegation between specialized agents | Context sharing with proper isolation | Conversation lifecycle management | External agent integration capabilities | Comprehensive security and authentication | . | Full MCP Server Interface: . | Complete streaming response support | Enhanced tool discovery from agent capabilities | Advanced request/response handling | Authentication shared with REST API | Complete documentation and examples | . | Performance &amp; Monitoring: . | Comprehensive system status monitoring | API usage statistics and dashboards | Rate limiting and quota management | Performance optimizations for high-scale deployments | . | Multi-Modal Support: . | Full support for images, audio, and document processing | Standardized multi-modal message formats | Comprehensive handling of various content types | . | . v0.4.0 (Planned Q2 2025) - Advanced Features . The MUXI Framework v0.4.0 will introduce several advanced features with a focus on agent communication and MCP server implementation. Planned Features . | Basic MCP Server Interface: . | SSE-based server endpoint for exposing agent capabilities | Initial tool discovery implementation | Basic request/response message handling | Simplified authentication mechanism | NPX bridge package for non-SSE clients | . | Initial Agent-to-Agent (A2A) Communication: . | Standardized message format for inter-agent communication | Basic agent capability registration | Simple task delegation between agents | Configuration options for A2A control | . | Enhanced WebSocket Support: . | Complete WebSocket implementation to spec | Support for real-time agent interactions | Improved error handling and recovery | . | Additional LLM Providers: . | Support for additional model providers beyond OpenAI | Abstraction layer for provider-agnostic operations | Configuration options for provider selection | . | . ",
+    "url": "/muxi/release-notes#upcoming-releases",
+    
+    "relUrl": "/release-notes#upcoming-releases"
+  },"256": {
+    "doc": "Release Notes",
     "title": "v0.3.0 (March 2025) - Context Knowledge Expansion",
     "content": "The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilities, enhancing agents with specialized context knowledge and improved contextual awareness. Major Features . | Agent-Level Knowledge Base: Agents can now have dedicated knowledge sources specific to their domains of expertise . | File-based knowledge sources with automatic embedding generation | Efficient in-memory vector storage using FAISS | Persistent caching of embeddings for cost optimization | Dynamic embedding dimension detection based on the agent’s model | . | Enhanced Knowledge API: Comprehensive API for managing agent knowledge . | Add and remove knowledge sources programmatically | Search knowledge with relevance controls | List and manage knowledge sources | . | Declarative Knowledge Configuration: Define knowledge sources in YAML/JSON configurations . | Specify file paths and descriptions | Automatic loading and embedding on agent initialization | . | Improved Documentation: Comprehensive guides for all knowledge features | MCP Server Enhancements: Improved MCP server integration . | Made credentials optional for MCP servers to simplify configuration | Better documentation on MCP server configuration | Updated examples to demonstrate credential-optional usage patterns | . | . Benefits . | Create specialized agents with domain-specific knowledge | Provide more accurate and contextual responses | Reduce hallucinations by grounding responses in factual information | Simplify RAG (Retrieval-Augmented Generation) implementation | Easier MCP server integration with fewer required configuration parameters | . Example Usage . # Add knowledge programmatically from muxi.knowledge.base import FileKnowledge knowledge = FileKnowledge( path=\"knowledge/products.txt\", description=\"Product catalog and specifications\" ) await agent.add_knowledge(knowledge) # Search knowledge results = await agent.search_knowledge( query=\"What are our best-selling products?\", top_k=3, threshold=0.7 ) . ",
     "url": "/muxi/release-notes#v030-march-2025---context-knowledge-expansion",
     
     "relUrl": "/release-notes#v030-march-2025---context-knowledge-expansion"
-  },"256": {
+  },"257": {
     "doc": "Release Notes",
     "title": "v0.2.0 (March 2025) - Architecture Migration",
     "content": "The MUXI Framework v0.2.0 marks a significant milestone with the completion of our architectural migration to a modular, package-based structure. This release focuses on improving the framework’s architecture, maintainability, and extensibility rather than adding new features. Major Changes . | Modular Package Structure: Reorganized from a monolithic structure to a modular, package-based architecture | Import Path Migration: Changed imports from src.* to muxi.core.*, muxi.cli.*, etc. | Independent Packages: Created separately installable packages for core functionality, CLI, server, and web interface | Clearer Subsystem Boundaries: Established well-defined interfaces between subsystems | . Benefits of the New Architecture . | Independent Versioning: Components can be versioned independently | Clearer Module Boundaries: Better separation of concerns with well-defined interfaces | Focused Testing: Tests can target specific packages | Flexible Deployment: Support for installing only needed components | Enhanced Maintainability: Easier to understand and modify codebase | . Breaking Changes . | Import paths have changed from src.* to muxi.core.*, etc. | Configuration files now use the new package structure | Extensions and custom components need to be updated to the new import structure | . Migration Guide . To upgrade from v0.1.x to v0.2.0: . | Update your Python package: pip install -U muxi | Update any custom code to use the new import paths: . | Replace from src.core... with from muxi.core... | Replace from src.models... with from muxi.core.models... | Replace from src.memory... with from muxi.core.memory... | . | For web UI support, install the web module: pip install muxi-web | For server deployments, install the server module: pip install muxi-server | . What’s Next . With this architectural foundation in place, future releases will focus on: . | Enhanced multi-agent coordination | Expanded tool capabilities | Improved memory systems | More sophisticated context knowledge management | Additional model providers and support for local models | . Stay tuned for these exciting developments in upcoming releases! . ",
     "url": "/muxi/release-notes#v020-march-2025---architecture-migration",
     
     "relUrl": "/release-notes#v020-march-2025---architecture-migration"
-  },"257": {
+  },"258": {
+    "doc": "Project Roadmap",
+    "title": "MUXI Framework Roadmap",
+    "content": "This document outlines the development roadmap for the MUXI Framework, including completed releases, current development status, and planned future enhancements. The roadmap is organized by version milestones and development phases. ",
+    "url": "/muxi/roadmap#muxi-framework-roadmap",
+    
+    "relUrl": "/roadmap#muxi-framework-roadmap"
+  },"259": {
+    "doc": "Project Roadmap",
+    "title": "Overview",
+    "content": "The MUXI Framework is being developed in a phased approach, with each phase building upon the previous one to create a comprehensive framework for AI agent development. Our development philosophy emphasizes: . | Solid Foundations: Building reliable core components before adding advanced features | API-First Design: Designing with API compatibility and extensibility in mind | Modular Architecture: Creating clean, loosely-coupled subsystems | Progressive Enhancement: Adding capabilities iteratively based on user feedback | . ",
+    "url": "/muxi/roadmap#overview",
+    
+    "relUrl": "/roadmap#overview"
+  },"260": {
+    "doc": "Project Roadmap",
+    "title": "Development Phases",
+    "content": "Our overall development is structured into distinct phases: . Phase 1: Core Framework (v0.1.0 - v0.3.0) ✅ . This phase established the foundational architecture and core components of the framework: . | Basic agent functionality with LLM integration | Memory systems (buffer and long-term) | MCP client integration for external tools | Multi-agent support with orchestration | Configuration system | Basic CLI interface | Basic REST API foundations | . Phase 2: Advanced Features (v0.4.0) 🛠️ . This phase focuses on enhancing the framework with advanced communication capabilities: . | Full-featured CLI interface | Complete REST API implementation | Complete WebSocket API implementation | Basic MCP server interface implementation | Initial Agent-to-Agent (A2A) communication protocol | Additional LLM providers | Enhanced documentation | Basic multi-modal support | . Phase 3: Scaling &amp; Monitoring (v0.5.0) 📅 . This phase will prepare the framework for production deployment at scale: . | Advanced A2A communication with capability discovery | Full MCP Server interface with streaming response support | Performance improvements and optimizations | Monitoring and metrics | Full multi-modal support | Deployment guides and infrastructure | Web UI enhancements | . … . Phase 10: Enterprise Ready (v1.0.0) 🔮 . This phase will complete the framework’s feature set for enterprise use: . | Comprehensive security features | Advanced deployment options | Extended LLM provider support | Full production readiness | Complete documentation and examples | Stable, backward-compatible API | . ",
+    "url": "/muxi/roadmap#development-phases",
+    
+    "relUrl": "/roadmap#development-phases"
+  },"261": {
+    "doc": "Project Roadmap",
+    "title": "Completed Releases",
+    "content": "v0.3.0 (March 2025) - Context Knowledge Expansion . The MUXI Framework v0.3.0 brought significant improvements to knowledge capabilities, enhancing agents with specialized context knowledge and improved contextual awareness. Major Features . | Agent-Level Knowledge Base: . | File-based knowledge sources with automatic embedding generation | Efficient in-memory vector storage using FAISS | Persistent caching of embeddings for cost optimization | Dynamic embedding dimension detection based on the agent’s model | . | Enhanced Knowledge API: . | Add and remove knowledge sources programmatically | Search knowledge with relevance controls | List and manage knowledge sources | . | Declarative Knowledge Configuration: . | Specify file paths and descriptions | Automatic loading and embedding on agent initialization | . | MCP Server Enhancements: . | Made credentials optional for MCP servers | Better documentation on MCP server configuration | Updated examples to demonstrate credential-optional usage patterns | . | . v0.2.0 (March 2025) - Architecture Migration . The MUXI Framework v0.2.0 marked a significant milestone with the completion of our architectural migration to a modular, package-based structure. Major Features . | Modular Package Structure: . | Reorganized from a monolithic structure to a modular, package-based architecture | Changed imports from src.* to muxi.core.*, muxi.cli.*, etc. | Created separately installable packages for core functionality, CLI, server, and web interface | Established well-defined interfaces between subsystems | . | . v0.1.0 (January 2025) - Foundation Release . The initial release of the MUXI Framework established the core architecture and essential functionality. Major Features . | Core Agent System: . | Basic agent functionality with LLM integration | System message handling | Message processing pipeline | . | Memory Systems: . | Buffer memory using FAISS for short-term context | Long-term memory using PostgreSQL with pgvector | Context memory for user-specific structured information | . | MCP Integration: . | MCP handler for communication with external services | Multiple transport types (HTTP+SSE, Command-line) | Tool call processing and response handling | . | Orchestrator: . | Multi-agent management | Intelligent message routing | Agent description handling | . | Command Line Interface: . | Terminal-based user interface | Agent interaction commands | Server management | . | . ",
+    "url": "/muxi/roadmap#completed-releases",
+    
+    "relUrl": "/roadmap#completed-releases"
+  },"262": {
+    "doc": "Project Roadmap",
+    "title": "Current Development (v0.4.0)",
+    "content": "The MUXI Framework v0.4.0 will introduce several advanced features with a focus on agent communication and MCP server implementation. Key Features in Development . | Basic MCP Server Interface: . | SSE-based server endpoint for exposing agent capabilities | Tool discovery from agent capabilities | Request/response message handling | Authentication shared with REST API | NPX bridge package for non-SSE clients | . | Initial Agent-to-Agent (A2A) Communication: . | Standardized message format for inter-agent communication | Basic agent capability registration | Task delegation between agents | Context sharing with proper isolation | Configuration options for A2A control | . | Enhanced WebSocket Support: . | Complete WebSocket implementation to spec | Support for real-time agent interactions | Improved error handling and recovery | Multi-user WebSocket connections | . | Additional LLM Providers: . | Anthropic provider | Gemini provider | Abstraction layer for provider-agnostic operations | Support for local model integration | . | . ",
+    "url": "/muxi/roadmap#current-development-v040",
+    
+    "relUrl": "/roadmap#current-development-v040"
+  },"263": {
+    "doc": "Project Roadmap",
+    "title": "Upcoming Releases",
+    "content": "v0.5.0 (Planned Q2 2025) - Scaling &amp; Communication . The MUXI Framework v0.5.0 will focus on advanced agent communication, enhanced MCP server capabilities, and performance improvements to support larger-scale deployments. Planned Features . | Advanced Agent-to-Agent (A2A) Communication: . | Capability discovery mechanism for automatic service detection | Robust task delegation between specialized agents | Conversation lifecycle management | External agent integration capabilities | Comprehensive security and authentication | . | Full MCP Server Interface: . | Complete streaming response support | Enhanced tool discovery from agent capabilities | Advanced request/response handling | Authentication shared with REST API | Complete documentation and examples | . | Performance &amp; Monitoring: . | Comprehensive system status monitoring | API usage statistics and dashboards | Rate limiting and quota management | Performance optimizations for high-scale deployments | . | Multi-Modal Support: . | Full support for images, audio, and document processing | Standardized multi-modal message formats | Comprehensive handling of various content types | . | . v1.0.0 (Planned Q3 2025) - Stable Release . The v1.0.0 release will represent the first stable, production-ready version of the MUXI Framework. Planned Features . | API Stabilization: . | Complete API documentation | Backward compatibility guarantees | Standardized error handling across all components | . | Deployment Solutions: . | Docker containerization | Kubernetes deployment guides | Cloud deployment templates | Serverless deployment options | . | Security Enhancements: . | Comprehensive authentication options | Role-based access control | Data encryption at rest and in transit | Security best practices documentation | . | Extended Model Support: . | Support for all major LLM providers | Robust local model integration | Model fallback and routing options | Performance optimization for different model types | . | Developer Experience: . | Comprehensive documentation | Interactive tutorials | Extensive example projects | Plugin/extension system | . | . ",
+    "url": "/muxi/roadmap#upcoming-releases",
+    
+    "relUrl": "/roadmap#upcoming-releases"
+  },"264": {
+    "doc": "Project Roadmap",
+    "title": "Feature Completion Status",
+    "content": "| Feature | Status | Target Version | . | Core Agent System | ✅ Complete | v0.1.0 | . | Memory Systems | ✅ Complete | v0.1.0 | . | MCP Client Integration | ✅ Complete | v0.1.0 | . | Orchestrator | ✅ Complete | v0.1.0 | . | CLI Interface | ✅ Complete | v0.1.0 | . | Knowledge Base | ✅ Complete | v0.3.0 | . | SQLite Vector Support | ✅ Complete | v0.3.0 | . | PostgreSQL Vector Support | ✅ Complete | v0.3.0 | . | Multi-user Support | ✅ Complete | v0.3.0 | . | Modular Package Architecture | ✅ Complete | v0.2.0 | . | Complete WebSocket API | 🛠️ In Development | v0.4.0 | . | MCP Server Interface | 🛠️ In Development | v0.4.0 | . | A2A Communication | 🛠️ In Development | v0.4.0 | . | Additional LLM Providers | 🛠️ In Development | v0.4.0 | . | Multi-Modal Support | 📅 Planned | v0.5.0 | . | Performance Monitoring | 📅 Planned | v0.5.0 | . | Advanced A2A Communication | 📅 Planned | v0.5.0 | . | Full MCP Server Interface | 📅 Planned | v0.5.0 | . | Deployment Solutions | 🔮 Future | v1.0.0 | . | Extended Model Support | 🔮 Future | v1.0.0 | . | Security Enhancements | 🔮 Future | v1.0.0 | . | API Stabilization | 🔮 Future | v1.0.0 | . ",
+    "url": "/muxi/roadmap#feature-completion-status",
+    
+    "relUrl": "/roadmap#feature-completion-status"
+  },"265": {
+    "doc": "Project Roadmap",
+    "title": "Long-Term Vision",
+    "content": "Beyond the current roadmap, the MUXI Framework has several exciting directions for future development: . | Autonomous Agent Collectives: Advanced multi-agent systems that can work together autonomously | Agent Specialization Marketplace: Library of pre-trained specialized agents for different domains | Enhanced Learning Capabilities: Agents that improve over time through user feedback and interactions | Hardware Integration: Support for robotics and IoT device control through standardized interfaces | Enterprise IAM Integration: Integration with enterprise identity and access management systems | Cross-Platform Support: Mobile and edge device deployment options | . ",
+    "url": "/muxi/roadmap#long-term-vision",
+    
+    "relUrl": "/roadmap#long-term-vision"
+  },"266": {
+    "doc": "Project Roadmap",
+    "title": "Contributing",
+    "content": "We welcome contributions to the MUXI Framework! Please see our contribution guidelines for details on how to get involved with the development process. ",
+    "url": "/muxi/roadmap#contributing",
+    
+    "relUrl": "/roadmap#contributing"
+  },"267": {
+    "doc": "Project Roadmap",
+    "title": "Project Roadmap",
+    "content": " ",
+    "url": "/muxi/roadmap",
+    
+    "relUrl": "/roadmap"
+  },"268": {
     "doc": "Simple Agent",
     "title": "Creating a Simple Agent",
     "content": "This guide walks you through creating a basic agent using the MUXI Framework. ",
     "url": "/muxi/agents/simple#creating-a-simple-agent",
     
     "relUrl": "/agents/simple#creating-a-simple-agent"
-  },"258": {
+  },"269": {
     "doc": "Simple Agent",
     "title": "Basic Agent Creation",
     "content": "Declarative way . # configs/assistant.yaml --- agent_id: assistant description: A helpful assistant that answers questions and performs tasks. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o system_message: You are a helpful AI assistant. # app.py from muxi import muxi from dotenv import load_dotenv # Load environment variables load_dotenv() # Initialize MUXI app = muxi() # Add an agent from a configuration file app.add_agent(\"assistant\", \"configs/assistant.yaml\") # Chat with the agent response = await app.chat(\"Hello, who are you?\") print(response) . Programmatic way . import os from muxi.core.orchestrator import Orchestrator from muxi.core.models.openai import OpenAIModel # Initialize the orchestrator orchestrator = Orchestrator() # Create an OpenAI model model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\" ) # Create an agent orchestrator.create_agent( agent_id=\"assistant\", description=\"A helpful assistant that answers questions and performs tasks.\", model=model, system_message=\"You are a helpful AI assistant.\" ) # Chat with the agent response = orchestrator.chat(\"Hello, who are you?\") print(response) . ",
     "url": "/muxi/agents/simple#basic-agent-creation",
     
     "relUrl": "/agents/simple#basic-agent-creation"
-  },"259": {
+  },"270": {
     "doc": "Simple Agent",
     "title": "Customizing Agent Settings",
     "content": "Declarative way . --- agent_id: creative_writer description: A creative assistant that can help with writing and generating creative content. model: provider: openai api_key: \"${OPENAI_API_KEY}\" model: gpt-4o temperature: 0.8 top_p: 0.9 max_tokens: 1000 system_message: You are a creative assistant specializing in fiction writing. Help users craft stories, characters, and engaging narratives. Programmatic way . # ... # Create a model with custom parameters model = OpenAIModel( api_key=os.getenv(\"OPENAI_API_KEY\"), model=\"gpt-4o\", temperature=0.8, top_p=0.9, max_tokens=1000 ) # Create a creative agent orchestrator.create_agent( agent_id=\"creative_writer\", description=\"...\", model=model, system_message=\"...\" ) # ... ",
     "url": "/muxi/agents/simple#customizing-agent-settings",
     
     "relUrl": "/agents/simple#customizing-agent-settings"
-  },"260": {
+  },"271": {
     "doc": "Simple Agent",
     "title": "Using Different Model Providers",
     "content": "MUXI supports multiple model providers including OpenAI, Anthropic, Google, and more. Anthropic Agent Example . Declarative way . --- agent_id: claude description: An intelligent assistant powered by Claude. model: provider: anthropic api_key: \"${ANTHROPIC_API_KEY}\" model: claude-3-opus-20240229 system_message: You are Claude, a helpful AI assistant created by Anthropic. Programmatic way . # Create an Anthropic model model = AnthropicModel( api_key=os.getenv(\"ANTHROPIC_API_KEY\"), model=\"claude-3-opus-20240229\" ) # Create a Claude agent orchestrator.create_agent( agent_id=\"claude\", description=\"...\", model=model, system_message=\"...\" ) . Google Agent Example . Declarative way . --- agent_id: gemini description: An intelligent assistant powered by Google's Gemini model. model: provider: google api_key: \"${GOOGLE_API_KEY}\" model: gemini-1.5-pro system_message: You are Gemini, a helpful AI assistant created by Google. Programmatic way . # Create a Google model model = GoogleModel( api_key=os.getenv(\"GOOGLE_API_KEY\"), model=\"gemini-1.5-pro\" ) # Create a Gemini agent orchestrator.create_agent( agent_id=\"gemini\", description=\"...\", model=model, system_message=\"...\" ) . ",
     "url": "/muxi/agents/simple#using-different-model-providers",
     
     "relUrl": "/agents/simple#using-different-model-providers"
-  },"261": {
+  },"272": {
     "doc": "Simple Agent",
     "title": "Azure OpenAI Support",
     "content": "MUXI also supports Azure OpenAI services: . Declarative way . --- agent_id: azure_assistant description: A helpful assistant using Azure-hosted OpenAI models. model: provider: azure_openai api_key: \"${AZURE_OPENAI_API_KEY}\" api_version: 2023-12-01-preview api_base: \"${AZURE_OPENAI_ENDPOINT}\" deployment_name: gpt-4 system_message: You are a helpful AI assistant running on Azure infrastructure. Programmatic way . # Create an Azure OpenAI model model = AzureOpenAIModel( api_key=os.getenv(\"AZURE_OPENAI_API_KEY\"), api_version=\"2023-12-01-preview\", api_base=os.getenv(\"AZURE_OPENAI_ENDPOINT\"), deployment_name=\"gpt-4\" ) # Create an Azure agent orchestrator.create_agent( agent_id=\"azure_assistant\", description=\"...\", model=model, system_message=\"...\" ) . ",
     "url": "/muxi/agents/simple#azure-openai-support",
     
     "relUrl": "/agents/simple#azure-openai-support"
-  },"262": {
+  },"273": {
     "doc": "Simple Agent",
     "title": "Local Models",
     "content": "MUXI supports running models locally using the local provider: . Declarative way . --- agent_id: local_assistant description: A locally-hosted AI assistant running on your own hardware. model: provider: local model_path: \"/path/to/local/model\" model_type: llama2 context_window: 4096 system_message: You are a locally-hosted AI assistant. Programmatic way . # Create a local model model = LocalModel( model_path=\"/path/to/local/model\", model_type=\"llama2\", context_window=4096 ) # Create a local agent orchestrator.create_agent( agent_id=\"local_assistant\", description=\"...\", model=model, system_message=\"...\" ) . ",
     "url": "/muxi/agents/simple#local-models",
     
     "relUrl": "/agents/simple#local-models"
-  },"263": {
+  },"274": {
     "doc": "Simple Agent",
     "title": "Next Steps",
     "content": "Now that you’ve created a simple agent, you can: . | Learn how to configure agent settings in detail - see Agent Configuration | Add memory capabilities to your agent - see Adding Memory | Create multi-agent systems - see Multi-Agent Systems | . ",
     "url": "/muxi/agents/simple#next-steps",
     
     "relUrl": "/agents/simple#next-steps"
-  },"264": {
+  },"275": {
     "doc": "Simple Agent",
     "title": "Troubleshooting",
     "content": "Common Issues . | API Key Issues: If you receive authentication errors, check that your API key is correct and properly set. | Model Availability: Ensure you have access to the model you’re trying to use (e.g., GPT-4o might require special access). | Rate Limiting: If you encounter rate limiting, consider adding delays between requests or using a different API key. | . Getting Help . If you run into issues, check the GitHub Issues or create a new issue with detailed information about your problem. ",
     "url": "/muxi/agents/simple#troubleshooting",
     
     "relUrl": "/agents/simple#troubleshooting"
-  },"265": {
+  },"276": {
     "doc": "Simple Agent",
     "title": "Simple Agent",
     "content": " ",
     "url": "/muxi/agents/simple",
     
     "relUrl": "/agents/simple"
-  },"266": {
+  },"277": {
     "doc": "Why MUXI?",
     "title": "Why MUXI?",
     "content": " ",
     "url": "/muxi/intro/why-muxi",
     
     "relUrl": "/intro/why-muxi"
-  },"267": {
+  },"278": {
     "doc": "Why MUXI?",
     "title": "What You’ll Learn",
     "content": ". | The advantages of MUXI compared to other frameworks | How MUXI simplifies AI agent development | Where MUXI excels and what problems it best solves | Why you might choose MUXI for your next project | . ",
     "url": "/muxi/intro/why-muxi#what-youll-learn",
     
     "relUrl": "/intro/why-muxi#what-youll-learn"
-  },"268": {
+  },"279": {
     "doc": "Why MUXI?",
     "title": "Prerequisites",
     "content": ". | Basic understanding of AI agent frameworks (optional) | . ",
     "url": "/muxi/intro/why-muxi#prerequisites",
     
     "relUrl": "/intro/why-muxi#prerequisites"
-  },"269": {
+  },"280": {
     "doc": "Why MUXI?",
     "title": "The AI Agent Framework Landscape",
     "content": "The landscape of AI agent frameworks is becoming increasingly crowded. There are many options available for building LLM-powered applications. With so many choices, why should you consider MUXI? . ",
     "url": "/muxi/intro/why-muxi#the-ai-agent-framework-landscape",
     
     "relUrl": "/intro/why-muxi#the-ai-agent-framework-landscape"
-  },"270": {
+  },"281": {
     "doc": "Why MUXI?",
     "title": "MUXI’s Core Advantages",
     "content": "1. Simplicity Without Sacrifice . The Challenge: Many frameworks require complex manual implementation and management of various components. MUXI’s Solution: MUXI handles these complexities automatically: . # Traditional approach (pseudo-code) from other_framework.text_splitter import TextSplitter from other_framework.embeddings import EmbeddingGenerator from other_framework.vector_store import VectorDatabase from other_framework.llm import LanguageModel from other_framework.memory import ConversationMemory # Manual text splitting splitter = TextSplitter(chunk_size=1000, chunk_overlap=100) chunks = splitter.split_documents(documents) # Manual embedding creation embedding_generator = EmbeddingGenerator(api_key=\"YOUR_API_KEY\") embeddings = embedding_generator.generate(chunks) vector_db = VectorDatabase.create(embeddings) # Manual memory setup memory = ConversationMemory(history_key=\"chat_history\", return_as_messages=True) # Manual chain setup llm = LanguageModel(model_name=\"large-model\", api_key=\"YOUR_API_KEY\") retriever = vector_db.as_retriever(search_type=\"similarity\") chain = QueryChain.from_components( llm=llm, retriever=retriever, memory=memory ) response = chain.run(query=\"What is the capital of France?\") . # MUXI approach from muxi.core.agent import Agent from muxi.core.models.openai import OpenAIModel # Create an agent - memory and embeddings are handled automatically agent = Agent( model=OpenAIModel(\"gpt-4o\"), system_message=\"You are a helpful assistant.\" ) # Simple conversation with memory automatically managed response = agent.chat(\"What is the capital of France?\") . 2. Truly Multi-Agent by Design . The Challenge: Coordinating multiple specialized agents can be complex. MUXI’s Solution: Multi-agent orchestration is a core feature: . # MUXI multi-agent approach from muxi.core.orchestrator import Orchestrator from muxi.core.agent import Agent from muxi.core.models.openai import OpenAIModel # Create orchestrator orchestrator = Orchestrator() # Add specialized agents orchestrator.add_agent( Agent( name=\"travel_agent\", model=OpenAIModel(\"gpt-4o\"), system_message=\"You specialize in travel recommendations.\" ) ) orchestrator.add_agent( Agent( name=\"finance_agent\", model=OpenAIModel(\"gpt-4o\"), system_message=\"You specialize in financial advice.\" ) ) # Automatic message routing to the right agent response = orchestrator.chat(\"What's the best way to budget for a trip to Paris?\") . 3. Modern, Hybrid Communication . The Challenge: Most frameworks support limited communication protocols. MUXI’s Solution: Support for both REST API and WebSocket: . # WebSocket client example (simplified) import asyncio import websockets import json async def chat_with_agent(): async with websockets.connect(\"ws://localhost:5050/ws\") as websocket: # Send a message await websocket.send(json.dumps({ \"type\": \"message\", \"content\": \"Tell me about the weather in Paris\", \"agent\": \"weather_agent\" })) # Receive streaming response while True: response = await websocket.recv() response_data = json.loads(response) if response_data[\"type\"] == \"chunk\": # Process streaming chunk print(response_data[\"content\"], end=\"\") elif response_data[\"type\"] == \"done\": # Response complete break elif response_data[\"type\"] == \"mcp_call\": # MCP server being called print(f\"\\nFetching data from: {response_data['name']}\") asyncio.run(chat_with_agent()) . 4. Multi-User Support Built-In . The Challenge: Adding multi-user support to LLM applications often requires extensive custom code. MUXI’s Solution: Multi-user memory partitioning is built into the framework: . # Multi-user support in MUXI from muxi.core.agent import Agent from muxi.core.models.openai import OpenAIModel from muxi.core.memory.memobase import Memobase # Create a multi-user memory system memobase = Memobase(connection_string=\"postgresql://user:pass@localhost/db\") # Create an agent with multi-user memory agent = Agent( model=OpenAIModel(\"gpt-4o\"), long_term_memory=memobase, system_message=\"You are a personal assistant.\" ) # Chat with user-specific context response1 = agent.chat(\"Tell me about my upcoming trip\", user_id=\"user123\") response2 = agent.chat(\"What meetings do I have tomorrow?\", user_id=\"user456\") . 5. Declarative Configuration . The Challenge: Many frameworks require extensive code for even simple agent configurations. MUXI’s Solution: Declarative configuration with YAML or JSON: . # agent_config.yaml name: travel_assistant description: An agent specializing in travel advice and recommendations system_message: | You are a travel assistant that specializes in providing travel advice, destination recommendations, itinerary planning, and information about tourist attractions worldwide. model: provider: openai model: gpt-4o temperature: 0.7 api_key: ${OPENAI_API_KEY} memory: buffer_size: 10 enable_long_term: true mcp_servers: - name: travel_api url: http://localhost:5003 api_key: ${TRAVEL_API_KEY} . # Load agent from configuration from muxi.core.orchestrator import Orchestrator orchestrator = Orchestrator() orchestrator.add_agent_from_config(\"agent_config.yaml\") . ",
     "url": "/muxi/intro/why-muxi#muxis-core-advantages",
     
     "relUrl": "/intro/why-muxi#muxis-core-advantages"
-  },"271": {
+  },"282": {
     "doc": "Why MUXI?",
     "title": "Where MUXI Excels",
     "content": "MUXI is particularly well-suited for: . | Multi-Agent Applications: Systems where specialized agents handle different domains or tasks | Real-Time AI Interfaces: Applications requiring streaming responses and immediate feedback | Multi-User Platforms: Services where each user needs personalized, private context | Extending LLM Capabilities: Projects requiring integration with external services and APIs | Rapid Prototyping: Getting from concept to working prototype with minimal boilerplate | . ",
     "url": "/muxi/intro/why-muxi#where-muxi-excels",
     
     "relUrl": "/intro/why-muxi#where-muxi-excels"
-  },"272": {
+  },"283": {
     "doc": "Why MUXI?",
     "title": "MUXI’s Key Capabilities",
     "content": "MUXI offers a comprehensive set of features that make it stand out: . | Automatic Text Processing: Handles text chunking, embedding generation, and vector storage automatically | Multi-Agent Orchestration: Built-in support for creating and coordinating specialized agents | Real-Time Communication: Supports WebSocket and Server-Sent Events (SSE) for real-time interactions | Multi-User Memory Management: Automatic partitioning of memory by user ID | Declarative Configuration: Define agents using YAML or JSON configuration files | Standardized External Service Integration: MCP (Model Context Protocol) for consistent service access | Automatic Memory Management: Buffer and long-term memory with automatic summarization | Multi-Modal Support: Handle images, audio, and other modalities alongside text input | Streaming Response Processing: Process token-by-token responses for real-time applications | PostgreSQL/pgvector Integration: Built-in support for industry-standard vector storage | Hybrid Deployment Options: Use as a server, CLI tool, or Python library | . ",
     "url": "/muxi/intro/why-muxi#muxis-key-capabilities",
     
     "relUrl": "/intro/why-muxi#muxis-key-capabilities"
-  },"273": {
+  },"284": {
     "doc": "Why MUXI?",
     "title": "When to Consider Alternatives",
     "content": "While MUXI is powerful and flexible, it might not be the best choice for: . | Simple, One-Off Scripts: For quick scripts with minimal requirements, lighter libraries might be more appropriate | Highly Specialized Use Cases: If you need very specific functionality that MUXI doesn’t address | Production-Critical Systems: As MUXI is still in active development, very critical systems might need more mature frameworks | . ",
     "url": "/muxi/intro/why-muxi#when-to-consider-alternatives",
     
     "relUrl": "/intro/why-muxi#when-to-consider-alternatives"
-  },"274": {
+  },"285": {
     "doc": "Why MUXI?",
     "title": "Advanced Topics",
     "content": "For a deeper look at how MUXI compares to other frameworks: . | Framework Comparisons | . ",
     "url": "/muxi/intro/why-muxi#advanced-topics",
     
     "relUrl": "/intro/why-muxi#advanced-topics"
-  },"275": {
+  },"286": {
     "doc": "Why MUXI?",
     "title": "What’s Next",
     "content": ". | Quick Start Guide - Get up and running with MUXI | Simple Agents - Learn how to create your first agent | Using MCP Servers - Extend your agents with external capabilities | . ",
