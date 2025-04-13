@@ -25,7 +25,7 @@ MUXI is designed with a modular, extensible architecture that allows for flexibi
 ```
 ┌───────────────────┐
 │      Clients      │
-│   (CLI/Web/SDK)   │
+│ (CLI/MCP/Web/SDK) │
 └─────────┬─────────┘
           │
           │ (API/SSE/WS)
