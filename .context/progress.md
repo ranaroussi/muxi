@@ -103,6 +103,24 @@ The following components are partially implemented or planned for future develop
    - ⏳ API versioning support
    - ⏳ Comprehensive API documentation
 
+### Inter-Agent Communication
+
+1. **Agent-to-Agent (A2A) Protocol**:
+   - ⏳ Capability discovery mechanism
+   - ⏳ Task delegation between agents
+   - ⏳ Context sharing with proper isolation
+   - ⏳ Conversation lifecycle management
+   - ⏳ External agent integration
+   - ⏳ Security and authentication
+
+2. **MCP Server Interface**:
+   - ⏳ SSE-based MCP server implementation
+   - ⏳ Automatic tool discovery from agent capabilities
+   - ⏳ NPX bridge package for non-SSE clients
+   - ⏳ Streaming response handling
+   - ⏳ Authentication shared with REST API
+   - ⏳ Unified credential management
+
 ### WebSocket API Enhancement
 
 1. **Protocol Standardization**:

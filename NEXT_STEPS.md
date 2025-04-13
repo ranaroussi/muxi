@@ -246,6 +246,29 @@ Based on api.md security considerations:
 - [x] Package documentation
 - [ ] Installation guides
 
+### 12. Agent-to-Agent Communication
+
+- [ ] Implement Agent-to-Agent (A2A) protocol
+  - [ ] Capability registration and discovery
+  - [ ] Inter-agent message format standardization
+  - [ ] Task delegation between agents
+  - [ ] Context sharing with proper isolation
+  - [ ] Conversation lifecycle management
+  - [ ] External agent integration
+  - [ ] Security and authentication
+  - [ ] Configuration system for controlling A2A access
+
+### 13. MCP Server Interface
+
+- [ ] Implement MCP server interface
+  - [ ] SSE-based server endpoint
+  - [ ] Tool discovery from agent capabilities
+  - [ ] Request/response message handling
+  - [ ] Streaming response support
+  - [ ] Authentication shared with REST API
+  - [ ] NPX bridge package for non-SSE clients
+  - [ ] Integration with existing orchestrator
+
 ## Implementation Roadmap
 
 Based on api.md roadmap and current progress:

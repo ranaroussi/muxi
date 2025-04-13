@@ -1,5 +1,7 @@
 # MUXI Framework Technical Context
 
+This document outlines the technical context of the MUXI Framework, including technologies used, development setup, constraints, and dependencies.
+
 ## Technologies Used
 
 ### Programming Languages
@@ -295,3 +297,40 @@ Dockerization is supported with:
 3. **Distributed Architecture**: Support for distributed agent deployments
 4. **GPU Acceleration**: Support for GPU-accelerated vector operations
 5. **Streaming HTTP Transport**: Support for upcoming MCP streaming HTTP transport
+
+## Package Structure
+
+The MUXI Framework is organized into a monorepo with multiple packages:
+
+1. **Core Package** (`packages/core`): Contains core functionality
+   - Agent implementation
+   - Orchestrator for agent management
+   - MCP transport abstractions
+   - Model integrations
+   - Common utilities
+
+2. **Server Package** (`packages/server`): API server implementation
+   - REST API endpoints
+   - WebSocket server
+   - MCP server interface
+   - Memory systems
+   - Database integrations
+
+3. **CLI Package** (`packages/cli`): Command-line interface
+   - Interactive chat interface
+   - Server management commands
+   - MCP server generator
+
+4. **Web Package** (`packages/web`): Web UI implementation
+   - React-based user interface
+   - API client
+   - WebSocket client
+
+### Module Organization
+
+The MUXI Framework follows these structural patterns:
+
+- Package exports are defined in `__init__.py` files, not through direct imports from `__main__.py` files
+- Executable modules use `__main__.py` files, but core functionality is in dedicated modules
+- The `run_server` function is exported from the server package for clean imports
+- Configuration is loaded through a unified config system
