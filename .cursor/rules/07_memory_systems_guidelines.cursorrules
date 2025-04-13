@@ -30,8 +30,9 @@
 
 ### SQLite with sqlite-vec
 - Recommended for local development and single-user deployments
-- Use the sqlite-vec Python package for vector operations
-- Implement proper error handling with fallback to binary extensions
+- Prefer using the sqlite-vec Python package for vector operations
+- Avoid relying on binary extensions when possible for better portability and maintenance
+- Implement proper error handling with fallback mechanisms only when necessary
 - Use appropriate indexes for vector columns
 - Optimize queries for vector searches
 - Consider performance limitations for large datasets
@@ -93,6 +94,7 @@
 - Document vector format and dimensionality
 - Handle vector serialization appropriately for different databases
 - Use float32 format for vectors to balance precision and size
+- Prefer using standardized Python packages over custom binary extensions
 
 ## Memory Retrieval
 - Implement relevance scoring for retrieved memories

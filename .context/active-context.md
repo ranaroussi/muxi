@@ -19,10 +19,11 @@ The current development focus is on implementing the complete REST API as define
 
 1. **SQLite Vector Integration**:
    - Added support for sqlite-vec Python package for vector similarity search
-   - Reorganized extensions directory structure for future expandability
+   - Simplified extensions handling by using Python package instead of binary extensions
+   - Reorganized extension directory structure to improve clarity and maintainability
    - Updated memory system to work with both PostgreSQL and SQLite databases
    - Improved vector serialization for compatibility with sqlite-vec
-   - Enhanced resilience with fallback to binary extensions when package is unavailable
+   - Enhanced resilience with fallback mechanisms when package is unavailable
 
 2. **Breaking Changes in Version 1.0**:
    - Removed deprecated methods like `_enhance_with_domain_knowledge()` (replaced by `_enhance_with_context_memory()`)
@@ -56,8 +57,12 @@ The current development focus is on implementing the complete REST API as define
 - Fixed coroutine warnings in test files by properly handling async methods
 - Updated `ClientSession` implementation to use streams appropriately
 - Addressed linter issues and code formatting across the codebase
+- Fixed line length issues in multiple files to comply with PEP 8 standards
+- Improved organization of test files in the tests directory
+- Simplified SQLite extension loading by using the sqlite-vec Python package
+- Fixed import ordering in test files to comply with linting rules
+- Added proper noqa comments for necessary linting exceptions
 - Improved API key handling for tests with standardized environment loading
-- Added sqlite-vec Python package to simplify SQLite extension loading
 
 ## Next Steps
 

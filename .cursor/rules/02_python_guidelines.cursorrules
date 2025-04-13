@@ -64,6 +64,7 @@ def generate_id(size: int = 21) -> str:
 - Group imports by source with a blank line between groups
 - Sort imports alphabetically within groups
 - Avoid circular imports
+- When an import must occur after code (e.g., path manipulation), use `# noqa: E402` to silence linter warnings
 
 ## Functional Patterns
 - Prefer immutable data structures where appropriate
@@ -107,3 +108,13 @@ def generate_id(size: int = 21) -> str:
 - Use fixtures to set up common test dependencies
 - Use parametrized tests for testing multiple inputs
 - Use tox for testing across multiple Python versions
+
+## Line Length and Formatting
+- Follow PEP 8 line length guidelines (79 characters for code, 72 for docstrings and comments)
+- Break long lines using parentheses or string continuation
+- Use line continuation for long functions, method calls, and expressions
+- For long strings, use multi-line string formatting with f-strings on separate lines
+- Break method chaining to multiple lines when it exceeds line length
+- Format SQL statements with proper indentation on multiple lines
+- When writing comments, keep them under the line length limit
+- Format data structures (lists, dicts) with one item per line when they exceed line length
