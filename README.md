@@ -2,22 +2,6 @@
 
 > The MUXI Framework is a versatile Python framework for building AI agents and Multi-Agent systems.
 
-## IMPORTANT: Breaking Changes in Version 1.0
-
-All backward compatibility support has been removed from the MUXI Framework codebase to create a cleaner, more maintainable implementation. The following major changes were made:
-
-1. Removed deprecated methods:
-   - `_enhance_with_domain_knowledge()` (replaced by `_enhance_with_context_memory()`)
-   - `add_user_domain_knowledge()` (replaced by `add_user_context_memory()`)
-
-2. Updated API signatures:
-   - Removed `memory` parameter from the `Agent` class (use `buffer_memory` instead)
-   - Removed backward compatibility for user_id=0 handling
-
-3. Renamed all "domain knowledge" terminology to "context memory" throughout the codebase
-
-If you're upgrading from an earlier version, you'll need to update your code to use the new method names and API signatures.
-
 MUXI Framework is a powerful platform for building AI agents with memory, MCP server integration, and real-time communication capabilities. It provides a solid foundation for creating advanced AI applications through a unified architecture that integrates multiple interfaces.
 
 > [!WARNING]
