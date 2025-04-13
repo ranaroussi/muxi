@@ -61,9 +61,9 @@ def api(host: str, port: int, reload: bool):
 @cli_main.command()
 def run():
     """Run both the API server and web UI."""
-    from muxi.__main__ import main
+    from muxi.server import run_server
 
-    main()
+    run_server()
 
 
 @cli_main.command()
