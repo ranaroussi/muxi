@@ -394,10 +394,10 @@ class Muxi:
             **kwargs: Additional arguments to pass to the API server
         """
         # Import the main entry point
-        from muxi.__main__ import main
+        from muxi.server import run_server
 
         # Start the server
-        main(**kwargs)
+        run_server(**kwargs)
 
     def get_agent(self, agent_id: str) -> Agent:
         """

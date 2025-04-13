@@ -2,7 +2,7 @@
 """
 Main entry point for the muxi-server package when run as a module.
 
-This allows running both the API server and web UI with:
+This allows running the MUXI server with:
 python -m muxi.server
 
 This is useful for development, testing, and containerized deployments
@@ -10,8 +10,8 @@ where direct module execution is preferred over CLI commands.
 """
 
 import logging
-import socket
 import sys
+from muxi.server import run_server
 
 # Configure logging
 logging.basicConfig(
@@ -21,43 +21,14 @@ logging.basicConfig(
 logger = logging.getLogger("run")
 
 
-def is_port_in_use(port):
-    """Check if a port is in use."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(("localhost", port)) == 0
-
-
-def run_api_server():
-    """Start the API server."""
-    try:
-        # Check if port is already in use
-        if is_port_in_use(5050):
-            msg = "Port 5050 is already in use. API server cannot start."
-            logger.error(msg)
-            print(f"Error: {msg}")
-            print("Please stop any other processes using port 5050 " "and try again.")
-            return False
-
-        logger.info("Starting API server on port 5050...")
-        from muxi.server.api.app import start_api
-
-        # Running directly in the main thread - fixes the signal handling issue
-        start_api(host="0.0.0.0", port=5050, reload=True)
-        return True
-    except Exception as e:
-        logger.error(f"Failed to start API server: {str(e)}")
-        print(f"Error: Failed to start API server: {str(e)}")
-        return False
-
-
 def main():
-    """Run the API server."""
+    """Run the MUXI server."""
     print("Starting MUXI Server...")
     logger.info("Starting MUXI Server")
 
-    # Run API server in the main thread (this should resolve the signal issue)
-    # This will block until the API server stops
-    run_api_server()
+    # Run server in the main thread
+    # This will block until the server stops
+    run_server()
 
 
 if __name__ == "__main__":
