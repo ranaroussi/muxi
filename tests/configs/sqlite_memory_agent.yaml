@@ -1,0 +1,11 @@
+---
+agent_id: assistant
+description: A helpful assistant with SQLite-based long-term memory
+model:
+  provider: openai
+  api_key: ${OPENAI_API_KEY}
+  model: gpt-4o
+  temperature: 0.2
+memory:
+  buffer: 15
+  long_term: ${SQLITE_DATABASE_PATH}

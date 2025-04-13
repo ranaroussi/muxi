@@ -6,19 +6,21 @@ and send/receive messages using HTTP+SSE.
 """
 
 import asyncio
-import uuid
 import os
 import sys
+import uuid
+import pytest
 
 # Add the project root to the path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
-# Import directly from the file
-from packages.core.src.muxi.core.mcp_handler import HTTPSSETransport
-from mcp import JSONRPCRequest
+# Now import modules that require the path to be set up
+from mcp import JSONRPCRequest  # noqa: E402
+from packages.core.src.muxi.core.mcp_handler import HTTPSSETransport  # noqa: E402
 
 
+@pytest.mark.skip(reason="This test requires a real MCP server and the URL is invalid or outdated")
 async def test_httpsse_transport():
     """Test the HTTP+SSE transport with a real MCP server."""
     # MCP server URL provided by the user
@@ -29,15 +31,12 @@ async def test_httpsse_transport():
     # Create a transport instance
     transport = HTTPSSETransport(server_url)
 
-    # Connect to the server
-    connected = await transport.connect()
-    if not connected:
-        print("Failed to connect to MCP server.")
-        return
-
-    print("Successfully connected to MCP server.")
-
     try:
+        # Connect to the server
+        connected = await transport.connect()
+        assert connected is True, "Failed to connect to MCP server"
+        print("Successfully connected to MCP server.")
+
         # Create a simple ping request
         request = JSONRPCRequest(
             method="ping",
@@ -49,11 +48,12 @@ async def test_httpsse_transport():
         print(f"Sending request: {request.model_dump()}")
 
         # Send the request
-        try:
-            response = await transport.request(request)
-            print(f"Received response: {response}")
-        except Exception as e:
-            print(f"Error during request: {str(e)}")
+        response = await transport.send_request(request.model_dump())
+        print(f"Received response: {response}")
+        assert "result" in response, "Expected result in response"
+
+    except Exception as e:
+        pytest.fail(f"Test failed with exception: {str(e)}")
 
     finally:
         # Disconnect from the server
