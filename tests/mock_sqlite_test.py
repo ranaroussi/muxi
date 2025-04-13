@@ -1,7 +1,7 @@
 """
-Test SQLite memory implementation
+Test SQLite memory with a mock implementation
 
-This module contains tests for the SQLite-based memory implementation in the Muxi framework.
+This is a standalone test that doesn't depend on the actual implementation.
 """
 
 import json
@@ -9,8 +9,9 @@ import os
 import sqlite3
 import tempfile
 import unittest
+import asyncio
 
-import nanoid
+import nanoid  # Make sure nanoid is installed with pip install nanoid
 
 
 class MockEmbeddingProvider:
@@ -28,12 +29,17 @@ class MockSQLiteMemory:
     sqlite-vec extension.
     """
 
-    def __init__(self, db_path, dimension=4, default_collection="default", extensions_dir=None):
+    def __init__(self, db_path, dimension=4, default_collection="default"):
         """Mock initialization."""
         self.db_path = db_path
         self.dimension = dimension
         self.default_collection = default_collection
         self.embedding_provider = None
+
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
+
+        # Initialize database
         self.conn = self._init_database()
 
     def _init_database(self):
@@ -41,7 +47,8 @@ class MockSQLiteMemory:
         conn = sqlite3.connect(self.db_path)
 
         # Create tables without requiring the extension
-        conn.execute("""
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS collections (
                 id TEXT PRIMARY KEY,
                 name TEXT UNIQUE NOT NULL,
@@ -49,14 +56,16 @@ class MockSQLiteMemory:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
-        conn.execute("""
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS memories (
                 id TEXT PRIMARY KEY,
                 collection TEXT NOT NULL,
                 content TEXT NOT NULL,
-                embedding TEXT NOT NULL,  # Store as JSON text for testing
+                embedding TEXT NOT NULL,
                 metadata TEXT DEFAULT '{}',
                 source TEXT,
                 type TEXT,
@@ -64,7 +73,8 @@ class MockSQLiteMemory:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (collection) REFERENCES collections(name)
             )
-        """)
+        """
+        )
 
         # Create a function to simulate vector similarity
         conn.create_function("vec_cosine_similarity", 2, lambda a, b: 0.95)
@@ -72,7 +82,7 @@ class MockSQLiteMemory:
         # Create default collection
         conn.execute(
             "INSERT OR IGNORE INTO collections (id, name, description) VALUES (?, ?, ?)",
-            (self._generate_id(), self.default_collection, "Default collection for memories")
+            (self._generate_id(), self.default_collection, "Default collection for memories"),
         )
 
         conn.commit()
@@ -93,8 +103,9 @@ class MockSQLiteMemory:
             # Add to database
             self._add_internal(content, embedding, metadata)
 
-    def _add_internal(self, text, embedding, metadata=None, collection=None,
-                      source=None, type_=None):
+    def _add_internal(
+        self, text, embedding, metadata=None, collection=None, source=None, type_=None
+    ):
         """Internal method to add a memory."""
         # Use default collection if not specified
         collection = collection or self.default_collection
@@ -118,8 +129,8 @@ class MockSQLiteMemory:
                 embedding_json,
                 metadata and json.dumps(metadata),
                 source,
-                type_
-            )
+                type_,
+            ),
         )
         self.conn.commit()
         return memory_id
@@ -138,7 +149,7 @@ class MockSQLiteMemory:
             ORDER BY created_at DESC
             LIMIT ?
             """,
-            (self.default_collection, limit)
+            (self.default_collection, limit),
         )
 
         results = []
@@ -147,11 +158,7 @@ class MockSQLiteMemory:
             # Use fixed high similarity score for testing
             score = 0.95
 
-            results.append({
-                "content": row[1],
-                "metadata": metadata,
-                "score": score
-            })
+            results.append({"content": row[1], "metadata": metadata, "score": score})
 
         return results
 
@@ -165,7 +172,7 @@ class MockSQLiteMemory:
             ORDER BY created_at DESC
             LIMIT ?
             """,
-            (collection or self.default_collection, limit)
+            (collection or self.default_collection, limit),
         )
 
         return [
@@ -173,14 +180,14 @@ class MockSQLiteMemory:
                 "id": row[0],
                 "text": row[1],
                 "metadata": json.loads(row[2]) if row[2] else {},
-                "created_at": row[3]
+                "created_at": row[3],
             }
             for row in cursor.fetchall()
         ]
 
     def __del__(self):
         """Clean up."""
-        if hasattr(self, 'conn'):
+        if hasattr(self, "conn"):
             self.conn.close()
 
 
@@ -195,8 +202,7 @@ class TestSQLiteMemory(unittest.TestCase):
 
         # Create mock SQLite memory instance
         self.memory = MockSQLiteMemory(
-            db_path=self.db_path,
-            dimension=4  # Use a small dimension for testing
+            db_path=self.db_path, dimension=4  # Use a small dimension for testing
         )
 
         # Set mock embedding provider
@@ -238,7 +244,7 @@ class TestSQLiteMemory(unittest.TestCase):
             "source": "user",
             "timestamp": 1620000000,
             "tags": ["important", "follow-up"],
-            "nested": {"key1": "value1", "key2": 42}
+            "nested": {"key1": "value1", "key2": 42},
         }
         await self.memory.add("Entry with complex metadata", metadata)
 
@@ -262,29 +268,18 @@ class TestSQLiteMemory(unittest.TestCase):
         # Get recent memories
         recent = self.memory.get_recent_memories(limit=2)
 
-        # Verify we get the most recent entries
+        # Verify we get the most recent entries (reverse chronological order)
         self.assertEqual(len(recent), 2)
-
-        # Check that we have at least 2 entries, don't check the exact order
-        # since SQLite test behavior might vary
-        orders = [entry["metadata"]["order"] for entry in recent]
-        self.assertTrue(all(order in [1, 2, 3] for order in orders))
+        self.assertEqual(recent[0]["metadata"]["order"], 3)
+        self.assertEqual(recent[1]["metadata"]["order"], 2)
 
 
 if __name__ == "__main__":
-    import asyncio
-
     # Run the async tests
     async def run_tests():
-        test_case = TestSQLiteMemory()
-        test_case.setUp()
-
-        try:
-            await test_case.test_add_and_search()
-            await test_case.test_metadata_storage()
-            test_case.test_get_recent_memories()
-        finally:
-            test_case.tearDown()
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestSQLiteMemory)
+        runner = unittest.TextTestRunner()
+        runner.run(suite)
 
     # Use asyncio to run the tests
     asyncio.run(run_tests())
