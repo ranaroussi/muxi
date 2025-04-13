@@ -201,7 +201,35 @@ Transform agents into omni agents capable of handling various media types as spe
 - [ ] OCR for scanned documents
 - [ ] Document summarization tools
 
-### 8. Deployment
+### 8. Language-Specific SDKs
+
+Develop SDKs for popular programming languages to increase framework adoptability:
+
+- [ ] TypeScript/JavaScript SDK
+  - [ ] REST API client with full endpoint coverage
+  - [ ] WebSocket client implementation
+  - [ ] MCP server protocol implementation for JavaScript tools
+  - [ ] Comprehensive examples and documentation
+  - [ ] NPM package distribution
+
+- [ ] Go SDK
+  - [ ] API client library
+  - [ ] MCP server implementation helpers
+  - [ ] Utilities for agent configuration
+
+- [ ] Other Language SDKs
+  - [ ] Java/Kotlin SDK
+  - [ ] Rust SDK
+  - [ ] C#/.NET SDK
+  - [ ] Ruby SDK (optional)
+
+- [ ] SDK Development Tools
+  - [ ] API client generators from OpenAPI spec
+  - [ ] Shared test suite for SDK validations
+  - [ ] Consistent interface definitions across languages
+  - [ ] Version syncing mechanisms with core framework
+
+### 9. Deployment
 
 - [ ] Docker containerization
 - [ ] Kubernetes deployment
@@ -211,7 +239,7 @@ Transform agents into omni agents capable of handling various media types as spe
 - [ ] Automatic version bumping for releases
 - [ ] SQLite deployment guides for serverless and edge environments
 
-### 9. Stability and Performance
+### 10. Stability and Performance
 
 - [x] Comprehensive error monitoring
 - [x] Database schema optimization and indexing
@@ -227,7 +255,7 @@ Transform agents into omni agents capable of handling various media types as spe
   - [ ] Performance metrics collection
   - [ ] Log visualization in web dashboard
 
-### 10. Security Enhancements
+### 11. Security Enhancements
 
 Based on api.md security considerations:
 - [ ] Ensure all API endpoints use HTTPS in production
@@ -238,7 +266,7 @@ Based on api.md security considerations:
 - [ ] Implement proper security logging for auditing
 - [ ] Add IP-based restrictions for sensitive operations
 
-### 11. Package Distribution
+### 12. Package Distribution
 
 - [x] Create proper Python package for PyPI distribution
 - [x] Versioning strategy
@@ -246,7 +274,7 @@ Based on api.md security considerations:
 - [x] Package documentation
 - [ ] Installation guides
 
-### 12. Agent-to-Agent Communication
+### 13. Agent-to-Agent Communication
 
 - [ ] Implement Agent-to-Agent (A2A) protocol
   - [ ] Capability registration and discovery
@@ -258,7 +286,7 @@ Based on api.md security considerations:
   - [ ] Security and authentication
   - [ ] Configuration system for controlling A2A access
 
-### 13. MCP Server Interface
+### 14. MCP Server Interface
 
 - [ ] Implement MCP server interface
   - [ ] SSE-based server endpoint
@@ -296,6 +324,7 @@ Based on api.md roadmap and current progress:
 - [ ] Multi-modal content support
 - [ ] Advanced A2A communication with capability discovery
 - [ ] Full MCP Server interface with streaming response support
+- [ ] Language-specific SDKs (TypeScript, Go, others)
 
 ## Contribution Guidelines
 

@@ -153,6 +153,27 @@ The following components are partially implemented or planned for future develop
    - ⏳ OCR for scanned documents
    - ⏳ Document summarization
 
+### Language-Specific SDKs
+
+1. **Client Libraries**:
+   - ⏳ TypeScript/JavaScript SDK for web and Node.js
+   - ⏳ Go SDK for backend integration
+   - ⏳ Java/Kotlin SDK for Android and JVM environments
+   - ⏳ C#/.NET SDK for Windows integration
+   - ⏳ Rust SDK for systems programming
+
+2. **SDK Features**:
+   - ⏳ API client implementations for all endpoints
+   - ⏳ WebSocket client implementations
+   - ⏳ MCP server protocol implementations
+   - ⏳ Consistent interfaces across languages
+   - ⏳ Language-idiomatic wrappers for configuration
+
+3. **SDK Development Tools**:
+   - ⏳ API client generators from OpenAPI spec
+   - ⏳ Shared test suite for validation
+   - ⏳ Version synchronization tools
+
 ### Vector Database Enhancements
 
 1. **Performance Optimizations**:
@@ -254,6 +275,7 @@ SQLite vector support has been added, providing a simpler deployment option for 
 3. **v0.5.0**: Scaling & Monitoring
    - Advanced A2A communication with capability discovery
    - Full MCP Server interface with streaming response support
+   - Language-specific SDKs (TypeScript, Go)
    - Performance improvements
    - Monitoring and metrics
    - Full multi-modal support

@@ -29,6 +29,7 @@ MUXI Framework is a versatile Python framework for building AI agents and Multi-
 9. **Context Memory**: Store structured user information for personalization
 10. **Knowledge Base**: Provide agents with specialized domain knowledge
 11. **Hybrid Communication**: Support HTTP, SSE, and WebSockets
+12. **Language-Specific SDKs**: Provide client libraries for popular programming languages
 
 ### Technical Requirements
 
@@ -58,6 +59,7 @@ MUXI Framework is a versatile Python framework for building AI agents and Multi-
 - Context memory
 - Configuration system
 - Intelligent message routing
+- Language-specific SDKs (TypeScript/JavaScript, Go, etc.)
 - Documentation and examples
 
 ### Out of Scope (Future Phases)
@@ -100,6 +102,7 @@ The project is now moving toward API standardization and enhancement based on th
 3. **Phase 3 (v0.5.0)**: Scaling & Monitoring
    - Advanced A2A communication with capability discovery
    - Full MCP Server interface with streaming support
+   - Language-specific SDKs (TypeScript, Go)
    - Performance improvements
    - Monitoring and metrics
    - Full multi-modal support

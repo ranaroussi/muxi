@@ -130,7 +130,15 @@ Based on the updated NEXT_STEPS.md document, the following tasks have been prior
    - Add support for local models (e.g., Llama, Mistral, DeepSeek)
    - Create a model router for fallback and cost optimization
 
-4. **Vector Database Improvements**:
+4. **Language-Specific SDKs**:
+   - Develop TypeScript/JavaScript SDK as highest priority
+   - Create Go SDK for backend applications
+   - Design consistent cross-language interfaces
+   - Implement OpenAPI-based client generators
+   - Develop shared test suites for validation
+   - Create comprehensive documentation for each SDK
+
+5. **Vector Database Improvements**:
    - Enhance SQLite vector integration for improved performance
    - Add support for additional vector databases (e.g., Milvus, Qdrant)
    - Implement more vector functions and operations
@@ -178,6 +186,8 @@ Based on the updated NEXT_STEPS.md document, the following tasks have been prior
 5. **Deployment Strategy**: What containerization and orchestration approaches should be recommended for production deployments?
 
 6. **Vector Database Choice**: Should we provide more guidance on choosing between SQLite and PostgreSQL for different use cases?
+
+7. **SDK Prioritization**: Which language SDKs should be prioritized after TypeScript/JavaScript, and what features are most important for each target language?
 
 ## Blockers and Dependencies
 

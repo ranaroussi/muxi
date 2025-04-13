@@ -201,6 +201,12 @@ The MUXI Framework v0.5.0 will focus on advanced agent communication, enhanced M
   - Standardized multi-modal message formats
   - Comprehensive handling of various content types
 
+- **Language-Specific SDKs**:
+  - TypeScript/JavaScript SDK for web and Node.js applications
+  - Client libraries for popular programming languages
+  - Consistent API experience across languages
+  - MCP server protocol implementations in multiple languages
+
 ### v1.0.0 (Planned Q3 2025) - Stable Release
 
 The v1.0.0 release will represent the first stable, production-ready version of the MUXI Framework.
@@ -258,10 +264,11 @@ The v1.0.0 release will represent the first stable, production-ready version of 
 | Performance Monitoring | 📅 Planned | v0.5.0 |
 | Advanced A2A Communication | 📅 Planned | v0.5.0 |
 | Full MCP Server Interface | 📅 Planned | v0.5.0 |
+| Language SDKs (TS/JS, Go, etc.) | 📅 Planned | v0.5.0 |
 | Deployment Solutions | 🔮 Future | v1.0.0 |
 | Extended Model Support | 🔮 Future | v1.0.0 |
 | Security Enhancements | 🔮 Future | v1.0.0 |
-| API Stabilization | 🔮 Future | v1.0.0 |
+| API Stabilization | �� Future | v1.0.0 |
 
 ## Long-Term Vision
 
