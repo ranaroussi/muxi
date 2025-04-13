@@ -30,20 +30,32 @@ MUXI Framework is a powerful platform for building AI agents with memory, MCP se
   - FAISS for short-term buffer memory
   - PostgreSQL with pgvector for scalable long-term memory
   - SQLite with sqlite-vec for local or lightweight deployments
-- 🔌 **MCP Server Integration**: Connect to external services via Model Context Protocol servers
+- 🔌 **MCP Client Integration**: Connect to external services via Model Context Protocol servers
   - Support for HTTP+SSE transport for web-based MCP servers
   - Support for Command-line transport for local executable servers
   - Robust reconnection mechanism with exponential backoff
   - Comprehensive error handling and diagnostics
   - Cancellation support for long-running operations
+- 🌟 **MCP Server Implementation**: Expose your agents as MCP-compatible servers
+  - SSE-based server endpoint for MCP host integration
+  - Tool discovery from agent capabilities
+  - Authentication shared with REST API
+  - Bridge package for non-SSE clients
+- 🔄 **Agent-to-Agent (A2A) Communication**: Enable structured communication between agents
+  - Standardized message format for inter-agent communication
+  - Capability registration and discovery
+  - Task delegation between specialized agents
+  - Context sharing with proper isolation
+  - Security and authentication
 - 🌐 **Multiple Interfaces**: REST API, WebSockets, CLI, Web UI, etc.
 - 🔄 **Intelligent Message Routing**: Automatically direct messages to the most appropriate agent
 - 📊 **Multi-User Support**: User-specific memory partitioning for multi-tenant applications
-- 📘 **Domain Knowledge**: Store and retrieve structured information to personalize responses
+- 📘 **Context Memory**: Store and retrieve structured information to personalize responses
 - 🔍 **Agent-Level Knowledge Base**: Provide agents with specialized domain knowledge via lightweight RAG
 - 🔄 **Hybrid Communication Protocol**: HTTP for standard requests, SSE for streaming, WebSockets for multi-modal
 - 📝 **Declarative Configuration**: Define agents using YAML or JSON files with minimal code
 - 🚀 **Modular Architecture**: Use only the components you need
+- 🌍 **Language-Specific SDKs** (Coming in v0.5.0): Client libraries for TypeScript/JavaScript, Go, and more
 
 ## Architecture
 
@@ -69,6 +81,11 @@ MUXI has a flexible, service-oriented approach:
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │    ┌───────────┐
 │  │   Agent 1   │  │   Agent 2   │  │   Agent N   │-------│ Knowledge │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │    └───────────┘
+│         │                │                │         │
+│         ↓                ↓                ↓         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │ A2A Handler │  │ A2A Handler │  │ A2A Handler │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
 │         ↓                ↓                ↓         │
 │         └────────┬───────┴────────┬───────┘         │
 │                  ↓                :                 │
@@ -147,12 +164,12 @@ model:
   temperature: 0.7
 memory:
   buffer: 10  # Buffer window size of 10
-  long_term: true  # Enable long-term memory using default database
+  long_term: true  # Enable long-term memory using default SQLite in app's root
   # Or specify SQLite: long_term: "sqlite:///data/memory.db"
   # Or specify PostgreSQL: long_term: "postgresql://user:pass@localhost/muxi"
-  knowledge:
-    - path: "knowledge/domain_facts.txt"
-      description: "Specialized domain knowledge for this agent"
+knowledge:
+  - path: "knowledge/domain_facts.txt"
+    description: "Specialized domain knowledge for this agent"
 mcp_servers:
 - name: web_search
   url: http://localhost:5001
@@ -320,6 +337,38 @@ ROUTING_LLM_MODEL=gpt-4o-mini
 ROUTING_LLM_TEMPERATURE=0.0
 ```
 
+## Agent-to-Agent (A2A) Communication
+
+Enable collaboration between specialized agents:
+
+```python
+from muxi import muxi
+
+# Initialize MUXI with multiple specialized agents
+app = muxi()
+await app.add_agent("researcher", "configs/researcher_agent.yaml")
+await app.add_agent("writer", "configs/writer_agent.yaml")
+await app.add_agent("fact_checker", "configs/fact_checker_agent.yaml")
+
+# Enable A2A communication (enabled by default, but can be configured)
+app.configure_a2a(enabled=True, scope="internal")
+
+# Process a complex query that requires multiple agents
+response = await app.chat(
+    "Research quantum computing advancements in 2025 and write a summary report",
+    user_id="user123"
+)
+
+# Behind the scenes:
+# 1. The message is routed to the researcher agent
+# 2. Researcher agent gathers information
+# 3. Researcher delegates to the writer agent to create the summary
+# 4. Writer creates draft and delegates to fact_checker for verification
+# 5. Final verified response returned to the user
+```
+
+A2A communication allows agents to collaborate seamlessly, creating more powerful workflows than any single agent could accomplish alone.
+
 ## Package Structure
 
 The MUXI Framework is organized into a modular architecture with the following components:
@@ -428,6 +477,46 @@ from muxi.core.memory.long_term import LongTermMemory
 memory = LongTermMemory(connection_string="postgresql://user:password@localhost:5432/muxi")
 ```
 
+## MCP Server Implementation
+
+MUXI can not only connect to MCP servers but also expose your agents as MCP-compatible servers:
+
+```python
+from muxi import muxi
+
+# Initialize MUXI
+app = muxi()
+
+# Add an agent from configuration
+app.add_agent("assistant", "configs/assistant.yaml")
+
+# Start both API and MCP server on different ports
+app.run_server(
+    port=5050,
+    mcp=True,
+    mcp_port=5051
+)
+
+# Or start just the MCP server
+app.start_mcp(port=5051)
+```
+
+This allows other MCP clients (like Claude, Cursor, or other AI assistants) to connect to your MUXI agents and use their capabilities.
+
+## Language-Specific SDKs (Coming in v0.5.0)
+
+MUXI Framework will provide client libraries for popular programming languages:
+
+- **TypeScript/JavaScript SDK**: For web and Node.js applications
+- **Go SDK**: For backend integrations
+- **Other Planned SDKs**: Java/Kotlin, Rust, C#/.NET
+
+Each SDK will provide:
+- Full REST API client implementation
+- WebSocket client for real-time communication
+- MCP server protocol implementation
+- Consistent developer experience across languages
+
 ## Documentation
 
 For more detailed documentation, see:
@@ -439,6 +528,7 @@ For more detailed documentation, see:
 - [Web UI Guide](docs/web_ui.md)
 - [Configuration](docs/configuration.md)
 - [Package Structure](docs/package_structure.md)
+- [Roadmap](docs/roadmap.md)
 
 ## License
 
