@@ -286,12 +286,16 @@ Based on api.md roadmap and current progress:
 - [ ] Knowledge management endpoints
 - [ ] WebSocket support for real-time communication
 - [ ] Streaming responses
+- [ ] Basic MCP server interface implementation
+- [ ] Initial Agent-to-Agent (A2A) communication protocol
 
 ### Phase 3: Scaling & Monitoring (v0.5.0)
 - [ ] System status and monitoring
 - [ ] API usage statistics
 - [ ] Rate limiting and quotas
 - [ ] Multi-modal content support
+- [ ] Advanced A2A communication with capability discovery
+- [ ] Full MCP Server interface with streaming response support
 
 ## Contribution Guidelines
 

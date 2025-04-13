@@ -21,12 +21,14 @@ MUXI Framework is a versatile Python framework for building AI agents and Multi-
 1. **Multi-Agent Support**: Create and manage multiple specialized AI agents
 2. **Memory Systems**: Implement short-term and long-term memory for context retention
 3. **MCP Server Integration**: Connect to external services via Model Context Protocol
-4. **Multiple Interfaces**: Support REST API, WebSockets, CLI, and Web UI
-5. **Intelligent Message Routing**: Direct messages to the appropriate agent
-6. **Multi-User Support**: Enable user-specific memory partitioning
-7. **Context Memory**: Store structured user information for personalization
-8. **Knowledge Base**: Provide agents with specialized domain knowledge
-9. **Hybrid Communication**: Support HTTP, SSE, and WebSockets
+4. **MCP Server Implementation**: Provide an MCP server interface for exposing agent capabilities
+5. **Agent-to-Agent Communication**: Enable structured communication between agents
+6. **Multiple Interfaces**: Support REST API, WebSockets, CLI, and Web UI
+7. **Intelligent Message Routing**: Direct messages to the appropriate agent
+8. **Multi-User Support**: Enable user-specific memory partitioning
+9. **Context Memory**: Store structured user information for personalization
+10. **Knowledge Base**: Provide agents with specialized domain knowledge
+11. **Hybrid Communication**: Support HTTP, SSE, and WebSockets
 
 ### Technical Requirements
 
@@ -45,7 +47,9 @@ MUXI Framework is a versatile Python framework for building AI agents and Multi-
 
 - Core agent framework
 - Memory systems (buffer and long-term)
-- MCP server integration
+- MCP server integration (client side)
+- MCP server implementation (server side)
+- Agent-to-Agent (A2A) communication protocol
 - REST API endpoints
 - WebSocket support
 - CLI interface
@@ -80,8 +84,27 @@ The project is now moving toward API standardization and enhancement based on th
 ## Project Timeline
 
 1. **Phase 1 (v0.3.0)**: Core API implementation
+   - Complete REST API endpoints
+   - Authentication system
+   - Standardized error handling
+   - Basic API documentation
+
 2. **Phase 2 (v0.4.0)**: Advanced features
+   - Complete WebSocket support
+   - Basic MCP Server interface implementation
+   - Initial Agent-to-Agent (A2A) communication protocol
+   - Additional LLM providers
+   - Enhanced documentation
+   - Basic multi-modal support
+
 3. **Phase 3 (v0.5.0)**: Scaling & Monitoring
+   - Advanced A2A communication with capability discovery
+   - Full MCP Server interface with streaming support
+   - Performance improvements
+   - Monitoring and metrics
+   - Full multi-modal support
+   - Deployment guides
+
 4. **Version 1.0**: Stable release with complete API
 
 ## License

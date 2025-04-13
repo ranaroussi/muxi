@@ -245,11 +245,15 @@ SQLite vector support has been added, providing a simpler deployment option for 
 
 2. **v0.4.0**: Advanced Features
    - Complete WebSocket support
+   - MCP Server Interface implementation
+   - Basic Agent-to-Agent (A2A) communication protocol
    - At least one additional LLM provider
    - Enhanced documentation
    - Basic multi-modal support (images)
 
 3. **v0.5.0**: Scaling & Monitoring
+   - Advanced A2A communication with capability discovery
+   - Full MCP Server interface with streaming response support
    - Performance improvements
    - Monitoring and metrics
    - Full multi-modal support

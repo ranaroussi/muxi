@@ -7,6 +7,69 @@ permalink: /release-notes
 
 # Release Notes
 
+## Upcoming Releases
+
+### v0.5.0 (Planned Q2 2025) - Scaling & Communication
+
+The MUXI Framework v0.5.0 will focus on advanced agent communication, enhanced MCP server capabilities, and performance improvements to support larger-scale deployments.
+
+#### Planned Features
+
+- **Advanced Agent-to-Agent (A2A) Communication**:
+  - Capability discovery mechanism for automatic service detection
+  - Robust task delegation between specialized agents
+  - Context sharing with proper isolation
+  - Conversation lifecycle management
+  - External agent integration capabilities
+  - Comprehensive security and authentication
+
+- **Full MCP Server Interface**:
+  - Complete streaming response support
+  - Enhanced tool discovery from agent capabilities
+  - Advanced request/response handling
+  - Authentication shared with REST API
+  - Complete documentation and examples
+
+- **Performance & Monitoring**:
+  - Comprehensive system status monitoring
+  - API usage statistics and dashboards
+  - Rate limiting and quota management
+  - Performance optimizations for high-scale deployments
+
+- **Multi-Modal Support**:
+  - Full support for images, audio, and document processing
+  - Standardized multi-modal message formats
+  - Comprehensive handling of various content types
+
+### v0.4.0 (Planned Q2 2025) - Advanced Features
+
+The MUXI Framework v0.4.0 will introduce several advanced features with a focus on agent communication and MCP server implementation.
+
+#### Planned Features
+
+- **Basic MCP Server Interface**:
+  - SSE-based server endpoint for exposing agent capabilities
+  - Initial tool discovery implementation
+  - Basic request/response message handling
+  - Simplified authentication mechanism
+  - NPX bridge package for non-SSE clients
+
+- **Initial Agent-to-Agent (A2A) Communication**:
+  - Standardized message format for inter-agent communication
+  - Basic agent capability registration
+  - Simple task delegation between agents
+  - Configuration options for A2A control
+
+- **Enhanced WebSocket Support**:
+  - Complete WebSocket implementation to spec
+  - Support for real-time agent interactions
+  - Improved error handling and recovery
+
+- **Additional LLM Providers**:
+  - Support for additional model providers beyond OpenAI
+  - Abstraction layer for provider-agnostic operations
+  - Configuration options for provider selection
+
 ## v0.3.0 (March 2025) - Context Knowledge Expansion
 
 The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilities, enhancing agents with specialized context knowledge and improved contextual awareness.
