@@ -183,7 +183,7 @@ Based on production experience, here are recommended approaches:
 ### Agent Design
 - Create specialized agents with focused responsibilities
 - Use clear system messages to define agent behavior
-- Leverage domain knowledge for improved responses
+- Leverage context knowledge for improved responses
 - Implement appropriate memory systems
 
 ### Memory Configuration

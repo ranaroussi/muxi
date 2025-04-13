@@ -556,10 +556,9 @@ print(response)  # Should mention "Sam"
     "api_key": "${OPENAI_API_KEY}",
     "model": "gpt-4o"
   },
-  "long_term_memory": {
-    "type": "long_term",
-    "connection_string": "${POSTGRES_DATABASE_URL}",
-    "collection": "agent_memories"
+  "memory": {
+    "buffer": 15,
+    "long_term": "postgresql://user:password@localhost:5432/muxi"
   }
 }
 ```
@@ -580,10 +579,18 @@ model = OpenAIModel(
 )
 
 # Configure long-term memory
-long_term = LongTermMemory(
-    connection_string=os.getenv("POSTGRES_DATABASE_URL"),
-    collection="agent_memories"
-)
+# Option 1: PostgreSQL - for production environments
+postgres_connection = "postgresql://user:password@localhost:5432/muxi"
+# Or use environment variable:
+# postgres_connection = os.getenv("POSTGRES_DATABASE_URL")
+
+# Option 2: SQLite - for local development
+sqlite_connection = "sqlite:///data/memory.db"
+
+# Choose the connection string based on your needs
+connection_string = postgres_connection  # or sqlite_connection
+
+long_term = LongTermMemory(connection_string=connection_string)
 
 # Create an agent with long-term memory
 orchestrator.create_agent(
@@ -647,13 +654,9 @@ Each MCP server can have optional credentials for authentication, though many se
     "max_tokens": 1000
   },
   "system_message": "You are an expert assistant with broad knowledge and capabilities. You can help with research, writing, problem-solving, and many other tasks. Always be helpful, accurate, and concise.",
-  "buffer_memory": {
-    "type": "buffer",
-    "max_tokens": 4000
-  },
-  "long_term_memory": {
-    "type": "long_term",
-    "connection_string": "${POSTGRES_DATABASE_URL}"
+  "memory": {
+    "buffer": 20,
+    "long_term": "postgresql://user:password@localhost:5432/muxi"
   },
   "mcp_servers": [
     {
@@ -717,7 +720,6 @@ from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.openai import OpenAIModel
 from muxi.core.memory.buffer import BufferMemory
 from muxi.core.memory.long_term import LongTermMemory
-from muxi.core.memory.context_memory import ContextMemory
 
 # Initialize the orchestrator
 orchestrator = Orchestrator()
@@ -732,7 +734,7 @@ model = OpenAIModel(
 
 # Configure memory
 buffer = BufferMemory(max_tokens=4000)
-long_term = LongTermMemory(connection_string=os.getenv("POSTGRES_DATABASE_URL"))
+long_term = LongTermMemory(connection_string="postgresql://user:password@localhost:5432/muxi")
 
 # Create a fully-configured agent
 agent = orchestrator.create_agent(
@@ -784,7 +786,7 @@ print(response)
 4. **Balance Memory Configuration**
    - Set appropriate token limits for buffer memory based on your model's context window
    - Use long-term memory for important information that needs to persist
-   - Use domain knowledge for static information that doesn't change
+   - Use context knowledge for static information that doesn't change
 5. **Use Descriptive Agent IDs**
    - Choose agent IDs that clearly reflect their purpose
    - Follow a consistent naming convention

@@ -34,7 +34,7 @@ For a deeper dive into how MUXI works, explore the [Architecture](/intro/archite
 Once you've completed this section, you'll be ready to explore:
 
 - [Building Agents](/agents/) - Learn to create and configure agents for different purposes
-- [Extending Capabilities](/extend/) - Enhance your agents with MCP servers and domain knowledge
+- [Extending Capabilities](/extend/) - Enhance your agents with MCP servers and context knowledge
 - [Interfaces & Clients](/clients/) - Discover the different ways to interact with MUXI
 
 Let's get started with the [Overview & Key Concepts](/intro/overview)!

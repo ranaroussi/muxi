@@ -151,8 +151,8 @@ The routing system uses an LLM to analyze the message content and agent descript
 You can enhance your agents with context memory:
 
 ```python
-# Add domain knowledge for the agent
-app.add_domain_knowledge("geography.txt")
+# Add context knowledge for the agent
+app.add_context_knowledge("geography.txt")
 
 # Add user-specific context memory
 app.add_user_context_memory(user_id=123, knowledge={"name": "John", "location": "New York"})

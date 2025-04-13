@@ -1,25 +1,25 @@
 ---
 layout: default
-title: Domain Knowledge
+title: Context Knowledge
 parent: Extending Capabilities
 nav_order: 3
 permalink: /extend/knowledge
 ---
 
-# Domain Knowledge
+# Context Knowledge
 
 {: .fs-5 .fw-600 }
-This guide explains how to enhance your MUXI agents with domain knowledge, allowing them to access and utilize information from external sources when responding to user queries.
+This guide explains how to enhance your MUXI agents with context knowledge, allowing them to access and utilize information from external sources when responding to user queries.
 
-## Understanding Domain Knowledge
+## Understanding Context Knowledge
 
-Domain knowledge in MUXI represents static information that agents can reference during conversations, providing them with:
+Context knowledge in MUXI represents static information that agents can reference during conversations, providing them with:
 
 1. **Factual information** from documents, files, and other sources
 2. **Context-specific data** for specialized applications
 3. **Up-to-date information** without relying solely on model training data
 
-Unlike memory which tracks conversation history, domain knowledge provides agents with external information they can search and reference.
+Unlike memory which tracks conversation history, context knowledge provides agents with external information they can search and reference.
 
 ## Knowledge Types in MUXI
 
@@ -295,19 +295,19 @@ For efficiency, MUXI caches knowledge embeddings:
 2. Cached embeddings are reused when the same knowledge source is added again
 3. Embeddings are regenerated when the source file is modified
 
-## Best Practices for Domain Knowledge
+## Best Practices for Context Knowledge
 
 1. **Focus on Quality**: Include high-quality, relevant information in knowledge sources
 2. **Right-Size Documents**: Break large documents into smaller, topic-focused files
 3. **Descriptive Metadata**: Provide clear descriptions for knowledge sources
 4. **Regular Updates**: Keep knowledge sources up-to-date with the latest information
-5. **Knowledge vs. Memory**: Use domain knowledge for static information, memory for conversation context
+5. **Knowledge vs. Memory**: Use context knowledge for static information, memory for conversation context
 6. **Strategic Search**: Set appropriate threshold and top_k values for your use case
 
 ## Next Steps
 
-Now that you've added domain knowledge to your agents, you might want to:
+Now that you've added context knowledge to your agents, you might want to:
 
-- Combine domain knowledge with memory - see [User Context Memory](../memory/)
+- Combine context knowledge with memory - see [User Context Memory](../memory/)
 - Create multi-agent systems with specialized knowledge - see [Multi-Agent Systems](../multi-agent/)
 - Configure your agents with specific settings - see [Agent Configuration](../configuration/)

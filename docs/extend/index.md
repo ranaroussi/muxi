@@ -9,7 +9,7 @@ permalink: /extend
 # Extending Capabilities
 
 {: .fs-5 .fw-600 }
-The Extending Capabilities section covers ways to enhance your agents with external services, domain knowledge, and advanced features.
+The Extending Capabilities section covers ways to enhance your agents with external services, context knowledge, and advanced features.
 
 By connecting agents to external servers, integrating specialized knowledge, and supporting multi-modal interactions, you can create more powerful and versatile agents.
 

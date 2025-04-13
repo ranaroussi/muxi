@@ -7,9 +7,9 @@ permalink: /release-notes
 
 # Release Notes
 
-## v0.3.0 (March 2025) - Domain Knowledge Expansion
+## v0.3.0 (March 2025) - Context Knowledge Expansion
 
-The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilities, enhancing agents with specialized domain knowledge and improved contextual awareness.
+The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilities, enhancing agents with specialized context knowledge and improved contextual awareness.
 
 ### Major Features
 
@@ -103,7 +103,7 @@ With this architectural foundation in place, future releases will focus on:
 - Enhanced multi-agent coordination
 - Expanded tool capabilities
 - Improved memory systems
-- More sophisticated domain knowledge management
+- More sophisticated context knowledge management
 - Additional model providers and support for local models
 
 Stay tuned for these exciting developments in upcoming releases!

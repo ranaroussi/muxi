@@ -104,6 +104,8 @@ MUXI includes a sophisticated memory architecture:
 
 - **Buffer Memory**: Short-term contextual memory for conversation flow
 - **Long-Term Memory**: Persistent storage of important information
+  - **PostgreSQL with pgvector**: For production and multi-user applications
+  - **SQLite with sqlite-vec**: For local development and single-user applications
 - **Memobase**: Multi-user aware memory system that partitions by user ID
 
 ### 6. MCP Servers
@@ -187,7 +189,17 @@ MUXI follows a service-oriented architecture that enables:
 - Auto-generated keys with one-time display
 - Environment variable configuration
 
-### 4. MCP Server Integration
+### 4. Database Options
+- PostgreSQL with pgvector for production and multi-user environments
+  - Scalable vector storage and retrieval
+  - Advanced indexing for large datasets
+  - Concurrent access handling
+- SQLite with sqlite-vec for development and single-user applications
+  - Simplified deployment with file-based storage
+  - Cross-platform compatibility
+  - Uses the sqlite-vec Python package for vector operations
+
+### 5. MCP Server Integration
 - All external functionality provided through standardized MCP servers
 - Consistent interface for interacting with external services
 - Service discovery mechanisms

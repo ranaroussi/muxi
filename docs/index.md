@@ -32,10 +32,10 @@ Learn how to create and configure agents for different purposes:
 - [Agent Configuration](./agents/configuration)
 
 ### [Extending Capabilities](./extend/)
-Enhance your agents with external services and domain knowledge:
+Enhance your agents with external services and context knowledge:
 - [Using MCP Servers](./extend/using-mcp)
 - [Creating Custom MCP Servers](./extend/custom-mcp)
-- [Domain Knowledge Integration](./extend/domain-knowledge)
+- [Context Knowledge Integration](./extend/context-knowledge)
 - [Multi-Modal Support](./extend/multi-modal)
 
 ### [Interfaces & Clients](./clients/)
@@ -73,7 +73,7 @@ Information for contributors and developers:
 - **Model Context Protocol (MCP)**: Connect to external services via standardized MCP servers
 - **Memory Systems**: Short-term buffer memory and long-term persistent memory
 - **Multi-User Support**: Memobase provides user-specific memory partitioning
-- **Domain Knowledge**: Store and retrieve structured information to personalize agent responses
+- **Context Knowledge**: Store and retrieve structured information to personalize agent responses
 - **Real-Time Communication**: WebSocket support for streaming responses
 - **Flexible Configuration**: Define agents using YAML or JSON with minimal code
 
