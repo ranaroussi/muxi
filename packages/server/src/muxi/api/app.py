@@ -25,8 +25,6 @@ from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.server.memory.memobase import Memobase
 from muxi.models import OpenAIModel
-from muxi.server.tools.calculator import Calculator
-from muxi.server.tools.web_search import WebSearch
 from muxi.utils import get_version
 
 # Load environment variables
@@ -54,17 +52,14 @@ class AgentRequest(BaseModel):
     system_message: Optional[str] = Field(
         None, description="System message to customize agent behavior"
     )
-    enable_web_search: bool = Field(
-        config.tools.enable_web_search, description="Whether to enable web search"
-    )
-    enable_calculator: bool = Field(
-        config.tools.enable_calculator, description="Whether to enable calculator"
-    )
     use_long_term_memory: bool = Field(
         config.memory.use_long_term, description="Whether to use long-term memory"
     )
     multi_user_support: bool = Field(
         False, description="Whether to enable multi-user support via Memobase"
+    )
+    mcp_servers: List[Dict[str, Any]] = Field(
+        default_factory=list, description="MCP servers to connect to"
     )
 
 
@@ -153,10 +148,13 @@ class AgentListResponse(BaseModel):
     agents: List[Dict[str, Any]] = Field(default_factory=list, description="List of agents")
 
 
-class ToolListResponse(BaseModel):
-    """Model for listing tools."""
+class MCPServerListResponse(BaseModel):
+    """Model for listing MCP servers."""
 
-    tools: List[Dict[str, Any]] = Field(default_factory=list, description="List of available tools")
+    mcp_servers: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="List of available MCP servers"
+    )
 
 
 def create_app() -> FastAPI:
@@ -260,14 +258,17 @@ def create_app() -> FastAPI:
                         detail=f"Error creating long-term memory: {str(e)}",
                     )
 
-            # Create tools
-            tools = []
-
-            if request.enable_web_search:
-                tools.append(WebSearch())
-
-            if request.enable_calculator:
-                tools.append(Calculator())
+            # Connect to MCP servers
+            mcp_servers = []
+            for server in request.mcp_servers:
+                try:
+                    mcp_servers.append(server)
+                except Exception as e:
+                    logger.error(f"Error connecting to MCP server: {str(e)}")
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Error connecting to MCP server: {str(e)}",
+                    )
 
             # Create agent
             orchestrator.create_agent(
@@ -275,7 +276,7 @@ def create_app() -> FastAPI:
                 model=model,
                 buffer_memory=buffer_memory,
                 long_term_memory=memobase if request.multi_user_support else long_term_memory,
-                tools=tools,
+                mcp_servers=mcp_servers,
                 system_message=request.system_message,
             )
 
@@ -292,13 +293,14 @@ def create_app() -> FastAPI:
         try:
             agents_info = []
             for agent_id, agent in orchestrator.agents.items():
-                tools = agent.get_available_tools()
-                tool_names = [tool["name"] for tool in tools]
+                mcp_servers = []
+                if hasattr(agent, "mcp_handler"):
+                    mcp_servers = list(agent.mcp_handler.active_connections.keys())
 
                 agents_info.append(
                     {
                         "agent_id": agent_id,
-                        "tools": tool_names,
+                        "mcp_servers": mcp_servers,
                         "is_default": orchestrator.default_agent_id == agent_id,
                     }
                 )
@@ -450,37 +452,32 @@ def create_app() -> FastAPI:
             logger.error(f"Error clearing memory: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error clearing memory: {str(e)}")
 
-    @app.get("/tools", response_model=ToolListResponse, tags=["Tools"])
-    async def list_tools():
-        """List all available tools."""
+    @app.get("/mcp-servers", response_model=MCPServerListResponse, tags=["MCP"])
+    async def list_mcp_servers():
+        """List all available MCP servers."""
         try:
-            # Create a temporary agent to get the tool list
-            if not orchestrator.agents:
-                model = OpenAIModel(
-                    api_key=config.model.openai_api_key,
-                    model=config.model.default_model,
-                )
+            # Get MCP server information from agents
+            mcp_servers = []
 
-                tools = [Calculator(), WebSearch()]
-
-                orchestrator.create_agent(
-                    agent_id="_temp",
-                    model=model,
-                    tools=tools,
-                )
-
-                tool_list = orchestrator.get_agent("_temp").get_available_tools()
-                orchestrator.remove_agent("_temp")
-            else:
-                # Use existing agent to get tool list
+            if orchestrator.agents:
+                # Use an existing agent to get MCP server information
                 agent_id = list(orchestrator.agents.keys())[0]
-                tool_list = orchestrator.get_agent(agent_id).get_available_tools()
+                agent = orchestrator.get_agent(agent_id)
 
-            return ToolListResponse(tools=tool_list)
+                if hasattr(agent, "mcp_handler"):
+                    for server_name, client in agent.mcp_handler.active_connections.items():
+                        mcp_servers.append({
+                            "name": server_name,
+                            "connected": client.connected,
+                            "url": getattr(client, "url", None),
+                            "command": getattr(client, "command", None),
+                        })
+
+            return MCPServerListResponse(mcp_servers=mcp_servers)
 
         except Exception as e:
-            logger.error(f"Error listing tools: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error listing tools: {str(e)}")
+            logger.error(f"Error listing MCP servers: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error listing MCP servers: {str(e)}")
 
     # Register WebSocket routes
     register_websocket_routes(app, orchestrator)

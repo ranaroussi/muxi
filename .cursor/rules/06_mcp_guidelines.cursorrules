@@ -1,6 +1,11 @@
 # MUXI Framework - MCP (Model Context Protocol) Guidelines
 
 > These rules define best practices for MCP implementation
+>
+> **IMPORTANT UPDATE**: All direct tool implementations have been removed from the framework.
+> The MUXI framework now exclusively uses MCP servers for all specialized capabilities.
+> The old `/packages/server/src/muxi/tools` directory has been removed along with related
+> configurations. All functionality should now be implemented as MCP servers.
 
 ## Message Format
 - Follow the official MCP specification for message formats
