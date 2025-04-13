@@ -10,6 +10,7 @@ Requires-Dist: uvicorn>=0.22.0
 Requires-Dist: websockets>=11.0.0
 Requires-Dist: python-multipart>=0.0.6
 Requires-Dist: sqlalchemy>=2.0.0
+Requires-Dist: numpy>=1.24.0
 Dynamic: author
 Dynamic: requires-dist
 Dynamic: requires-python

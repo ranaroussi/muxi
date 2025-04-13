@@ -1,4 +1,9 @@
 from setuptools import setup, find_namespace_packages
+import os
+
+# Get path to extensions directory relative to setup.py
+parent_dirs = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+extensions_dir = os.path.join(parent_dirs, "extensions")
 
 setup(
     name="muxi-server",
@@ -15,5 +20,10 @@ setup(
         "websockets>=11.0.0",
         "python-multipart>=0.0.6",
         "sqlalchemy>=2.0.0",
+        "numpy>=1.24.0",  # Required for vector operations
     ],
+    include_package_data=True,
+    package_data={
+        "muxi": ["extensions/**/*"],
+    },
 )

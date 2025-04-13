@@ -6,6 +6,7 @@ This module provides memory-related configuration settings.
 
 import os
 from pathlib import Path
+from typing import Union
 
 from pydantic import BaseModel, Field
 
@@ -13,8 +14,9 @@ from pydantic import BaseModel, Field
 class MemoryConfig(BaseModel):
     """Memory configuration settings."""
 
-    use_long_term: bool = Field(
-        default_factory=lambda: os.getenv("USE_LONG_TERM_MEMORY", "true").lower() == "true"
+    use_long_term: Union[bool, str] = Field(
+        default_factory=lambda: os.getenv("USE_LONG_TERM_MEMORY", "true").lower() == "true",
+        description="Enable long-term memory. Can be boolean or path to SQLite DB/Postgres URL"
     )
 
     vector_dimension: int = Field(

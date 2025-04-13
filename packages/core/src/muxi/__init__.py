@@ -17,10 +17,34 @@ def muxi(db_connection_string=None):
 
     Args:
         db_connection_string: Optional database connection string.
-            If None, will be loaded from DATABASE_URL environment variable
+            If None, will be loaded from POSTGRES_DATABASE_URL environment variable
             when needed (only if an agent with long-term memory is created).
 
     Returns:
         Muxi: A new MUXI facade instance
     """
     return Muxi(db_connection_string)
+
+
+def use_extension(name, **kwargs):
+    """Initialize a MUXI extension by name.
+
+    Args:
+        name: The name of the extension to initialize
+        **kwargs: Extension-specific initialization parameters
+
+    Returns:
+        The result of the extension initialization
+
+    Raises:
+        ValueError: If the extension is not found
+        ImportError: If there is an error loading the extension
+    """
+    from muxi.core.extensions.base import Extension
+
+    extension_cls = Extension.get(name)
+    if not extension_cls:
+        available = ", ".join(Extension.list()) or "none available"
+        raise ValueError(f"Extension '{name}' not found. Available extensions: {available}")
+
+    return extension_cls.init(**kwargs)

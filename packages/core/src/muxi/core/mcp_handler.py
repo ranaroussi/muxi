@@ -144,7 +144,6 @@ class HTTPSSETransport(BaseTransport):
                         "status_code": response.status_code,
                         "url": self.sse_url,
                         "headers": dict(response.headers),
-                        "response_text": response.text[:500] if hasattr(response, 'text') else None,
                         "connection_time_s": connection_time,
                         "timestamp": datetime.now().isoformat()
                     }

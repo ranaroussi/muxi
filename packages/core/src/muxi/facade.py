@@ -36,7 +36,7 @@ class Muxi:
         Args:
             db_connection_string: Optional database connection string for
                                   credentials and long-term memory.
-                                  If None, will be loaded from DATABASE_URL
+                                  If None, will be loaded from POSTGRES_DATABASE_URL
                                   when needed.
         """
         # Initialize the orchestrator
@@ -59,7 +59,7 @@ class Muxi:
         """
         if self._db_connection_string is None:
             # Try to load from environment if not already set
-            self._db_connection_string = os.environ.get("DATABASE_URL")
+            self._db_connection_string = os.environ.get("POSTGRES_DATABASE_URL")
 
         return self._db_connection_string
 
@@ -81,7 +81,7 @@ class Muxi:
         if required and not connection_string:
             raise ValueError(
                 "Database connection string is required for this operation. "
-                "Please provide it when initializing Muxi or set DATABASE_URL "
+                "Please provide it when initializing Muxi or set POSTGRES_DATABASE_URL "
                 "in your environment."
             )
 
@@ -181,9 +181,6 @@ class Muxi:
         Returns:
             tuple: (buffer_memory, long_term_memory)
         """
-        # Debug print
-        print(f"Memory config: {memory_config}")
-
         # Create buffer memory
         buffer_size = memory_config.get("buffer", 10)
         if isinstance(buffer_size, dict):
@@ -195,27 +192,55 @@ class Muxi:
         long_term_memory = None
         long_term_config = memory_config.get("long_term", False)
 
-        # Support both boolean and dict configurations
-        if isinstance(long_term_config, dict):
-            enabled = long_term_config.get("enabled", False)
-        else:
-            enabled = bool(long_term_config)
+        if long_term_config:
+            if isinstance(long_term_config, str):
+                # String value - either SQLite path or Postgres URL
+                if long_term_config.startswith(('postgresql://', 'postgres://')):
+                    # Postgres connection string
+                    try:
+                        # Create long-term memory with database connection
+                        long_term_memory = LongTermMemory(connection_string=long_term_config)
 
-        if enabled:
-            # Get database connection string
-            connection_string = self._get_connection_string(required=False)
-
-            if connection_string:
+                        # Wrap with Memobase for multi-user support
+                        long_term_memory = Memobase(long_term_memory=long_term_memory)
+                        logger.info("Created Postgres long-term memory with connection string")
+                    except Exception as e:
+                        # Log the error but continue without long-term memory
+                        logger.error(f"Error creating Postgres long-term memory: {e}")
+                else:
+                    # SQLite path
+                    try:
+                        from muxi.server.memory.sqlite import SQLiteMemory
+                        long_term_memory = SQLiteMemory(db_path=long_term_config)
+                        logger.info(f"Created SQLite long-term memory at {long_term_config}")
+                    except Exception as e:
+                        # Log the error but continue without long-term memory
+                        logger.error(f"Error creating SQLite long-term memory: {e}")
+            elif long_term_config is True:
+                # Boolean true - use default SQLite database
                 try:
-                    # Create long-term memory with database connection
-                    long_term_memory = LongTermMemory(connection_string=connection_string)
-
-                    # Wrap with Memobase for multi-user support
-                    long_term_memory = Memobase(long_term_memory=long_term_memory)
+                    from muxi.server.memory.sqlite import SQLiteMemory
+                    db_path = os.path.join(os.getcwd(), 'muxi.db')
+                    long_term_memory = SQLiteMemory(db_path=db_path)
+                    logger.info(f"Created default SQLite long-term memory at {db_path}")
                 except Exception as e:
                     # Log the error but continue without long-term memory
-                    print(f"Error creating long-term memory: {e}")
-                    long_term_memory = None
+                    logger.error(f"Error creating default SQLite long-term memory: {e}")
+            elif isinstance(long_term_config, dict):
+                # Dict configuration (legacy support)
+                enabled = long_term_config.get("enabled", False)
+                if enabled:
+                    # Get database connection string
+                    connection_string = self._get_connection_string(required=False)
+                    if connection_string:
+                        try:
+                            # Create long-term memory with database connection
+                            long_term_memory = LongTermMemory(connection_string=connection_string)
+                            # Wrap with Memobase for multi-user support
+                            long_term_memory = Memobase(long_term_memory=long_term_memory)
+                        except Exception as e:
+                            # Log the error but continue without long-term memory
+                            logger.error(f"Error creating long-term memory: {e}")
 
         return buffer_memory, long_term_memory
 
