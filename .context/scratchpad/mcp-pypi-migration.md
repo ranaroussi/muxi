@@ -53,8 +53,8 @@ Test the integration to ensure compatibility:
 
 Update documentation to reflect the migration:
 
-1. Update `ideas/mcp-progress.md` to note the PyPI availability
-2. Update `ideas/mcp-integration-guide.md` with PyPI installation instructions
+1. Update `mcp-progress.md` to note the PyPI availability
+2. Update `mcp-integration-guide.md` with PyPI installation instructions
 3. Add notes about optional extras (`cli`, `rich`, `ws`) if needed
 
 ## Benefits of PyPI Migration
@@ -85,4 +85,4 @@ Update documentation to reflect the migration:
 - [MCP Package on PyPI](https://pypi.org/project/mcp/)
 - [MCP GitHub Repository](https://github.com/modelcontextprotocol/python-sdk)
 - [Working Implementation](tests/mcp_updated_transport.py)
-- [MCP Integration Guide](ideas/mcp-integration-guide.md)
+- [MCP Integration Guide](mcp-integration-guide.md)

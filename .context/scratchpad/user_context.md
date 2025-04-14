@@ -77,8 +77,8 @@ Currently, the MUXI Framework uses the term "user domain knowledge" to refer to 
 - Any additional Python files with references to user domain knowledge
 
 ### Documentation
-- `ideas/api.md`
-- `ideas/knowledge.md`
+- `api.md`
+- `knowledge.md`
 - `docs/extend/knowledge.md`
 - `docs/intro/quick-start.md`
 - `docs/technical/memory/` directory files

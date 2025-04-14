@@ -1,6 +1,6 @@
 # Developer Tasks and Implementation Checklist
 
-This document provides a detailed task tracker for developers working on the MUXI Framework. It contains specific implementation tasks, checklists, and tracks completed work. For the high-level strategic vision and roadmap, see the [docs/roadmap.md](`docs/roadmap.md`) file.
+This document provides a detailed task tracker for developers working on the MUXI Framework. It contains specific implementation tasks, checklists, and tracks completed work. For the high-level strategic vision and roadmap, see the [docs/roadmap.md](docs/roadmap.md) file.
 
 ## Completed Work
 

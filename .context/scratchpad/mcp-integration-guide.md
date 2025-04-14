@@ -202,4 +202,4 @@ After implementing these changes, test the integration with the following steps:
 - [MCP Specification](https://github.com/modelcontextprotocol/specification)
 - [SSE Standard](https://html.spec.whatwg.org/multipage/server-sent-events.html)
 - [Reference Implementation](tests/mcp_updated_transport.py)
-- [Progress Documentation](ideas/mcp-progress.md)
+- [Progress Documentation](mcp-progress.md)

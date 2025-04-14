@@ -66,9 +66,9 @@ We've successfully integrated the Model Context Protocol (MCP) Python SDK into t
    - Sends JSON-RPC requests and receives 202 Accepted responses
 
 2. **Documentation**:
-   - Created integration guide in `ideas/mcp-integration-guide.md`
-   - Updated progress documentation in `ideas/mcp-progress.md`
-   - Documented migration from GitHub to PyPI in `ideas/mcp-pypi-migration.md`
+   - Created integration guide in `mcp-integration-guide.md`
+   - Updated progress documentation in `mcp-progress.md`
+   - Documented migration from GitHub to PyPI in `mcp-pypi-migration.md`
 
 ## Next Steps
 

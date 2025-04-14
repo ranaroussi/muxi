@@ -576,21 +576,6 @@ The MUXI Framework development is focused on the following priorities:
 
 The [roadmap](docs/roadmap.md) file provides more detailed information about the roadmap.
 
-<!--
-## Documentation
-
-For more detailed documentation, see:
-
-- [User Guide](docs/user_guide.md)
-- [Developer Guide](docs/developer_guide.md)
-- [API Reference](docs/api_reference.md)
-- [CLI Reference](docs/cli.md)
-- [Web UI Guide](docs/web_ui.md)
-- [Configuration](docs/configuration.md)
-- [Package Structure](docs/package_structure.md)
-- [Roadmap](docs/roadmap.md)
--->
-
 ## License
 
 This project is licensed under a dual licensing model to balance open-source collaboration with sustainable business practices.

@@ -236,4 +236,4 @@ if __name__ == "__main__":
 
 The agent-level knowledge base feature is now fully implemented in the MUXI Framework, enabling agents to access and utilize specialized information to provide more accurate and contextual responses. The implementation maintains MUXI's design philosophy of simplicity and flexibility while providing powerful knowledge capabilities for a wide range of applications.
 
-For comprehensive documentation on using this feature, refer to the [Domain Knowledge](../docs/agents/knowledge.md) guide.
+For comprehensive documentation on using this feature, refer to the [Domain Knowledge](../docs/extend/knowledge.md) guide.
