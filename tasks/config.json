@@ -1,0 +1,12 @@
+{
+    "project": "MUXI Framework",
+    "description": "A Python framework for building AI agents with sophisticated memory and tool integration capabilities",
+    "version": "0.1.0",
+    "settings": {
+      "defaultPriority": "medium",
+      "defaultSubtasks": 5,
+      "model": "claude-3-7-sonnet-latest",
+      "maxTokens": 64000,
+      "temperature": 0.2
+    }
+  }

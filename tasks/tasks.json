@@ -1,0 +1,347 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Implement Core REST API Endpoints",
+      "description": "Develop the foundational REST API endpoints for agent management, conversation management, and memory operations as specified in api.md.",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "details": "Implement RESTful endpoints following the api.md specification. Create controllers for agent management (CRUD operations), conversation management (create, retrieve, update conversations), and memory operations. Use standard HTTP methods (GET, POST, PUT, DELETE) with proper status codes. Ensure JSON response formatting is consistent. Set up routing with proper URL patterns and versioning support (e.g., /v1/agents).",
+      "testStrategy": "Create unit tests for each endpoint using a testing framework. Verify correct response codes, payload validation, and error handling. Use mock services to isolate API layer testing.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up API project structure and routing framework",
+          "description": "Create the foundational structure for the REST API including project setup, routing configuration, error handling middleware, and API versioning support.",
+          "dependencies": [],
+          "details": "1. Initialize the API project structure with appropriate folders (controllers, routes, models, middleware, utils)\n2. Set up the main server file with Express.js or similar framework\n3. Implement API versioning support (e.g., /v1/)\n4. Create middleware for request validation, error handling, and logging\n5. Implement standardized response formatting for consistent JSON outputs\n6. Configure CORS and security headers\n7. Test the base API structure with a simple health check endpoint (/v1/health)\n8. Document the project structure for other developers",
+          "status": "pending",
+          "parentTaskId": 1
+        },
+        {
+          "id": 2,
+          "title": "Implement Agent Management API endpoints",
+          "description": "Create the CRUD endpoints for agent management as specified in api.md, including creating, retrieving, updating, and deleting agents.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Create an agent model/schema based on api.md specifications\n2. Implement the following endpoints:\n   - GET /v1/agents - List all agents\n   - GET /v1/agents/:id - Get a specific agent\n   - POST /v1/agents - Create a new agent\n   - PUT /v1/agents/:id - Update an agent\n   - DELETE /v1/agents/:id - Delete an agent\n3. Add request validation for each endpoint\n4. Implement proper HTTP status codes (200, 201, 400, 404, etc.)\n5. Write unit tests for each endpoint using Jest or similar\n6. Test with Postman or similar tool to verify functionality\n7. Document the endpoints with examples",
+          "status": "pending",
+          "parentTaskId": 1
+        },
+        {
+          "id": 3,
+          "title": "Implement Conversation Management API endpoints",
+          "description": "Develop the endpoints for creating, retrieving, and updating conversations between users and agents.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Create a conversation model/schema that references agents\n2. Implement the following endpoints:\n   - GET /v1/conversations - List conversations\n   - GET /v1/conversations/:id - Get a specific conversation\n   - POST /v1/conversations - Create a new conversation\n   - PUT /v1/conversations/:id - Update a conversation\n   - GET /v1/conversations/:id/messages - Get messages in a conversation\n   - POST /v1/conversations/:id/messages - Add a message to a conversation\n3. Ensure proper relationships between conversations and agents\n4. Implement pagination for conversation listing and message retrieval\n5. Add filtering capabilities (by date, agent, etc.)\n6. Write unit tests for each endpoint\n7. Test conversation flows end-to-end",
+          "status": "pending",
+          "parentTaskId": 1
+        },
+        {
+          "id": 4,
+          "title": "Implement Memory Operations API endpoints",
+          "description": "Create endpoints for managing agent memory operations including storing, retrieving, and updating memory entries.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Create a memory model/schema that links to agents\n2. Implement the following endpoints:\n   - GET /v1/agents/:id/memory - Retrieve an agent's memory\n   - POST /v1/agents/:id/memory - Add to an agent's memory\n   - PUT /v1/agents/:id/memory/:memoryId - Update a specific memory entry\n   - DELETE /v1/agents/:id/memory/:memoryId - Delete a memory entry\n   - GET /v1/agents/:id/memory/search - Search within an agent's memory\n3. Implement memory indexing for efficient retrieval\n4. Add query parameters for memory filtering and searching\n5. Ensure proper validation of memory entries\n6. Write unit tests for memory operations\n7. Test memory persistence and retrieval accuracy",
+          "status": "pending",
+          "parentTaskId": 1
+        },
+        {
+          "id": 5,
+          "title": "Implement API documentation and integration testing",
+          "description": "Create comprehensive API documentation using OpenAPI/Swagger and implement integration tests to ensure all endpoints work together correctly.",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "1. Generate OpenAPI/Swagger documentation for all implemented endpoints\n2. Set up an interactive API documentation interface\n3. Create integration tests that test complete workflows:\n   - Creating an agent, starting a conversation, and storing memory\n   - Retrieving conversations with their associated agents\n   - Testing memory operations in context of conversations\n4. Implement API rate limiting and throttling\n5. Add authentication middleware (if required by api.md)\n6. Perform load testing to ensure API performance\n7. Create example API client code snippets\n8. Document error codes and troubleshooting guidance",
+          "status": "pending",
+          "parentTaskId": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Add Authentication and Security for REST API",
+      "description": "Implement API key authentication, rate limiting, and throttling for the REST API endpoints.",
+      "status": "pending",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "details": "Create middleware for API key validation. Implement rate limiting using a token bucket or similar algorithm. Add request throttling to prevent abuse. Create an API key management system with generation, revocation, and permission scoping. Implement proper error responses for authentication failures (401) and rate limit exceeded (429). Store API keys securely with hashing.",
+      "testStrategy": "Test authentication with valid and invalid API keys. Verify rate limiting by sending requests exceeding the limit. Test API key management operations. Create integration tests that simulate various authentication scenarios.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create API Key Storage and Management System",
+          "description": "Implement a secure storage system for API keys with functionality for generation, hashing, and management",
+          "dependencies": [],
+          "details": "Implementation details:\n1. Design a database schema for storing API keys with fields for: key_id, hashed_key, user_id, created_at, last_used, permissions/scopes, active status, and expiration\n2. Implement a secure hashing function using bcrypt or similar algorithm to store API keys\n3. Create functions for generating new API keys with configurable length and entropy\n4. Implement methods for key revocation (setting active status to false)\n5. Add functionality for permission/scope assignment to keys\n6. Create admin endpoints for key management (generation, revocation, scope modification)\n7. Testing approach: Write unit tests for key generation, hashing, and validation functions; create integration tests for the key management endpoints",
+          "status": "pending",
+          "parentTaskId": 2
+        },
+        {
+          "id": 2,
+          "title": "Implement API Key Authentication Middleware",
+          "description": "Create middleware to validate API keys for protected endpoints",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation details:\n1. Create middleware function that extracts API key from request headers, query parameters, or Authorization header\n2. Implement key validation logic that checks the provided key against stored hashed keys\n3. Add functionality to verify key hasn't expired and is still active\n4. Implement permission/scope checking to ensure the key has access to the requested resource\n5. Create proper 401 Unauthorized responses with informative error messages for authentication failures\n6. Add request logging for authentication attempts (successful and failed)\n7. Testing approach: Write unit tests with mock requests containing valid and invalid API keys; test different authentication failure scenarios; ensure proper error responses",
+          "status": "pending",
+          "parentTaskId": 2
+        },
+        {
+          "id": 3,
+          "title": "Implement Rate Limiting Functionality",
+          "description": "Create a token bucket or similar rate limiting algorithm to restrict API usage",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation details:\n1. Research and select appropriate rate limiting algorithm (token bucket recommended)\n2. Implement the rate limiting logic with configurable rates per API key or user\n3. Create a storage mechanism for tracking request counts (Redis recommended for distributed systems)\n4. Implement different rate limit tiers based on user permissions or subscription levels\n5. Add headers to responses showing rate limit status (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)\n6. Create 429 Too Many Requests responses when limits are exceeded\n7. Testing approach: Write tests that simulate rapid API calls to trigger rate limiting; verify correct headers and 429 responses",
+          "status": "pending",
+          "parentTaskId": 2
+        },
+        {
+          "id": 4,
+          "title": "Add Request Throttling Mechanism",
+          "description": "Implement request throttling to prevent API abuse and ensure service stability",
+          "dependencies": [
+            3
+          ],
+          "details": "Implementation details:\n1. Design a throttling mechanism that limits concurrent requests from the same client\n2. Implement logic to track ongoing requests per API key or IP address\n3. Create configurable throttling parameters (max concurrent requests, cool-down period)\n4. Add functionality to queue or reject requests that exceed throttling limits\n5. Implement proper error responses for throttled requests with retry-after headers\n6. Create monitoring for throttling events to detect potential abuse patterns\n7. Testing approach: Write tests that simulate concurrent requests to verify throttling behavior; test with different throttling configurations",
+          "status": "pending",
+          "parentTaskId": 2
+        },
+        {
+          "id": 5,
+          "title": "Integrate Security Features and Create Documentation",
+          "description": "Connect all security components, add global error handling, and create documentation for API security",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Implementation details:\n1. Integrate authentication, rate limiting, and throttling middleware into the main application\n2. Create a configuration system for security parameters (rate limits, throttling settings, key expiration policies)\n3. Implement global error handling for security-related errors with appropriate status codes\n4. Add security headers to all API responses (Content-Security-Policy, X-Content-Type-Options, etc.)\n5. Create comprehensive documentation for API consumers explaining authentication requirements, rate limits, and error codes\n6. Implement a developer dashboard showing API usage, rate limit status, and key management\n7. Testing approach: Perform end-to-end testing of the complete security system; verify all components work together correctly; test edge cases and error scenarios",
+          "status": "pending",
+          "parentTaskId": 2
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Implement WebSocket API",
+      "description": "Develop the WebSocket API for real-time communication with support for multi-modal messages as specified in api.md.",
+      "status": "pending",
+      "dependencies": [
+        2
+      ],
+      "priority": "high",
+      "details": "Set up WebSocket server with proper connection handling. Implement message types for text, images, and audio as defined in api.md. Create handlers for different message types. Implement reconnection logic with exponential backoff. Add support for attachments with proper binary data handling. Ensure proper error handling with standardized error messages. Implement authentication for WebSocket connections.",
+      "testStrategy": "Create WebSocket client tests that verify connection establishment, message sending/receiving, and reconnection behavior. Test with different message types and attachments. Verify proper error handling and recovery mechanisms.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up WebSocket server with connection handling",
+          "description": "Implement the core WebSocket server with proper connection establishment, maintenance, and termination capabilities.",
+          "dependencies": [],
+          "details": "1. Choose and set up a WebSocket library (like ws, Socket.IO)\n2. Create a WebSocket server that listens on a configurable port\n3. Implement connection event handlers (open, close, error)\n4. Set up ping/pong mechanism to detect stale connections\n5. Implement basic logging for connection events\n6. Create a connection pool to track active connections\n7. Testing: Write tests to verify connection establishment, maintenance over time, and proper termination",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 2,
+          "title": "Implement authentication for WebSocket connections",
+          "description": "Add authentication mechanisms to verify client identity before establishing WebSocket connections.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Review authentication requirements from api.md\n2. Implement token validation on connection request\n3. Create middleware to authenticate connection requests\n4. Add user/client identification to connection objects\n5. Implement connection rejection for invalid credentials\n6. Set up secure token transmission\n7. Testing: Write tests with valid and invalid authentication attempts, verify proper rejection of unauthorized connections",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 3,
+          "title": "Implement message types and handlers",
+          "description": "Create the message type definitions and corresponding handlers for text, images, and audio as specified in api.md.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Define message type schemas for text, images, and audio based on api.md\n2. Implement message parsing and validation\n3. Create handler functions for each message type\n4. Set up message routing based on type\n5. Implement acknowledgment responses\n6. Add message queuing for handling high loads\n7. Testing: Create tests for each message type, verify proper routing and handling",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 4,
+          "title": "Add support for binary data and attachments",
+          "description": "Implement binary data handling for attachments like images and audio files.",
+          "dependencies": [
+            3
+          ],
+          "details": "1. Configure WebSocket server for binary data transmission\n2. Implement buffer handling for binary messages\n3. Create utilities for encoding/decoding binary data\n4. Add attachment size validation\n5. Implement streaming for large attachments\n6. Set up temporary storage for attachments if needed\n7. Testing: Test binary data transmission with various file types and sizes, verify data integrity",
+          "status": "pending",
+          "parentTaskId": 3
+        },
+        {
+          "id": 5,
+          "title": "Implement reconnection logic and error handling",
+          "description": "Add client reconnection capabilities with exponential backoff and standardized error handling.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "1. Define standardized error message format as specified in api.md\n2. Implement error types and codes\n3. Create error handling middleware\n4. Implement reconnection logic with exponential backoff\n5. Add connection state tracking\n6. Implement message buffering during disconnections\n7. Create client-side reconnection examples\n8. Testing: Simulate network failures and verify reconnection behavior, test error handling for various error scenarios",
+          "status": "pending",
+          "parentTaskId": 3
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Enhance CLI Interface",
+      "description": "Improve the command-line interface to support all API operations with better formatting and user experience.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        2,
+        3
+      ],
+      "priority": "medium",
+      "details": "Refactor CLI to use a command pattern for all API operations. Add support for multi-modal interactions (text, images, audio). Implement configuration management commands for API keys and preferences. Improve output formatting with colors and structured data. Add progress indicators for long-running operations. Implement interactive mode for conversation. Create help documentation for all commands.",
+      "testStrategy": "Create automated tests for CLI commands using command execution and output parsing. Test configuration persistence. Verify all API operations can be performed through CLI. Create user acceptance testing script for manual verification."
+    },
+    {
+      "id": 5,
+      "title": "Develop Web UI Core",
+      "description": "Create a responsive web interface with real-time updates using WebSocket for agent interactions.",
+      "status": "pending",
+      "dependencies": [
+        3
+      ],
+      "priority": "medium",
+      "details": "Set up a modern web framework (React/Vue/Angular). Create responsive layouts for mobile and desktop. Implement WebSocket connection for real-time updates. Build chat interface with support for multi-modal content. Create authentication screens and session management. Implement error handling and user notifications. Design and implement the agent interaction UI with message history.",
+      "testStrategy": "Implement unit tests for UI components. Create end-to-end tests for critical user flows. Test responsive design across different screen sizes. Verify WebSocket reconnection behavior. Test multi-modal content rendering."
+    },
+    {
+      "id": 6,
+      "title": "Implement Agent-to-Agent Communication Protocol",
+      "description": "Develop the A2A protocol for inter-agent communication with capability discovery and task delegation.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        3
+      ],
+      "priority": "medium",
+      "details": "Design and implement the A2A protocol message format. Create capability discovery mechanism for agents to advertise their abilities. Implement task delegation between agents with proper request/response handling. Develop context sharing with isolation boundaries. Create conversation lifecycle management for A2A interactions. Implement authentication and security for A2A communications. Build external agent integration interfaces.",
+      "testStrategy": "Create unit tests for protocol message handling. Develop integration tests with multiple agents communicating. Test capability discovery with mock agents. Verify task delegation with various scenarios. Test security boundaries and authentication."
+    },
+    {
+      "id": 7,
+      "title": "Enhance Vector Database Support",
+      "description": "Optimize vector operations and add support for additional vector databases with migration tools.",
+      "status": "pending",
+      "dependencies": [
+        1
+      ],
+      "priority": "medium",
+      "details": "Optimize existing vector operations for improved performance. Implement adapters for additional vector databases (Milvus, Qdrant). Create database abstraction layer for consistent API. Develop migration tools for transferring between database types. Implement benchmarking tools for performance comparison. Add support for clustering and sharding configurations. Create guidance documentation for database selection (SQLite vs PostgreSQL).",
+      "testStrategy": "Benchmark vector operations before and after optimization. Test database adapters with actual database instances. Verify migration tools with sample datasets. Create integration tests for each supported database. Test clustering and sharding configurations."
+    },
+    {
+      "id": 8,
+      "title": "Expand LLM Provider Support",
+      "description": "Implement support for additional LLM providers including Anthropic, Gemini, Grok, and local models.",
+      "status": "pending",
+      "dependencies": [
+        1
+      ],
+      "priority": "medium",
+      "details": "Create provider interfaces for Anthropic, Gemini, and Grok. Implement local model support for Llama, Mistral, and DeepSeek. Develop a model router for fallback and cost optimization. Standardize prompt formatting across providers. Implement caching mechanisms for responses. Create configuration options for each provider. Add streaming support for compatible providers.",
+      "testStrategy": "Test each provider with sample prompts. Verify streaming capabilities. Test fallback mechanisms in the model router. Benchmark performance and cost across providers. Create integration tests with mock API responses."
+    },
+    {
+      "id": 9,
+      "title": "Implement Multi-Modal Capabilities",
+      "description": "Add support for document processing, image processing, and audio processing capabilities.",
+      "status": "pending",
+      "dependencies": [
+        3,
+        8
+      ],
+      "priority": "low",
+      "details": "Implement document processing for PDF and Office documents with OCR for scanned content. Create image preprocessing pipeline with vision-capable model integration. Develop audio file handling with speech-to-text and text-to-speech capabilities. Implement streaming audio support. Create standardized interfaces for multi-modal content. Develop content extraction and summarization pipelines. Integrate with appropriate external services or libraries for specialized processing.",
+      "testStrategy": "Test document processing with various file types. Verify OCR accuracy with test documents. Test image processing pipeline with sample images. Verify audio processing with different audio formats. Create integration tests for end-to-end multi-modal workflows."
+    },
+    {
+      "id": 10,
+      "title": "Create Comprehensive Testing and Documentation",
+      "description": "Develop unit tests, integration tests, performance benchmarks, and comprehensive documentation.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "priority": "medium",
+      "details": "Implement unit tests for all components with high coverage. Create integration tests for API and WebSocket endpoints. Develop performance benchmarks for critical operations. Generate OpenAPI/Swagger documentation from code. Write comprehensive CLI documentation. Create user guides for advanced use cases. Develop example projects showcasing API usage. Implement automated documentation generation from code comments.",
+      "testStrategy": "Verify test coverage metrics. Review documentation for completeness and accuracy. Test example projects to ensure they work as documented. Have team members perform documentation review and usability testing."
+    },
+    {
+      "id": 11,
+      "title": "Set Up Deployment and Package Distribution",
+      "description": "Create Docker containerization, Kubernetes deployment, and cloud deployment guides with monitoring integration.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        2,
+        3,
+        7
+      ],
+      "priority": "low",
+      "details": "Create Dockerfile and docker-compose configuration. Develop Kubernetes manifests for deployment. Write deployment guides for AWS, GCP, and Azure. Implement monitoring and logging integration. Set up continuous integration workflow with GitHub Actions. Create automatic version bumping for releases. Develop SQLite deployment guides for serverless and edge environments. Implement health check endpoints.",
+      "testStrategy": "Test Docker builds and container functionality. Verify Kubernetes deployments in test environment. Test CI/CD pipeline with sample changes. Validate monitoring and logging functionality. Test deployment guides by following them in clean environments."
+    },
+    {
+      "id": 12,
+      "title": "Develop Language-Specific SDKs",
+      "description": "Create SDKs for TypeScript/JavaScript, Go, Java/Kotlin, C#/.NET, and Rust with shared development tools.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        2,
+        3,
+        10
+      ],
+      "priority": "low",
+      "details": "Develop TypeScript/JavaScript SDK for web and Node.js. Create Go SDK for backend integration. Implement Java/Kotlin SDK for Android and JVM environments. Build C#/.NET SDK for Windows integration. Develop Rust SDK for systems programming. Create shared API client generators and test suites. Implement consistent error handling across SDKs. Add documentation and examples for each SDK. Set up package distribution for each language's ecosystem.",
+      "testStrategy": "Create unit tests for each SDK. Develop integration tests that verify API compatibility. Test examples in each SDK. Verify package installation process. Create cross-language test scenarios to ensure consistent behavior."
+    }
+  ],
+  "metadata": {
+    "projectName": "MUXI Framework Implementation",
+    "totalTasks": 12,
+    "sourceFile": "/Users/ran/Projects/muxi/framework/.context/scratchpad/updated_tasks.txt",
+    "generatedAt": "2023-12-15"
+  }
+}
