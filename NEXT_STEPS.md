@@ -85,9 +85,9 @@ Core components of the muxi framework now implemented:
 
 ## Todo List
 
-Things to do next to enhance the framework:
+Things to do next to enhance the framework, ordered by priority:
 
-### 1. REST API Implementation (High Priority)
+### 1. REST API & MCP Server Implementation
 
 Based on the api.md specifications, implement the full REST API for MUXI:
 
@@ -119,20 +119,52 @@ Building on the api.md specifications, enhance the WebSocket API:
 - [ ] Add reconnection logic with exponential backoff
 - [ ] Support for attachments as specified in api.md
 
-### 3. User Interfaces
+### 3. CLI Interfaces
 
 - [ ] Enhance CLI interface
   - [ ] Add support for all API operations described in api.md
   - [ ] Improve user experience with better formatting and colors
-- [ ] Develop web interface
-  - [ ] Create responsive UI for mobile and desktop
-  - [ ] Implement real-time updates using WebSocket
-  - [ ] Add support for multi-modal interactions
+  - [ ] Add multi-modal interaction support
+  - [ ] Implement configuration management commands
 - [ ] Improve API server based on api.md specifications
   - [ ] Implement all endpoints described in the spec
   - [ ] Add comprehensive test coverage
 
-### 4. LLM Providers
+### 4. Web UI
+
+- [ ] Develop web interface
+  - [ ] Create responsive UI for mobile and desktop
+  - [ ] Implement real-time updates using WebSocket
+  - [ ] Add support for multi-modal interactions
+  - [ ] Build user-friendly configuration interface
+  - [ ] Create agent management dashboard
+
+### 5. Agent-to-Agent Communication
+
+- [ ] Implement the A2A protocol for inter-agent communication
+  - [ ] Capability discovery mechanism
+  - [ ] Task delegation between agents
+  - [ ] Context sharing with proper isolation
+  - [ ] Conversation lifecycle management
+  - [ ] External agent integration
+  - [ ] Security and authentication
+- [ ] Enhance MCP Server Interface
+  - [ ] SSE-based MCP server implementation
+  - [ ] Automatic tool discovery from agent capabilities
+  - [ ] NPX bridge package for non-SSE clients
+  - [ ] Streaming response handling
+  - [ ] Authentication shared with REST API
+
+### 6. Vector Database Enhancements
+
+- [ ] Optimize vector operations for improved performance
+- [ ] Add support for additional vector databases (e.g., Milvus, Qdrant)
+- [ ] Add migration tools for transferring between database types
+- [ ] Create performance benchmarks for different vector database options
+- [ ] Develop guidance for choosing between SQLite and PostgreSQL
+- [ ] Support for vector database clustering and sharding
+
+### 7. LLM Providers
 
 - [x] Implement OpenAI LLM provider
 - [ ] Implement Anthropic LLM provider
@@ -141,17 +173,7 @@ Building on the api.md specifications, enhance the WebSocket API:
 - [ ] Add support for local models (e.g., Llama, Mistral, DeepSeek)
 - [ ] Create a model router for fallback and cost optimization
 
-### 5. Vector Database Enhancements
-
-- [x] SQLite with sqlite-vec integration for local deployments
-- [ ] Optimize vector operations for improved performance
-- [ ] Add support for additional vector databases (e.g., Milvus, Qdrant)
-- [ ] Add migration tools for transferring between database types
-- [ ] Create performance benchmarks for different vector database options
-- [ ] Develop guidance for choosing between SQLite and PostgreSQL
-- [ ] Support for vector database clustering and sharding
-
-### 6. Testing and Documentation
+### 8. Testing and Documentation
 
 - [ ] Unit tests for all new API endpoints
 - [ ] Integration tests for API and WebSocket endpoints
@@ -161,11 +183,55 @@ Building on the api.md specifications, enhance the WebSocket API:
 - [ ] User guides for advanced use cases
 - [ ] Example projects showcasing API usage
 - [ ] Generate API documentation with Sphinx
-- [ ] Create SQLite vector extension usage guide
 
-### 7. Multi-Modal Capabilities
+### 9. Deployment & Package Distribution
+
+- [ ] Docker containerization
+- [ ] Kubernetes deployment
+- [ ] Cloud deployment guides (AWS, GCP, Azure)
+- [ ] Monitoring and logging integration
+- [ ] Continuous integration workflow with GitHub Actions or similar tools
+- [ ] Automatic version bumping for releases
+- [ ] SQLite deployment guides for serverless and edge environments
+
+### 10. Language-Specific SDKs
+
+Develop SDKs for popular programming languages to increase framework adoptability:
+
+- [ ] TypeScript/JavaScript SDK
+  - [ ] REST API client with full endpoint coverage
+  - [ ] WebSocket client implementation
+  - [ ] MCP server protocol implementation for JavaScript tools
+  - [ ] Comprehensive examples and documentation
+  - [ ] NPM package distribution
+
+- [ ] Go SDK
+  - [ ] API client library
+  - [ ] MCP server implementation helpers
+  - [ ] Utilities for agent configuration
+
+- [ ] Other Language SDKs
+  - [ ] Java/Kotlin SDK
+  - [ ] Rust SDK
+  - [ ] C#/.NET SDK
+  - [ ] PHP SDK
+  - [ ] Ruby SDK (optional)
+
+- [ ] SDK Development Tools
+  - [ ] API client generators from OpenAPI spec
+  - [ ] Shared test suite for SDK validations
+  - [ ] Consistent interface definitions across languages
+  - [ ] Version syncing mechanisms with core framework
+
+### 11. Multi-Modal Capabilities
 
 Transform agents into omni agents capable of handling various media types as specified in api.md WebSocket section:
+
+#### Document Processing
+- [ ] PDF processing and text extraction
+- [ ] Support for Office documents (Word, Excel, etc.)
+- [ ] OCR for scanned documents
+- [ ] Document summarization tools
 
 #### Image Processing
 - [ ] Extend MCPMessage to support image attachments
@@ -195,51 +261,26 @@ Transform agents into omni agents capable of handling various media types as spe
   - [ ] Design WebSocket protocol for audio streaming
   - [ ] Implement real-time audio processing
 
-#### Document Processing
-- [ ] PDF processing and text extraction
-- [ ] Support for Office documents (Word, Excel, etc.)
-- [ ] OCR for scanned documents
-- [ ] Document summarization tools
+### 12. Security Enhancements
 
-### 8. Language-Specific SDKs
+- [ ] Enhance API security
+  - [ ] Rate limiting and throttling
+  - [ ] Input validation and sanitization
+  - [ ] IP-based restrictions
+- [ ] Implement advanced authentication methods
+  - [ ] OAuth and OpenID Connect integration
+  - [ ] Role-based access control
+  - [ ] Multi-factor authentication options
+- [ ] Add data protection features
+  - [ ] Encryption at rest and in transit
+  - [ ] Privacy controls
+  - [ ] Compliance with security standards
+- [ ] Implement security auditing
+  - [ ] Vulnerability scanning
+  - [ ] Security logging
+  - [ ] Access monitoring
 
-Develop SDKs for popular programming languages to increase framework adoptability:
-
-- [ ] TypeScript/JavaScript SDK
-  - [ ] REST API client with full endpoint coverage
-  - [ ] WebSocket client implementation
-  - [ ] MCP server protocol implementation for JavaScript tools
-  - [ ] Comprehensive examples and documentation
-  - [ ] NPM package distribution
-
-- [ ] Go SDK
-  - [ ] API client library
-  - [ ] MCP server implementation helpers
-  - [ ] Utilities for agent configuration
-
-- [ ] Other Language SDKs
-  - [ ] Java/Kotlin SDK
-  - [ ] Rust SDK
-  - [ ] C#/.NET SDK
-  - [ ] Ruby SDK (optional)
-
-- [ ] SDK Development Tools
-  - [ ] API client generators from OpenAPI spec
-  - [ ] Shared test suite for SDK validations
-  - [ ] Consistent interface definitions across languages
-  - [ ] Version syncing mechanisms with core framework
-
-### 9. Deployment
-
-- [ ] Docker containerization
-- [ ] Kubernetes deployment
-- [ ] Cloud deployment guides (AWS, GCP, Azure)
-- [ ] Monitoring and logging integration
-- [ ] Continuous integration workflow with GitHub Actions or similar tools
-- [ ] Automatic version bumping for releases
-- [ ] SQLite deployment guides for serverless and edge environments
-
-### 10. Stability and Performance
+### Stability and Performance
 
 - [x] Comprehensive error monitoring
 - [x] Database schema optimization and indexing
@@ -248,54 +289,6 @@ Develop SDKs for popular programming languages to increase framework adoptabilit
 - [ ] Load testing for concurrent connections
 - [ ] Benchmarking WebSocket message throughput
 - [ ] Connection pooling for database access
-- [ ] Caching strategies for frequent requests
-- [ ] Implement the execution log system as described in api.md
-  - [ ] Detailed logging of agent actions and decisions
-  - [ ] MCP server call tracking with inputs and outputs
-  - [ ] Performance metrics collection
-  - [ ] Log visualization in web dashboard
-
-### 11. Security Enhancements
-
-Based on api.md security considerations:
-- [ ] Ensure all API endpoints use HTTPS in production
-- [ ] Implement secure API key storage and rotation
-- [ ] Add comprehensive rate limiting to prevent abuse
-- [ ] Implement request validation to prevent injection attacks
-- [ ] Add input sanitization to prevent XSS
-- [ ] Implement proper security logging for auditing
-- [ ] Add IP-based restrictions for sensitive operations
-
-### 12. Package Distribution
-
-- [x] Create proper Python package for PyPI distribution
-- [x] Versioning strategy
-- [x] Dependency management
-- [x] Package documentation
-- [ ] Installation guides
-
-### 13. Agent-to-Agent Communication
-
-- [ ] Implement Agent-to-Agent (A2A) protocol
-  - [ ] Capability registration and discovery
-  - [ ] Inter-agent message format standardization
-  - [ ] Task delegation between agents
-  - [ ] Context sharing with proper isolation
-  - [ ] Conversation lifecycle management
-  - [ ] External agent integration
-  - [ ] Security and authentication
-  - [ ] Configuration system for controlling A2A access
-
-### 14. MCP Server Interface
-
-- [ ] Implement MCP server interface
-  - [ ] SSE-based server endpoint
-  - [ ] Tool discovery from agent capabilities
-  - [ ] Request/response message handling
-  - [ ] Streaming response support
-  - [ ] Authentication shared with REST API
-  - [ ] NPX bridge package for non-SSE clients
-  - [ ] Integration with existing orchestrator
 
 ## Implementation Roadmap
 
@@ -501,15 +494,3 @@ This scenario demonstrates connecting to a remote MUXI server:
    print(response)
    ```
 
-3. **Use Streaming Responses**
-
-   ```python
-   # Streaming - yields chunks as they arrive via SSE
-   for chunk in app.chat("Tell me a short story", stream=True):
-       print(chunk, end="", flush=True)
-
-   # Using WebSockets for multi-modal capabilities
-   socket = app.open_socket()
-   await socket.send_message("Process this image", images=["path/to/image.jpg"])
-   await socket.close()
-   ```

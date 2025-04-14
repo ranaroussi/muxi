@@ -38,9 +38,10 @@ This phase established the foundational architecture and core components of the 
 
 This phase focuses on enhancing the framework with advanced communication capabilities:
 
-- Full-featured CLI interface
 - Complete REST API implementation
 - Complete WebSocket API implementation
+- Enhanced CLI interface
+- Web UI development
 - Basic MCP server interface implementation
 - Initial Agent-to-Agent (A2A) communication protocol
 - Additional LLM providers
@@ -52,12 +53,13 @@ This phase focuses on enhancing the framework with advanced communication capabi
 This phase will prepare the framework for production deployment at scale:
 
 - Advanced A2A communication with capability discovery
+- Vector database optimizations and additional integrations
 - Full MCP Server interface with streaming response support
-- Performance improvements and optimizations
-- Monitoring and metrics
+- Comprehensive testing and documentation
+- Deployment solutions and containerization
+- Language-specific SDKs
 - Full multi-modal support
-- Deployment guides and infrastructure
-- Web UI enhancements
+- Performance monitoring and metrics
 
 ...
 
@@ -138,97 +140,116 @@ The initial release of the MUXI Framework established the core architecture and 
 
 ## Current Development (v0.4.0)
 
-The MUXI Framework v0.4.0 will introduce several advanced features with a focus on agent communication and MCP server implementation.
+The MUXI Framework v0.4.0 will introduce several advanced features with a focus on comprehensive API implementation and enhanced communication capabilities, reflecting our updated development priorities.
 
 ### Key Features in Development
 
-- **Basic MCP Server Interface**:
-  - SSE-based server endpoint for exposing agent capabilities
-  - Tool discovery from agent capabilities
-  - Request/response message handling
-  - Authentication shared with REST API
-  - NPX bridge package for non-SSE clients
+- **REST API & MCP Server Implementation**:
+  - Standard REST API endpoints (agent, conversation, memory management)
+  - Authentication with API keys
+  - Streaming support for chat endpoints with SSE
+  - Proper error handling with standardized format
+  - API versioning support
+  - Rate limiting and throttling
+  - API documentation using OpenAPI/Swagger
+  - SSE-based MCP server implementation
 
-- **Initial Agent-to-Agent (A2A) Communication**:
+- **WebSocket API Implementation**:
+  - WebSocket protocol for real-time communication
+  - Support for multi-modal messages (text, images, audio)
+  - Proper error handling and recovery mechanisms
+  - Reconnection logic with exponential backoff
+  - Support for attachments as specified in api.md
+
+- **CLI Interfaces & Web UI**:
+  - Enhanced CLI interface with support for all API operations
+  - Web interface with responsive design for mobile and desktop
+  - Real-time updates using WebSocket
+  - Multi-modal interaction support
+  - User-friendly configuration interface
+
+- **Agent-to-Agent (A2A) Communication**:
   - Standardized message format for inter-agent communication
-  - Basic agent capability registration
+  - Basic agent capability registration and discovery
   - Task delegation between agents
   - Context sharing with proper isolation
-  - Configuration options for A2A control
-
-- **Enhanced WebSocket Support**:
-  - Complete WebSocket implementation to spec
-  - Support for real-time agent interactions
-  - Improved error handling and recovery
-  - Multi-user WebSocket connections
-
-- **Additional LLM Providers**:
-  - Anthropic provider
-  - Gemini provider
-  - Abstraction layer for provider-agnostic operations
-  - Support for local model integration
+  - Security and authentication foundation
 
 ## Upcoming Releases
 
-### v0.5.0 (Planned Q2 2025) - Scaling & Communication
+### v0.5.0 (Planned Q2 2025) - Scaling & Integration
 
-The MUXI Framework v0.5.0 will focus on advanced agent communication, enhanced MCP server capabilities, and performance improvements to support larger-scale deployments.
+The MUXI Framework v0.5.0 will focus on advanced integration capabilities, vector database enhancements, and expanding LLM provider support.
 
 #### Planned Features
 
-- **Advanced Agent-to-Agent (A2A) Communication**:
-  - Capability discovery mechanism for automatic service detection
-  - Robust task delegation between specialized agents
-  - Conversation lifecycle management
-  - External agent integration capabilities
-  - Comprehensive security and authentication
+- **Vector Database Enhancements**:
+  - Optimized vector operations for improved performance
+  - Support for additional vector databases (e.g., Milvus, Qdrant)
+  - Migration tools for transferring between database types
+  - Performance benchmarks for different database options
+  - Support for vector database clustering and sharding
 
-- **Full MCP Server Interface**:
-  - Complete streaming response support
-  - Enhanced tool discovery from agent capabilities
-  - Advanced request/response handling
-  - Authentication shared with REST API
-  - Complete documentation and examples
+- **LLM Provider Expansion**:
+  - Anthropic LLM provider implementation
+  - Gemini LLM provider implementation
+  - Grok LLM provider implementation
+  - Support for local models (Llama, Mistral, DeepSeek)
+  - Model router for fallback and cost optimization
 
-- **Performance & Monitoring**:
-  - Comprehensive system status monitoring
-  - API usage statistics and dashboards
-  - Rate limiting and quota management
-  - Performance optimizations for high-scale deployments
-
-- **Multi-Modal Support**:
-  - Full support for images, audio, and document processing
-  - Standardized multi-modal message formats
-  - Comprehensive handling of various content types
+- **Testing and Documentation**:
+  - Comprehensive unit and integration tests
+  - Performance benchmarks for API endpoints
+  - Complete API and CLI documentation
+  - User guides for advanced use cases
+  - Example projects showcasing API usage
 
 - **Language-Specific SDKs**:
-  - TypeScript/JavaScript SDK for web and Node.js applications
-  - Client libraries for popular programming languages
-  - Consistent API experience across languages
-  - MCP server protocol implementations in multiple languages
+  - TypeScript/JavaScript SDK for web and Node.js
+  - Go SDK for backend integration
+  - Initial SDKs for Java/Kotlin, Rust, and C#/.NET
+  - SDK Development Tools for consistent interfaces
+
+### v0.6.0 (Planned Q2 2025) - Multi-Modal & Deployment
+
+The v0.6.0 release will focus on enhancing multi-modal capabilities and deployment solutions.
+
+#### Planned Features
+
+- **Multi-Modal Capabilities**:
+  - Document processing (PDF, Office documents, OCR)
+  - Image attachment support and preprocessing pipeline
+  - Audio file handling with speech-to-text integration
+  - Streaming audio capabilities
+  - Vision-capable model integrations
+
+- **Deployment & Package Distribution**:
+  - Docker containerization and Kubernetes deployment
+  - Cloud deployment guides (AWS, GCP, Azure)
+  - Monitoring and logging integration
+  - CI/CD workflows with GitHub Actions
+  - SQLite deployment guides for serverless environments
+
+...
 
 ### v1.0.0 (Planned Q3 2025) - Stable Release
 
-The v1.0.0 release will represent the first stable, production-ready version of the MUXI Framework.
+The v1.0.0 release will represent the first stable, production-ready version of the MUXI Framework with comprehensive security enhancements.
 
 #### Planned Features
+
+- **Security Enhancements**:
+  - Enhanced API security (rate limiting, input validation)
+  - Advanced authentication methods (OAuth, OIDC)
+  - Role-based access control
+  - Data encryption at rest and in transit
+  - Security auditing and vulnerability scanning
+  - Privacy controls and data protection mechanisms
 
 - **API Stabilization**:
   - Complete API documentation
   - Backward compatibility guarantees
   - Standardized error handling across all components
-
-- **Deployment Solutions**:
-  - Docker containerization
-  - Kubernetes deployment guides
-  - Cloud deployment templates
-  - Serverless deployment options
-
-- **Security Enhancements**:
-  - Comprehensive authentication options
-  - Role-based access control
-  - Data encryption at rest and in transit
-  - Security best practices documentation
 
 - **Extended Model Support**:
   - Support for all major LLM providers
@@ -250,25 +271,27 @@ The v1.0.0 release will represent the first stable, production-ready version of 
 | Memory Systems | ✅ Complete | v0.1.0 |
 | MCP Client Integration | ✅ Complete | v0.1.0 |
 | Orchestrator | ✅ Complete | v0.1.0 |
-| CLI Interface | ✅ Complete | v0.1.0 |
+| Basic CLI Interface | ✅ Complete | v0.1.0 |
 | Knowledge Base | ✅ Complete | v0.3.0 |
 | SQLite Vector Support | ✅ Complete | v0.3.0 |
 | PostgreSQL Vector Support | ✅ Complete | v0.3.0 |
 | Multi-user Support | ✅ Complete | v0.3.0 |
 | Modular Package Architecture | ✅ Complete | v0.2.0 |
-| Complete WebSocket API | 🛠️ In Development | v0.4.0 |
-| MCP Server Interface | 🛠️ In Development | v0.4.0 |
+| REST API Implementation | 🛠️ In Development | v0.4.0 |
+| WebSocket API Implementation | 🛠️ In Development | v0.4.0 |
+| Enhanced CLI Interface | 🛠️ In Development | v0.4.0 |
+| Web UI Development | 🛠️ In Development | v0.4.0 |
+| MCP Server Implementation | 🛠️ In Development | v0.4.0 |
 | A2A Communication | 🛠️ In Development | v0.4.0 |
 | Additional LLM Providers | 🛠️ In Development | v0.4.0 |
-| Multi-Modal Support | 📅 Planned | v0.5.0 |
-| Performance Monitoring | 📅 Planned | v0.5.0 |
-| Advanced A2A Communication | 📅 Planned | v0.5.0 |
-| Full MCP Server Interface | 📅 Planned | v0.5.0 |
+| Vector Database Enhancements | 📅 Planned | v0.5.0 |
+| Testing & Documentation | 📅 Planned | v0.5.0 |
 | Language SDKs (TS/JS, Go, etc.) | 📅 Planned | v0.5.0 |
-| Deployment Solutions | 🔮 Future | v1.0.0 |
-| Extended Model Support | 🔮 Future | v1.0.0 |
+| Multi-Modal Support | 📅 Planned | v0.6.0 |
+| Deployment Solutions | 📅 Planned | v0.6.0 |
 | Security Enhancements | 🔮 Future | v1.0.0 |
-| API Stabilization | �� Future | v1.0.0 |
+| API Stabilization | 🔮 Future | v1.0.0 |
+| Extended Model Support | 🔮 Future | v1.0.0 |
 
 ## Long-Term Vision
 

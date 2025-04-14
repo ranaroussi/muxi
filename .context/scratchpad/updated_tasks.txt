@@ -1,0 +1,118 @@
+# MUXI Framework Updated Task Priorities
+
+The MUXI Framework development will now focus on the following tasks in order of priority:
+
+## 1. REST API & MCP Server Implementation
+Implement the full REST API for MUXI based on the api.md specifications, including:
+- Standard REST API endpoints (agent management, conversation management, memory operations)
+- Authentication with API keys
+- Streaming support for chat endpoints with SSE
+- Proper error handling with standardized format
+- API versioning support
+- Rate limiting and throttling
+- API documentation using OpenAPI/Swagger
+
+## 2. WebSocket API Implementation
+Enhance the WebSocket API based on api.md specifications:
+- WebSocket protocol for real-time communication
+- Support for multi-modal messages (text, images, audio)
+- Proper error handling and recovery mechanisms
+- Reconnection logic with exponential backoff
+- Support for attachments as specified in api.md
+
+## 3. CLI Interfaces
+Improve command-line interfaces for better user experience:
+- Add support for all API operations described in api.md
+- Improve formatting and user experience
+- Add multi-modal interaction support
+- Implement configuration management commands
+
+## 4. Web UI
+Develop a comprehensive web interface for the framework:
+- Create responsive UI for mobile and desktop
+- Implement real-time updates using WebSocket
+- Add support for multi-modal interactions
+- Build user-friendly configuration interface
+- Create agent management dashboard
+
+## 5. Agent-to-Agent Communication
+Implement the A2A protocol for inter-agent communication:
+- Capability discovery mechanism
+- Task delegation between agents
+- Context sharing with proper isolation
+- Conversation lifecycle management
+- External agent integration
+- Security and authentication
+
+## 6. Vector Database Enhancements
+Improve vector database support and performance:
+- Optimize vector operations for improved performance
+- Add support for additional vector databases (Milvus, Qdrant, etc.)
+- Add migration tools for transferring between database types
+- Create performance benchmarks for different vector database options
+- Develop guidance for choosing between SQLite and PostgreSQL
+- Support for vector database clustering and sharding
+
+## 7. LLM Providers
+Expand support for various LLM providers:
+- Implement Anthropic LLM provider
+- Implement Gemini LLM provider
+- Implement Grok LLM provider
+- Add support for local models (Llama, Mistral, DeepSeek)
+- Create a model router for fallback and cost optimization
+
+## 8. Testing and Documentation
+Comprehensive testing and documentation:
+- Unit tests for all new API endpoints
+- Integration tests for API and WebSocket endpoints
+- Performance benchmarks for API endpoints
+- Complete CLI documentation
+- Expand API documentation beyond api.md with practical examples
+- User guides for advanced use cases
+- Example projects showcasing API usage
+
+## 9. Deployment & Package Distribution
+Ensure proper deployment options and package distribution:
+- Docker containerization
+- Kubernetes deployment
+- Cloud deployment guides (AWS, GCP, Azure)
+- Monitoring and logging integration
+- Continuous integration workflow with GitHub Actions
+- Automatic version bumping for releases
+- SQLite deployment guides for serverless and edge environments
+
+## 10. Language-Specific SDKs
+Develop SDKs for popular programming languages:
+- TypeScript/JavaScript SDK for web and Node.js
+- Go SDK for backend integration
+- Java/Kotlin SDK for Android and JVM environments
+- C#/.NET SDK for Windows integration
+- Rust SDK for systems programming
+- SDK Development Tools (API client generators, shared test suite)
+
+## 11. Multi-Modal Capabilities
+Add support for multi-modal capabilities:
+
+### Document Processing
+- PDF and Office document support
+- OCR for scanned documents
+- Document summarization
+
+### Image Processing
+- Image attachment support
+- Image preprocessing pipeline
+- Vision-capable model integration
+
+### Audio Processing
+- Audio file handling
+- Speech-to-text integration
+- Text-to-speech for responses
+- Streaming audio capabilities
+
+## 12. Security Enhancements
+Enhance security features:
+- API security (rate limiting, input validation, IP restrictions)
+- Advanced authentication methods (OAuth, OIDC, role-based access)
+- Data protection (encryption at rest and in transit)
+- Security auditing and vulnerability scanning
+- Privacy controls and data protection mechanisms

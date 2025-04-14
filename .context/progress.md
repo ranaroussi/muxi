@@ -84,9 +84,9 @@ The following components of the MUXI Framework have been successfully implemente
 
 ## What's Left to Build
 
-The following components are partially implemented or planned for future development:
+The following components are partially implemented or planned for future development, organized by priority:
 
-### API Implementation (High Priority)
+### 1. REST API & MCP Server Implementation (High Priority)
 
 1. **REST API Endpoints**:
    - ⏳ Complete agent management endpoints
@@ -102,8 +102,36 @@ The following components are partially implemented or planned for future develop
    - ⏳ Standardized error handling
    - ⏳ API versioning support
    - ⏳ Comprehensive API documentation
+   - ⏳ Rate limiting and throttling
+   - ⏳ Streaming support with SSE
 
-### Inter-Agent Communication
+### 2. WebSocket API Implementation
+
+1. **Protocol Standardization**:
+   - ⏳ Message type standardization per api.md
+   - ⏳ Support for multi-modal messages
+   - ⏳ Enhanced error handling and recovery
+   - ⏳ Reconnection logic with exponential backoff
+   - ⏳ Attachment support for files and media
+
+### 3. CLI Interfaces
+
+1. **Command Line Interface Enhancements**:
+   - ⏳ Support for all API operations
+   - ⏳ Improved user experience
+   - ⏳ Multi-modal interaction support
+   - ⏳ Configuration management commands
+
+### 4. Web UI
+
+1. **Web Interface Development**:
+   - ⏳ Responsive UI for mobile and desktop
+   - ⏳ Real-time updates via WebSocket
+   - ⏳ Multi-modal interaction support
+   - ⏳ User-friendly configuration interface
+   - ⏳ Agent management dashboard
+
+### 5. Agent-to-Agent Communication
 
 1. **Agent-to-Agent (A2A) Protocol**:
    - ⏳ Capability discovery mechanism
@@ -121,39 +149,58 @@ The following components are partially implemented or planned for future develop
    - ⏳ Authentication shared with REST API
    - ⏳ Unified credential management
 
-### WebSocket API Enhancement
+### 6. Vector Database Enhancements
 
-1. **Protocol Standardization**:
-   - ⏳ Message type standardization per api.md
-   - ⏳ Support for multi-modal messages
-   - ⏳ Enhanced error handling and recovery
+1. **Performance Optimizations**:
+   - ⏳ Improved indexing for vector operations
+   - ⏳ Caching strategies for frequent queries
+   - ⏳ Batch operations for efficient insertions
 
-### Additional LLM Providers
+2. **Additional Integrations**:
+   - ⏳ Support for other vector databases (Milvus, Qdrant, etc.)
+   - ⏳ Migration tools between database types
+   - ⏳ Advanced vector operations (clustering, etc.)
+   - ⏳ Vector database clustering and sharding
+
+### 7. LLM Providers
 
 1. **Provider Integrations**:
    - ⏳ Anthropic provider
    - ⏳ Gemini provider
    - ⏳ Grok provider
-   - ⏳ Local model support
+   - ⏳ Local model support (Llama, Mistral, DeepSeek)
+   - ⏳ Model router for fallback and cost optimization
 
-### Multi-Modal Capabilities
+### 8. Testing and Documentation
 
-1. **Image Processing**:
-   - ⏳ Image attachment support
-   - ⏳ Image preprocessing pipeline
-   - ⏳ Vision-capable model integration
+1. **Testing Infrastructure**:
+   - ⏳ Unit tests for all new API endpoints
+   - ⏳ Integration tests for API and WebSocket endpoints
+   - ⏳ Performance benchmarks for different components
 
-2. **Audio Processing**:
-   - ⏳ Audio file handling
-   - ⏳ Speech-to-text integration
-   - ⏳ Text-to-speech for responses
+2. **Documentation**:
+   - ⏳ API reference documentation
+   - ⏳ Developer guides for extension
+   - ⏳ Example projects and tutorials
+   - ⏳ User guides for advanced use cases
 
-3. **Document Processing**:
-   - ⏳ PDF and Office document support
-   - ⏳ OCR for scanned documents
-   - ⏳ Document summarization
+### 9. Deployment & Package Distribution
 
-### Language-Specific SDKs
+1. **Containerization**:
+   - ⏳ Docker configuration
+   - ⏳ Kubernetes deployment guides
+
+2. **Monitoring**:
+   - ⏳ Logging infrastructure
+   - ⏳ Performance metrics
+   - ⏳ Error tracking
+
+3. **Continuous Integration**:
+   - ⏳ GitHub Actions workflows
+   - ⏳ Automatic version bumping
+   - ⏳ Release management
+
+### 10. Language-Specific SDKs
 
 1. **Client Libraries**:
    - ⏳ TypeScript/JavaScript SDK for web and Node.js
@@ -174,42 +221,41 @@ The following components are partially implemented or planned for future develop
    - ⏳ Shared test suite for validation
    - ⏳ Version synchronization tools
 
-### Vector Database Enhancements
+### 11. Multi-Modal Capabilities
 
-1. **Performance Optimizations**:
-   - ⏳ Improved indexing for vector operations
-   - ⏳ Caching strategies for frequent queries
-   - ⏳ Batch operations for efficient insertions
+1. **Document Processing**:
+   - ⏳ PDF and Office document support
+   - ⏳ OCR for scanned documents
+   - ⏳ Document summarization
 
-2. **Additional Integrations**:
-   - ⏳ Support for other vector databases (Milvus, Qdrant, etc.)
-   - ⏳ Migration tools between database types
-   - ⏳ Advanced vector operations (clustering, etc.)
+2. **Image Processing**:
+   - ⏳ Image attachment support
+   - ⏳ Image preprocessing pipeline
+   - ⏳ Vision-capable model integration
 
-### Deployment Infrastructure
+3. **Audio Processing**:
+   - ⏳ Audio file handling
+   - ⏳ Speech-to-text integration
+   - ⏳ Text-to-speech for responses
+   - ⏳ Streaming audio capabilities
 
-1. **Containerization**:
-   - ⏳ Docker configuration
-   - ⏳ Kubernetes deployment guides
-
-2. **Monitoring**:
-   - ⏳ Logging infrastructure
-   - ⏳ Performance metrics
-   - ⏳ Error tracking
-
-### Security Enhancements
+### 12. Security Enhancements
 
 1. **API Security**:
    - ⏳ Rate limiting and throttling
    - ⏳ Input validation and sanitization
    - ⏳ IP-based restrictions
 
-### Documentation
+2. **Authentication & Authorization**:
+   - ⏳ Enhanced authentication methods
+   - ⏳ Role-based access control
+   - ⏳ OAuth and OpenID Connect integration
 
-1. **Developer Documentation**:
-   - ⏳ API reference documentation
-   - ⏳ Developer guides for extension
-   - ⏳ Example projects and tutorials
+3. **Data Protection**:
+   - ⏳ Encryption at rest and in transit
+   - ⏳ Privacy controls
+   - ⏳ Compliance with security standards
+   - ⏳ Security auditing and vulnerability scanning
 
 ## Current Status
 

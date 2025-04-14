@@ -83,66 +83,99 @@ The current development focus is on implementing the complete REST API as define
 
 ## Next Steps
 
-Based on the updated NEXT_STEPS.md document, the following tasks have been prioritized:
+Based on the updated priority list, the following tasks have been prioritized:
 
-### Immediate Tasks (In Progress)
+### Updated Task Priorities
 
-1. **REST API Implementation**:
-   - Implement agent management endpoints (GET/POST/PATCH/DELETE /agents)
-   - Implement conversation management endpoints (POST /agents/{agent_id}/chat)
-   - Implement memory operations endpoints (GET/DELETE /agents/{agent_id}/memory)
-   - Implement context memory CRUD operations
-   - Implement MCP server management endpoints
-   - Implement knowledge management endpoints
-   - Implement system information endpoints
-
-2. **Authentication**:
-   - Add API key generation mechanism
-   - Implement bearer token authentication
-   - Add support for IP-based restrictions
-
-3. **API Enhancement**:
+1. **REST API & MCP Server Implementation**:
+   - Implement standard REST API endpoints according to api.md spec
+   - Implement authentication with API keys
    - Add streaming support for chat endpoints with SSE
    - Implement proper error handling with standardized format
    - Add API versioning support
    - Implement rate limiting and throttling
    - Create API documentation using OpenAPI/Swagger
 
-### Upcoming Tasks
-
-1. **WebSocket API Enhancement**:
-   - Implement WebSocket protocol as defined in api.md
+2. **WebSocket API Implementation**:
+   - Implement WebSocket protocol for real-time communication
    - Add support for multi-modal messages (text, images, audio)
    - Implement proper error handling and recovery
    - Add reconnection logic with exponential backoff
    - Support for attachments as specified in api.md
 
-2. **User Interface Improvements**:
+3. **CLI Interfaces**:
    - Enhance CLI interface with support for all API operations
    - Develop web interface with responsive design
    - Implement real-time updates using WebSocket
    - Add support for multi-modal interactions
 
-3. **LLM Provider Expansion**:
+4. **Web UI**:
+   - Create responsive UI for mobile and desktop
+   - Implement real-time updates using WebSocket
+   - Add support for multi-modal interactions
+   - Build user-friendly configuration interface
+
+5. **Agent-to-Agent Communication**:
+   - Implement capability discovery mechanism
+   - Create task delegation between agents
+   - Develop context sharing with proper isolation
+   - Implement conversation lifecycle management
+   - Add external agent integration
+   - Implement security and authentication
+
+6. **Vector Database Enhancements**:
+   - Optimize vector operations for improved performance
+   - Add support for additional vector databases (e.g., Milvus, Qdrant)
+   - Add migration tools for transferring between database types
+   - Create performance benchmarks for different vector database options
+   - Develop guidance for choosing between SQLite and PostgreSQL
+   - Support for vector database clustering and sharding
+
+7. **LLM Providers**:
    - Implement Anthropic LLM provider
    - Implement Gemini LLM provider
    - Implement Grok LLM provider
    - Add support for local models (e.g., Llama, Mistral, DeepSeek)
    - Create a model router for fallback and cost optimization
 
-4. **Language-Specific SDKs**:
-   - Develop TypeScript/JavaScript SDK as highest priority
-   - Create Go SDK for backend applications
-   - Design consistent cross-language interfaces
-   - Implement OpenAPI-based client generators
-   - Develop shared test suites for validation
-   - Create comprehensive documentation for each SDK
+8. **Testing and Documentation**:
+   - Unit tests for all new API endpoints
+   - Integration tests for API and WebSocket endpoints
+   - Performance benchmarks for API endpoints
+   - Complete CLI documentation
+   - Expand API documentation beyond api.md with practical examples
+   - User guides for advanced use cases
+   - Example projects showcasing API usage
 
-5. **Vector Database Improvements**:
-   - Enhance SQLite vector integration for improved performance
-   - Add support for additional vector databases (e.g., Milvus, Qdrant)
-   - Implement more vector functions and operations
-   - Create database migration tools for SQLite to PostgreSQL transitions
+9. **Deployment & Package Distribution**:
+   - Docker containerization
+   - Kubernetes deployment
+   - Cloud deployment guides (AWS, GCP, Azure)
+   - Monitoring and logging integration
+   - Continuous integration workflow with GitHub Actions or similar tools
+   - Automatic version bumping for releases
+   - SQLite deployment guides for serverless and edge environments
+
+10. **Language-Specific SDKs**:
+    - TypeScript/JavaScript SDK
+    - Go SDK
+    - Java/Kotlin SDK
+    - Rust SDK
+    - C#/.NET SDK
+    - SDK Development Tools
+
+11. **Multi-Modal Capabilities**:
+    - **Document Processing**: PDF handling, Office documents, OCR, document summarization
+    - **Image Processing**: Image attachments, preprocessing pipeline, vision-capable model integration
+    - **Audio Processing**: Audio file handling, speech-to-text, text-to-speech, streaming audio
+
+12. **Security Enhancements**:
+    - API security (rate limiting, input validation, IP restrictions)
+    - Enhanced authentication methods
+    - Data encryption at rest and in transit
+    - Compliance with security standards
+    - Security auditing and vulnerability scanning
+    - Privacy controls and data protection mechanisms
 
 ## Active Decisions and Considerations
 

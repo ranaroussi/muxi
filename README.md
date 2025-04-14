@@ -92,12 +92,6 @@ For more details, see [Architecture Documentation](docs/intro/architecture.md).
 
 ## Installation
 
-### From PyPI (Recommended)
-
-```bash
-pip install muxi
-```
-
 ### For Development
 
 ```bash
@@ -107,6 +101,12 @@ cd muxi-framework
 
 # Install in development mode
 ./install_dev.sh
+```
+
+### From PyPI (Future)
+
+```bash
+pip install muxi
 ```
 
 ## Quick Start
@@ -250,7 +250,7 @@ muxi send "What is the capital of France?"
 muxi run
 ```
 
-### Using the API
+### Using the Server (API w/ Websockets + MCP Server)
 
 Start the server:
 
@@ -292,248 +292,7 @@ Alternatively, you can run the web UI separately if you already have a MUXI serv
 muxi-web --server-url http://your-server-address:5050
 ```
 
-## Intelligent Message Routing
-
-Automatically route user messages to the most appropriate agent based on their content:
-
-```python
-from muxi import muxi
-
-# Initialize your app with multiple specialized agents
-app = muxi()
-await app.add_agent("weather", "configs/weather_agent.yaml")
-await app.add_agent("finance", "configs/finance_agent.json")
-await app.add_agent("travel", "configs/travel_agent.yaml")
-
-# The message will be automatically routed to the most appropriate agent
-response = await app.chat("What's the weather forecast for Tokyo this weekend?")  # Weather agent
-response = await app.chat("Should I invest in tech stocks right now?")  # Finance agent
-response = await app.chat("What are the best attractions in Barcelona?")  # Travel agent
-```
-
-The orchestrator analyzes the content of each message and intelligently routes it to the most suitable agent based on their specializations and descriptions. This means you don't need to specify which agent should handle each request - the system figures it out automatically.
-
-Configure the routing system through environment variables:
-
-```
-ROUTING_LLM=openai
-ROUTING_LLM_MODEL=gpt-4o-mini
-ROUTING_LLM_TEMPERATURE=0.0
-```
-
-## Agent-to-Agent (A2A) Communication
-
-Enable collaboration between specialized agents:
-
-```python
-from muxi import muxi
-
-# Initialize MUXI with multiple specialized agents
-app = muxi()
-await app.add_agent("researcher", "configs/researcher_agent.yaml")
-await app.add_agent("writer", "configs/writer_agent.yaml")
-await app.add_agent("fact_checker", "configs/fact_checker_agent.yaml")
-
-# Enable A2A communication (enabled by default, but can be configured)
-app.configure_a2a(enabled=True, scope="internal")
-
-# Process a complex query that requires multiple agents
-response = await app.chat(
-    "Research quantum computing advancements in 2025 and write a summary report",
-    user_id="user123"
-)
-
-# Behind the scenes:
-# 1. The message is routed to the researcher agent
-# 2. Researcher agent gathers information
-# 3. Researcher delegates to the writer agent to create the summary
-# 4. Writer creates draft and delegates to fact_checker for verification
-# 5. Final verified response returned to the user
-```
-
-A2A communication allows agents to collaborate seamlessly, creating more powerful workflows than any single agent could accomplish alone.
-
-## Package Structure
-
-The MUXI Framework is organized into a modular architecture with the following components:
-
-```
-muxi-framework/
-├── packages/
-│   ├── core/          # Core components: agents, memory, MCP interface
-│   ├── server/        # REST API and WebSocket server
-│   ├── cli/           # Command-line interface
-│   ├── web/           # Web user interface
-│   └── muxi/          # Meta-package that integrates all components
-└── tests/             # Test suite for all components
-```
-
-## Communication Protocols
-
-MUXI implements a hybrid protocol approach for optimal performance and flexibility:
-
-- **HTTP**: For standard API requests like configuration and management
-- **Server-Sent Events (SSE)**: For streaming responses token-by-token
-- **WebSockets**: For multi-modal capabilities with bi-directional communication
-
-## Working with Memory and Context Memory
-
-```python
-from muxi import muxi
-
-# Initialize MUXI
-app = muxi()
-
-# Add multiple agents from configuration files
-await app.add_agent("weather", "configs/weather_agent.yaml")
-await app.add_agent("assistant", "configs/assistant.yaml")
-
-# Add context memory for a specific user
-user_id = "user123"
-knowledge = {
-    "name": "Alice",
-    "location": {"city": "New York", "country": "USA"},
-    "preferences": {"language": "English", "units": "metric"}
-}
-await app.add_user_context_memory(user_id, knowledge)
-
-# Chat with personalized context
-# Note: No need to specify agent_id - the orchestrator will select the appropriate agent
-response = await app.chat(
-    "What's the weather like in my city?",
-    user_id=user_id
-)
-print(response.content)  # Uses Alice's location data from context memory
-
-# For memory operations that are specific to an agent, you can specify agent_id
-memory_results = await app.search_memory(
-    "What did the user ask about the weather?",
-    agent_id="weather",  # Specify when you need to target a specific agent's memory
-    user_id=user_id,
-    limit=5
-)
-print("Related memories:", memory_results)
-```
-
-## Vector Database Support
-
-MUXI supports multiple vector database backends for long-term memory:
-
-### Using SQLite with sqlite-vec
-
-Ideal for local development, small-scale deployments, or edge environments:
-
-```python
-# In your environment variables (.env file)
-USE_LONG_TERM_MEMORY=sqlite:///data/memory.db
-# Or for default SQLite database in app's root directory
-USE_LONG_TERM_MEMORY=true
-
-# Or in your configuration file (YAML)
-memory:
-  buffer: 10
-  long_term: "sqlite:///data/memory.db"
-  # Or for default SQLite database in app's root directory
-  # long_term: true
-
-# Or programmatically
-from muxi.core.memory.long_term import LongTermMemory
-
-memory = LongTermMemory(connection_string="sqlite:///data/memory.db")
-```
-
-### Using PostgreSQL with pgvector
-
-Recommended for production deployments or multi-user environments:
-
-```python
-# In your environment variables (.env file)
-POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
-
-# Or in your configuration file (YAML)
-memory:
-  buffer: 10
-  long_term: "postgresql://user:password@localhost:5432/muxi"
-
-# Or programmatically
-from muxi.core.memory.long_term import LongTermMemory
-
-memory = LongTermMemory(connection_string="postgresql://user:password@localhost:5432/muxi")
-```
-
-## MCP Server Implementation
-
-MUXI can not only connect to MCP servers but also expose your agents as MCP-compatible servers:
-
-```python
-from muxi import muxi
-
-# Initialize MUXI
-app = muxi()
-
-# Add an agent from configuration
-app.add_agent("assistant", "configs/assistant.yaml")
-
-# Start both API and MCP server on different ports
-app.run_server(
-    port=5050,
-    mcp=True,
-    mcp_port=5051
-)
-
-# Or start just the MCP server
-app.start_mcp(port=5051)
-```
-
-This allows other MCP clients (like Claude, Cursor, or other AI assistants) to connect to your MUXI agents and use their capabilities.
-
-## Language-Specific SDKs (Coming in v0.5.0)
-
-MUXI Framework will provide client libraries for popular programming languages:
-
-- **TypeScript/JavaScript SDK**: For web and Node.js applications
-- **Go SDK**: For backend integrations
-- **Other Planned SDKs**: Java/Kotlin, Rust, C#/.NET
-
-Each SDK will provide:
-- Full REST API client implementation
-- WebSocket client for real-time communication
-- MCP server protocol implementation
-- Consistent developer experience across languages
-
-## Documentation
-
-For more detailed documentation, see:
-
-- [User Guide](docs/user_guide.md)
-- [Developer Guide](docs/developer_guide.md)
-- [API Reference](docs/api_reference.md)
-- [CLI Reference](docs/cli.md)
-- [Web UI Guide](docs/web_ui.md)
-- [Configuration](docs/configuration.md)
-- [Package Structure](docs/package_structure.md)
-- [Roadmap](docs/roadmap.md)
-
-## License
-
-This project is licensed under a dual licensing model to balance open-source collaboration with sustainable business practices.
-
-### Development Phase (Pre-Version 1.0)
-
-During the development phase, the software is licensed under the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0)** license. This license prohibits commercial use, derivative works, and redistribution to ensure the integrity of the development process and to avoid fragmentation of the project before it reaches maturity.
-
-### After Version 1.0 Release
-
-When the project reaches version 1.0, it will adopt a more permissive open-source license that permits free use for non-commercial and internal commercial purposes, with the possibility of a commercial license for specific use cases.
-
-## Contributing
-
-**Contributions are welcome!** Please read our [Contributing Guide](docs/contributing.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
-
-## Acknowledgements
-
-- OpenAI for their LLM technologies
-- The many open-source projects that make this framework possible
+## Core Capabilities
 
 ### Working with MCP Servers
 
@@ -585,4 +344,270 @@ mcp_servers:
   command: npx -y @modelcontextprotocol/server-calculator
   # No credentials section needed for servers that don't require authentication
 ```
+
+### MCP Server Implementation
+
+MUXI can not only connect to MCP servers but also expose your agents as MCP-compatible servers:
+
+```python
+from muxi import muxi
+
+# Initialize MUXI
+app = muxi()
+
+# Add an agent from configuration
+app.add_agent("assistant", "configs/assistant.yaml")
+
+# Start both API and MCP server on different ports
+app.run_server(
+    port=5050,
+    mcp=True,
+    mcp_port=5051
+)
+
+# Or start just the MCP server
+app.start_mcp(port=5051)
+```
+
+This allows other MCP clients (like Claude, Cursor, or other AI assistants) to connect to your MUXI agents and use their capabilities.
+
+### Intelligent Message Routing
+
+Automatically route user messages to the most appropriate agent based on their content:
+
+```python
+from muxi import muxi
+
+# Initialize your app with multiple specialized agents
+app = muxi()
+await app.add_agent("weather", "configs/weather_agent.yaml")
+await app.add_agent("finance", "configs/finance_agent.json")
+await app.add_agent("travel", "configs/travel_agent.yaml")
+
+# The message will be automatically routed to the most appropriate agent
+response = await app.chat("What's the weather forecast for Tokyo this weekend?")  # Weather agent
+response = await app.chat("Should I invest in tech stocks right now?")  # Finance agent
+response = await app.chat("What are the best attractions in Barcelona?")  # Travel agent
+```
+
+The orchestrator analyzes the content of each message and intelligently routes it to the most suitable agent based on their specializations and descriptions. This means you don't need to specify which agent should handle each request - the system figures it out automatically.
+
+Configure the routing system through environment variables:
+
+```
+ROUTING_LLM=openai
+ROUTING_LLM_MODEL=gpt-4o-mini
+ROUTING_LLM_TEMPERATURE=0.0
+```
+
+### Agent-to-Agent (A2A) Communication
+
+Enable collaboration between specialized agents:
+
+```python
+from muxi import muxi
+
+# Initialize MUXI with multiple specialized agents
+app = muxi()
+await app.add_agent("researcher", "configs/researcher_agent.yaml")
+await app.add_agent("writer", "configs/writer_agent.yaml")
+await app.add_agent("fact_checker", "configs/fact_checker_agent.yaml")
+
+# Enable A2A communication (enabled by default, but can be configured)
+app.configure_a2a(enabled=True, scope="internal")
+
+# Process a complex query that requires multiple agents
+response = await app.chat(
+    "Research quantum computing advancements in 2025 and write a summary report",
+    user_id="user123"
+)
+
+# Behind the scenes:
+# 1. The message is routed to the researcher agent
+# 2. Researcher agent gathers information
+# 3. Researcher delegates to the writer agent to create the summary
+# 4. Writer creates draft and delegates to fact_checker for verification
+# 5. Final verified response returned to the user
+```
+
+A2A communication allows agents to collaborate seamlessly, creating more powerful workflows than any single agent could accomplish alone.
+
+### Working with Memory and Context Memory
+
+```python
+from muxi import muxi
+
+# Initialize MUXI
+app = muxi()
+
+# Add multiple agents from configuration files
+await app.add_agent("weather", "configs/weather_agent.yaml")
+await app.add_agent("assistant", "configs/assistant.yaml")
+
+# Add context memory for a specific user
+user_id = "user123"
+knowledge = {
+    "name": "Alice",
+    "location": {"city": "New York", "country": "USA"},
+    "preferences": {"language": "English", "units": "metric"}
+}
+await app.add_user_context_memory(user_id, knowledge)
+
+# Chat with personalized context
+# Note: No need to specify agent_id - the orchestrator will select the appropriate agent
+response = await app.chat(
+    "What's the weather like in my city?",
+    user_id=user_id
+)
+print(response.content)  # Uses Alice's location data from context memory
+
+# For memory operations that are specific to an agent, you can specify agent_id
+memory_results = await app.search_memory(
+    "What did the user ask about the weather?",
+    agent_id="weather",  # Specify when you need to target a specific agent's memory
+    user_id=user_id,
+    limit=5
+)
+print("Related memories:", memory_results)
+```
+
+### Vector Database Support
+
+MUXI supports multiple vector database backends for long-term memory:
+
+#### Using SQLite with `sqlite-vec`
+
+Ideal for local development, small-scale deployments, or edge environments:
+
+```python
+# In your environment variables (.env file)
+USE_LONG_TERM_MEMORY=sqlite:///data/memory.db
+# Or for default SQLite database in app's root directory
+USE_LONG_TERM_MEMORY=true
+
+# Or in your configuration file (YAML)
+memory:
+  buffer: 10
+  long_term: "sqlite:///data/memory.db"
+  # Or for default SQLite database in app's root directory
+  # long_term: true
+
+# Or programmatically
+from muxi.core.memory.long_term import LongTermMemory
+
+memory = LongTermMemory(connection_string="sqlite:///data/memory.db")
+```
+
+#### Using PostgreSQL with `pgvector`
+
+Recommended for production deployments or multi-user environments:
+
+```python
+# In your environment variables (.env file)
+POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
+
+# Or in your configuration file (YAML)
+memory:
+  buffer: 10
+  long_term: "postgresql://user:password@localhost:5432/muxi"
+
+# Or programmatically
+from muxi.core.memory.long_term import LongTermMemory
+
+memory = LongTermMemory(connection_string="postgresql://user:password@localhost:5432/muxi")
+```
+
+## Technical Details
+
+### Communication Protocols
+
+MUXI implements a hybrid protocol approach for optimal performance and flexibility:
+
+- **HTTP**: For standard API requests like configuration and management
+- **Server-Sent Events (SSE)**: For streaming responses token-by-token
+- **WebSockets**: For multi-modal capabilities with bi-directional communication
+
+### Package Structure
+
+The MUXI Framework is organized into a modular architecture with the following components:
+
+```
+muxi-framework/
+├── packages/
+│   ├── core/          # Core components: agents, memory, MCP interface
+│   ├── server/        # REST API and WebSocket server
+│   ├── cli/           # Command-line interface
+│   ├── web/           # Web user interface
+│   └── muxi/          # Meta-package that integrates all components
+└── tests/             # Test suite for all components
+```
+
+### Language-Specific SDKs (Coming in v0.5.0)
+
+MUXI Framework will provide client libraries for popular programming languages:
+
+- **TypeScript/JavaScript SDK**: For web and Node.js applications
+- **Go SDK**: For backend integrations
+- **Other Planned SDKs**: Java/Kotlin, Rust, C#/.NET, PHP, Ruby
+
+**Each SDK will provide:**
+
+- Full REST API client implementation
+- WebSocket client for real-time communication
+- MCP server protocol implementation
+- Consistent developer experience across languages
+
+## Development Roadmap
+
+The MUXI Framework development is focused on the following priorities:
+
+1. **REST API & MCP Server Implementation** - Implementing the full REST API with authentication, streaming, and API documentation
+2. **WebSocket API Implementation** - Enhancing real-time communication with multi-modal message support
+3. **CLI Interfaces** - Improving command-line interface with support for all API operations
+4. **Web UI** - Developing a responsive web interface with real-time updates
+5. **Agent-to-Agent Communication** - Implementing the A2A protocol for inter-agent communication
+6. **Vector Database Enhancements** - Optimizing vector operations and supporting additional databases
+7. **LLM Providers** - Expanding support for various LLM providers (Anthropic, Gemini, Grok, local models)
+8. **Testing and Documentation** - Comprehensive testing and documentation for all components
+9. **Deployment & Package Distribution** - Docker containerization, Kubernetes deployment, and CI/CD pipelines
+10. **Language-Specific SDKs** - Developing client libraries for TypeScript, Go, Java/Kotlin, Rust, and C#/.NET
+11. **Multi-Modal Capabilities** - Adding support for document, image, and audio processing
+12. **Security Enhancements** - Implementing advanced security features for enterprise-grade deployments
+
+The [roadmap](docs/roadmap.md) file provides more detailed information about the roadmap.
+
+<!--
+## Documentation
+
+For more detailed documentation, see:
+
+- [User Guide](docs/user_guide.md)
+- [Developer Guide](docs/developer_guide.md)
+- [API Reference](docs/api_reference.md)
+- [CLI Reference](docs/cli.md)
+- [Web UI Guide](docs/web_ui.md)
+- [Configuration](docs/configuration.md)
+- [Package Structure](docs/package_structure.md)
+- [Roadmap](docs/roadmap.md)
+-->
+
+## License
+
+This project is licensed under a dual licensing model to balance open-source collaboration with sustainable business practices.
+
+### Development Phase (Pre-Version 1.0)
+
+The software is licensed under the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0)** during the development phase. This license prohibits commercial use, derivative works, and redistribution to ensure the integrity of the development process and to **avoid project fragmentation before it reaches maturity**.
+
+### After Version 1.0 Release
+
+When the project reaches version 1.0, it will switch to a more permissive open-source license that permits unrestricted use for non-commercial use cases and extensive use for commercial use cases.
+
+## Contributing
+
+**Contributions are welcome!** Please read our [Contributing Guide](docs/contributing.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
+
+## Acknowledgements
+
+The many open-source projects that make this framework possible ❤️
 
