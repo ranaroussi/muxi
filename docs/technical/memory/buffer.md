@@ -23,14 +23,14 @@ Buffer Memory is designed with the following components:
 ┌──────────────────────┐
 │    BufferMemory      │
 ├──────────────────────┤
-│ - messages: List     │      ┌─────────────────┐
-│ - buffer_size: int   │◄────►│     Message     │
-│ - summarizer: Opt    │      ├─────────────────┤
-└──────────┬───────────┘      │ - role: str     │
+│ - messages: List     │      ┌──────────────────┐
+│ - buffer_size: int   │◄────►│      Message     │
+│ - summarizer: Opt    │      ├──────────────────┤
+└──────────┬───────────┘      │ - role: str      │
            │                  │ - content: str   │
            ▼                  │ - timestamp: dt  │
 ┌──────────────────────┐      │ - metadata: Dict │
-│   MemorySummarizer   │      └─────────────────┘
+│   MemorySummarizer   │      └──────────────────┘
 └──────────────────────┘
 ```
 

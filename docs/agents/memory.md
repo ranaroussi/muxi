@@ -39,9 +39,6 @@ Buffer memory is a short-term memory system that stores recent conversation hist
     "provider": "openai",
     "api_key": "${OPENAI_API_KEY}",
     "model": "gpt-4o"
-  },
-  "memory": {
-    "buffer": 20
   }
 }
 ```
@@ -55,8 +52,10 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Initialize MUXI
-app = muxi()
+# Initialize MUXI with buffer memory
+app = muxi(
+    buffer_memory=20
+)
 
 # Add agent from configuration
 app.add_agent("configs/buffer_memory_agent.json")
@@ -78,19 +77,21 @@ from muxi.core.models.openai import OpenAIModel
 from muxi.core.memory.buffer import BufferMemory
 
 # Initialize components
-orchestrator = Orchestrator()
 model = OpenAIModel(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o"
 )
-buffer = BufferMemory()
+buffer = BufferMemory(15)
+
+orchestrator = Orchestrator(
+    buffer_memory=buffer
+)
 
 # Create an agent with buffer memory
 orchestrator.create_agent(
     agent_id="assistant",
     description="A helpful assistant with short-term memory for conversations.",
-    model=model,
-    buffer_memory=buffer
+    model=model
 )
 
 # The agent will remember the conversation context
@@ -140,11 +141,6 @@ model:
   provider: openai
   api_key: "${OPENAI_API_KEY}"
   model: gpt-4o
-memory:
-  buffer: 15
-  long_term: "postgresql://user:password@localhost:5432/muxi"
-  # Or use environment variable:
-  # long_term: "${POSTGRES_DATABASE_URL}"
 ```
 
 ```python
@@ -157,7 +153,10 @@ import os
 load_dotenv()
 
 # Initialize MUXI
-app = muxi()
+app = muxi(
+    buffer_memory=15,
+    long_term_memory="postgresql://user:pass@localhost/db",
+)
 
 # Add agent with PostgreSQL long-term memory
 app.add_agent("configs/postgres_memory_agent.yaml")
@@ -179,9 +178,6 @@ model:
   provider: openai
   api_key: "${OPENAI_API_KEY}"
   model: gpt-4o
-memory:
-  buffer: 15
-  long_term: "sqlite:///data/memory.db"
 ```
 
 {: .note }
@@ -197,7 +193,10 @@ import os
 load_dotenv()
 
 # Initialize MUXI
-app = muxi()
+app = muxi(
+    buffer_memory=15,
+    long_term_memory="sqlite:///data/memory.db"
+)
 
 # Add agent with SQLite long-term memory
 app.add_agent("configs/sqlite_memory_agent.yaml")
@@ -216,7 +215,6 @@ from muxi.core.memory.buffer import BufferMemory
 from muxi.core.memory.long_term import LongTermMemory
 
 # Initialize components
-orchestrator = Orchestrator()
 model = OpenAIModel(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o"
@@ -234,6 +232,11 @@ sqlite_connection = "sqlite:///data/memory.db"
 # Choose the memory system based on your needs
 connection_string = sqlite_connection  # or postgres_connection
 long_term_memory = LongTermMemory(connection_string=connection_string)
+
+orchestrator = Orchestrator(
+    buffer_memory=15,
+    long_term_memory="sqlite:///data/memory.db"
+)
 
 # Create an agent with both buffer and long-term memory
 orchestrator.create_agent(

@@ -197,9 +197,6 @@ model:
   model: gpt-4o
   temperature: 0.7
   api_key: ${OPENAI_API_KEY}
-memory:
-  buffer_size: 10
-  enable_long_term: true
 mcp_servers:
   - name: travel_api
     url: http://localhost:5003
@@ -210,7 +207,10 @@ mcp_servers:
 # Load agent from configuration
 from muxi.core.orchestrator import Orchestrator
 
-orchestrator = Orchestrator()
+orchestrator = Orchestrator(
+  buffer_memory=10,
+  long_term_memory="postgresql://user:pass@localhost/db"
+)
 orchestrator.add_agent_from_config("agent_config.yaml")
 ```
 

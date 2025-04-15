@@ -60,9 +60,6 @@ model:
   api_key: "${OPENAI_API_KEY}"
   model: gpt-4o
   temperature: 0.7
-memory:
-  buffer_size: 10  # Sets buffer window size to 10
-  enable_long_term: true  # Enables long-term memory
 mcp_servers:
   - name: weather_api
     url: "http://localhost:5001"
@@ -81,20 +78,27 @@ from muxi.core.memory.buffer import BufferMemory
 # Create buffer memory with a window size of 5 messages
 buffer = BufferMemory(buffer_size=5)
 
-# Create an agent with buffer memory
-agent = Agent(
-    name="assistant",
-    model=OpenAIModel("gpt-4o"),
-    system_message="You are a helpful assistant.",
+# Create an orchestrator with buffer memory
+orchestrator = Orchestrator(
     buffer_memory=buffer
 )
 
+# Create an agent
+agent = Agent(
+    name="assistant",
+    model=OpenAIModel("gpt-4o"),
+    system_message="You are a helpful assistant."
+)
+
+# Add the agent to the orchestrator
+orchestrator.add_agent(agent)
+
 # First message
-response1 = agent.chat("My name is Alice.")
+response1 = orchestrator.chat("assistant", "My name is Alice.")
 print(response1)
 
 # Second message (agent will remember the user's name)
-response2 = agent.chat("What's my name?")
+response2 = orchestrator.chat("assistant", "What's my name?")
 print(response2)  # Will include "Alice"
 ```
 
@@ -110,20 +114,27 @@ long_term_memory = LongTermMemory(
     connection_string="postgresql://user:pass@localhost/db"
 )
 
+# Create an orchestrator with buffer memory
+orchestrator = Orchestrator(
+    long_term_memory=long_term_memory
+)
+
 # Create an agent with long-term memory
 agent = Agent(
     name="assistant",
     model=OpenAIModel("gpt-4o"),
-    system_message="You are a helpful assistant.",
-    long_term_memory=long_term_memory
+    system_message="You are a helpful assistant."
 )
 
+# Add the agent to the orchestrator
+orchestrator.add_agent(agent)
+
 # Store important information
-response1 = agent.chat("Remember that my favorite color is blue.")
+response1 = orchestrator.chat("assistant", "Remember that my favorite color is blue.")
 print(response1)
 
 # Later conversation (even after restarting the application)
-response2 = agent.chat("What's my favorite color?")
+response2 = orchestrator.chat("assistant", "What's my favorite color?")
 print(response2)  # Will include "blue"
 ```
 
@@ -139,23 +150,30 @@ memobase = Memobase(
     connection_string="postgresql://user:pass@localhost/db"
 )
 
+# Create an orchestrator with buffer memory
+orchestrator = Orchestrator(
+    long_term_memory=memobase
+)
+
 # Create an agent with Memobase
 agent = Agent(
     name="assistant",
     model=OpenAIModel("gpt-4o"),
-    system_message="You are a helpful assistant.",
-    long_term_memory=memobase
+    system_message="You are a helpful assistant."
 )
 
+# Add the agent to the orchestrator
+orchestrator.add_agent(agent)
+
 # Chat with user-specific context
-response1 = agent.chat("My name is Alice.", user_id="user1")
-response2 = agent.chat("My name is Bob.", user_id="user2")
+response1 = orchestrator.chat("assistant", "My name is Alice.", user_id="user1")
+response2 = orchestrator.chat("assistant", "My name is Bob.", user_id="user2")
 
 # Later conversations with separate contexts
-response3 = agent.chat("What's my name?", user_id="user1")
+response3 = orchestrator.chat("assistant", "What's my name?", user_id="user1")
 print(response3)  # Will include "Alice"
 
-response4 = agent.chat("What's my name?", user_id="user2")
+response4 = orchestrator.chat("assistant", "What's my name?", user_id="user2")
 print(response4)  # Will include "Bob"
 ```
 

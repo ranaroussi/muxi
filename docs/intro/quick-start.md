@@ -63,9 +63,6 @@ model:
   api_key: "${OPENAI_API_KEY}"
   model: gpt-4o
   temperature: 0.7
-memory:
-  buffer_size: 10  # Sets buffer window size to 10
-  enable_long_term: true  # Enables long-term memory
 mcp_servers:
   - name: weather_api
     url: http://localhost:5001
@@ -86,10 +83,6 @@ Alternatively, create `agents/finance_agent.json`:
         "api_key": "${OPENAI_API_KEY}",
         "model": "gpt-4o",
         "temperature": 0.2
-    },
-    "memory": {
-        "buffer_size": 5,
-        "enable_long_term": false
     },
     "mcp_servers": [
         {
@@ -114,6 +107,12 @@ load_dotenv()
 
 # Initialize MUXI
 app = muxi()
+
+# Optional: Initialize MUXI with buffer size and long-term memory
+# app = muxi(
+#   buffer_memory=10,  # Sets buffer window size to 10
+#   long_term_memory="postgresql://user:pass@localhost/db"  # Enables long-term memory
+# )
 
 # Add agents from configuration files
 app.add_agent("weather", "agents/weather_agent.yaml")
