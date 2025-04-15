@@ -93,16 +93,17 @@ This document outlines the technical context of the MUXI Framework, including te
 # LLM API Keys
 OPENAI_API_KEY=your_openai_key_here
 
-# Database Configuration - Orchestrator Level Memory
-# Use PostgreSQL for production/multi-user deployments
-POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
-# Or use SQLite for local/single-user deployments
+# Memory Configuration (Orchestrator Level)
+# Buffer memory size (integer)
 BUFFER_MEMORY_SIZE=50
+
+# Long-term memory options:
+# For PostgreSQL (production/multi-user deployments)
+LONG_TERM_MEMORY=postgresql://user:password@localhost:5432/muxi
+# Or for SQLite (local/single-user deployments)
 LONG_TERM_MEMORY=sqlite:///path/to/memory.db
 # Or just enable with default SQLite in app's root directory
 LONG_TERM_MEMORY=true
-# For multi-user support
-IS_MULTI_USER=true
 
 # MCP Configurations
 MCP_WEATHER_API_KEY=your_weather_api_key
@@ -185,10 +186,10 @@ python -m pytest --cov=muxi
 ### Scalability Constraints
 
 1. **Stateful Components**:
-   - Agent memory requires state persistence
-   - Consider distributed memory architecture for horizontal scaling
-   - SQLite suitable for single-instance deployments
-   - PostgreSQL recommended for multi-instance deployments
+   - Orchestrator manages memory centrally for all agents
+   - Memory is shared between agents through the orchestrator
+   - SQLite is suitable for single-instance deployments
+   - PostgreSQL with Memobase is recommended for multi-user and multi-instance deployments
 
 2. **External Rate Limits**:
    - LLM APIs impose rate limits
@@ -198,140 +199,32 @@ python -m pytest --cov=muxi
 3. **Database Scaling**:
    - Long-term memory requires database scaling strategies
    - Plan for sharding or read replicas as needed
-   - SQLite is limited to single-node scaling
 
-### Compatibility Requirements
+## Memory Architecture
 
-1. **Python Version**: 3.10+ required (uses modern async features)
-2. **PostgreSQL**: 13+ with pgvector extension
-3. **SQLite**: 3.38+ with sqlite-vec
-4. **Browser Support**: Modern browsers with WebSocket and SSE support
-5. **Operating Systems**: Cross-platform (Linux, macOS, Windows)
+The MUXI Framework uses an orchestrator-level memory architecture, where:
+
+1. **Memory Management**: All memory systems (buffer and long-term) are initialized and managed at the orchestrator level, not at the agent level.
+
+2. **Memory Types**:
+   - **Buffer Memory**: Short-term memory for recent conversations, implemented with FAISS.
+   - **Long-Term Memory**: Persistent storage with vector database support (PostgreSQL or SQLite).
+   - **Memobase**: User-specific memory management for multi-user applications.
+
+3. **Database Options**:
+   - **PostgreSQL with pgvector**: Recommended for production and multi-user deployments.
+   - **SQLite with sqlite-vec**: Ideal for local development and single-user deployments.
+
+4. **Configuration**:
+   - Memory is configured during initialization: `app = muxi(buffer_memory=50, long_term_memory="connection_string")`
+   - Configuration files define agents in an array, with memory configured at the orchestrator level
+
+5. **Multi-User Support**:
+   - Multi-user capabilities through Memobase: `memobase = Memobase(long_term_memory=long_term)`
+   - Each user has isolated memory space identified by user_id
 
 ## Dependencies
 
 ### Core Dependencies
 
 ```
-fastapi>=0.101.0
-uvicorn>=0.23.2
-pydantic>=2.3.0
-SQLAlchemy>=2.0.20
-asyncpg>=0.28.0
-pgvector>=0.2.1
-sqlite-vec>=0.1.7
-faiss-cpu>=1.7.4
-httpx>=0.24.1
-websockets>=11.0.3
-rich>=13.5.2
-python-dotenv>=1.0.0
-pyyaml>=6.0.1
-jinja2>=3.1.2
-typer>=0.9.0
-mcp-python-sdk>=0.1.0
-openai>=1.3.0
-tiktoken>=0.5.1
-```
-
-### Development Dependencies
-
-```
-pytest>=7.4.0
-pytest-asyncio>=0.21.1
-pytest-cov>=4.1.0
-black>=23.7.0
-flake8>=6.1.0
-mypy>=1.5.1
-pre-commit>=3.3.3
-alembic>=1.11.3
-sphinx>=7.1.2
-sphinx-rtd-theme>=1.3.0
-```
-
-### Optional Dependencies
-
-```
-anthropic>=0.5.0    # For Anthropic LLM provider
-```
-
-## API Dependencies
-
-The framework's REST API is defined according to the OpenAPI standard with the following endpoints:
-
-- `/agents`: Agent management
-- `/agents/{agent_id}/chat`: Agent chat
-- `/agents/{agent_id}/memory`: Memory operations
-- `/chat`: Orchestrator chat routing
-- `/users/{user_id}/context_memory`: Context memory operations
-- `/system/status`: System information
-
-See `api.md` for the complete API specification.
-
-## Deployment Considerations
-
-### Server Requirements
-
-- 2+ CPU cores
-- 4+ GB RAM (8+ GB recommended for multiple agents)
-- Fast SSD storage for database
-- Good network connectivity for LLM API calls
-
-### Container Deployment
-
-Dockerization is supported with:
-- Python base image
-- PostgreSQL with pgvector as a separate service or SQLite with sqlite-vec for simpler deployments
-- Volume mounts for configuration and persistent data
-
-### Cloud Considerations
-
-- Consider managed PostgreSQL services with vector support
-- Implement proper API key rotation and management
-- Use load balancers for high-availability deployments
-- Consider serverless options for cost efficiency
-- Use SQLite with sqlite-vec for serverless functions with size/memory constraints
-
-## Future Technology Considerations
-
-1. **Local LLM Support**: Integration with local LLM frameworks
-2. **Multi-Modal Expansion**: Support for image, audio, and video processing
-3. **Distributed Architecture**: Support for distributed agent deployments
-4. **GPU Acceleration**: Support for GPU-accelerated vector operations
-5. **Streaming HTTP Transport**: Support for upcoming MCP streaming HTTP transport
-
-## Package Structure
-
-The MUXI Framework is organized into a monorepo with multiple packages:
-
-1. **Core Package** (`packages/core`): Contains core functionality
-   - Agent implementation
-   - Orchestrator for agent management
-   - MCP transport abstractions
-   - Model integrations
-   - Common utilities
-
-2. **Server Package** (`packages/server`): API server implementation
-   - REST API endpoints
-   - WebSocket server
-   - MCP server interface
-   - Memory systems
-   - Database integrations
-
-3. **CLI Package** (`packages/cli`): Command-line interface
-   - Interactive chat interface
-   - Server management commands
-   - MCP server generator
-
-4. **Web Package** (`packages/web`): Web UI implementation
-   - React-based user interface
-   - API client
-   - WebSocket client
-
-### Module Organization
-
-The MUXI Framework follows these structural patterns:
-
-- Package exports are defined in `__init__.py` files, not through direct imports from `__main__.py` files
-- Executable modules use `__main__.py` files, but core functionality is in dedicated modules
-- The `run_server` function is exported from the server package for clean imports
-- Configuration is loaded through a unified config system

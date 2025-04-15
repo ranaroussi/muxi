@@ -51,41 +51,41 @@ MUXI has a flexible, service-oriented approach:
 │ (CLI/MCP/Web/SDK) │
 └─────────┬─────────┘
           │
-          │ (API/SSE/WS)
+          │  (API/SSE/WS)
           │
-┌─────────│───────────────────────────────────────────┐
-│         │    MUXI Server (Local/Remote)             │
-│         │                                           │
-│         │        ┌───────────────┐                  │
-│         └───────>│  Orchestrator │                  │
-│                  └───────┬───────┘                  │
-│         ┌────────────────┼────────────────┐         │
-│         │                │                │         │
-│         ▼                ▼                ▼         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │    ┌───────────┐
-│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │-------│ Knowledge │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │    └───────────┘
-│         │                │                │         │
-│         ↓                ↓                ↓         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │ A2A Handler │  │ A2A Handler │  │ A2A Handler │  │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
-│         ↓                ↓                ↓         │
-│         └────────┬───────┴────────┬───────┘         │
-│                  ↓                :                 │
-│           ┌──────┴──────┐  ┌──────┴──────┐          │
-│           │ MCP Handler │  │   Memory    │          │
-│           └──────┬──────┘  └─────────────┘          │
-└──────────────────│──────────────────────────────────┘
+┌─────────│───────────────────────────────────────────────┐
+│         │    MUXI Server (Local/Remote)                 │
+│         │                                               │
+│         │        ┌───────────────┐                      │
+│         └───────>│  Orchestrator │<─────────────────┐   │
+│                  └───────┬───────┘                  │   │
+│         ┌────────────────┼────────────────┐         │   │
+│         │                │                │         │   │
+│         ▼                ▼                ▼         │   │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │   │   ┌───────────┐
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │----------│ Knowledge │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │   │   └───────────┘
+│         │                │                │         │   │
+│         ↓                ↓                ↓         │   │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │   │
+│  │ A2A Handler │  │ A2A Handler │  │ A2A Handler │  │   │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │   │
+│         ↓                ↓                ↓         │   │
+│         └────────┬───────┴────────────────┘         │   │
+│                  ↓                                  │   │
+│           ┌──────┴──────┐  ┌─────────────┐          │   │
+│           │ MCP Handler │  │   Memory    │<─────────┘   │
+│           └──────┬──────┘  └─────────────┘              │
+└──────────────────│──────────────────────────────────────┘
                    │
                    │ (gRPC/HTTP)
                    ▼
-┌─────────────────────────────────────────────────────┐
-│              MCP Servers (via Command/SSE)          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │   Weather   │  │  Web Search │  │     ....    │  │
-│  └─────────────┘  └─────────────┘  └─────────────┘  │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                MCP Servers (via Command/SSE)            │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
+│  │   Weather   │    │  Web Search │    │     ....    │  │
+│  └─────────────┘    └─────────────┘    └─────────────┘  │
+└─────────────────────────────────────────────────────────┘
 ```
 
 For more details, see [Architecture Documentation](docs/intro/architecture.md).
@@ -122,8 +122,12 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Initialize MUXI
-app = muxi()
+# Initialize MUXI with memory configuration at the orchestrator level
+app = muxi(
+    buffer_size=10,  # Buffer window size of 10 messages
+    long_term="sqlite:///data/memory.db"  # Enable long-term memory with SQLite
+    # Alternatively: long_term="postgresql://user:pass@localhost/muxi"
+)
 
 # Add an agent from a configuration file
 app.add_agent("assistant", "configs/assistant.yaml")
@@ -136,32 +140,36 @@ print(response)
 # app.run()
 ```
 
-Example configuration file (`configs/assistant.yaml`):
+Example configuration file (`configs/muxi_config.yaml`):
 
 ```yaml
-name: assistant
-system_message: You are a helpful AI assistant.
-model:
-  provider: openai
-  api_key: "${OPENAI_API_KEY}"
-  model: gpt-4o
-  temperature: 0.7
+# Memory configuration at the top level
 memory:
-  buffer: 10  # Buffer window size of 10
+  buffer_size: 10  # Buffer window size of 10
   long_term: true  # Enable long-term memory using default SQLite in app's root
   # Or specify SQLite: long_term: "sqlite:///data/memory.db"
   # Or specify PostgreSQL: long_term: "postgresql://user:pass@localhost/muxi"
-knowledge:
-  - path: "knowledge/domain_facts.txt"
-    description: "Specialized domain knowledge for this agent"
-mcp_servers:
-- name: web_search
-  url: http://localhost:5001
-  credentials:
-  - id: search_api_key
-    param_name: api_key
-    required: true
-    env_fallback: SEARCH_API_KEY
+
+# Agents defined as an array
+agents:
+  - name: assistant
+    system_message: You are a helpful AI assistant.
+    model:
+      provider: openai
+      api_key: "${OPENAI_API_KEY}"
+      model: gpt-4o
+      temperature: 0.7
+    knowledge:
+      - path: "knowledge/domain_facts.txt"
+        description: "Specialized domain knowledge for this agent"
+    mcp_servers:
+    - name: web_search
+      url: http://localhost:5001
+      credentials:
+      - id: search_api_key
+        param_name: api_key
+        required: true
+        env_fallback: SEARCH_API_KEY
 ```
 
 ### Programmatic Approach
@@ -175,14 +183,20 @@ from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.knowledge.base import FileKnowledge
 
-# Create an orchestrator to manage agents
-orchestrator = Orchestrator()
+# Create an orchestrator with memory configuration
+buffer_memory = BufferMemory(max_messages=10)
+long_term_memory = LongTermMemory(connection_string="postgresql://user:pass@localhost/muxi")
+# Or use SQLite: LongTermMemory(connection_string="sqlite:///data/memory.db")
 
-# Create a basic agent with buffer memory
+orchestrator = Orchestrator(
+    buffer_memory=buffer_memory,
+    long_term_memory=long_term_memory
+)
+
+# Create a basic agent (memory is provided by the orchestrator)
 agent = orchestrator.create_agent(
     agent_id="assistant",
     model=OpenAIModel(model="gpt-4o", api_key="your_api_key"),
-    buffer_memory=BufferMemory(),
     system_message="You are a helpful AI assistant.",
     description="General-purpose assistant for answering questions and providing information."
 )
@@ -194,22 +208,17 @@ product_knowledge = FileKnowledge(
 )
 await agent.add_knowledge(product_knowledge)
 
-# Create an agent with long-term memory using PostgreSQL
+# Create additional specialized agents
 orchestrator.create_agent(
     agent_id="researcher",
     model=OpenAIModel(model="gpt-4o", api_key="your_api_key"),
-    buffer_memory=BufferMemory(),
-    long_term_memory=LongTermMemory(connection_string="postgresql://user:pass@localhost/muxi"),
     system_message="You are a helpful research assistant.",
     description="Specialized in research tasks, data analysis, and information retrieval."
 )
 
-# Create an agent with long-term memory using SQLite
 orchestrator.create_agent(
     agent_id="local_assistant",
     model=OpenAIModel(model="gpt-4o", api_key="your_api_key"),
-    buffer_memory=BufferMemory(),
-    long_term_memory=LongTermMemory(connection_string="sqlite:///data/memory.db"),
     system_message="You are a helpful personal assistant.",
     description="Personal assistant for tasks, reminders, and general information."
 )
@@ -301,8 +310,11 @@ The framework provides a powerful interface for working with Model Context Proto
 ```python
 from muxi import muxi
 
-# Initialize MUXI
-app = muxi()
+# Initialize MUXI with memory configuration
+app = muxi(
+    buffer_size=10,
+    long_term=True  # Use default SQLite database
+)
 
 # Add an agent with MCP server capabilities
 app.add_agent("assistant", "configs/assistant.yaml")
@@ -332,17 +344,29 @@ print(response.content)  # Agent will use both MCP servers to answer
 Example MCP server configuration in YAML:
 
 ```yaml
-mcp_servers:
-- name: web_search
-  url: http://localhost:5001
-  credentials:  # Optional: can be omitted if no authentication is required
-  - id: search_api_key
-    param_name: api_key
-    required: true
-    env_fallback: SEARCH_API_KEY
-- name: calculator
-  command: npx -y @modelcontextprotocol/server-calculator
-  # No credentials section needed for servers that don't require authentication
+# Memory configuration at the top level
+memory:
+  buffer_size: 10
+  long_term: true  # Use default SQLite database
+
+# Agents configuration
+agents:
+  - name: assistant
+    system_message: You are a helpful AI assistant.
+    model:
+      provider: openai
+      model: gpt-4o
+    mcp_servers:
+    - name: web_search
+      url: http://localhost:5001
+      credentials:  # Optional: can be omitted if no authentication is required
+      - id: search_api_key
+        param_name: api_key
+        required: true
+        env_fallback: SEARCH_API_KEY
+    - name: calculator
+      command: npx -y @modelcontextprotocol/server-calculator
+      # No credentials section needed for servers that don't require authentication
 ```
 
 ### MCP Server Implementation
@@ -352,8 +376,11 @@ MUXI can not only connect to MCP servers but also expose your agents as MCP-comp
 ```python
 from muxi import muxi
 
-# Initialize MUXI
-app = muxi()
+# Initialize MUXI with memory configuration
+app = muxi(
+    buffer_size=10,
+    long_term="sqlite:///data/memory.db"
+)
 
 # Add an agent from configuration
 app.add_agent("assistant", "configs/assistant.yaml")
@@ -378,8 +405,13 @@ Automatically route user messages to the most appropriate agent based on their c
 ```python
 from muxi import muxi
 
-# Initialize your app with multiple specialized agents
-app = muxi()
+# Initialize your app with memory and multiple specialized agents
+app = muxi(
+    buffer_size=10,
+    long_term="postgresql://user:pass@localhost/muxi"
+)
+
+# Add multiple specialized agents
 await app.add_agent("weather", "configs/weather_agent.yaml")
 await app.add_agent("finance", "configs/finance_agent.json")
 await app.add_agent("travel", "configs/travel_agent.yaml")
@@ -407,8 +439,13 @@ Enable collaboration between specialized agents:
 ```python
 from muxi import muxi
 
-# Initialize MUXI with multiple specialized agents
-app = muxi()
+# Initialize MUXI with memory and multiple specialized agents
+app = muxi(
+    buffer_size=10,
+    long_term="sqlite:///data/memory.db"
+)
+
+# Add multiple specialized agents
 await app.add_agent("researcher", "configs/researcher_agent.yaml")
 await app.add_agent("writer", "configs/writer_agent.yaml")
 await app.add_agent("fact_checker", "configs/fact_checker_agent.yaml")
@@ -437,8 +474,11 @@ A2A communication allows agents to collaborate seamlessly, creating more powerfu
 ```python
 from muxi import muxi
 
-# Initialize MUXI
-app = muxi()
+# Initialize MUXI with memory configuration
+app = muxi(
+    buffer_size=10,
+    long_term="postgresql://user:pass@localhost/muxi"
+)
 
 # Add multiple agents from configuration files
 await app.add_agent("weather", "configs/weather_agent.yaml")
@@ -487,15 +527,15 @@ USE_LONG_TERM_MEMORY=true
 
 # Or in your configuration file (YAML)
 memory:
-  buffer: 10
+  buffer_size: 10
   long_term: "sqlite:///data/memory.db"
   # Or for default SQLite database in app's root directory
   # long_term: true
 
 # Or programmatically
-from muxi.core.memory.long_term import LongTermMemory
+from muxi import muxi
 
-memory = LongTermMemory(connection_string="sqlite:///data/memory.db")
+app = muxi(long_term="sqlite:///data/memory.db")
 ```
 
 #### Using PostgreSQL with `pgvector`
@@ -508,13 +548,13 @@ POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
 
 # Or in your configuration file (YAML)
 memory:
-  buffer: 10
+  buffer_size: 10
   long_term: "postgresql://user:password@localhost:5432/muxi"
 
 # Or programmatically
-from muxi.core.memory.long_term import LongTermMemory
+from muxi import muxi
 
-memory = LongTermMemory(connection_string="postgresql://user:password@localhost:5432/muxi")
+app = muxi(long_term="postgresql://user:password@localhost:5432/muxi")
 ```
 
 ## Technical Details

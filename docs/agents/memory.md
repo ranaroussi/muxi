@@ -29,17 +29,21 @@ Buffer memory is a short-term memory system that stores recent conversation hist
 
 <h4>Declarative way</h4>
 
-`configs/buffer_memory_agent.json`
+`configs/muxi_config.json`
 
 ```json
 {
-  "agent_id": "assistant",
-  "description": "A helpful assistant with short-term memory for conversations.",
-  "model": {
-    "provider": "openai",
-    "api_key": "${OPENAI_API_KEY}",
-    "model": "gpt-4o"
-  }
+  "agents": [
+    {
+      "agent_id": "assistant",
+      "description": "A helpful assistant with short-term memory for conversations.",
+      "model": {
+        "provider": "openai",
+        "api_key": "${OPENAI_API_KEY}",
+        "model": "gpt-4o"
+      }
+    }
+  ]
 }
 ```
 
@@ -54,11 +58,9 @@ load_dotenv()
 
 # Initialize MUXI with buffer memory
 app = muxi(
-    buffer_memory=20
+    buffer_memory=20,
+    config_file="configs/muxi_config.json"
 )
-
-# Add agent from configuration
-app.add_agent("configs/buffer_memory_agent.json")
 
 # The agent will remember the conversation context
 response1 = await app.chat("assistant", "My name is Alice.")
@@ -73,8 +75,9 @@ print(response2)  # The agent should respond with "Alice"
 ```python
 import os
 from muxi.core.orchestrator import Orchestrator
-from muxi.core.models.openai import OpenAIModel
-from muxi.core.memory.buffer import BufferMemory
+from muxi.core.agent import Agent
+from muxi.models.providers.openai import OpenAIModel
+from muxi.server.memory.buffer import BufferMemory
 
 # Initialize components
 model = OpenAIModel(
@@ -83,11 +86,12 @@ model = OpenAIModel(
 )
 buffer = BufferMemory(15)
 
+# Initialize orchestrator with buffer memory
 orchestrator = Orchestrator(
     buffer_memory=buffer
 )
 
-# Create an agent with buffer memory
+# Create an agent that will use the orchestrator's memory
 orchestrator.create_agent(
     agent_id="assistant",
     description="A helpful assistant with short-term memory for conversations.",
@@ -133,14 +137,15 @@ Long-term memory provides persistent storage for important information across se
 <h4>Declarative way</h4>
 
 ```yaml
-# configs/postgres_memory_agent.yaml
+# configs/muxi_config.yaml
 ---
-agent_id: assistant
-description: A helpful assistant with PostgreSQL-based long-term memory.
-model:
-  provider: openai
-  api_key: "${OPENAI_API_KEY}"
-  model: gpt-4o
+agents:
+  - agent_id: assistant
+    description: A helpful assistant with PostgreSQL-based long-term memory.
+    model:
+      provider: openai
+      api_key: "${OPENAI_API_KEY}"
+      model: gpt-4o
 ```
 
 ```python
@@ -152,14 +157,12 @@ import os
 # Load environment variables
 load_dotenv()
 
-# Initialize MUXI
+# Initialize MUXI with both buffer and PostgreSQL long-term memory
 app = muxi(
     buffer_memory=15,
     long_term_memory="postgresql://user:pass@localhost/db",
+    config_file="configs/muxi_config.yaml"
 )
-
-# Add agent with PostgreSQL long-term memory
-app.add_agent("configs/postgres_memory_agent.yaml")
 
 # The agent will store important information in long-term memory
 await app.chat("assistant", "Remember that my favorite color is blue.")
@@ -170,18 +173,19 @@ await app.chat("assistant", "Remember that my favorite color is blue.")
 <h4>Declarative way</h4>
 
 ```yaml
-# configs/sqlite_memory_agent.yaml
+# configs/muxi_config.yaml
 ---
-agent_id: assistant
-description: A helpful assistant with SQLite-based long-term memory.
-model:
-  provider: openai
-  api_key: "${OPENAI_API_KEY}"
-  model: gpt-4o
+agents:
+  - agent_id: assistant
+    description: A helpful assistant with SQLite-based long-term memory.
+    model:
+      provider: openai
+      api_key: "${OPENAI_API_KEY}"
+      model: gpt-4o
 ```
 
 {: .note }
-> You can also use `long_term: true` to use a default SQLite database named "muxi.db" in your application's root directory.
+> You can also use `long_term_memory=True` to use a default SQLite database named "muxi.db" in your application's root directory.
 
 ```python
 # app.py
@@ -192,14 +196,12 @@ import os
 # Load environment variables
 load_dotenv()
 
-# Initialize MUXI
+# Initialize MUXI with both buffer and SQLite long-term memory
 app = muxi(
     buffer_memory=15,
-    long_term_memory="sqlite:///data/memory.db"
+    long_term_memory="sqlite:///data/memory.db",
+    config_file="configs/muxi_config.yaml"
 )
-
-# Add agent with SQLite long-term memory
-app.add_agent("configs/sqlite_memory_agent.yaml")
 
 # The agent will store important information in long-term memory
 await app.chat("assistant", "Remember that my favorite color is blue.")
@@ -210,16 +212,17 @@ await app.chat("assistant", "Remember that my favorite color is blue.")
 ```python
 import os
 from muxi.core.orchestrator import Orchestrator
-from muxi.core.models.openai import OpenAIModel
-from muxi.core.memory.buffer import BufferMemory
-from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.agent import Agent
+from muxi.models.providers.openai import OpenAIModel
+from muxi.server.memory.buffer import BufferMemory
+from muxi.server.memory.long_term import LongTermMemory
 
 # Initialize components
 model = OpenAIModel(
     api_key=os.getenv("OPENAI_API_KEY"),
     model="gpt-4o"
 )
-buffer = BufferMemory()
+buffer = BufferMemory(15)
 
 # Option 1: PostgreSQL long-term memory (for production/multi-user deployments)
 postgres_connection = "postgresql://user:password@localhost:5432/muxi"
@@ -233,18 +236,17 @@ sqlite_connection = "sqlite:///data/memory.db"
 connection_string = sqlite_connection  # or postgres_connection
 long_term_memory = LongTermMemory(connection_string=connection_string)
 
+# Initialize orchestrator with both buffer and long-term memory
 orchestrator = Orchestrator(
-    buffer_memory=15,
-    long_term_memory="sqlite:///data/memory.db"
+    buffer_memory=buffer,
+    long_term_memory=long_term_memory
 )
 
-# Create an agent with both buffer and long-term memory
+# Create an agent that will use the orchestrator's memory
 orchestrator.create_agent(
     agent_id="assistant",
     description="A helpful assistant with both short-term and long-term memory capabilities.",
-    model=model,
-    buffer_memory=buffer,
-    long_term_memory=long_term_memory
+    model=model
 )
 
 # The agent will store important information in long-term memory
@@ -253,15 +255,15 @@ orchestrator.chat("assistant", "Remember that my favorite color is blue.")
 
 ### Searching Long-Term Memory
 
-You can explicitly search an agent's memory, regardless of whether you're using PostgreSQL or SQLite:
+You can explicitly search memory, regardless of whether you're using PostgreSQL or SQLite:
 
 <h4>Declarative way</h4>
 
 ```python
 # Search the memory explicitly
-search_results = await app.search_memory(
-    agent_id="assistant",
+search_results = await app.orchestrator.search_memory(
     query="What do I like?",
+    agent_id="assistant",  # Optional: filter by agent_id
     k=3,  # Return top 3 results
     threshold=0.7  # Minimum similarity threshold (0-1)
 )
@@ -276,9 +278,10 @@ for result in search_results:
 <h4>Programmatic way</h4>
 
 ```python
-# Search the agent's memory for relevant information
-results = agent.search_memory(
+# Search the orchestrator's memory for relevant information
+results = orchestrator.search_memory(
     query="What do I like?",
+    agent_id="assistant",  # Optional: filter by agent_id
     k=3,  # Return top 3 results
     threshold=0.7  # Minimum similarity threshold (0-1)
 )
@@ -310,32 +313,37 @@ import os
 # Load environment variables
 load_dotenv()
 
-# Initialize MUXI
-app = muxi()
-
-# Add multi-user agent
-app.add_agent("configs/postgres_memory_agent.yaml")
+# Initialize MUXI with multi-user memory
+app = muxi(
+    buffer_memory=15,
+    long_term_memory="postgresql://user:pass@localhost/db",
+    config_file="configs/muxi_config.yaml"
+)
 
 # Chat with the agent as different users
 user_1_response = await app.chat(
     message="My name is Bob and I like hiking.",
+    agent_name="assistant",
     user_id="user_1"
 )
 
 user_2_response = await app.chat(
     message="My name is Carol and I like painting.",
+    agent_name="assistant",
     user_id="user_2"
 )
 
 # Later, the agent will remember each user's specific information
 user_1_question = await app.chat(
     message="What hobby do I enjoy?",
+    agent_name="assistant",
     user_id="user_1"
 )
 print(f"User 1 response: {user_1_question}")  # Should mention hiking
 
 user_2_question = await app.chat(
     message="What hobby do I enjoy?",
+    agent_name="assistant",
     user_id="user_2"
 )
 print(f"User 2 response: {user_2_question}")  # Should mention painting
@@ -344,27 +352,50 @@ print(f"User 2 response: {user_2_question}")  # Should mention painting
 <h4>Programmatic way</h4>
 
 ```python
-...
+# Initialize orchestrator with multi-user memory support
+from muxi.server.memory.memobase import Memobase
+
+# Create Memobase for multi-user support
+long_term_memory = LongTermMemory(connection_string="postgresql://user:pass@localhost/db")
+memobase = Memobase(long_term_memory=long_term_memory)
+
+# Initialize orchestrator with multi-user memory
+orchestrator = Orchestrator(
+    buffer_memory=buffer,
+    long_term_memory=memobase
+)
+
+# Create an agent
+orchestrator.create_agent(
+    agent_id="assistant",
+    description="A helpful assistant with multi-user memory.",
+    model=model
+)
+
 # Chat with the agent as different users
 user_1_response = orchestrator.chat(
-    message="My name is Bob and I like hiking.",
+    "assistant",
+    "My name is Bob and I like hiking.",
     user_id="user_1"
 )
 
 user_2_response = orchestrator.chat(
-    message="My name is Carol and I like painting.",
+    "assistant",
+    "My name is Carol and I like painting.",
     user_id="user_2"
 )
 
 # Later, the agent will remember each user's specific information
 user_1_question = orchestrator.chat(
-    message="What hobby do I enjoy?",
+    "assistant",
+    "What hobby do I enjoy?",
     user_id="user_1"
 )
 print(f"User 1 response: {user_1_question}")  # Should mention hiking
 
 user_2_question = orchestrator.chat(
-    message="What hobby do I enjoy?",
+    "assistant",
+    "What hobby do I enjoy?",
     user_id="user_2"
 )
 print(f"User 2 response: {user_2_question}")  # Should mention painting

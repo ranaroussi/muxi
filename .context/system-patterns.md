@@ -18,6 +18,10 @@ The MUXI Framework follows a service-oriented architecture with clear separation
 │         │        ┌───────────────┐                  │
 │         └───────>│  Orchestrator │                  │
 │                  └───────┬───────┘                  │
+│                          ▼                          │
+│                    ┌─────────────┐                  │
+│                    │   Memory    │                  │
+│                    └──────┬──────┘                  │
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │
 │         ▼                ▼                ▼         │
@@ -26,10 +30,10 @@ The MUXI Framework follows a service-oriented architecture with clear separation
 │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │    └───────────┘
 │         ↓                ↓                ↓         │
 │         └────────┬───────┴────────┬───────┘         │
-│                  ↓                :                 │
-│           ┌──────┴──────┐  ┌──────┴──────┐          │
-│           │ MCP Handler │  │   Memory    │          │
-│           └──────┬──────┘  └─────────────┘          │
+│                  ↓                                  │
+│           ┌──────┴──────┐                           │
+│           │ MCP Handler │                           │
+│           └──────┬──────┘                           │
 └──────────────────│──────────────────────────────────┘
                    │
                    │ (gRPC/HTTP)
@@ -44,9 +48,9 @@ The MUXI Framework follows a service-oriented architecture with clear separation
 
 ### Key Architectural Components
 
-1. **Orchestrator**: Central component that manages agents and routes messages
+1. **Orchestrator**: Central component that manages agents and memory systems
 2. **Agent**: Core entity that processes messages with specific capabilities
-3. **Memory System**: Stores conversation history and contextual information
+3. **Memory System**: Centralized at the orchestrator level, storing conversation history and contextual information
 4. **MCP Handler**: Manages communications with external MCP servers
 5. **Knowledge Base**: Stores and retrieves domain-specific knowledge
 6. **Communication Interfaces**: HTTP API, SSE, WebSockets for interaction
@@ -79,7 +83,7 @@ The framework implements a hybrid protocol approach:
 
 ### 3. Configuration-Driven Development
 
-The framework emphasizes configuration over code, allowing users to define agents and their capabilities through YAML or JSON files.
+The framework emphasizes configuration over code, allowing users to define agents and their capabilities through YAML or JSON files, with centralized memory configuration at the orchestrator level.
 
 ### 4. LLM Provider Abstraction
 
@@ -93,10 +97,12 @@ External tool integration follows the Model Context Protocol (MCP) standard, wit
 
 ### 6. Memory Architecture
 
-The memory system is split into:
+The memory system is centralized at the orchestrator level:
 - **Buffer Memory**: Short-term memory for immediate context (using FAISS for vector similarity)
 - **Long-Term Memory**: Persistent storage using PostgreSQL with pgvector or SQLite with sqlite-vec
-- **User Partitioning**: Memory segregation for multi-user support
+- **Memobase**: Memory partitioning system for multi-user support
+- **Shared Access**: All agents access memory through the orchestrator
+- **Unified Configuration**: Memory is configured in a single place at initialization
 
 ## Design Patterns in Use
 
@@ -123,7 +129,7 @@ class TransportFactory:
 
 Used to encapsulate different algorithms behind a common interface:
 - **LLM Provider Strategies**: Different implementation for OpenAI, Anthropic, etc.
-- **Memory Storage Strategies**: Different backends for memory storage
+- **Memory Storage Strategies**: Different backends for memory storage (PostgreSQL, SQLite)
 
 ```python
 # Example of strategy pattern for LLM providers
@@ -151,11 +157,19 @@ The main `muxi` class provides a simplified facade to the complex underlying sys
 ```python
 # Example of facade pattern
 class muxi:
-    def __init__(self, **kwargs):
-        self.orchestrator = Orchestrator()
+    def __init__(self, buffer_memory=None, long_term_memory=None, **kwargs):
+        # Create memory systems
+        _buffer_memory = self._create_buffer_memory(buffer_memory)
+        _long_term_memory = self._create_long_term_memory(long_term_memory)
+
+        # Initialize orchestrator with memory
+        self.orchestrator = Orchestrator(
+            buffer_memory=_buffer_memory,
+            long_term_memory=_long_term_memory
+        )
         # Initialize other components
 
-    async def add_agent(self, agent_id, config_path=None, **kwargs):
+    async def add_agent(self, name, path=None, **kwargs):
         # Simplified interface to agent creation
         pass
 
@@ -184,10 +198,10 @@ Used for operation encapsulation:
 - **Routes** messages to appropriate Agents
 - **Manages** global configuration
 - **Exposes** a public API for client interaction
-- **Owns and manages** memory systems (Buffer and Long-Term Memory)
+- **Owns and manages** all memory systems (Buffer and Long-Term Memory)
 - **Provides** memory access methods to agents
 - **Maintains** centralized memory management
-- **Handles** multi-user memory partitioning
+- **Handles** multi-user memory partitioning through Memobase
 
 ### Agent Relationships
 
@@ -196,16 +210,19 @@ Used for operation encapsulation:
 - **Does not own** memory systems directly
 - **Connects to** MCP Servers via MCP Handler
 - **Maintains** a Knowledge Base for domain knowledge
+- **Stores** reference to the parent Orchestrator for memory access
 
 ### Memory System Relationships
 
-- **Owned by** the Orchestrator, not individual Agents
-- **Buffer Memory provides** immediate context to Agents through the Orchestrator
-- **Long-Term Memory stores** historical context that Agents access via Orchestrator
-- **Memory is configured** at the Orchestrator level
-- **Memory is shared** across multiple Agents when appropriate
-- **Memory is partitioned by** user_id for multi-user support
-- **Memory operations** (add, search, clear) are exposed via the Orchestrator
+- **Exclusively owned by** the Orchestrator, not individual Agents
+- **Initialized during** Orchestrator construction
+- **Configured via** the Muxi facade constructor or directly in Orchestrator
+- **Buffer Memory provides** immediate context to all Agents via the Orchestrator
+- **Long-Term Memory stores** historical context accessed through the Orchestrator
+- **Shared efficiently** across all Agents managed by the Orchestrator
+- **Partitioned by** user_id for multi-user support via Memobase
+- **Memory operations** (add, search, clear) are exposed via Orchestrator methods
+- **Agent-specific data** maintained through metadata filtering (using agent_id)
 
 ### MCP Handler Relationships
 
@@ -225,11 +242,11 @@ Used for operation encapsulation:
 
 1. **Message Reception**: Client sends message through an interface
 2. **Orchestration**: Message is routed to the appropriate agent
-3. **Context Enhancement**: Memory systems provide relevant context
+3. **Context Enhancement**: Orchestrator's memory systems provide relevant context
 4. **Processing**: Agent processes message with LLM and tools
 5. **Tool Usage**: External tools are invoked via MCP if needed
 6. **Response Generation**: Agent generates a response
-7. **Memory Update**: Conversation is stored in memory
+7. **Memory Update**: Conversation is stored in orchestrator's memory systems
 8. **Response Delivery**: Response is returned to the client
 
 This architecture allows for flexibility, extensibility, and maintainability while providing a powerful foundation for AI agent development.

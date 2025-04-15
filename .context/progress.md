@@ -339,3 +339,33 @@ SQLite vector support has been added, providing a simpler deployment option for 
    - Comprehensive documentation
    - Production-ready deployment
    - Full test coverage
+
+## Recent Progress
+
+1. **Documentation Alignment**: Updated all memory-related documentation to reflect the orchestrator-level memory architecture:
+   - Updated `docs/agents/memory.md` with correct examples for both declarative and programmatic memory configuration
+   - Updated `docs/intro/quick-start.md` to show proper agent configuration with memory at the orchestrator level
+   - Ensured consistency in examples between code and documentation
+   - Fixed code snippets to accurately reflect the current architecture
+
+2. **Memory Architecture Migration**:
+   - Migrated memory systems from agent level to orchestrator level for centralized management
+   - Updated all tests to reflect the new architecture
+   - Implemented backward compatibility layers
+   - Added full PostgreSQL and SQLite support with simplified configuration
+   - Added multi-user memory support with Memobase at the orchestrator level
+
+3. **SQLite Vector Integration**:
+   - Added support for sqlite-vec Python package for vector similarity search
+   - Simplified extensions handling without binary dependencies
+   - Enhanced cross-platform compatibility
+
+4. **Package Organization**:
+   - Restructured codebase into modular packages
+   - Fixed import patterns and dependencies
+   - Improved package installation and development workflows
+
+5. **Test Improvements**:
+   - Fixed test warnings and improved coverage
+   - Added specific tests for memory-related functionality
+   - Enhanced CI/CD pipeline

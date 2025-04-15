@@ -52,45 +52,80 @@ The easiest way to get started with MUXI is to use declarative configuration fil
 
 ### YAML Configuration Example
 
-Create a file `agents/weather_agent.yaml`:
+Create a file `configs/muxi_config.yaml`:
 
 ```yaml
-name: weather_assistant
-description: "Specialized in providing weather forecasts and current conditions."
-system_message: You are a helpful assistant that can check the weather.
-model:
-  provider: openai
-  api_key: "${OPENAI_API_KEY}"
-  model: gpt-4o
-  temperature: 0.7
-mcp_servers:
-  - name: weather_api
-    url: http://localhost:5001
-    api_key: "${WEATHER_API_KEY}"
+agents:
+  - agent_id: weather_assistant
+    description: "Specialized in providing weather forecasts and current conditions."
+    system_message: You are a helpful assistant that can check the weather.
+    model:
+      provider: openai
+      api_key: "${OPENAI_API_KEY}"
+      model: gpt-4o
+      temperature: 0.7
+    mcp_servers:
+      - name: weather_api
+        url: http://localhost:5001
+        api_key: "${WEATHER_API_KEY}"
+  - agent_id: finance_assistant
+    description: "Expert in financial analysis, investments, and market trends."
+    system_message: You are a helpful finance assistant.
+    model:
+      provider: openai
+      api_key: "${OPENAI_API_KEY}"
+      model: gpt-4o
+      temperature: 0.2
+    mcp_servers:
+      - name: finance_api
+        url: http://localhost:5002
+        api_key: "${FINANCE_API_KEY}"
 ```
 
 ### JSON Configuration Example
 
-Alternatively, create `agents/finance_agent.json`:
+Alternatively, create `configs/muxi_config.json`:
 
 ```json
 {
-    "name": "finance_assistant",
-    "description": "Expert in financial analysis, investments, and market trends.",
-    "system_message": "You are a helpful finance assistant.",
-    "model": {
+  "agents": [
+    {
+      "agent_id": "weather_assistant",
+      "description": "Specialized in providing weather forecasts and current conditions.",
+      "system_message": "You are a helpful assistant that can check the weather.",
+      "model": {
+        "provider": "openai",
+        "api_key": "${OPENAI_API_KEY}",
+        "model": "gpt-4o",
+        "temperature": 0.7
+      },
+      "mcp_servers": [
+        {
+          "name": "weather_api",
+          "url": "http://localhost:5001",
+          "api_key": "${WEATHER_API_KEY}"
+        }
+      ]
+    },
+    {
+      "agent_id": "finance_assistant",
+      "description": "Expert in financial analysis, investments, and market trends.",
+      "system_message": "You are a helpful finance assistant.",
+      "model": {
         "provider": "openai",
         "api_key": "${OPENAI_API_KEY}",
         "model": "gpt-4o",
         "temperature": 0.2
-    },
-    "mcp_servers": [
+      },
+      "mcp_servers": [
         {
-            "name": "finance_api",
-            "url": "http://localhost:5002",
-            "api_key": "${FINANCE_API_KEY}"
+          "name": "finance_api",
+          "url": "http://localhost:5002",
+          "api_key": "${FINANCE_API_KEY}"
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
@@ -105,26 +140,20 @@ from muxi import muxi
 # Load environment variables
 load_dotenv()
 
-# Initialize MUXI
-app = muxi()
-
-# Optional: Initialize MUXI with buffer size and long-term memory
-# app = muxi(
-#   buffer_memory=10,  # Sets buffer window size to 10
-#   long_term_memory="postgresql://user:pass@localhost/db"  # Enables long-term memory
-# )
-
-# Add agents from configuration files
-app.add_agent("weather", "agents/weather_agent.yaml")
-app.add_agent("finance", "agents/finance_agent.json")
+# Initialize MUXI with memory configuration
+app = muxi(
+  buffer_memory=10,  # Sets buffer window size to 10
+  long_term_memory="postgresql://user:pass@localhost/db",  # Enables long-term memory
+  config_file="configs/muxi_config.yaml"  # Load agent configurations from file
+)
 
 # Chat with a specific agent
-response = app.chat("What's the weather in New York?", agent_name="weather")
+response = app.chat("What's the weather in New York?", agent_name="weather_assistant")
 print(response)
 
 # Let the orchestrator automatically select the appropriate agent
 response = app.chat("What's the current stock market trend?")
-print(response)  # Will be handled by the finance agent
+print(response)  # Will be handled by the finance_assistant
 
 # Start the server
 app.run()
@@ -137,10 +166,10 @@ When you add multiple agents to your application, MUXI will automatically route 
 ```python
 # Let the orchestrator automatically select the appropriate agent
 response = app.chat("What's the current stock market trend?")
-print(response)  # Will likely be handled by the finance agent
+print(response)  # Will likely be handled by the finance_assistant
 
 response = app.chat("What's the weather in New York?")
-print(response)  # Will likely be handled by the weather agent
+print(response)  # Will likely be handled by the weather_assistant
 ```
 
 The routing system uses an LLM to analyze the message content and agent descriptions to determine the best match.
@@ -151,10 +180,13 @@ You can enhance your agents with context memory:
 
 ```python
 # Add context knowledge for the agent
-app.add_context_knowledge("geography.txt")
+app.add_context_knowledge("geography.txt", agent_id="weather_assistant")
 
 # Add user-specific context memory
-app.add_user_context_memory(user_id=123, knowledge={"name": "John", "location": "New York"})
+app.add_user_context_memory(
+    user_id="user123",
+    knowledge={"name": "John", "location": "New York"}
+)
 ```
 
 ## Multi-User Support
@@ -162,19 +194,28 @@ app.add_user_context_memory(user_id=123, knowledge={"name": "John", "location": 
 For multi-user applications:
 
 ```python
+# Initialize MUXI with multi-user memory support
+app = muxi(
+    buffer_memory=10,
+    long_term_memory="postgresql://user:pass@localhost/db",  # PostgreSQL recommended for multi-user
+    config_file="configs/muxi_config.yaml"
+)
+
 # Chat with user-specific context
 response = app.chat(
     "What's the weather in my city?",
+    agent_name="weather_assistant",
     user_id="user123"
 )
-print(response)  # Will use Alice's location data
+print(response)  # Will use user123's location data
 
 # Another user with different context
 response = app.chat(
     "What's the weather in my city?",
+    agent_name="weather_assistant",
     user_id="user456"
 )
-print(response)  # Will use Bob's location data if available
+print(response)  # Will use user456's location data if available
 ```
 
 ## Using the CLI
@@ -204,7 +245,7 @@ You can interact with the API:
 
 ```bash
 # Send a message to an agent
-curl -X POST http://localhost:5050/agents/assistant/messages \
+curl -X POST http://localhost:5050/agents/weather_assistant/messages \
   -H "Content-Type: application/json" \
   -d '{"content": "What is the capital of France?"}'
 ```

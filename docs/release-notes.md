@@ -1,172 +1,168 @@
 ---
 layout: default
 title: Release Notes
-nav_order: 8
+nav_order: 10
 permalink: /release-notes
 ---
 
-# Release Notes
+# MUXI Framework Release Notes
+
+This document provides a summary of changes, new features, and fixes in each release of the MUXI Framework.
 
 ## Upcoming Releases
 
-### v0.5.0 (Planned Q2 2025) - Scaling & Communication
+### v0.5.0 (Planned Q2 2025) - Enhanced Communication and Advanced Features
 
-The MUXI Framework v0.5.0 will focus on advanced agent communication, enhanced MCP server capabilities, and performance improvements to support larger-scale deployments.
+The MUXI Framework v0.5.0 will focus on advanced communication capabilities, expanded LLM provider support, and performance optimizations.
 
-#### Planned Features
+#### Major Features
 
 - **Advanced Agent-to-Agent (A2A) Communication**:
-  - Capability discovery mechanism for automatic service detection
-  - Robust task delegation between specialized agents
+  - Capability discovery mechanism
+  - Task delegation between agents
   - Context sharing with proper isolation
   - Conversation lifecycle management
-  - External agent integration capabilities
-  - Comprehensive security and authentication
-
-- **Full MCP Server Interface**:
-  - Complete streaming response support
-  - Enhanced tool discovery from agent capabilities
-  - Advanced request/response handling
-  - Authentication shared with REST API
-  - Complete documentation and examples
-
-- **Performance & Monitoring**:
-  - Comprehensive system status monitoring
-  - API usage statistics and dashboards
-  - Rate limiting and quota management
-  - Performance optimizations for high-scale deployments
+  - External agent integration
+  - Security and authentication
 
 - **Multi-Modal Support**:
-  - Full support for images, audio, and document processing
-  - Standardized multi-modal message formats
-  - Comprehensive handling of various content types
+  - File attachment support in WebSocket API
+  - Image processing capabilities
+  - Document handling (PDF, Office documents)
+  - Audio processing integration
 
-### v0.4.0 (Planned Q2 2025) - Advanced Features
-
-The MUXI Framework v0.4.0 will introduce several advanced features with a focus on agent communication and MCP server implementation.
-
-#### Planned Features
-
-- **Basic MCP Server Interface**:
-  - SSE-based server endpoint for exposing agent capabilities
-  - Initial tool discovery implementation
-  - Basic request/response message handling
-  - Simplified authentication mechanism
+- **MCP Server Enhancements**:
+  - SSE-based MCP server implementation
+  - Automatic tool discovery from agent capabilities
   - NPX bridge package for non-SSE clients
+  - Streaming response handling
+  - Authentication shared with REST API
 
-- **Initial Agent-to-Agent (A2A) Communication**:
-  - Standardized message format for inter-agent communication
-  - Basic agent capability registration
-  - Simple task delegation between agents
-  - Configuration options for A2A control
+- **LLM Provider Expansion**:
+  - Anthropic LLM provider implementation
+  - Gemini LLM provider implementation
+  - Grok LLM provider implementation
+  - Support for local models (Llama, Mistral, DeepSeek)
+  - Model router for fallback and cost optimization
 
-- **Enhanced WebSocket Support**:
-  - Complete WebSocket implementation to spec
-  - Support for real-time agent interactions
-  - Improved error handling and recovery
+### v0.4.0 (Planned Q1 2025) - API-First Framework
 
-- **Additional LLM Providers**:
-  - Support for additional model providers beyond OpenAI
-  - Abstraction layer for provider-agnostic operations
-  - Configuration options for provider selection
+The MUXI Framework v0.4.0 will introduce comprehensive API implementations as outlined in the API specification document, with a focus on making the framework accessible through multiple interfaces.
 
-## v0.3.0 (March 2025) - Context Knowledge Expansion
+#### Major Features
 
-The MUXI Framework v0.3.0 brings significant improvements to knowledge capabilities, enhancing agents with specialized context knowledge and improved contextual awareness.
+- **REST API Implementation**:
+  - Standard REST API endpoints (agent, conversation, memory management)
+  - Authentication with API keys
+  - Streaming support for chat endpoints with SSE
+  - Proper error handling with standardized format
+  - API versioning support
+  - Rate limiting and throttling
+  - API documentation using OpenAPI/Swagger
 
-### Major Features
+- **WebSocket API Implementation**:
+  - WebSocket protocol for real-time communication
+  - Support for multi-modal messages (text, images, audio)
+  - Proper error handling and recovery mechanisms
+  - Reconnection logic with exponential backoff
+  - Support for attachments as specified in API documentation
 
-- **Agent-Level Knowledge Base**: Agents can now have dedicated knowledge sources specific to their domains of expertise
+- **MCP Server Implementation**:
+  - HTTP+SSE-based MCP server implementation
+  - Simplified credential management
+  - Authentication that integrates with API keys
+  - Tool discovery mechanism
+  - Robust error handling and recovery
+
+- **CLI Enhancements**:
+  - Support for all API operations
+  - Improved user experience with better formatting
+  - Configuration management commands
+  - Multi-modal interaction support
+
+- **Web UI Development**:
+  - Responsive design for mobile and desktop
+  - Real-time updates using WebSocket
+  - Agent management dashboard
+  - Configuration interface
+
+## Current Release
+
+### v0.3.0 (March 2025) - Context Knowledge & Memory Modernization
+
+The MUXI Framework v0.3.0 brought significant improvements to knowledge capabilities, enhancing agents with specialized context knowledge. It also included a major architectural change in how memory is managed throughout the framework.
+
+#### Major Features
+
+- **Memory Architecture Migration**:
+  - **Breaking Change**: Moved memory management from agent level to orchestrator level
+  - Consolidated memory initialization in the orchestrator constructor
+  - Updated configuration format to specify memory at the top level, not per agent
+  - Removed `setup_memory()` methods, memory is now provided during initialization
+  - Memory is now shared efficiently between agents
+  - Simplified multi-user memory management
+  - Significantly reduced memory duplication and improved performance
+  - Enabled more complex memory sharing patterns between agents
+
+- **Agent-Level Knowledge Base**:
   - File-based knowledge sources with automatic embedding generation
   - Efficient in-memory vector storage using FAISS
   - Persistent caching of embeddings for cost optimization
   - Dynamic embedding dimension detection based on the agent's model
-- **Enhanced Knowledge API**: Comprehensive API for managing agent knowledge
+
+- **Enhanced Knowledge API**:
   - Add and remove knowledge sources programmatically
   - Search knowledge with relevance controls
   - List and manage knowledge sources
-- **Declarative Knowledge Configuration**: Define knowledge sources in YAML/JSON configurations
+
+- **Declarative Knowledge Configuration**:
   - Specify file paths and descriptions
   - Automatic loading and embedding on agent initialization
-- **Improved Documentation**: Comprehensive guides for all knowledge features
-- **MCP Server Enhancements**: Improved MCP server integration
-  - Made credentials optional for MCP servers to simplify configuration
+
+- **MCP Server Enhancements**:
+  - Made credentials optional for MCP servers
   - Better documentation on MCP server configuration
   - Updated examples to demonstrate credential-optional usage patterns
 
-### Benefits
+### v0.2.0 (February 2025) - Architecture Migration
 
-- Create specialized agents with domain-specific knowledge
-- Provide more accurate and contextual responses
-- Reduce hallucinations by grounding responses in factual information
-- Simplify RAG (Retrieval-Augmented Generation) implementation
-- Easier MCP server integration with fewer required configuration parameters
+The MUXI Framework v0.2.0 marked a significant milestone with the completion of our architectural migration to a modular, package-based structure.
 
-### Example Usage
+#### Major Features
 
-```python
-# Add knowledge programmatically
-from muxi.knowledge.base import FileKnowledge
+- **Modular Package Structure**:
+  - Reorganized from a monolithic structure to a modular, package-based architecture
+  - Changed imports from `src.*` to `muxi.core.*`, `muxi.cli.*`, etc.
+  - Created separately installable packages for core functionality, CLI, server, and web interface
+  - Established well-defined interfaces between subsystems
 
-knowledge = FileKnowledge(
-    path="knowledge/products.txt",
-    description="Product catalog and specifications"
-)
-await agent.add_knowledge(knowledge)
+### v0.1.0 (January 2025) - Foundation Release
 
-# Search knowledge
-results = await agent.search_knowledge(
-    query="What are our best-selling products?",
-    top_k=3,
-    threshold=0.7
-)
-```
+The initial release of the MUXI Framework established the core architecture and essential functionality.
 
-## v0.2.0 (March 2025) - Architecture Migration
+#### Major Features
 
-The MUXI Framework v0.2.0 marks a significant milestone with the completion of our architectural migration to a modular, package-based structure. This release focuses on improving the framework's architecture, maintainability, and extensibility rather than adding new features.
+- **Core Agent System**:
+  - Basic agent functionality with LLM integration
+  - System message handling
+  - Message processing pipeline
 
-### Major Changes
+- **Memory Systems**:
+  - Buffer memory using FAISS for short-term context
+  - Long-term memory using PostgreSQL with pgvector
+  - Context memory for user-specific structured information
 
-- **Modular Package Structure**: Reorganized from a monolithic structure to a modular, package-based architecture
-- **Import Path Migration**: Changed imports from `src.*` to `muxi.core.*`, `muxi.cli.*`, etc.
-- **Independent Packages**: Created separately installable packages for core functionality, CLI, server, and web interface
-- **Clearer Subsystem Boundaries**: Established well-defined interfaces between subsystems
+- **MCP Integration**:
+  - MCP handler for communication with external services
+  - Multiple transport types (HTTP+SSE, Command-line)
+  - Tool call processing and response handling
 
-### Benefits of the New Architecture
+- **Orchestrator**:
+  - Multi-agent management
+  - Intelligent message routing
+  - Agent description handling
 
-- **Independent Versioning**: Components can be versioned independently
-- **Clearer Module Boundaries**: Better separation of concerns with well-defined interfaces
-- **Focused Testing**: Tests can target specific packages
-- **Flexible Deployment**: Support for installing only needed components
-- **Enhanced Maintainability**: Easier to understand and modify codebase
-
-### Breaking Changes
-
-- Import paths have changed from `src.*` to `muxi.core.*`, etc.
-- Configuration files now use the new package structure
-- Extensions and custom components need to be updated to the new import structure
-
-### Migration Guide
-
-To upgrade from v0.1.x to v0.2.0:
-
-1. Update your Python package: `pip install -U muxi`
-2. Update any custom code to use the new import paths:
-   - Replace `from src.core...` with `from muxi.core...`
-   - Replace `from src.models...` with `from muxi.core.models...`
-   - Replace `from src.memory...` with `from muxi.core.memory...`
-3. For web UI support, install the web module: `pip install muxi-web`
-4. For server deployments, install the server module: `pip install muxi-server`
-
-### What's Next
-
-With this architectural foundation in place, future releases will focus on:
-
-- Enhanced multi-agent coordination
-- Expanded tool capabilities
-- Improved memory systems
-- More sophisticated context knowledge management
-- Additional model providers and support for local models
-
-Stay tuned for these exciting developments in upcoming releases!
+- **Command Line Interface**:
+  - Terminal-based user interface
+  - Agent interaction commands
+  - Server management
