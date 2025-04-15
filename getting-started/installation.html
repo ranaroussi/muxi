@@ -1,0 +1,83 @@
+<h1 id="installation">Installation</h1>
+
+<p>The MUXI Framework can be installed through pip:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>muxi
+</code></pre></div></div>
+
+<p>For the latest development version:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>git+https://github.com/microsoft/muxi.git
+</code></pre></div></div>
+
+<h2 id="dependencies">Dependencies</h2>
+
+<p>MUXI requires:</p>
+
+<ul>
+  <li>Python 3.8+</li>
+  <li>An LLM provider (OpenAI, Azure OpenAI, Anthropic, etc.)</li>
+  <li>API keys for the chosen providers</li>
+</ul>
+
+<h2 id="development-setup">Development Setup</h2>
+
+<p>To set up a development environment:</p>
+
+<ol>
+  <li>Clone the repository:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/microsoft/muxi.git
+<span class="nb">cd </span>muxi
+</code></pre></div>    </div>
+  </li>
+  <li>Create a virtual environment:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-m</span> venv venv
+<span class="nb">source </span>venv/bin/activate  <span class="c"># On Windows: venv\Scripts\activate</span>
+</code></pre></div>    </div>
+  </li>
+  <li>Install dependencies:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install</span> <span class="nt">-e</span> <span class="s2">".[dev]"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>Set up environment variables:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># For OpenAI</span>
+<span class="nb">export </span><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>your_api_key
+
+<span class="c"># For Azure OpenAI</span>
+<span class="nb">export </span><span class="nv">AZURE_OPENAI_API_KEY</span><span class="o">=</span>your_api_key
+<span class="nb">export </span><span class="nv">AZURE_OPENAI_ENDPOINT</span><span class="o">=</span>your_endpoint
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="configuration">Configuration</h2>
+
+<p>Create a basic configuration file for your application:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># configs/muxi_config.yaml</span>
+<span class="na">orchestrator</span><span class="pi">:</span>
+  <span class="na">memory</span><span class="pi">:</span>
+    <span class="na">buffer_size</span><span class="pi">:</span> <span class="m">10</span>
+    <span class="na">long_term</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s2">"</span><span class="s">sqlite"</span>
+      <span class="na">connection_string</span><span class="pi">:</span> <span class="s2">"</span><span class="s">memory.db"</span>
+
+<span class="na">agents</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">assistant"</span>
+    <span class="na">model</span><span class="pi">:</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s2">"</span><span class="s">openai"</span>
+      <span class="na">model_name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">gpt-4"</span>
+      <span class="na">temperature</span><span class="pi">:</span> <span class="m">0.7</span>
+    <span class="na">instructions</span><span class="pi">:</span> <span class="s2">"</span><span class="s">You</span><span class="nv"> </span><span class="s">are</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">helpful</span><span class="nv"> </span><span class="s">assistant."</span>
+</code></pre></div></div>
+
+<h2 id="running-tests">Running Tests</h2>
+
+<p>To run the test suite:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pytest
+</code></pre></div></div>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<p>After installation, proceed to the <a href="../intro/quick-start.md">Quick Start Guide</a> to create your first agent application.</p>

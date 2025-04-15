@@ -1,0 +1,109 @@
+<h1 id="changelog">Changelog</h1>
+
+<p>All notable changes to the MUXI Framework will be documented in this file.</p>
+
+<p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
+and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+
+<h2 id="030---2023-09-10">[0.3.0] - 2023-09-10</h2>
+
+<h3 id="added">Added</h3>
+<ul>
+  <li><strong>Memory Architecture Migration</strong>: Migrated memory management from agent level to orchestrator level [Breaking Change]
+    <ul>
+      <li>Orchestrator-level memory management for centralized control</li>
+      <li>Memory sharing between agents for improved collaboration</li>
+      <li>Simplified configuration via constructor parameters</li>
+      <li>Updated documentation and examples</li>
+    </ul>
+  </li>
+  <li><strong>Knowledge Base</strong>: Enhanced agent-level knowledge storage and retrieval capabilities
+    <ul>
+      <li>Vector database support for semantic search</li>
+      <li>Efficient document indexing and retrieval</li>
+      <li>Support for multiple knowledge sources</li>
+    </ul>
+  </li>
+  <li><strong>Long-term Memory</strong>: Added persistent memory solutions
+    <ul>
+      <li>PostgreSQL with pgvector integration</li>
+      <li>SQLite with sqlite-vec support</li>
+      <li>Configurable retention policies</li>
+    </ul>
+  </li>
+  <li><strong>Multi-user Memory Support</strong>: Separated memory contexts for multiple users
+    <ul>
+      <li>User-specific knowledge and conversation history</li>
+      <li>Enhanced privacy and context management</li>
+    </ul>
+  </li>
+  <li><strong>User Context Memory</strong>: Added support for storing user-specific information
+    <ul>
+      <li>Profile data and preferences</li>
+      <li>Session state management</li>
+    </ul>
+  </li>
+  <li><strong>MCP Server Capabilities</strong>:
+    <ul>
+      <li>SSE-based server endpoint for MCP host integration</li>
+      <li>Tool discovery from agent capabilities</li>
+      <li>Authentication shared with REST API</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="changed">Changed</h3>
+<ul>
+  <li><strong>Configuration Format</strong>: Updated YAML/JSON configuration to support orchestrator-level memory</li>
+  <li><strong>API Signatures</strong>: Modified initialization procedures to use constructor parameters instead of setup methods</li>
+  <li><strong>Examples</strong>: Revamped all code examples to demonstrate the new memory architecture</li>
+  <li><strong>Documentation</strong>: Comprehensive update of all memory-related documentation</li>
+</ul>
+
+<h3 id="fixed">Fixed</h3>
+<ul>
+  <li>Memory isolation issues in multi-agent environments</li>
+  <li>Inefficient memory access patterns</li>
+  <li>Inconsistent user context handling</li>
+</ul>
+
+<h3 id="removed">Removed</h3>
+<ul>
+  <li>Agent-level memory configuration</li>
+  <li><code class="language-plaintext highlighter-rouge">Agent.setup_memory()</code> method (replaced with constructor parameters in Orchestrator)</li>
+  <li>Deprecated memory access patterns</li>
+</ul>
+
+<h2 id="020---2023-08-15">[0.2.0] - 2023-08-15</h2>
+
+<h3 id="added-1">Added</h3>
+<ul>
+  <li>Modular package structure for better organization</li>
+  <li>Enhanced CLI with interactive mode</li>
+  <li>Improved error handling and logging</li>
+</ul>
+
+<h3 id="changed-1">Changed</h3>
+<ul>
+  <li>Restructured import paths for better clarity</li>
+  <li>Refactored core components for better maintainability</li>
+</ul>
+
+<h3 id="fixed-1">Fixed</h3>
+<ul>
+  <li>Various stability issues</li>
+  <li>Performance bottlenecks in message routing</li>
+</ul>
+
+<h2 id="010---2023-07-01">[0.1.0] - 2023-07-01</h2>
+
+<h3 id="added-2">Added</h3>
+<ul>
+  <li>Initial release of MUXI Framework</li>
+  <li>Core agent system</li>
+  <li>Basic memory systems (short-term buffer)</li>
+  <li>OpenAI integration</li>
+  <li>Command line interface</li>
+  <li>MCP Client integration (HTTP+SSE)</li>
+  <li>MCP Client integration (Command)</li>
+</ul>
