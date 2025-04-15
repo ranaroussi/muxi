@@ -2,6 +2,17 @@
 
 > These rules define best practices for implementing and using memory systems
 
+## Orchestrator-Level Memory Management
+- Memory systems are initialized and managed at the orchestrator level, not at the agent level
+- Configure memory through the orchestrator constructor: `Orchestrator(buffer_memory=buffer, long_term_memory=long_term)`
+- For the muxi facade, configure memory in the constructor: `muxi(buffer_memory=50, long_term_memory="connection_string")`
+- Access memory through orchestrator methods: `orchestrator.search_memory()`, `orchestrator.add_to_buffer_memory()`
+- Agent constructor no longer accepts direct memory parameters
+- Memory is shared between agents through the orchestrator
+- Multi-user support is configured at the orchestrator level with `is_multi_user=True`
+- Configuration files should have memory at the top level, not within agent configurations
+- Agent instances access memory indirectly through their orchestrator reference
+
 ## Buffer Memory (Short-Term)
 - Use FAISS for efficient similarity search
 - Implement proper vector normalization
@@ -20,12 +31,12 @@
 
 ### Configuration Options
 - For simplified configuration, use direct connection string format:
-  - PostgreSQL: `long_term: "postgresql://user:password@localhost:5432/dbname"`
-  - SQLite: `long_term: "sqlite:///path/to/database.db"`
-  - Default SQLite: `long_term: true` (creates muxi.db in app root)
+  - PostgreSQL: `long_term_memory: "postgresql://user:password@localhost:5432/dbname"`
+  - SQLite: `long_term_memory: "sqlite:///path/to/database.db"`
+  - Default SQLite: `long_term_memory: true` (creates muxi.db in app root)
 - The system automatically detects database type based on the connection string prefix
 - Maintain backward compatibility with legacy configuration format
-- Use environment variables for connection strings in production: `long_term: "${DATABASE_URL}"`
+- Use environment variables for connection strings in production: `long_term_memory: "${DATABASE_URL}"`
 
 ### PostgreSQL with pgvector
 - Recommended for production and multi-user deployments
@@ -75,6 +86,7 @@
   - When using other PostgreSQL features
 
 ## Memobase (User-Aware Memory)
+- Configure multi-user support at orchestrator level: `orchestrator = Orchestrator(long_term_memory=memobase, is_multi_user=True)`
 - Properly partition memories by user_id
 - Implement access control for memories
 - Support cross-user memory sharing when appropriate
@@ -106,6 +118,7 @@
 - Prefer using standardized Python packages over custom binary extensions
 
 ## Memory Retrieval
+- Access memory through orchestrator: `orchestrator.search_memory(agent_id="assistant", query="...", k=3, threshold=0.7)`
 - Implement relevance scoring for retrieved memories
 - Support hybrid search (vector + keyword)
 - Implement proper ranking algorithms
@@ -132,6 +145,25 @@
 - Support memory collection during conversations
 - Implement feedback loops for memory relevance
 - Document memory integration patterns
+
+## Configuration File Patterns
+- Memory configuration belongs at the top level of YAML/JSON files, not within agent objects:
+```yaml
+# Good
+buffer_memory: 20
+long_term_memory: "postgresql://user:password@localhost:5432/muxi"
+agents:
+  - agent_id: "assistant"
+    model: ...
+
+# Bad
+agents:
+  - agent_id: "assistant"
+    model: ...
+    memory:  # Don't put memory here
+      buffer: 20
+      long_term: "postgresql://..."
+```
 
 ## Performance and Scalability
 - Optimize vector operations for performance
