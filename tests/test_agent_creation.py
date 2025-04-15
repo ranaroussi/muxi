@@ -119,6 +119,7 @@ def test_agent_creation():
     Agent(
         model=model,
         system_message="You are a test assistant.",
+        orchestrator=orchestrator  # Pass the orchestrator
     )
     print("Agent created successfully!\n")
 

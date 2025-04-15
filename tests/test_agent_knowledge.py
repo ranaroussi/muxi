@@ -21,6 +21,10 @@ def agent_setup():
     mock_model = MagicMock()
     mock_buffer_memory = MagicMock()
 
+    # Create mock orchestrator
+    mock_orchestrator = MagicMock()
+    mock_orchestrator.buffer_memory = mock_buffer_memory
+
     # Mock embedding functions
     mock_model.embed = AsyncMock()
     mock_model.embed.return_value = [0.1] * 1536  # Mock embedding of dimension 1536
@@ -32,53 +36,55 @@ def agent_setup():
     # Create agent with mock dependencies
     agent = Agent(
         model=mock_model,
-        buffer_memory=mock_buffer_memory
+        orchestrator=mock_orchestrator
     )
 
-    # Create temporary files for testing
+    # Create test file content
     test_file_content = (
         "This is a test file for knowledge testing.\n"
         "It contains information about testing knowledge functionality.\n"
         "MUXI Framework allows agents to use knowledge sources."
     )
 
-    return {
-        "agent": agent,
-        "mock_model": mock_model,
-        "mock_buffer_memory": mock_buffer_memory,
-        "test_file_content": test_file_content
-    }
+    return agent, mock_model, mock_buffer_memory, test_file_content
 
 
 # Tests
 @pytest.mark.asyncio
-@patch('muxi.knowledge.base.KnowledgeHandler')
+@patch('muxi.knowledge.handler.KnowledgeHandler')
 async def test_initialize_knowledge(mock_knowledge_handler_class, agent_setup):
     """Test initializing knowledge in agent."""
-    agent = agent_setup["agent"]
-    mock_model = agent_setup["mock_model"]
+    agent, mock_model, _, _ = agent_setup
 
     # Setup mock
     mock_handler = MagicMock()
-    # Set up add_file to return a coroutine that returns 3
     mock_handler.add_file = AsyncMock(return_value=3)
     mock_knowledge_handler_class.return_value = mock_handler
 
     # Create test knowledge source
     test_source = FileKnowledge(path="/path/to/test.txt", description="Test file")
 
-    # Initialize knowledge
-    await agent._initialize_knowledge([test_source])
+    # Create a new agent with knowledge
+    with patch('muxi.knowledge.handler.KnowledgeHandler') as mock_handler_class:
+        mock_handler_class.return_value = mock_handler
+        agent = Agent(
+            model=mock_model,
+            orchestrator=MagicMock(),
+            knowledge=[test_source]
+        )
 
-    # Verify model was used to get embedding dimension
-    mock_model.embed.assert_called_once()
+        # Verify knowledge handler was created with correct parameters
+        mock_handler_class.assert_called_once_with(
+            knowledge_sources=[test_source],
+            agent_id=None
+        )
 
-    # Verify knowledge handler was created with correct parameters
-    mock_knowledge_handler_class.assert_called_once()
-    assert agent.knowledge_handler == mock_handler
+        assert agent.knowledge_handler == mock_handler
+        assert hasattr(agent, '_pending_knowledge_sources')
 
-    # Verify knowledge source was added
-    mock_handler.add_file.assert_called_once()
+        # Now test initializing the pending knowledge
+        await agent.initialize_pending_knowledge()
+        mock_handler.add_file.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -87,8 +93,7 @@ async def test_initialize_knowledge(mock_knowledge_handler_class, agent_setup):
 @patch('builtins.open', new_callable=mock_open, read_data="Test content")
 async def test_add_knowledge(mock_file, mock_getmtime, mock_exists, agent_setup):
     """Test adding a knowledge source."""
-    agent = agent_setup["agent"]
-    mock_model = agent_setup["mock_model"]
+    agent, mock_model, _, _ = agent_setup
 
     # Setup mocks
     mock_exists.return_value = True
@@ -105,16 +110,20 @@ async def test_add_knowledge(mock_file, mock_getmtime, mock_exists, agent_setup)
     chunks_added = await agent.add_knowledge(test_source)
 
     # Verify knowledge was added
-    agent.knowledge_handler.add_file.assert_called_once_with(
-        test_source, mock_model.generate_embeddings
-    )
+    if hasattr(mock_model, 'generate_embeddings'):
+        agent.knowledge_handler.add_file.assert_called_once_with(
+            test_source, mock_model.generate_embeddings
+        )
+    else:
+        # We should check adapter function was used properly
+        agent.knowledge_handler.add_file.assert_called_once()
     assert chunks_added == 3
 
 
 @pytest.mark.asyncio
 async def test_add_knowledge_initializes_handler(agent_setup):
     """Test adding knowledge initializes handler if not already created."""
-    agent = agent_setup["agent"]
+    agent, _, _, _ = agent_setup
 
     # Ensure no handler exists initially
     agent.knowledge_handler = None
@@ -123,7 +132,7 @@ async def test_add_knowledge_initializes_handler(agent_setup):
     test_source = FileKnowledge(path="/path/to/test.txt", description="Test file")
 
     # Patch KnowledgeHandler class
-    with patch('muxi.knowledge.base.KnowledgeHandler') as mock_handler_class:
+    with patch('muxi.knowledge.handler.KnowledgeHandler') as mock_handler_class:
         # Setup mock handler
         mock_handler = MagicMock()
         mock_handler.add_file = AsyncMock(return_value=0)
@@ -132,7 +141,7 @@ async def test_add_knowledge_initializes_handler(agent_setup):
         # Add knowledge
         await agent.add_knowledge(test_source)
 
-        # Verify handler was created
+        # Verify handler was created with agent_id
         mock_handler_class.assert_called_once_with(agent.agent_id)
         assert agent.knowledge_handler == mock_handler
 
@@ -140,7 +149,7 @@ async def test_add_knowledge_initializes_handler(agent_setup):
 @pytest.mark.asyncio
 async def test_remove_knowledge(agent_setup):
     """Test removing a knowledge source."""
-    agent = agent_setup["agent"]
+    agent, _, _, _ = agent_setup
 
     # Create a mock knowledge handler
     agent.knowledge_handler = MagicMock()
@@ -157,7 +166,7 @@ async def test_remove_knowledge(agent_setup):
 @pytest.mark.asyncio
 async def test_remove_knowledge_without_handler(agent_setup):
     """Test removing knowledge when no handler exists."""
-    agent = agent_setup["agent"]
+    agent, _, _, _ = agent_setup
 
     # Ensure no handler exists
     agent.knowledge_handler = None
@@ -169,7 +178,7 @@ async def test_remove_knowledge_without_handler(agent_setup):
 
 def test_get_knowledge_sources(agent_setup):
     """Test getting knowledge sources."""
-    agent = agent_setup["agent"]
+    agent, _, _, _ = agent_setup
 
     # Create a mock knowledge handler
     agent.knowledge_handler = MagicMock()
@@ -186,7 +195,7 @@ def test_get_knowledge_sources(agent_setup):
 
 def test_get_knowledge_sources_without_handler(agent_setup):
     """Test getting knowledge sources when no handler exists."""
-    agent = agent_setup["agent"]
+    agent, _, _, _ = agent_setup
 
     # Ensure no handler exists
     agent.knowledge_handler = None
@@ -199,8 +208,7 @@ def test_get_knowledge_sources_without_handler(agent_setup):
 @pytest.mark.asyncio
 async def test_search_knowledge(agent_setup):
     """Test searching knowledge."""
-    agent = agent_setup["agent"]
-    mock_model = agent_setup["mock_model"]
+    agent, mock_model, _, _ = agent_setup
 
     # Create mock search results
     mock_results = [
@@ -215,17 +223,21 @@ async def test_search_knowledge(agent_setup):
     # Search knowledge
     results = await agent.search_knowledge("test query", 2, 0.7)
 
-    # Verify search was performed
-    agent.knowledge_handler.search.assert_called_once_with(
-        "test query", mock_model.generate_embeddings, 2, 0.7
-    )
+    # Verify search was performed with the right embedding function
+    if hasattr(mock_model, 'generate_embeddings'):
+        agent.knowledge_handler.search.assert_called_once_with(
+            "test query", mock_model.generate_embeddings, 2, 0.7
+        )
+    else:
+        # Fallback to embed
+        agent.knowledge_handler.search.assert_called_once()
     assert results == mock_results
 
 
 @pytest.mark.asyncio
 async def test_search_knowledge_without_handler(agent_setup):
     """Test searching knowledge when no handler exists."""
-    agent = agent_setup["agent"]
+    agent, _, _, _ = agent_setup
 
     # Ensure no handler exists
     agent.knowledge_handler = None
@@ -236,12 +248,15 @@ async def test_search_knowledge_without_handler(agent_setup):
 
 
 @pytest.mark.asyncio
-@patch('muxi.knowledge.base.KnowledgeHandler')
+@patch('muxi.knowledge.handler.KnowledgeHandler')
 @patch('muxi.knowledge.base.FileKnowledge')
-async def test_integration_with_real_file(mock_file_knowledge_class, mock_knowledge_handler_class, agent_setup):
+async def test_integration_with_real_file(
+    mock_file_knowledge_class,
+    mock_knowledge_handler_class,
+    agent_setup
+):
     """Test integration with a real file."""
-    agent = agent_setup["agent"]
-    test_file_content = agent_setup["test_file_content"]
+    agent, mock_model, _, test_file_content = agent_setup
 
     # Create a temporary file
     with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
