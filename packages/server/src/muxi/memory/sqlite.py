@@ -7,7 +7,6 @@ extension for vector similarity search.
 
 import json
 import os
-import platform
 import sqlite3
 import time
 from typing import (
@@ -17,142 +16,7 @@ from typing import (
 import numpy as np
 from loguru import logger
 
-# Try to import the sqlite_vec package, fall back to binary extensions if not available
-try:
-    import sqlite_vec
-    SQLITE_VEC_AVAILABLE = True
-except ImportError:
-    SQLITE_VEC_AVAILABLE = False
-    logger.warning(
-        "sqlite_vec package not available. Falling back to binary extensions."
-    )
-
 from muxi.server.memory.base import BaseMemory
-
-
-def load_sqlite_vec_extension(conn: sqlite3.Connection, base_dir="extensions"):
-    """
-    Load the sqlite-vec extension into a SQLite connection.
-
-    This is a legacy function kept for backward compatibility.
-    It's recommended to use the new Extension system instead:
-
-    ```
-    from muxi import use_extension
-    use_extension('sqlite-vec')
-
-    # or programmatically:
-    from muxi.core.extensions import SQLiteVecExtension
-    SQLiteVecExtension.init()
-    ```
-
-    When using the new system, load the extension with:
-    ```
-    from muxi.core.extensions import SQLiteVecExtension
-    SQLiteVecExtension.load_extension(conn)
-    ```
-    """
-    # Try to use the new extension system if available
-    try:
-        from muxi.core.extensions import SQLiteVecExtension
-        SQLiteVecExtension.load_extension(conn)
-        return
-    except ImportError:
-        # Fall back to the old method
-        logger.warning(
-            "SQLiteVecExtension not available, falling back to legacy loading"
-        )
-
-    conn.enable_load_extension(True)
-
-    # Try using the Python sqlite-vec package first
-    if SQLITE_VEC_AVAILABLE:
-        try:
-            sqlite_vec.load(conn)
-            logger.info("Loaded sqlite-vec extension using Python package")
-            return
-        except Exception as e:
-            logger.warning(
-                f"Failed to load sqlite-vec using Python package: {e}"
-            )
-            logger.warning("Falling back to binary extensions")
-
-    # Fall back to manual binary loading
-    system = platform.system()
-    machine = platform.machine().lower()
-
-    # Normalize architecture
-    if machine in ("x86_64", "amd64"):
-        arch = "x86_64"
-    elif machine in ("arm64", "aarch64"):
-        arch = "arm64"
-    else:
-        raise RuntimeError(f"Unsupported architecture: {machine}")
-
-    # Select file extension
-    ext_file = {
-        "Linux": "sqlite-vec.so",
-        "Darwin": "sqlite-vec.dylib",
-        "Windows": "sqlite-vec.dll"
-    }.get(system)
-
-    if not ext_file:
-        raise RuntimeError(f"Unsupported OS: {system}")
-
-    # Search for extension in multiple possible locations
-    possible_locations = [
-        # Primary location in packages/extensions/sqlite-vec
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            "..", "..", "..", "..",
-            "packages", "extensions", "sqlite-vec",
-            f"{arch}-{system.lower()}", ext_file
-        ),
-
-        # Alternative location in packages/extensions (flat structure)
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            "..", "..", "..", "..", "packages", "extensions",
-            f"{arch}-{system.lower()}", ext_file
-        ),
-
-        # Package installed location - within the package
-        os.path.join(
-            os.path.dirname(__file__), "..",
-            "extensions", "sqlite-vec",
-            f"{arch}-{system.lower()}", ext_file
-        ),
-
-        # Try absolute path if extensions_dir is an absolute path
-        os.path.join(
-            base_dir, "sqlite-vec",
-            f"{arch}-{system.lower()}", ext_file
-        ) if os.path.isabs(base_dir) else None
-    ]
-
-    # Filter out None values
-    possible_locations = [loc for loc in possible_locations if loc]
-
-    # Try each location
-    for ext_path in possible_locations:
-        if os.path.exists(ext_path):
-            try:
-                conn.load_extension(ext_path)
-                logger.info(f"Loaded sqlite-vec extension from: {ext_path}")
-                return
-            except sqlite3.OperationalError as e:
-                logger.warning(
-                    f"Failed to load extension from {ext_path}:"
-                    f" {e}"
-                )
-
-    # If we get here, all load attempts failed
-    error_msg = (
-        "SQLite-vec extension not found. "
-        "Tried Python package and binary locations."
-    )
-    logger.error(f"Locations tried: {possible_locations}")
-    raise FileNotFoundError(error_msg)
 
 
 class SQLiteMemory(BaseMemory):
@@ -196,14 +60,16 @@ class SQLiteMemory(BaseMemory):
         """Initialize the SQLite database with required tables."""
         conn = sqlite3.connect(self.db_path)
 
-        # Load sqlite-vec extension
-        # Try using the new extension system first
+        # Load sqlite-vec extension using the extension system
         try:
             from muxi.core.extensions import SQLiteVecExtension
             SQLiteVecExtension.load_extension(conn)
         except ImportError:
-            # Fall back to the legacy method
-            load_sqlite_vec_extension(conn, self.extensions_dir)
+            # If extension system not available, raise an error
+            raise ImportError(
+                "SQLiteVecExtension not available. Please install it with:"
+                " pip install muxi-extensions-sqlite-vec"
+            )
 
         # Create tables
         conn.execute("""
@@ -295,9 +161,6 @@ class SQLiteMemory(BaseMemory):
         # Convert numpy array to list if necessary
         if isinstance(embedding, np.ndarray):
             embedding = embedding.astype(np.float32)
-        elif SQLITE_VEC_AVAILABLE and isinstance(embedding, list):
-            # Use sqlite_vec.serialize_float32 for list embeddings when available
-            embedding = sqlite_vec.serialize_float32(embedding)
 
         # Use default collection if none specified
         collection = collection or self.default_collection
@@ -379,9 +242,6 @@ class SQLiteMemory(BaseMemory):
         # Convert numpy array to float32 if necessary
         if isinstance(query_embedding, np.ndarray):
             query_embedding = query_embedding.astype(np.float32)
-        elif SQLITE_VEC_AVAILABLE and isinstance(query_embedding, list):
-            # Use sqlite_vec.serialize_float32 for list embeddings when available
-            query_embedding = sqlite_vec.serialize_float32(query_embedding)
 
         # Build query
         query = """

@@ -6,24 +6,42 @@ It allows users to create and manage agents, start servers, and interact with
 the framework with minimal code, using configuration files instead of direct API calls.
 """
 
+from typing import Optional, Union
+
 from .facade import Muxi
+from muxi.server.memory.buffer import BufferMemory
+from muxi.server.memory.long_term import LongTermMemory
+from muxi.server.memory.memobase import Memobase
 
 __all__ = ["Muxi"]
 
 
-def muxi(db_connection_string=None):
+def muxi(
+    buffer_memory: Optional[Union[int, BufferMemory]] = None,
+    long_term_memory: Optional[Union[str, bool, LongTermMemory, Memobase]] = None,
+    credential_db_connection_string: Optional[str] = None
+):
     """
-    Create a new MUXI facade instance.
+    Create a new MUXI facade instance with memory configuration.
 
     Args:
-        db_connection_string: Optional database connection string.
-            If None, will be loaded from POSTGRES_DATABASE_URL environment variable
-            when needed (only if an agent with long-term memory is created).
+        buffer_memory: Optional buffer memory configuration.
+            Can be an integer (buffer size), a BufferMemory instance, or None.
+        long_term_memory: Optional long-term memory configuration.
+            Can be a connection string, a boolean (True for default SQLite),
+            an instance of LongTermMemory/Memobase, or None.
+        credential_db_connection_string: Optional database connection string for credential storage.
+            If None, will try to use the long_term_memory connection if it's a database string,
+            or fall back to POSTGRES_DATABASE_URL environment variable.
 
     Returns:
         Muxi: A new MUXI facade instance
     """
-    return Muxi(db_connection_string)
+    return Muxi(
+        buffer_memory=buffer_memory,
+        long_term_memory=long_term_memory,
+        credential_db_connection_string=credential_db_connection_string
+    )
 
 
 def use_extension(name, **kwargs):

@@ -12,16 +12,16 @@ from typing import Any, Dict, List, Optional
 class CredentialManager:
     """Manage credentials for MCP servers."""
 
-    def __init__(self, connection_string: Optional[str] = None):
+    def __init__(self, credential_db_connection_string: Optional[str] = None):
         """
         Initialize the credential manager.
 
         Args:
-            connection_string: Database connection string for credential storage
+            credential_db_connection_string: Database connection string for credential storage
                                (if None, only environment variables will be used)
         """
-        self.connection_string = connection_string
-        self.db_available = connection_string is not None
+        self.connection_string = credential_db_connection_string
+        self.db_available = credential_db_connection_string is not None
 
     def get_credential(
         self,
