@@ -145,6 +145,38 @@ class Orchestrator:
 
         return agent
 
+    def add_agent(
+        self,
+        agent: Agent,
+        set_as_default: bool = False,
+    ) -> Agent:
+        """
+        Add an existing agent to the orchestrator.
+
+        Args:
+            agent: The agent to add.
+            set_as_default: Whether to set this agent as the default.
+
+        Returns:
+            The created agent.
+        """
+        if agent.agent_id in self.agents:
+            raise ValueError(f"Agent with ID '{agent.agent_id}' already exists")
+
+        # Store the agent
+        self.agents[agent.agent_id] = agent
+
+        # Store description for routing
+        self.agent_descriptions[agent.agent_id] = agent.description or agent.system_message or ""
+
+        # Set as default if requested or if it's the first agent
+        if set_as_default or len(self.agents) == 1:
+            self.default_agent_id = agent.agent_id
+
+        logger.info(f"Created agent with ID '{agent.agent_id}'")
+
+        return agent
+
     # Memory access methods
 
     def add_to_buffer_memory(
