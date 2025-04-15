@@ -62,7 +62,7 @@ MUXI has a flexible, service-oriented approach:
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │
 │  ┌──────▼──────┐  ┌──────▼──────┐  ┌──────▼──────┐  │   ┌──────────────────┐
-│  │   Agent 1   │  │ A2A Handler │  │   Agent N   │------│ Domain Knowledge │
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │------│ Domain Knowledge │
 │  └───┬─────↑───┘  └──────↑──────┘  └───↑─────┬───┘  │   └──────────────────┘
 │      │     │             │             │     │      │
 │      │     │             ↓             │     │      │

@@ -39,7 +39,7 @@ MUXI is designed with a modular, extensible architecture that allows for flexibi
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │
 │  ┌──────▼──────┐  ┌──────▼──────┐  ┌──────▼──────┐  │   ┌──────────────────┐
-│  │   Agent 1   │  │ A2A Handler │  │   Agent N   │------│ Domain Knowledge │
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │------│ Domain Knowledge │
 │  └───┬─────↑───┘  └──────↑──────┘  └───↑─────┬───┘  │   └──────────────────┘
 │      │     │             │             │     │      │
 │      │     │             ↓             │     │      │
