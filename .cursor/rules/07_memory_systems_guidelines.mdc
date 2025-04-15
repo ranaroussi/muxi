@@ -5,13 +5,62 @@
 ## Orchestrator-Level Memory Management
 - Memory systems are initialized and managed at the orchestrator level, not at the agent level
 - Configure memory through the orchestrator constructor: `Orchestrator(buffer_memory=buffer, long_term_memory=long_term)`
-- For the muxi facade, configure memory in the constructor: `muxi(buffer_memory=50, long_term_memory="connection_string")`
+- For the muxi facade, configure memory in the constructor: `muxi(buffer_memory=50, long_term_memory="connection_string", config_file="config.yaml")`
 - Access memory through orchestrator methods: `orchestrator.search_memory()`, `orchestrator.add_to_buffer_memory()`
 - Agent constructor no longer accepts direct memory parameters
 - Memory is shared between agents through the orchestrator
-- Multi-user support is configured at the orchestrator level with `is_multi_user=True`
-- Configuration files should have memory at the top level, not within agent configurations
+- Multi-user support is configured at the orchestrator level with Memobase
+- Configuration files should have agents in an array at the top level, not as separate files
 - Agent instances access memory indirectly through their orchestrator reference
+- All memory operations should include agent_id when filtering is needed
+
+## Memory Configuration
+
+### Declarative Configuration
+- Memory is configured at initialization time, not through setup methods:
+  ```python
+  app = muxi(
+      buffer_memory=10,
+      long_term_memory="postgresql://user:pass@localhost/db",
+      config_file="configs/muxi_config.yaml"
+  )
+  ```
+
+- Configuration files should define multiple agents in a single file:
+  ```yaml
+  # configs/muxi_config.yaml
+  agents:
+    - agent_id: assistant1
+      description: "..."
+      model: { ... }
+    - agent_id: assistant2
+      description: "..."
+      model: { ... }
+  ```
+
+### Programmatic Configuration
+- Initialize memory components first:
+  ```python
+  buffer = BufferMemory(15)
+  long_term = LongTermMemory(connection_string="...")
+  ```
+
+- Create orchestrator with memory:
+  ```python
+  orchestrator = Orchestrator(
+      buffer_memory=buffer,
+      long_term_memory=long_term
+  )
+  ```
+
+- Create agents through orchestrator:
+  ```python
+  orchestrator.create_agent(
+      agent_id="assistant",
+      description="...",
+      model=model  # No memory parameters
+  )
+  ```
 
 ## Buffer Memory (Short-Term)
 - Use FAISS for efficient similarity search
@@ -70,20 +119,37 @@
 
 ## Vector Database Selection Guidelines
 - Use SQLite with sqlite-vec for:
-  - Local development
+  - Local development and testing
   - Single-user applications
-  - Edge computing
-  - Serverless functions
-  - Deployments with resource constraints
+  - Edge computing and resource-constrained environments
   - Situations where a simple file-based database is preferred
+  - Rapid prototyping and proof-of-concept projects
 
 - Use PostgreSQL with pgvector for:
   - Production environments
   - Multi-user applications
   - High-throughput systems
-  - Situations requiring horizontal scaling
   - Enterprise deployments with high availability requirements
-  - When using other PostgreSQL features
+  - Scenarios requiring horizontal scaling
+
+## Multi-User Memory Best Practices
+- Always use PostgreSQL for multi-user applications
+- Enable multi-user support through Memobase:
+  ```python
+  # Create Memobase for multi-user support
+  long_term_memory = LongTermMemory(connection_string="postgresql://...")
+  memobase = Memobase(long_term_memory=long_term_memory)
+
+  # Initialize orchestrator with multi-user memory
+  orchestrator = Orchestrator(
+      buffer_memory=buffer,
+      long_term_memory=memobase
+  )
+  ```
+- Always include user_id when working with user-specific data
+- Handle user privacy and data isolation appropriately
+- Implement proper authentication and authorization for user data access
+- Consider data retention policies for user-specific memories
 
 ## Memobase (User-Aware Memory)
 - Configure multi-user support at orchestrator level: `orchestrator = Orchestrator(long_term_memory=memobase, is_multi_user=True)`
