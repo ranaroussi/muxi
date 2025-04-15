@@ -27,12 +27,17 @@ The current development focus is on implementing the complete REST API as define
    - Created dedicated `start_mcp()` function for standalone MCP server usage
    - Ensured no direct imports from `__main__.py` files (only through package exports)
 
-2. **Memory Configuration Simplification**:
-   - Simplified long-term memory configuration with direct connection string format
-   - Added support for both `postgresql://` URLs and `sqlite:///` paths in config
-   - Enhanced backward compatibility with legacy configuration format
-   - Made muxi.db in the app's root directory the default when using `long_term: true`
-   - Updated all documentation and test configurations to reflect the new format
+2. **Memory Architecture Migration**:
+   - Moved memory systems from agent level to orchestrator level for centralized management
+   - Orchestrator now owns and manages all memory systems (buffer and long-term)
+   - Agent constructor no longer accepts direct memory parameters
+   - Simplified memory configuration in muxi constructor: `muxi(buffer_memory=50, long_term_memory="connection_string")`
+   - Memory operations now exposed through orchestrator: `orchestrator.search_memory()`, `orchestrator.add_to_buffer_memory()`
+   - Support for Postgres and SQLite via direct connection strings: `"postgresql://..."` or `"sqlite:///..."`
+   - Default SQLite database in app's root directory when using `long_term_memory=True`
+   - Enhanced support for multi-user environments with `is_multi_user=True` parameter at orchestrator level
+   - Improved memory sharing across multiple agents for better context consistency
+   - Simplified configuration files by moving memory to top-level parameters
 
 3. **SQLite Vector Integration**:
    - Added support for sqlite-vec Python package for vector similarity search

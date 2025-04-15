@@ -13,14 +13,18 @@ The following components of the MUXI Framework have been successfully implemente
    - ✅ Agent-level knowledge base
 
 2. **Memory Systems**:
+   - ✅ Orchestrator-level memory management (buffer and long-term)
    - ✅ Buffer memory using FAISS for short-term context
    - ✅ Long-term memory using PostgreSQL with pgvector
    - ✅ Long-term memory using SQLite with sqlite-vec for local deployments
    - ✅ Simplified configuration with direct connection string format (postgresql://, sqlite:///)
    - ✅ Automatic detection of database type from connection string
-   - ✅ Default SQLite database in app's root directory when using `long_term: true`
+   - ✅ Default SQLite database in app's root directory when using `long_term_memory: true`
    - ✅ Memobase system for multi-user memory partitioning
    - ✅ Context memory for user-specific structured information
+   - ✅ Centralized memory access through orchestrator methods
+   - ✅ Memory sharing between multiple agents
+   - ✅ Removal of agent-level memory parameters and properties
 
 3. **MCP Server Integration**:
    - ✅ MCP handler for communication with external services
@@ -36,11 +40,15 @@ The following components of the MUXI Framework have been successfully implemente
    - ✅ Intelligent message routing
    - ✅ Agent description handling
    - ✅ Automatic caching of routing decisions
+   - ✅ Centralized memory management
+   - ✅ Memory access methods and operations
+   - ✅ Multi-user support with user context partitioning
 
 5. **Configuration System**:
    - ✅ YAML and JSON configuration files
    - ✅ Environment variable substitution
    - ✅ Validation of configuration parameters
+   - ✅ Orchestrator-level memory configuration
 
 6. **Communication**:
    - ✅ Basic REST API for agent interactions
@@ -198,7 +206,6 @@ The following components are partially implemented or planned for future develop
 3. **Continuous Integration**:
    - ⏳ GitHub Actions workflows
    - ⏳ Automatic version bumping
-   - ⏳ Release management
 
 ### 10. Language-Specific SDKs
 

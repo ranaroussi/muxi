@@ -93,12 +93,16 @@ This document outlines the technical context of the MUXI Framework, including te
 # LLM API Keys
 OPENAI_API_KEY=your_openai_key_here
 
-# Database Configuration
+# Database Configuration - Orchestrator Level Memory
+# Use PostgreSQL for production/multi-user deployments
 POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
-# Or use SQLite
-USE_LONG_TERM_MEMORY=sqlite:///path/to/memory.db
+# Or use SQLite for local/single-user deployments
+BUFFER_MEMORY_SIZE=50
+LONG_TERM_MEMORY=sqlite:///path/to/memory.db
 # Or just enable with default SQLite in app's root directory
-USE_LONG_TERM_MEMORY=true
+LONG_TERM_MEMORY=true
+# For multi-user support
+IS_MULTI_USER=true
 
 # MCP Configurations
 MCP_WEATHER_API_KEY=your_weather_api_key
@@ -135,7 +139,7 @@ API_KEY=your_api_key_here
      ```
    - Set appropriate environment variables to use SQLite:
      ```
-     USE_LONG_TERM_MEMORY=sqlite:///path/to/memory.db
+     LONG_TERM_MEMORY=sqlite:///path/to/memory.db
      ```
 
 ### Running Tests
@@ -248,9 +252,6 @@ sphinx-rtd-theme>=1.3.0
 
 ```
 anthropic>=0.5.0    # For Anthropic LLM provider
-google-generativeai>=0.2.0  # For Gemini LLM provider
-pillow>=10.0.0     # For image processing
-pytest-xdist>=3.3.1  # For parallel testing
 ```
 
 ## API Dependencies

@@ -95,7 +95,7 @@ External tool integration follows the Model Context Protocol (MCP) standard, wit
 
 The memory system is split into:
 - **Buffer Memory**: Short-term memory for immediate context (using FAISS for vector similarity)
-- **Long-Term Memory**: Persistent storage using PostgreSQL with pgvector
+- **Long-Term Memory**: Persistent storage using PostgreSQL with pgvector or SQLite with sqlite-vec
 - **User Partitioning**: Memory segregation for multi-user support
 
 ## Design Patterns in Use
@@ -184,20 +184,28 @@ Used for operation encapsulation:
 - **Routes** messages to appropriate Agents
 - **Manages** global configuration
 - **Exposes** a public API for client interaction
+- **Owns and manages** memory systems (Buffer and Long-Term Memory)
+- **Provides** memory access methods to agents
+- **Maintains** centralized memory management
+- **Handles** multi-user memory partitioning
 
 ### Agent Relationships
 
 - **Uses** a Model for LLM interaction
-- **Manages** Buffer Memory for short-term context
-- **Optionally uses** Long-Term Memory for persistent storage
+- **Accesses** memory through the Orchestrator
+- **Does not own** memory systems directly
 - **Connects to** MCP Servers via MCP Handler
 - **Maintains** a Knowledge Base for domain knowledge
 
 ### Memory System Relationships
 
-- **Buffer Memory serves** immediate context to Agents
-- **Long-Term Memory provides** historical context to Agents
+- **Owned by** the Orchestrator, not individual Agents
+- **Buffer Memory provides** immediate context to Agents through the Orchestrator
+- **Long-Term Memory stores** historical context that Agents access via Orchestrator
+- **Memory is configured** at the Orchestrator level
+- **Memory is shared** across multiple Agents when appropriate
 - **Memory is partitioned by** user_id for multi-user support
+- **Memory operations** (add, search, clear) are exposed via the Orchestrator
 
 ### MCP Handler Relationships
 
