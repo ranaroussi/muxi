@@ -5,39 +5,39 @@
           │
           │  (API/SSE/WS)
           │
-┌─────────│───────────────────────────────────────────────┐
-│         │    MUXI Server (Local/Remote)                 │
-│         │                                               │
-│         │        ┌───────────────┐                      │
-│         └───────&gt;│  Orchestrator │&lt;─────────────────┐   │
-│                  └───────┬───────┘                  │   │
-│         ┌────────────────┼────────────────┐         │   │
-│         │                │                │         │   │
-│         ▼                ▼                ▼         │   │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │   │   ┌───────────┐
-│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │----------│ Knowledge │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │   │   └───────────┘
-│         │                │                │         │   │
-│         ↓                ↓                ↓         │   │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │   │
-│  │ A2A Handler │  │ A2A Handler │  │ A2A Handler │  │   │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │   │
-│         ↓                ↓                ↓         │   │
-│         └────────┬───────┴────────────────┘         │   │
-│                  ↓                                  │   │
-│           ┌──────┴──────┐  ┌─────────────┐          │   │
-│           │ MCP Handler │  │   Memory    │&lt;─────────┘   │
-│           └──────┬──────┘  └─────────────┘              │
-└──────────────────│──────────────────────────────────────┘
+┌─────────│──────────────────────────────────────────────┐
+│         │    MUXI Server (Local/Remote)                │
+│         │                                              │
+│         │        ┌───────────────┐                     │
+│         └───────&gt;│  Orchestrator │&lt;─────────────────┐  │
+│                  └───────┬───────┘                  │  │
+│         ┌────────────────┼────────────────┐         │  │
+│         │                │                │         │  │
+│         ▼                ▼                ▼         │  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │  │   ┌───────────┐
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │---------│ Knowledge │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │  │   └───────────┘
+│         │                │                │         │  │
+│         ↓                ↓                ↓         │  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │  │
+│  │ A2A Handler │  │ A2A Handler │  │ A2A Handler │  │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │  │
+│         ↓                ↓                ↓         │  │
+│         └────────┬───────┴────────────────┘         │  │
+│                  ↓                                  │  │
+│           ┌──────┴──────┐  ┌─────────────┐          │  │
+│           │ MCP Handler │  │   Memory    │&lt;─────────┘  │
+│           └──────┬──────┘  └─────────────┘             │
+└──────────────────│─────────────────────────────────────┘
                    │
                    │ (gRPC/HTTP)
                    ▼
-┌─────────────────────────────────────────────────────────┐
-│                MCP Servers (via Command/SSE)            │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
-│  │   Weather   │    │  Web Search │    │     ....    │  │
-│  └─────────────┘    └─────────────┘    └─────────────┘  │
-└─────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│                MCP Servers (via Command/SSE)           │
+│  ┌─────────────┐    ┌─────────────┐    ┌────────────┐  │
+│  │   Weather   │    │  Web Search │    │     ...    │  │
+│  └─────────────┘    └─────────────┘    └────────────┘  │
+└────────────────────────────────────────────────────────┘
 </code></pre></div></div> <h2 id="core-components"> <a href="#core-components" class="anchor-heading" aria-labelledby="core-components"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Core Components </h2> <h3 id="1-server-layer"> <a href="#1-server-layer" class="anchor-heading" aria-labelledby="1-server-layer"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 1. Server Layer </h3> <p>The Server layer is the entry point for all external communication with the framework:</p> <ul> <li><strong>REST API</strong>: Endpoints for agent management, chat operations, and memory interactions</li> <li><strong>WebSocket Server</strong>: Real-time, bidirectional communication for streaming responses</li> <li><strong>Web App</strong>: Frontend interface for visual interaction</li> <li><strong>CLI</strong>: Command-line interface for text-based interaction</li> </ul> <h3 id="2-orchestrator"> <a href="#2-orchestrator" class="anchor-heading" aria-labelledby="2-orchestrator"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 2. Orchestrator </h3> <p>The Orchestrator is the central coordinator that:</p> <ul> <li>Manages the lifecycle of all agents in the system</li> <li>Routes messages to the appropriate agent</li> <li>Handles agent creation, configuration, and removal</li> <li>Provides a unified interface for all client applications</li> </ul> <h3 id="3-agents"> <a href="#3-agents" class="anchor-heading" aria-labelledby="3-agents"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 3. Agents </h3> <p>Agents are the intelligent entities that process information and produce responses:</p> <ul> <li>Integrate with a specific LLM provider</li> <li>Maintain their own memory systems</li> <li>Access MCP servers for extended capabilities</li> <li>Process messages according to their system instructions</li> </ul> <h3 id="4-model-context-protocol-mcp"> <a href="#4-model-context-protocol-mcp" class="anchor-heading" aria-labelledby="4-model-context-protocol-mcp"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 4. Model Context Protocol (MCP) </h3> <p>The MCP is a standardized communication layer between agents and external services:</p> <ul> <li>Provides a consistent interface for integrating external functionality</li> <li>Handles specialized message formatting</li> <li>Manages request/response parsing and serialization</li> <li>Supports function execution and result handling</li> </ul> <h3 id="5-memory-systems"> <a href="#5-memory-systems" class="anchor-heading" aria-labelledby="5-memory-systems"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 5. Memory Systems </h3> <p>MUXI includes a sophisticated memory architecture:</p> <ul> <li><strong>Buffer Memory</strong>: Short-term contextual memory for conversation flow</li> <li><strong>Long-Term Memory</strong>: Persistent storage of important information <ul> <li><strong>PostgreSQL with pgvector</strong>: For production and multi-user applications</li> <li><strong>SQLite with sqlite-vec</strong>: For local development and single-user applications</li> </ul> </li> <li><strong>Memobase</strong>: Multi-user aware memory system that partitions by user ID</li> </ul> <h3 id="6-mcp-servers"> <a href="#6-mcp-servers" class="anchor-heading" aria-labelledby="6-mcp-servers"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> 6. MCP Servers </h3> <p>MCP Servers provide extended functionality to agents:</p> <ul> <li>Implement standardized MCP protocol</li> <li>Can be deployed separately from the main application</li> <li>Provide specialized services like weather data, web search, etc.</li> <li>Can be implemented in any language that supports HTTP</li> </ul> <h2 id="modular-package-structure"> <a href="#modular-package-structure" class="anchor-heading" aria-labelledby="modular-package-structure"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Modular Package Structure </h2> <p>The MUXI framework is organized into a modular monorepo structure with multiple packages:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>muxi-framework/
 ├── packages/
 │   ├── core/          # Core components: agents, memory, MCP interface
