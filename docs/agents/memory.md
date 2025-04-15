@@ -33,17 +33,13 @@ Buffer memory is a short-term memory system that stores recent conversation hist
 
 ```json
 {
-  "agents": [
-    {
-      "agent_id": "assistant",
-      "description": "A helpful assistant with short-term memory for conversations.",
-      "model": {
+    "agent_id": "assistant",
+    "description": "A helpful assistant with short-term memory for conversations.",
+    "model": {
         "provider": "openai",
         "api_key": "${OPENAI_API_KEY}",
         "model": "gpt-4o"
-      }
     }
-  ]
 }
 ```
 
