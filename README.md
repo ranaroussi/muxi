@@ -1,11 +1,17 @@
-# MUXI Framework
+<img src="icon.svg" width="64" alt="MUXI.ai logo" />
 
-> The MUXI Framework is a versatile Python framework for building AI agents and Multi-Agent systems.
+# MUXI.ai
 
-MUXI Framework is a powerful platform for building AI agents with memory, MCP server integration, and real-time communication capabilities. It provides a solid foundation for creating advanced AI applications through a unified architecture that integrates multiple interfaces.
+[📚 Read the whitepaper](WHITEPAPER.md) &nbsp;│&nbsp; [⭐️ Star this repo](https://github.com/ranaroussi/muxi/stargazers)
+
+MUXI is an ambitious project that provides a powerful, open-source framework for building multi-AI-agent systems with sophisticated orchestration capabilities.
+
+MUXI delivers persistent memory, standardized communication protocols, and chain-of-thought tracing, while seamlessly integrating multiple interfaces including CLI, API/WS, Web UI, MCP, and WebRTC.
+
+The stated goal is to offer a comprehensive platform that will serve as a solid foundation for developers seeking to create advanced AI applications with real-time communication and MCP server integration, enabling complex agent interactions within a modular, extensible environment.
 
 > [!TIP]
-> This project is a work in progress and is not yet ready for production use. Please read the [whitepaper](WHITEPAPER.md) to learn "everything" about this project.
+> Make sure to [📚 read the whitepaper](WHITEPAPER.md) to learn "everything" about this project, and to [⭐️ star this repo](https://github.com/ranaroussi/muxi/stargazers) so you can follow its development.
 
 ## Features
 
