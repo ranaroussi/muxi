@@ -91,9 +91,59 @@ The framework employs a modular architecture, allowing developers to utilize onl
 
 This model-agnostic approach ensures organizations can optimize for performance, compliance, and cost while remaining adaptable as the LLM ecosystem evolves.
 
-![](media/image3.png){width="6.377952755905512in"
-height="3.003578302712161in"}
+```mermaid
+flowchart TB
+    subgraph Interfaces
+        direction TB
+        CLI["CLI"]
+        API_WS["API+WS"]
+        WebUI["WebUI"]
+        MCP_Host["MCP Host"]
+        WebRTC["WebRTC"]
+        SDKs["SDKs"]
+    end
 
+    subgraph Orchestrator
+        direction LR
+        subgraph Right ["Actions"]
+            direction LR
+            A2A["A2A"]
+            Agents["Agents"]
+            MCP_Handler["MCP Handler"]
+        end
+        subgraph Left ["Core"]
+            direction LR
+            Memory["Memory"]
+            Security["Security"]
+            Observability["Observability"]
+        end
+    end
+
+    subgraph Third_Party_Services["Third-party Services"]
+        direction TB
+        subgraph LLMs["LLMs"]
+            direction TB
+            OpenAI["OpenAI"]
+            Gemini["Gemini"]
+            Anthropic["ANTHROPIC"]
+            XI["XI"]
+            Hugging_Face["🤗"]
+            Meta["Meta"]
+        end
+
+        subgraph Service_Types["via MCP"]
+            direction TB
+            Tools["Tools"]
+            APIs["APIs"]
+        end
+    end
+
+    Interfaces --- Orchestrator
+    Orchestrator --- Third_Party_Services
+    Right --- Left
+    A2A --- Agents --- MCP_Handler
+    Memory --- Security --- Observability
+```
 Figure 1: Framework layered architecture
 
 
