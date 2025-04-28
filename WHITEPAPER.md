@@ -13,6 +13,9 @@
 
 ---
 
+> [!TIP]
+> You can download the whitepaper as a PDF [here](MUXI-Whitepaper.pdf).
+
 ## Executive Summary
 
 This white paper introduces MUXI, an open-source framework addressing the limitations of traditional AI-agent systems. MUXI enables the development of sophisticated agent swarms through an orchestration layer, tiered memory architecture, standardized communication protocols, and flexible deployment options.
