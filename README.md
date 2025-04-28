@@ -39,7 +39,7 @@ MUXI Framework is a powerful platform for building AI agents with memory, MCP se
 - 🔄 **Hybrid Communication Protocol**: HTTP for standard requests, SSE for streaming, WebSockets for multi-modal
 - 📝 **Declarative Configuration**: Define agents using YAML or JSON files with minimal code
 - 🚀 **Modular Architecture**: Use only the components you need
-- 🌍 **Language-Specific SDKs** (Coming in v0.5.0): Client libraries for TypeScript/JavaScript, Go, and more
+- 🌍 **Language-Specific SDKs**: Client libraries for TypeScript/JavaScript, Go, and more
 
 ## Technical Details
 
