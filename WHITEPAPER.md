@@ -14,7 +14,7 @@
 ---
 
 > [!TIP]
-> You can download the whitepaper as a PDF [here](MUXI-Whitepaper.pdf).
+> **[Download the whitepaper as a PDF here ›](MUXI-Whitepaper.pdf)**
 
 ## Executive Summary
 
