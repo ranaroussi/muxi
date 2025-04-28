@@ -2,7 +2,7 @@
 
 ## A modular, open-source framework for building multi-AI-agent systems orchestration with persistent memory, standardized communication protocols, and chain-of-thought tracing
 
-### White Paper - May 2025
+### April 2025
 
 **Author**: Ran Aroussi <ran@aroussi.com>
 
