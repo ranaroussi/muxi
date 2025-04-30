@@ -21,6 +21,7 @@ The memory system is a key component that enables agents to maintain context ove
 - [Long-Term Memory](long-term) - Persistent storage of important information
 - [Multi-User Memory (Memobase)](memobase) - Partitioning memory by user
 - [Domain Knowledge](domain-knowledge) - Structured knowledge integration
+- [Automatic User Information Extraction](user-extraction) - Extracting and storing important user information
 
 ## Prerequisites
 
@@ -38,6 +39,7 @@ MUXI's memory system includes several key technical features:
 - PostgreSQL with pgvector for long-term storage
 - Efficient buffer management with automatic summarization
 - Memory partitioning for multi-user scenarios
+- Automatic extraction of important user information
 
 ## Related Topics
 

@@ -397,6 +397,79 @@ user_2_question = orchestrator.chat(
 print(f"User 2 response: {user_2_question}")  # Should mention painting
 ```
 
+## Automatic User Information Extraction
+
+MUXI includes a built-in automatic user information extraction system that can identify and remember important information about users from conversations.
+
+{: .note }
+> Automatic extraction is enabled by default and requires no additional code for basic functionality. Privacy controls ensure responsible data management.
+
+### How It Works
+
+The system works by analyzing conversations between users and agents, identifying key facts, preferences, and characteristics. This information is then stored in the user's context memory, making it available for future interactions.
+
+When a user mentions something important about themselves (like preferences, location, or occupation), the agent will automatically remember this information and use it to personalize future interactions.
+
+### Basic Configuration
+
+You can explicitly enable or disable the extraction system:
+
+<h4>Declarative way</h4>
+
+```python
+# Enable automatic extraction
+app = muxi(
+    buffer_memory=15,
+    long_term_memory="postgresql://user:pass@localhost/db",
+    auto_extract_user_info=True,  # Explicitly enable extraction
+    config_file="configs/muxi_config.yaml"
+)
+```
+
+<h4>Programmatic way</h4>
+
+```python
+# Initialize orchestrator with extraction enabled
+orchestrator = Orchestrator(
+    buffer_memory=buffer,
+    long_term_memory=long_term_memory,
+    auto_extract_user_info=True  # Explicitly enable extraction
+)
+```
+
+### Example
+
+This feature enables agents to automatically remember important user information:
+
+```python
+# First conversation
+await app.chat(
+    "assistant",
+    "I'm Alex, a software developer from San Francisco. I enjoy React and TypeScript.",
+    user_id="user_123"
+)
+
+# In a later conversation, the agent remembers this information
+response = await app.chat(
+    "assistant",
+    "What would you recommend for building a new web project?",
+    user_id="user_123"
+)
+# The agent might incorporate knowledge about the user's location, profession,
+# and technology preferences (React, TypeScript) in its response
+```
+
+### Advanced Usage
+
+For more detailed information about the extraction system, including:
+- Advanced configuration options
+- Privacy controls and user opt-out
+- Using specialized extraction models
+- Configuring extraction thresholds
+- Accessing and managing extracted information
+
+See the [Automatic User Information Extraction](../technical/memory/user-extraction) technical documentation.
+
 ## Database Technical Details
 
 ### SQLite with sqlite-vec
