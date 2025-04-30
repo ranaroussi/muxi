@@ -62,6 +62,12 @@ class Memobase:
             The ID of the newly created memory entry.
         """
         user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return dummy ID for anonymous users
+            return 0
+
         metadata = metadata or {}
 
         # Add user_id to metadata
@@ -103,32 +109,32 @@ class Memobase:
         collection: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Search for relevant content in memory for a specific user.
+        Search for similar content in memory for a specific user.
 
         Args:
-            query: The query to search for (used if query_embedding not
-                provided).
-            query_embedding: Optional pre-computed embedding for the query.
-            limit: The maximum number of results to return.
+            query: The text query to search for.
+            query_embedding: Optional pre-computed embedding.
+            limit: Maximum number of results to return.
             user_id: The user ID to search memory for. If None, uses the
                 default user.
-            additional_filter: Additional metadata filters to apply to the
-                search.
-            collection: Optional collection name to search in.
-                If None, uses the default user collection.
+            additional_filter: Optional additional metadata filter.
+            collection: Optional collection name to search in. If None, uses
+                the default collection for the user.
 
         Returns:
-            A list of dictionaries containing the retrieved content and
-            metadata.
+            A list of memory entries, ordered by relevance.
         """
         user_id = user_id if user_id is not None else self.default_user_id
 
-        # Create filter for user_id
-        filter_metadata = {"user_id": user_id}
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return empty results for anonymous users
+            return []
 
-        # Add any additional filters
-        if additional_filter:
-            filter_metadata.update(additional_filter)
+        additional_filter = additional_filter or {}
+
+        # Add user_id to filter
+        additional_filter["user_id"] = user_id
 
         # Create a collection name based on the user ID if not provided
         if collection is None:
@@ -139,7 +145,7 @@ class Memobase:
             self.long_term_memory.search,
             query=query,
             query_embedding=query_embedding,
-            filter_metadata=filter_metadata,
+            filter_metadata=additional_filter,
             k=limit,
             collection=collection,
         )
@@ -169,6 +175,11 @@ class Memobase:
                 default user.
         """
         user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # No-op for anonymous users
+            return
 
         # Create a collection name based on the user ID
         collection = f"user_{user_id}"
@@ -204,6 +215,11 @@ class Memobase:
             A list of memory entries.
         """
         user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return empty list for anonymous users
+            return []
 
         # Create a collection name based on the user ID
         collection = f"user_{user_id}"
@@ -244,6 +260,12 @@ class Memobase:
             List of memory IDs for the added knowledge items.
         """
         user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return empty list for anonymous users
+            return []
+
         knowledge = knowledge or {}
         memory_ids = []
 
@@ -309,6 +331,12 @@ class Memobase:
             and values are the corresponding information.
         """
         user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return empty dictionary for anonymous users
+            return {}
+
         collection_name = f"{self.CONTEXT_MEMORY_COLLECTION}_{user_id}"
 
         # Check if collection exists
@@ -436,6 +464,12 @@ class Memobase:
             True if the operation was successful, False otherwise.
         """
         user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return success for anonymous users (no-op)
+            return True
+
         collection_name = f"{self.CONTEXT_MEMORY_COLLECTION}_{user_id}"
 
         if keys:
