@@ -4,7 +4,7 @@
 
 The current development focus is on implementing the complete REST API as defined in the `.context/scratchpad/api.md` specification file. This involves standardizing all API endpoints, implementing authentication, error handling, and ensuring proper documentation. This work is considered high priority as it forms the foundation for client applications to interact with the MUXI Framework.
 
-Additionally, we're preparing to implement automatic user information extraction from conversations, a significant enhancement to the context memory system. This feature will allow agents to identify and store important user information without requiring explicit code.
+Additionally, we're refining the automatic user information extraction system in MUXI by centralizing the extraction logic at the Orchestrator level rather than handling it in the Agent.
 
 ### Primary Areas of Focus
 
@@ -22,7 +22,17 @@ Additionally, we're preparing to implement automatic user information extraction
 
 ### Major Changes
 
-1. **Package Organization and Import Cleanup**:
+1. **Centralized MCP Service Implementation**:
+   - Implemented a centralized MCPService as a singleton for managing all MCP server connections
+   - Created a dedicated ToolParser to handle various tool call formats in LLM responses
+   - Updated Agent class to use the centralized service for MCP server interactions
+   - Removed direct MCP handler dependency from Agent in favor of the shared service
+   - Added server_id to MCPServer for consistent identification
+   - Implemented thread-safe tool invocation with locks for concurrent access
+   - Improved error handling with consistent patterns throughout MCP interactions
+   - Added the ability to customize request timeout at various levels: Orchestrator, Agent, and per-request
+
+2. **Package Organization and Import Cleanup**:
    - Moved functionality from `__main__.py` files to dedicated modules
    - Improved import patterns with clean exports from package `__init__.py` files
    - Renamed `run_api_server()` to `run_server()` to reflect multi-purpose nature
@@ -30,7 +40,7 @@ Additionally, we're preparing to implement automatic user information extraction
    - Created dedicated `start_mcp()` function for standalone MCP server usage
    - Ensured no direct imports from `__main__.py` files (only through package exports)
 
-2. **Memory Architecture Migration**:
+3. **Memory Architecture Migration**:
    - Moved memory systems from agent level to orchestrator level for centralized management
    - Orchestrator now owns and manages all memory systems (buffer and long-term)
    - Agent constructor no longer accepts direct memory parameters
@@ -42,7 +52,7 @@ Additionally, we're preparing to implement automatic user information extraction
    - Improved memory sharing across multiple agents for better context consistency
    - Simplified configuration files by moving memory to top-level parameters
 
-3. **SQLite Vector Integration**:
+4. **SQLite Vector Integration**:
    - Added support for sqlite-vec Python package for vector similarity search
    - Simplified extensions handling by using Python package instead of binary extensions
    - Reorganized extension directory structure to improve clarity and maintainability
@@ -50,27 +60,27 @@ Additionally, we're preparing to implement automatic user information extraction
    - Improved vector serialization for compatibility with sqlite-vec
    - Enhanced resilience with fallback mechanisms when package is unavailable
 
-4. **Breaking Changes in Version 1.0**:
+5. **Breaking Changes in Version 1.0**:
    - Removed deprecated methods like `_enhance_with_domain_knowledge()` (replaced by `_enhance_with_context_memory()`)
    - Removed `add_user_domain_knowledge()` (replaced by `add_user_context_memory()`)
    - Updated API signatures by removing the `memory` parameter from the `Agent` class (replaced by `buffer_memory`)
    - Removed backward compatibility for user_id=0 handling
    - Renamed all "domain knowledge" terminology to "context memory" throughout the codebase
 
-5. **Test Improvements**:
+6. **Test Improvements**:
    - Fixed all test warnings and errors
    - Implemented pytest.ini configuration to filter FAISS-related DeprecationWarnings
    - Improved test coverage across all components
    - Made tests more robust to handle differences in database behaviors
 
-6. **Architectural Evolution**:
+7. **Architectural Evolution**:
    - Restructured codebase into modular packages
    - Created setup.py for each package with appropriate dependencies
    - Implemented proper monorepo structure
    - Created development installation scripts
    - Fixed cross-package imports
 
-7. **MCP Integration**:
+8. **MCP Integration**:
    - Enhanced MCP server integration with proper reconnection logic
    - Implemented transport abstraction with factory pattern
    - Added support for both HTTP+SSE and Command-line transports
@@ -96,6 +106,7 @@ Based on the updated priority list, the following tasks have been prioritized:
 ### Updated Task Priorities
 
 1. **REST API & MCP Server Implementation**:
+   - ✅ Implement centralized MCP service for Agent-to-MCP server communications
    - Implement standard REST API endpoints according to api.md spec
    - Implement authentication with API keys
    - Add streaming support for chat endpoints with SSE
@@ -269,3 +280,55 @@ Based on performance evaluation showing PostgreSQL with pgvector performing well
 4. **Testing Infrastructure**: Need to ensure comprehensive testing infrastructure is in place for the new API endpoints.
 
 5. **Documentation Tools**: Need to set up OpenAPI/Swagger tools for API documentation generation.
+
+## Refactoring Approach
+
+1. **Orchestrator-Centered Design**:
+   - Extraction logic is now centralized in the Orchestrator
+   - Added `handle_user_information_extraction` method to coordinate extraction
+   - Implemented `_run_extraction` for the actual extraction processing
+   - Maintained backward compatibility with existing `extract_user_information` method
+
+2. **Agent Design Changes**:
+   - Agent now delegates extraction to Orchestrator
+   - Removed message counting and extraction handling from Agent
+   - Simplified Agent implementation while preserving functionality
+   - Maintains `auto_extract_user_info` and `extraction_model` parameters for backward compatibility
+
+3. **Asynchronous Processing**:
+   - Extraction runs in background tasks to avoid blocking conversation flow
+   - Proper error handling to prevent extraction failures from affecting core functionality
+
+4. **Privacy Enhancements**:
+   - Anonymous users (user_id=0) are explicitly excluded from extraction
+   - Consistent handling of anonymous users across all memory operations
+   - Added testing to verify privacy controls
+
+## Recent Decisions
+
+- **Centralization of Memory Logic**: Memory operations are now primarily handled by the Orchestrator
+- **User ID Treatment**: Anonymous users (user_id=0) are consistently handled with early returns
+- **Error Isolation**: Extraction errors are caught and logged but don't disrupt core functionality
+- **Testing Approach**: Created comprehensive tests for both MemoryExtractor and Orchestrator functionality
+
+## Current Implementation State
+
+The automatic user information extraction system is now functional and centralized:
+
+1. MemoryExtractor class in packages/server/src/muxi/memory/extractor.py handles actual extraction
+2. Orchestrator in packages/core/src/muxi/core/orchestrator.py manages the extraction process
+3. Agent in packages/core/src/muxi/core/agent.py delegates extraction to Orchestrator
+4. Tests in tests/test_extractor.py verify functionality
+
+## Documentation Updates
+
+Documentation in .cursor/rules/ has been updated:
+- memory_extraction.mdc: Explains the centralized extraction architecture
+- memory_user_id.mdc: Documents anonymous user handling across memory operations
+
+## Next Steps
+
+1. **Performance Testing**: Evaluate extraction performance with high message volume
+2. **Enhanced Filtering**: Add more sophisticated filtering for extracted information
+3. **User Control**: Implement user-facing controls for extraction preferences
+4. **Integration**: Connect extraction with other components of the MUXI framework

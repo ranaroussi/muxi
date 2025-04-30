@@ -7,41 +7,42 @@ The MUXI Framework follows a service-oriented architecture with clear separation
 ```
 ┌───────────────────┐
 │      Clients      │
-│   (CLI/Web/SDK)   │
+│ (CLI/API/MCP/Web) │
 └─────────┬─────────┘
           │
-          │ (API/SSE/WS)
+          │  (REST/WS/SSE/WebRTC)
           │
 ┌─────────│───────────────────────────────────────────┐
+│         │                                           │
 │         │    MUXI Server (Local/Remote)             │
 │         │                                           │
-│         │        ┌───────────────┐                  │
-│         └───────>│  Orchestrator │                  │
-│                  └───────┬───────┘                  │
-│                          ▼                          │
-│                    ┌─────────────┐                  │
-│                    │   Memory    │                  │
-│                    └──────┬──────┘                  │
+│         │        ┌───────────────┐                  │   ┌──────────────────┐
+│         └───────>│  Orchestrator │----------------------│ Buffer/LT Memory │
+│                  └───────┬───────┘                  │   └──────────────────┘
+│                          │                          │
 │         ┌────────────────┼────────────────┐         │
 │         │                │                │         │
-│         ▼                ▼                ▼         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │    ┌───────────┐
-│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │-------│ Knowledge │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │    └───────────┘
-│         ↓                ↓                ↓         │
-│         └────────┬───────┴────────┬───────┘         │
-│                  ↓                                  │
-│           ┌──────┴──────┐                           │
-│           │ MCP Handler │                           │
-│           └──────┬──────┘                           │
-└──────────────────│──────────────────────────────────┘
-                   │
-                   │ (gRPC/HTTP)
-                   ▼
-┌─────────────────────────────────────────────────────┐
+│         │                │                │         │
+│  ┌──────▼──────┐  ┌──────▼──────┐  ┌──────▼──────┐  │   ┌──────────────────┐
+│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │------│ Domain Knowledge │
+│  └───┬─────↑───┘  └──────↑──────┘  └───↑─────┬───┘  │   └──────────────────┘
+│      │     │             │             │     │      │
+│      │     │             ↓             │     │      │
+│      │     └─────────> (A2A) <─────────┘     │      │
+│      │                   │                   │      │
+│      │            ┌──────↓──────┐            │      │
+│      └───────────>│ MCP Service │<───────────┘      │
+│                   └──────┬──────┘                   │   ┌──────────────────┐
+│                          │                      ------->│   Observability  │
+│                          │                          │   └──────────────────┘
+└──────────────────────────│──────────────────────────┘
+                           │
+                           │ (HTTP/SSE/Command)
+                           │
+┌──────────────────────────↓──────────────────────────┐
 │              MCP Servers (via Command/SSE)          │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │   Weather   │  │  Web Search │  │     ....    │  │
+│  │   Weather   │  │   Research  │  │     ....    │  │
 │  └─────────────┘  └─────────────┘  └─────────────┘  │
 └─────────────────────────────────────────────────────┘
 ```
@@ -50,8 +51,8 @@ The MUXI Framework follows a service-oriented architecture with clear separation
 
 1. **Orchestrator**: Central component that manages agents and memory systems
 2. **Agent**: Core entity that processes messages with specific capabilities
-3. **Memory System**: Centralized at the orchestrator level, storing conversation history and contextual information
-4. **MCP Handler**: Manages communications with external MCP servers
+3. **Centralized Memory System**: Managed by the orchestrator, storing conversation history and contextual information
+4. **MCP Service**: Centralized service that manages communications with external MCP servers
 5. **Knowledge Base**: Stores and retrieves domain-specific knowledge
 6. **Communication Interfaces**: HTTP API, SSE, WebSockets for interaction
 
@@ -91,9 +92,14 @@ The framework abstracts LLM providers behind a common interface, making it easy 
 
 ### 5. MCP Integration Strategy
 
-External tool integration follows the Model Context Protocol (MCP) standard, with support for:
-- HTTP+SSE transport for web-based MCP servers
-- Command-line transport for local executable servers
+The framework uses a centralized approach for MCP integration through the MCPService:
+- **Centralized Service**: Single point of service for all MCP server interactions
+- **Transport Abstraction**: Multiple transport methods supported:
+  - HTTP+SSE transport for web-based MCP servers
+  - Command-line transport for local executable servers
+- **Thread-safe Operations**: Locks for concurrent access to MCP servers
+- **Unified Error Handling**: Consistent error handling across all MCP interactions
+- **Configurable Timeouts**: Timeout configuration at orchestrator, agent, or per-request level
 
 ### 6. Memory Architecture
 
@@ -106,7 +112,12 @@ The memory system is centralized at the orchestrator level:
 
 ## Design Patterns in Use
 
-### 1. Factory Pattern
+### 1. Singleton Pattern
+
+Used for creating single instances of services that should be shared across the application:
+- **MCPService**: Singleton service for managing all MCP server connections, ensuring consistent state across all agents
+
+### 2. Factory Pattern
 
 Used for creating implementations of various interfaces:
 - **TransportFactory**: Creates the appropriate MCP transport implementation
@@ -125,7 +136,7 @@ class TransportFactory:
             raise ValueError(f"Unknown transport type: {transport_type}")
 ```
 
-### 2. Strategy Pattern
+### 3. Strategy Pattern
 
 Used to encapsulate different algorithms behind a common interface:
 - **LLM Provider Strategies**: Different implementation for OpenAI, Anthropic, etc.
@@ -144,13 +155,13 @@ class AnthropicModel(BaseModel):
         pass
 ```
 
-### 3. Observer Pattern
+### 4. Observer Pattern
 
 Used for event handling:
 - **Message Processing Pipeline**: Components observe and react to message events
 - **Connection State Changes**: Components react to MCP server connection events
 
-### 4. Facade Pattern
+### 5. Facade Pattern
 
 The main `muxi` class provides a simplified facade to the complex underlying system:
 
@@ -178,13 +189,13 @@ class muxi:
         pass
 ```
 
-### 5. Repository Pattern
+### 6. Repository Pattern
 
 Used for data access abstractions:
 - **Memory Repository**: Abstracts database operations for memory storage
 - **Knowledge Repository**: Manages knowledge data access
 
-### 6. Command Pattern
+### 7. Command Pattern
 
 Used for operation encapsulation:
 - **MCP Tool Calls**: Encapsulates tool execution into command objects
@@ -208,7 +219,7 @@ Used for operation encapsulation:
 - **Uses** a Model for LLM interaction
 - **Accesses** memory through the Orchestrator
 - **Does not own** memory systems directly
-- **Connects to** MCP Servers via MCP Handler
+- **Connects to** MCP Servers via MCP Service
 - **Maintains** a Knowledge Base for domain knowledge
 - **Stores** reference to the parent Orchestrator for memory access
 
@@ -224,7 +235,7 @@ Used for operation encapsulation:
 - **Memory operations** (add, search, clear) are exposed via Orchestrator methods
 - **Agent-specific data** maintained through metadata filtering (using agent_id)
 
-### MCP Handler Relationships
+### MCP Service Relationships
 
 - **Connects to** external MCP Servers
 - **Translates** Agent requests into MCP protocol

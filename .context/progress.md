@@ -26,9 +26,11 @@ The following components of the MUXI Framework have been successfully implemente
    - ✅ Memory sharing between multiple agents
    - ✅ Removal of agent-level memory parameters and properties
 
-3. **MCP Server Integration**:
-   - ✅ MCP handler for communication with external services
-   - ✅ MCP message processing
+3. **MCP Integration**:
+   - ✅ Centralized MCPService for managing all MCP server communications
+   - ✅ Thread-safe tool invocation with locks for concurrent access
+   - ✅ ToolParser for extracting tool calls from LLM responses in various formats
+   - ✅ Configurable request timeouts at orchestrator, agent, and per-request levels
    - ✅ Multiple transport types (HTTP+SSE, Command-line)
    - ✅ Reconnection with exponential backoff
    - ✅ Cancellation support for in-progress operations
@@ -43,6 +45,7 @@ The following components of the MUXI Framework have been successfully implemente
    - ✅ Centralized memory management
    - ✅ Memory access methods and operations
    - ✅ Multi-user support with user context partitioning
+   - ✅ MCP server registration and management
 
 5. **Configuration System**:
    - ✅ YAML and JSON configuration files
@@ -432,3 +435,38 @@ SQLite vector support has been added, providing a simpler deployment option for 
    - Fixed test warnings and improved coverage
    - Added specific tests for memory-related functionality
    - Enhanced CI/CD pipeline
+
+# Progress Updates
+
+## Completed
+
+- Initial repository setup
+- Base frameworks for MUXI Framework
+- Core agent implementation
+- Memory integration
+- Automatic user information extraction
+  - Implemented MemoryExtractor class to analyze conversations for user information
+  - Created privacy controls (anonymous user handling, opt-out, sensitive information detection)
+  - Refactored to centralize extraction logic at Orchestrator level
+  - Added asyncronous processing to avoid blocking conversation flow
+  - Created comprehensive tests for memory extraction functionality
+  - Updated documentation in .cursor/rules/ for memory-related operations
+- Orchestrator implementation
+- Multi-user support
+- Long-term memory
+
+## In Progress
+
+- Tool integration
+- Knowledge integration
+- UI/UX improvements
+- API endpoints
+- Security enhancements
+
+## Next Steps
+
+- Performance optimizations
+- Advanced context management
+- Documentation improvements
+- Example applications
+- Plugin system
