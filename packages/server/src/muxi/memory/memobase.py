@@ -166,6 +166,37 @@ class Memobase:
 
         return results
 
+    async def delete(
+        self,
+        memory_id: int,
+        user_id: Optional[int] = None,
+    ) -> bool:
+        """
+        Delete a specific memory entry.
+
+        Args:
+            memory_id: The ID of the memory to delete.
+            user_id: The user ID associated with this memory. If None, uses the
+                default user.
+
+        Returns:
+            True if deletion was successful, False otherwise.
+        """
+        user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return success for anonymous users (no-op)
+            return True
+
+        # Delete from long-term memory
+        success = await asyncio.to_thread(
+            self.long_term_memory.delete,
+            memory_id=memory_id,
+        )
+
+        return success
+
     def clear_user_memory(self, user_id: Optional[int] = None) -> None:
         """
         Clear memory for a specific user by recreating their collection.
@@ -427,6 +458,13 @@ class Memobase:
         Raises:
             ValueError: If the format is unsupported or the data cannot be parsed.
         """
+        user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return empty list for anonymous users
+            return []
+
         # Load data based on format
         if format == "json" and isinstance(data_source, str):
             try:
@@ -510,3 +548,47 @@ class Memobase:
                 return False
 
         return True
+
+    async def update_user_context_memory(
+        self,
+        user_id: Optional[int] = None,
+        key: str = None,
+        value: Any = None,
+        source: str = "update",
+        importance: float = 0.9,
+    ) -> int:
+        """
+        Update a specific key in user context memory.
+
+        Args:
+            user_id: The user's ID. If None, uses the default user.
+            key: The key to update.
+            value: The new value for the key.
+            source: Source identifier for this update.
+            importance: Importance score for this knowledge (0.0 to 1.0).
+
+        Returns:
+            The memory ID of the updated item, or 0 if update failed.
+        """
+        user_id = user_id if user_id is not None else self.default_user_id
+
+        # Skip memory operations for anonymous users (user_id=0)
+        if user_id == 0:
+            # Return 0 for anonymous users
+            return 0
+
+        if key is None:
+            return 0
+
+        # First clear the existing key if it exists
+        await self.clear_user_context_memory(user_id=user_id, keys=[key])
+
+        # Then add the new value
+        memory_ids = await self.add_user_context_memory(
+            user_id=user_id,
+            knowledge={key: value},
+            source=source,
+            importance=importance,
+        )
+
+        return memory_ids[0] if memory_ids else 0

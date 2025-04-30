@@ -5,6 +5,7 @@ This module provides the updated Orchestrator class, which manages both agents
 and memory systems centrally.
 """
 
+import asyncio
 import os
 from typing import Any, Dict, List, Optional, Union
 
@@ -13,6 +14,7 @@ from loguru import logger
 from muxi.server.config import config
 from muxi.core.agent import Agent
 from muxi.core.mcp import MCPMessage
+from muxi.core.mcp_service import MCPService
 from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.server.memory.memobase import Memobase
@@ -32,7 +34,10 @@ class Orchestrator:
     def __init__(
         self,
         buffer_memory: Optional[BufferMemory] = None,
-        long_term_memory: Optional[Union[LongTermMemory, Memobase]] = None
+        long_term_memory: Optional[Union[LongTermMemory, Memobase]] = None,
+        auto_extract_user_info: bool = True,
+        extraction_model: Optional[BaseModel] = None,
+        request_timeout: int = 60,
     ):
         """
         Initialize the orchestrator with optional centralized memory.
@@ -40,6 +45,9 @@ class Orchestrator:
         Args:
             buffer_memory: Optional buffer memory for short-term context across all agents.
             long_term_memory: Optional long-term memory for persistent storage across all agents.
+            auto_extract_user_info: Whether to automatically extract user information.
+            extraction_model: Optional model to use for automatic information extraction.
+            request_timeout: Default timeout in seconds for MCP server requests
         """
         self.agents: Dict[str, Agent] = {}
         self.agent_descriptions: Dict[str, str] = {}
@@ -50,11 +58,45 @@ class Orchestrator:
         self.buffer_memory = buffer_memory
         self.long_term_memory = long_term_memory
 
+        # Configure extraction settings
+        self.auto_extract_user_info = auto_extract_user_info
+        self.extraction_model = extraction_model
+        self.memory_extractor = None
+
+        # Track message counts per user for extraction
+        self.message_counts = {}
+
         # If long-term memory is a Memobase instance, mark as multi-user
-        self.is_multi_user = isinstance(long_term_memory, Memobase)
+        self.is_multi_user = False
+        if isinstance(self.long_term_memory, Memobase):
+            self.is_multi_user = True
+
+            # Initialize memory extractor if we have a Memobase and auto-extract is enabled
+            if self.auto_extract_user_info:
+                try:
+                    from muxi.server.memory.extractor import MemoryExtractor
+                    self.memory_extractor = MemoryExtractor(
+                        orchestrator=self,
+                        extraction_model=self.extraction_model,
+                        auto_extract=self.auto_extract_user_info
+                    )
+                    logger.info(
+                        "Initialized MemoryExtractor for automatic user information extraction"
+                    )
+                except ImportError:
+                    logger.warning(
+                        "Could not import MemoryExtractor, automatic extraction disabled"
+                    )
+                    self.auto_extract_user_info = False
+
+        # Get/Initialize the MCP service
+        self.mcp_service = MCPService.get_instance()
 
         # Initialize the routing model if needed
         self._initialize_routing_model()
+
+        # Set request timeout
+        self.request_timeout = request_timeout
 
     def _initialize_routing_model(self):
         """Initialize the routing model from configuration."""
@@ -105,6 +147,8 @@ class Orchestrator:
         system_message: Optional[str] = None,
         description: Optional[str] = None,
         set_as_default: bool = False,
+        mcp_server: Optional['MCPServer'] = None,  # noqa: F821
+        request_timeout: Optional[int] = None,
     ) -> Agent:
         """
         Create a new agent that uses the orchestrator's memory.
@@ -116,6 +160,9 @@ class Orchestrator:
             description: Optional description of the agent's capabilities and purpose.
                 Used for intelligent message routing. Defaults to system_message if not provided.
             set_as_default: Whether to set this agent as the default.
+            mcp_server: Optional MCP server for tool calling and external integrations.
+            request_timeout: Optional timeout in seconds for MCP requests
+                (defaults to orchestrator's timeout).
 
         Returns:
             The created agent.
@@ -129,6 +176,8 @@ class Orchestrator:
             orchestrator=self,  # Pass reference to orchestrator
             system_message=system_message,
             agent_id=agent_id,
+            mcp_server=mcp_server,
+            request_timeout=request_timeout,  # Pass timeout parameter
         )
 
         # Store the agent
@@ -755,3 +804,364 @@ Available agents:
                 "is_default": agent_id == self.default_agent_id,
             }
         return agent_info
+
+    async def handle_user_information_extraction(
+        self,
+        user_message: str,
+        agent_response: str,
+        user_id: int,
+        agent_id: str,
+        extraction_model: Optional[BaseModel] = None
+    ) -> None:
+        """
+        Handle the process of extracting user information from conversation.
+
+        This method centralizes extraction logic, managing message counting
+        and running extraction asynchronously to avoid blocking the main flow.
+
+        Args:
+            user_message: The latest message from the user
+            agent_response: The agent's response to the user
+            user_id: The user's ID
+            agent_id: The agent's ID that handled the conversation
+            extraction_model: Optional model to use for extraction
+        """
+        # Skip extraction for anonymous users
+        if user_id == 0:
+            return
+
+        # Skip if extraction is disabled or not available
+        if not self.auto_extract_user_info or not self.memory_extractor:
+            return
+
+        # Increment message count for this user
+        self.message_counts[user_id] = self.message_counts.get(user_id, 0) + 1
+
+        # Process this conversation turn for information extraction
+        try:
+            # Use asyncio.create_task to run extraction in background
+            asyncio.create_task(
+                self._run_extraction(
+                    user_message=user_message,
+                    agent_response=agent_response,
+                    user_id=user_id,
+                    agent_id=agent_id,
+                    message_count=self.message_counts[user_id],
+                    extraction_model=extraction_model
+                )
+            )
+            logger.debug(f"Automatic extraction scheduled for user {user_id}")
+        except Exception as e:
+            # Log but don't fail if extraction errors occur
+            logger.warning(f"User information extraction failed: {str(e)}")
+
+    async def _run_extraction(
+        self,
+        user_message: str,
+        agent_response: str,
+        user_id: int,
+        agent_id: str,
+        message_count: int = 1,
+        extraction_model: Optional[BaseModel] = None
+    ) -> None:
+        """
+        Run the extraction process asynchronously.
+
+        This internal method handles the actual extraction process,
+        using the MemoryExtractor to process the conversation turn.
+
+        Args:
+            user_message: The user's message
+            agent_response: The agent's response
+            user_id: The user's ID
+            agent_id: The agent's ID
+            message_count: The current message count for this user
+            extraction_model: Optional model to use for extraction
+        """
+        # Use provided extraction model if available
+        if extraction_model:
+            # Temporarily override the extractor's model
+            original_model = self.memory_extractor.extraction_model
+            self.memory_extractor.extraction_model = extraction_model
+
+            try:
+                # Process the conversation turn
+                await self.memory_extractor.process_conversation_turn(
+                    user_message=user_message,
+                    agent_response=agent_response,
+                    user_id=user_id,
+                    message_count=message_count
+                )
+            finally:
+                # Restore the original model
+                self.memory_extractor.extraction_model = original_model
+        else:
+            # Use the default extraction model
+            await self.memory_extractor.process_conversation_turn(
+                user_message=user_message,
+                agent_response=agent_response,
+                user_id=user_id,
+                message_count=message_count
+            )
+
+    # Keep the existing extract_user_information method for backward compatibility
+    # but rename it to clarify its actual role
+    async def extract_user_information(
+        self,
+        user_message: str,
+        agent_response: str,
+        user_id: int,
+        agent_id: Optional[str] = None,
+        message_count: int = 1,
+        extraction_model: Optional[BaseModel] = None
+    ):
+        """
+        Extract and store information about a user from a conversation turn.
+
+        This method is kept for backward compatibility.
+        New code should use handle_user_information_extraction instead.
+
+        Args:
+            user_message: The message from the user
+            agent_response: The response from the agent
+            user_id: The user's ID
+            agent_id: Optional agent ID that handled this conversation
+            message_count: Counter for this user's messages (for throttling)
+            extraction_model: Optional model to use for extraction
+
+        Returns:
+            None, but extracts and stores user information in the background
+        """
+        await self.handle_user_information_extraction(
+            user_message=user_message,
+            agent_response=agent_response,
+            user_id=user_id,
+            agent_id=agent_id or self.default_agent_id or "",
+            extraction_model=extraction_model
+        )
+
+    async def get_user_context_memory(
+        self,
+        user_id: int,
+        agent_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Get context memory for a specific user.
+
+        Args:
+            user_id: The user's ID to get context for
+            agent_id: Optional agent ID to scope the context
+
+        Returns:
+            Dictionary of user context information
+        """
+        if not self.is_multi_user or not isinstance(self.long_term_memory, Memobase):
+            return {}
+
+        return await self.long_term_memory.get_user_context_memory(user_id=user_id)
+
+    async def add_user_context_memory(
+        self,
+        user_id: int,
+        knowledge: Dict[str, Any],
+        source: str = "manual_input",
+        importance: float = 0.9,
+        agent_id: Optional[str] = None
+    ) -> List[str]:
+        """
+        Add context memory for a specific user.
+
+        Args:
+            user_id: The user's ID
+            knowledge: Dictionary of information to store
+            source: Where this knowledge came from
+            importance: Importance score (0.0 to 1.0)
+            agent_id: Optional agent ID that provided this information
+
+        Returns:
+            List of memory IDs for stored information
+        """
+        if not self.is_multi_user or not isinstance(self.long_term_memory, Memobase):
+            return []
+
+        return await self.long_term_memory.add_user_context_memory(
+            user_id=user_id,
+            knowledge=knowledge,
+            source=source,
+            importance=importance
+        )
+
+    async def clear_user_context_memory(
+        self,
+        user_id: int,
+        keys: Optional[List[str]] = None,
+        agent_id: Optional[str] = None
+    ) -> bool:
+        """
+        Clear context memory for a specific user.
+
+        Args:
+            user_id: The user's ID
+            keys: Optional list of specific keys to clear
+            agent_id: Optional agent ID that's clearing the memory
+
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.is_multi_user or not isinstance(self.long_term_memory, Memobase):
+            return False
+
+        return await self.long_term_memory.clear_user_context_memory(
+            user_id=user_id,
+            keys=keys
+        )
+
+    async def register_mcp_server(
+        self,
+        server_id: str,
+        url: Optional[str] = None,
+        command: Optional[str] = None,
+        credentials: Optional[Dict[str, Any]] = None,
+        model: Optional[BaseModel] = None,
+        request_timeout: Optional[int] = None,
+    ) -> str:
+        """
+        Register an MCP server with the centralized MCP service.
+
+        Args:
+            server_id: Unique identifier for the MCP server
+            url: URL for HTTP/SSE MCP servers
+            command: Command for command-line MCP servers
+            credentials: Optional credentials for authentication
+            model: Optional model to use for this MCP handler
+            request_timeout: Optional timeout in seconds for requests.
+                Defaults to orchestrator's timeout.
+
+        Returns:
+            The server_id of the registered server
+        """
+        # Use orchestrator's default timeout if none specified
+        timeout = request_timeout if request_timeout is not None else self.request_timeout
+
+        # Register the server with the MCP service
+        return await self.mcp_service.register_mcp_server(
+            server_id=server_id,
+            url=url,
+            command=command,
+            credentials=credentials,
+            model=model,
+            request_timeout=timeout
+        )
+
+    async def list_mcp_tools(self, server_id: Optional[str] = None) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        List available tools from MCP servers.
+
+        Args:
+            server_id: Optional server ID to list tools from a specific server
+
+        Returns:
+            Dictionary mapping server IDs to lists of available tools
+        """
+        return await self.mcp_service.list_tools(server_id=server_id)
+
+    def get_mcp_service(self) -> MCPService:
+        """
+        Get the centralized MCP service.
+
+        Returns:
+            The MCP service instance
+        """
+        return self.mcp_service
+
+    async def add_message_to_memory(
+        self,
+        content: str,
+        role: str,
+        timestamp: float,
+        agent_id: str,
+        user_id: Optional[int] = None
+    ) -> None:
+        """
+        Add a message to appropriate memory stores based on configuration.
+
+        This centralizes all memory operations that were previously split between
+        Agent and Orchestrator classes.
+
+        Args:
+            content: The message content to store
+            role: The role of the message sender (e.g. 'user', 'assistant')
+            timestamp: The timestamp of the message
+            agent_id: The ID of the agent involved
+            user_id: Optional user ID for multi-user support
+        """
+        # Always add to buffer memory regardless of user context
+        if self.buffer_memory:
+            metadata = {
+                "role": role,
+                "timestamp": timestamp,
+                "agent_id": agent_id
+            }
+
+            self.buffer_memory.add(content, metadata=metadata)
+
+        # Add to long-term memory if we have a valid user_id and multi-user support
+        if self.is_multi_user and user_id is not None and user_id != 0 and self.long_term_memory:
+            metadata = {
+                "role": role,
+                "timestamp": timestamp,
+                "agent_id": agent_id
+            }
+
+            # Enhanced message with user context if this is a user message
+            if role == "user":
+                try:
+                    # Get user context memory
+                    context_memory = await self.get_user_context_memory(user_id=user_id)
+
+                    # If context is available, enhance the message before storing
+                    if context_memory:
+                        # Format context memory for storage with the message
+                        context_str = "User Context:\n"
+                        for key, value in context_memory.items():
+                            if isinstance(value, dict) and "value" in value:
+                                # Handle structured context memory format
+                                actual_value = value["value"]
+                                context_str += f"- {key}: {actual_value}\n"
+                            else:
+                                # Handle simple format
+                                context_str += f"- {key}: {value}\n"
+
+                        # Store the enhanced content
+                        enhanced_content = f"{context_str}\n\nUser Message: {content}"
+                        metadata["enhanced"] = True
+                        metadata["original_content"] = content
+
+                        await self.long_term_memory.add(
+                            content=enhanced_content,
+                            metadata=metadata,
+                            user_id=user_id
+                        )
+                    else:
+                        # Store the original content
+                        await self.long_term_memory.add(
+                            content=content,
+                            metadata=metadata,
+                            user_id=user_id
+                        )
+                except Exception as e:
+                    # Log error and fall back to original message
+                    error_msg = "Error enhancing message with user context:"
+                    logger.error(f"{error_msg} {e}")  # noqa: E501
+                    await self.long_term_memory.add(
+                        content=content,
+                        metadata=metadata,
+                        user_id=user_id
+                    )
+            else:
+                # For non-user messages, just store directly
+                await self.long_term_memory.add(
+                    content=content,
+                    metadata=metadata,
+                    user_id=user_id
+                )
