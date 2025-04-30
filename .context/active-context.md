@@ -109,21 +109,48 @@ Based on the updated priority list, the following tasks have been prioritized:
    - Add support for multi-modal messages (text, images, audio)
    - Implement proper error handling and recovery
    - Add reconnection logic with exponential backoff
-   - Support for attachments as specified in api.md
+   - Support attachments for files and media
 
-3. **CLI Interfaces**:
+3. **Automatic User Information Extraction**:
+   - Implement the memory extraction system as described in prd-auto-user-context.md
+   - Add model selection for extraction to optimize cost
+   - Implement confidence scoring and conflict resolution
+   - Add configuration for extraction frequency and sensitivity
+
+4. **Interface-Level User ID Generation**:
+   - Implement user ID generation at each interface (REST API, WebSocket, CLI) as described in prd-interface-user-id.md
+   - Create persistent user identification across sessions without requiring explicit IDs
+   - Develop fingerprinting techniques that respect privacy considerations
+   - Ensure memory and extraction features work properly with generated IDs
+   - Add configuration options to control ID generation behavior
+
+5. **Enhanced Context Memory**:
+   - Implement context memory templates for common use cases
+   - Add improved context merging capabilities
+   - Implement context memory namespaces
+
+### Deprioritized Tasks
+
+Based on performance evaluation showing PostgreSQL with pgvector performing well (471.57 QPS and low latency at 99% recall), the following tasks have been deprioritized:
+
+1. **Additional Vector Database Integrations**:
+   - ~~Milvus integration~~
+   - ~~Qdrant integration~~
+   - ~~Weaviate integration~~
+
+5. **CLI Interfaces**:
    - Enhance CLI interface with support for all API operations
    - Develop web interface with responsive design
    - Implement real-time updates using WebSocket
    - Add support for multi-modal interactions
 
-4. **Web UI**:
+6. **Web UI**:
    - Create responsive UI for mobile and desktop
    - Implement real-time updates using WebSocket
    - Add support for multi-modal interactions
    - Build user-friendly configuration interface
 
-5. **Agent-to-Agent Communication**:
+7. **Agent-to-Agent Communication**:
    - Implement capability discovery mechanism
    - Create task delegation between agents
    - Develop context sharing with proper isolation
@@ -131,14 +158,14 @@ Based on the updated priority list, the following tasks have been prioritized:
    - Add external agent integration
    - Implement security and authentication
 
-6. **A2A Security Layer** (New Priority):
+8. **A2A Security Layer** (New Priority):
    - Design and implement comprehensive permission system for controlling inter-agent communication
    - Develop context isolation to prevent unauthorized access to user data or sensitive information
    - Implement rate limiting to prevent abuse of inter-agent communication
    - Create audit logging system to record all inter-agent communications for security analysis
    - Develop security controls in line with the whitepaper specifications
 
-7. **Multi-Modal Capabilities** (Raised Priority):
+9. **Multi-Modal Capabilities** (Raised Priority):
    - Implement document processing with PDF and Office document support
    - Develop image analysis with vision-capable models
    - Create audio processing with speech-to-text and text-to-speech capabilities
@@ -146,22 +173,21 @@ Based on the updated priority list, the following tasks have been prioritized:
    - Ensure proper handling of multi-modal interactions across all interface types
    - Build comprehensive examples demonstrating multi-modal agent capabilities
 
-8. **Vector Database Enhancements**:
-   - Optimize vector operations for improved performance
-   - Add support for additional vector databases (e.g., Milvus, Qdrant)
-   - Add migration tools for transferring between database types
-   - Create performance benchmarks for different vector database options
-   - Develop guidance for choosing between SQLite and PostgreSQL
-   - Support for vector database clustering and sharding
+10. **Vector Database Enhancements**:
+    - Optimize vector operations for improved performance
+    - Add migration tools for transferring between database types
+    - Create performance benchmarks for different vector database options
+    - Develop guidance for choosing between SQLite and PostgreSQL
+    - Support for vector database clustering and sharding
 
-9. **LLM Providers**:
-   - Implement Anthropic LLM provider
-   - Implement Gemini LLM provider
-   - Implement Grok LLM provider
-   - Add support for local models (e.g., Llama, Mistral, DeepSeek)
-   - Create a model router for fallback and cost optimization
+11. **LLM Providers**:
+    - Implement Anthropic LLM provider
+    - Implement Gemini LLM provider
+    - Implement Grok LLM provider
+    - Add support for local models (e.g., Llama, Mistral, DeepSeek)
+    - Create a model router for fallback and cost optimization
 
-10. **Testing and Documentation**:
+12. **Testing and Documentation**:
     - Unit tests for all new API endpoints
     - Integration tests for API and WebSocket endpoints
     - Performance benchmarks for API endpoints
@@ -170,7 +196,7 @@ Based on the updated priority list, the following tasks have been prioritized:
     - User guides for advanced use cases
     - Example projects showcasing API usage
 
-11. **Deployment & Package Distribution**:
+13. **Deployment & Package Distribution**:
     - Docker containerization
     - Kubernetes deployment
     - Cloud deployment guides (AWS, GCP, Azure)
@@ -179,7 +205,7 @@ Based on the updated priority list, the following tasks have been prioritized:
     - Automatic version bumping for releases
     - SQLite deployment guides for serverless and edge environments
 
-12. **Language-Specific SDKs**:
+14. **Language-Specific SDKs**:
     - TypeScript/JavaScript SDK
     - Go SDK
     - Java/Kotlin SDK

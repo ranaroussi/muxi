@@ -63,10 +63,11 @@ The following components of the MUXI Framework have been successfully implemente
    - ✅ Colored output with Markdown support
 
 8. **Vector Database Integrations**:
-   - ✅ PostgreSQL with pgvector for high-scale deployments
-   - ✅ SQLite with sqlite-vec for local deployments
-   - ✅ Automatic handling of vector serialization based on database type
-   - ✅ Python package-based extension loading (sqlite-vec) with fallback mechanisms
+   - ✅ PostgreSQL with pgvector
+   - ✅ SQLite with sqlite-vec
+   - 🔄 ~~Milvus integration~~ (Deprioritized - pgvector performance is sufficient)
+   - 🔄 ~~Qdrant integration~~ (Deprioritized - pgvector performance is sufficient)
+   - 🔄 ~~Weaviate integration~~ (Deprioritized - pgvector performance is sufficient)
 
 ### Infrastructure
 
@@ -222,24 +223,33 @@ The following components are partially implemented or planned for future develop
 2. **Vector Database Integrations**:
    - ✅ PostgreSQL with pgvector
    - ✅ SQLite with sqlite-vec
-   - ⏳ Milvus integration
-   - ⏳ Qdrant integration
-   - ⏳ Weaviate integration
+   - 🔄 ~~Milvus integration~~ (Deprioritized - pgvector performance is sufficient)
+   - 🔄 ~~Qdrant integration~~ (Deprioritized - pgvector performance is sufficient)
+   - 🔄 ~~Weaviate integration~~ (Deprioritized - pgvector performance is sufficient)
 
 3. **Memory Management**:
-   - ✅ Buffer memory
-   - ✅ Long-term memory
-   - ⏳ Memory segmentation
-   - ⏳ Fact-based vs. embedding-based recall
-   - ⏳ Summarization of memories
+   - ✅ Support for PostgreSQL with pgvector
+   - ✅ Support for SQLite with sqlite-vec
+   - ✅ Dynamic selection between memory backends
+   - ⏳ Memory optimization for improved performance
+   - ⏳ Migration tools between memory backends
 
-4. **Automatic Information Extraction**:
-   - ⏳ Conversation analysis for important information
-   - ⏳ Automatic user profile building
-   - ⏳ Confidence-based information storage
-   - ⏳ Conflict resolution for contradicting information
-   - ⏳ Model selection for cost optimization
+4. **Automatic User Information Extraction**:
+   - ⏳ Automatic extraction from conversation history
+   - ⏳ Importance scoring for extracted information
+   - ⏳ Confidence assessment for uncertain information
+   - ⏳ Conflict resolution for contradictory information
+   - ⏳ Customizable extraction rules and categories
    - ⏳ Configuration for extraction frequency and sensitivity
+
+5. **Interface-Level User ID Generation**:
+   - ⏳ Core UserIdGenerator interface and implementations
+   - ⏳ REST API user identification from requests/cookies
+   - ⏳ WebSocket user identification from connections
+   - ⏳ CLI user identification from local environment
+   - ⏳ Persistent ID storage and lookup
+   - ⏳ Privacy-focused fingerprinting techniques
+   - ⏳ Configuration options for ID generation behavior
 
 ### 9. LLM Providers
 
