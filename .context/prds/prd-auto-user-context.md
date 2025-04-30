@@ -85,6 +85,10 @@ class MemoryExtractor:
         if not self.auto_extract:
             return
 
+        # Skip extraction for anonymous users (user_id=0)
+        if user_id == 0:
+            return
+
         # Only process every n messages based on extraction_interval
         if message_count % self.extraction_interval != 0:
             return
