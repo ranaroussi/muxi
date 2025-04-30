@@ -484,6 +484,268 @@
       "testStrategy": "1. Unit Tests:\n   - Test UserIdGenerator with various input combinations\n   - Verify deterministic behavior (same inputs produce same IDs)\n   - Test collision handling\n   - Verify privacy protection mechanisms\n\n2. Integration Tests:\n   - For each interface (REST, WebSocket, CLI), verify ID generation when explicit ID not provided\n   - Test persistence of generated IDs across multiple requests from same client\n   - Verify cross-interface consistency (same client should get same ID regardless of interface)\n\n3. Security Tests:\n   - Ensure IDs cannot be manipulated or predicted\n   - Verify privacy compliance (no PII in generated IDs)\n   - Test ID generation with proxies/VPNs to ensure proper handling\n\n4. Performance Tests:\n   - Benchmark ID generation under load\n   - Test concurrent ID generation scenarios\n\n5. Specific Test Cases:\n   - Anonymous REST API client gets consistent ID across multiple requests\n   - WebSocket reconnection preserves user ID\n   - CLI commands from same environment maintain user context\n   - Client changing IP but with same device fingerprint gets same ID (if configured)\n   - Two different clients don't receive the same generated ID",
       "status": "pending",
       "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create Core UserIdGenerator Interface and Base Implementation",
+          "description": "Define the core interface and base implementation for the UserIdGenerator service that will be used across all application interfaces.",
+          "dependencies": [],
+          "details": "1. Create a `UserIdGenerator` interface with methods for generating, validating, and looking up user IDs.\n2. Implement a base class that follows the algorithm in the PRD.\n3. Include methods for extracting client information (IP, user agent, device fingerprints).\n4. Implement the deterministic hashing algorithm for generating IDs based on client signatures.\n5. Add unit tests to verify the core ID generation logic works as expected.\n6. Test with various input combinations to ensure consistency and uniqueness.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 2,
+          "title": "Implement Collision Detection and Resolution Strategy",
+          "description": "Add collision detection and resolution mechanisms to ensure uniqueness of generated user IDs.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Implement a collision detection system that checks if a generated ID already exists.\n2. Create a resolution strategy that adds incremental suffixes or alternative hashing when collisions occur.\n3. Add performance optimizations to minimize collision checks.\n4. Implement a bloom filter or similar data structure for efficient collision detection.\n5. Add unit tests with forced collisions to verify resolution works correctly.\n6. Benchmark collision resolution performance with large datasets.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 3,
+          "title": "Develop Privacy Protection and Anonymization Features",
+          "description": "Implement privacy protection and anonymization techniques to ensure generated IDs don't expose sensitive user information.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Add data sanitization to remove personally identifiable information before ID generation.\n2. Implement configurable anonymization levels as specified in the PRD.\n3. Create a mechanism to rotate or refresh anonymization salts periodically.\n4. Add privacy compliance checks to ensure generated IDs meet requirements.\n5. Implement unit tests that verify sensitive information isn't leaked in generated IDs.\n6. Create documentation on privacy protections for developers.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 4,
+          "title": "Create Persistent Storage for User ID Mapping",
+          "description": "Implement a storage mechanism to persistently map generated IDs to client signatures for consistency across sessions.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Design a database schema for storing user ID mappings.\n2. Implement a repository layer for CRUD operations on ID mappings.\n3. Add TTL/expiry mechanisms as specified in the PRD.\n4. Implement caching for frequently accessed mappings.\n5. Create database migration scripts.\n6. Add integration tests for the storage layer.\n7. Implement cleanup jobs for expired mappings.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 5,
+          "title": "Integrate UserIdGenerator with REST API Interface",
+          "description": "Integrate the UserIdGenerator service with the REST API interface to automatically generate IDs when Authorization headers are missing.",
+          "dependencies": [
+            1,
+            3,
+            4
+          ],
+          "details": "1. Create middleware/interceptor for REST API requests.\n2. Extract client information from HTTP headers and request data.\n3. Check for missing Authorization headers and trigger ID generation.\n4. Add the generated ID to the request context for downstream handlers.\n5. Implement response headers to communicate generated IDs to clients.\n6. Add integration tests for REST API ID generation.\n7. Update API documentation to explain automatic ID generation behavior.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 6,
+          "title": "Integrate UserIdGenerator with WebSocket Interface",
+          "description": "Integrate the UserIdGenerator service with the WebSocket interface to generate IDs during connection establishment.",
+          "dependencies": [
+            1,
+            3,
+            4
+          ],
+          "details": "1. Modify WebSocket connection handlers to extract client information.\n2. Implement ID generation during the WebSocket handshake process.\n3. Store generated IDs in the WebSocket session context.\n4. Add mechanisms to communicate generated IDs to WebSocket clients.\n5. Create integration tests for WebSocket connections with and without explicit IDs.\n6. Update WebSocket documentation to explain ID generation behavior.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 7,
+          "title": "Integrate UserIdGenerator with CLI Interface",
+          "description": "Integrate the UserIdGenerator service with the CLI interface to generate persistent IDs based on local environment information.",
+          "dependencies": [
+            1,
+            3,
+            4
+          ],
+          "details": "1. Implement CLI-specific client information extraction.\n2. Create a local storage mechanism for CLI-generated IDs.\n3. Ensure consistency of IDs across CLI sessions.\n4. Add CLI commands to view and manage generated IDs.\n5. Implement integration tests for CLI ID generation.\n6. Update CLI documentation to explain ID generation and persistence.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 8,
+          "title": "Implement Configuration System for ID Generation",
+          "description": "Create a comprehensive configuration system to control ID generation behavior across all interfaces.",
+          "dependencies": [
+            1,
+            5,
+            6,
+            7
+          ],
+          "details": "1. Design a configuration schema for ID generation options.\n2. Implement configuration loading from environment variables, config files, and code.\n3. Add options for enabling/disabling automatic ID generation per interface.\n4. Create configuration for ID format, algorithm parameters, and security thresholds.\n5. Implement runtime configuration updates.\n6. Add validation for configuration values.\n7. Create documentation for all configuration options.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 9,
+          "title": "Develop Comprehensive Testing Suite",
+          "description": "Create a comprehensive testing suite to verify the ID generation system works correctly across all interfaces and edge cases.",
+          "dependencies": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "details": "1. Implement end-to-end tests covering all interfaces.\n2. Create load tests to verify performance under high concurrency.\n3. Add security tests to verify privacy protections.\n4. Implement tests for edge cases like network failures and partial client information.\n5. Create integration tests with actual databases and caches.\n6. Add tests for configuration changes and their effects.\n7. Implement continuous integration pipeline for automated testing.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 10,
+          "title": "Create Documentation and Examples",
+          "description": "Develop comprehensive documentation and examples for the user ID generation system.",
+          "dependencies": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "details": "1. Create developer documentation explaining the ID generation system architecture.\n2. Write interface-specific guides for REST API, WebSocket, and CLI integration.\n3. Add code examples for common use cases.\n4. Create diagrams illustrating the ID generation flow.\n5. Document configuration options and their effects.\n6. Add troubleshooting guides for common issues.\n7. Create user-facing documentation explaining the privacy implications.\n8. Update the main application documentation to reference the new ID generation system.",
+          "status": "pending",
+          "parentTaskId": 14
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Implement Automatic User Context Extraction System",
+      "description": "Create a MemoryExtractor class and integration system that automatically identifies, evaluates, and stores important user information from conversations to build comprehensive user profiles over time.",
+      "details": "Implement the automatic user context extraction system as specified in prd-auto-user-context.md with the following components:\n\n1. **MemoryExtractor Class**:\n   - Create a class that analyzes conversation text and extracts key user information\n   - Implement methods to assign importance scores (1-10) to extracted information\n   - Implement confidence scoring (0.0-1.0) for extraction reliability\n   - Design storage mechanism to save extracted data to user context memory\n   - Support different extraction models with a pluggable architecture\n\n2. **Integration Points**:\n   - Integrate with Agent class to process conversations after completion\n   - Add hooks in Orchestrator to trigger extraction at appropriate points\n   - Ensure extraction runs asynchronously to avoid performance impacts\n\n3. **Configuration System**:\n   - Create configuration options for enabling/disabling extraction\n   - Add settings for confidence thresholds (default: 0.7)\n   - Implement extraction frequency controls\n   - Add extraction model selection options\n\n4. **User Filtering**:\n   - Skip extraction for anonymous users (user_id=0)\n   - Implement whitelist/blacklist functionality for specific users\n\n5. **Extraction Modes**:\n   - Implement automatic extraction that runs without explicit calls\n   - Create manual extraction API for targeted extraction requests\n   - Support batch processing for historical conversations\n\n6. **Performance Optimization**:\n   - Implement tiered extraction models (light/standard/comprehensive)\n   - Add caching to prevent redundant extractions\n   - Include rate limiting to manage resource usage\n\n7. **Documentation**:\n   - Document the extraction patterns and information types\n   - Create examples of extracted information formats",
+      "testStrategy": "Testing should verify both functionality and performance of the extraction system:\n\n1. **Unit Tests**:\n   - Test MemoryExtractor class methods in isolation\n   - Verify correct importance and confidence scoring\n   - Test extraction with various conversation types\n   - Validate anonymous user filtering works correctly\n\n2. **Integration Tests**:\n   - Verify extraction triggers correctly from Agent and Orchestrator\n   - Test configuration changes propagate correctly\n   - Ensure extracted data is properly stored in user context\n\n3. **Performance Tests**:\n   - Measure extraction time for different conversation lengths\n   - Verify asynchronous operation doesn't block main processes\n   - Test with high volume to ensure system stability\n\n4. **Accuracy Tests**:\n   - Create a dataset of conversations with known information\n   - Measure precision and recall of extraction system\n   - Test with different confidence thresholds\n   - Verify extraction quality across different models\n\n5. **Edge Cases**:\n   - Test with extremely long conversations\n   - Verify behavior with malformed or unusual text\n   - Test with multiple languages\n   - Verify system handles conflicting information appropriately\n\n6. **Manual Verification**:\n   - Review samples of extracted information for accuracy\n   - Compare automatic vs. manual extraction results",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create MemoryExtractor Base Class with Core Functionality",
+          "description": "Implement the foundational MemoryExtractor class with the core extraction methods, importance scoring, and confidence evaluation.",
+          "dependencies": [],
+          "details": "Implementation details:\n1. Create a new MemoryExtractor class in the memory package\n2. Implement the base extraction method that takes conversation text as input\n3. Add methods for importance scoring (1-10) based on information type and relevance\n4. Implement confidence scoring (0.0-1.0) for extraction reliability\n5. Create a pluggable architecture to support different extraction models\n6. Add basic validation methods to verify extracted information\n7. Include logging for extraction process\n\nTesting approach:\n- Unit test each scoring method with sample conversation inputs\n- Test the pluggable architecture with a mock extraction model\n- Verify correct scoring ranges are enforced",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 2,
+          "title": "Implement Storage Mechanism for Extracted User Context",
+          "description": "Create the storage system for saving extracted user information to the user context memory with appropriate data structures.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation details:\n1. Design data structures for storing extracted user information\n2. Implement methods to save extracted data to user context memory\n3. Create update mechanisms for existing information (merge, replace, or append strategies)\n4. Add metadata storage for extraction source, timestamp, and confidence score\n5. Implement retrieval methods to access stored information\n6. Add versioning support for tracking information changes over time\n7. Create indexing for efficient information retrieval\n\nTesting approach:\n- Test storage and retrieval with various data types\n- Verify metadata is correctly associated with stored information\n- Test update mechanisms with conflicting information scenarios",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 3,
+          "title": "Develop Configuration System for Extraction Settings",
+          "description": "Create a comprehensive configuration system for controlling extraction behavior, thresholds, and model selection.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation details:\n1. Create a configuration class for extraction settings\n2. Implement options for enabling/disabling extraction\n3. Add confidence threshold settings (default: 0.7)\n4. Implement extraction frequency controls\n5. Add extraction model selection options\n6. Create validation for configuration parameters\n7. Implement configuration persistence\n8. Add methods to update configuration at runtime\n\nTesting approach:\n- Test configuration loading with various settings\n- Verify validation prevents invalid configurations\n- Test runtime configuration updates",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 4,
+          "title": "Implement User Filtering and Privacy Controls",
+          "description": "Add functionality to filter extraction based on user properties and implement privacy protection mechanisms.",
+          "dependencies": [
+            1,
+            3
+          ],
+          "details": "Implementation details:\n1. Implement logic to skip extraction for anonymous users (user_id=0)\n2. Create whitelist/blacklist functionality for specific users\n3. Add user consent tracking mechanism\n4. Implement opt-out functionality for users\n5. Create privacy-focused data retention policies\n6. Add methods to purge extracted data on request\n7. Implement data minimization techniques\n\nTesting approach:\n- Test extraction skipping for anonymous users\n- Verify whitelist/blacklist functionality works correctly\n- Test opt-out mechanism and data purging",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 5,
+          "title": "Integrate MemoryExtractor with Agent Class",
+          "description": "Connect the MemoryExtractor to the Agent class to process conversations after completion.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Implementation details:\n1. Add hooks in Agent class to trigger extraction after conversation completion\n2. Implement conversation preprocessing for extraction\n3. Create callback mechanism for extraction results\n4. Add error handling for extraction failures\n5. Implement asynchronous extraction to avoid blocking the main thread\n6. Create methods to access extraction results from Agent\n7. Add logging for integration points\n\nTesting approach:\n- Test extraction triggering after conversation completion\n- Verify asynchronous operation doesn't impact performance\n- Test error handling with simulated extraction failures",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 6,
+          "title": "Integrate MemoryExtractor with Orchestrator",
+          "description": "Add initialization and configuration hooks in the Orchestrator class for the extraction system.",
+          "dependencies": [
+            3,
+            5
+          ],
+          "details": "Implementation details:\n1. Add MemoryExtractor initialization in Orchestrator\n2. Implement configuration loading from environment or settings\n3. Create hooks to trigger extraction at appropriate points\n4. Add methods to access and modify extraction configuration\n5. Implement extraction status monitoring\n6. Create shutdown procedures for extraction processes\n7. Add health checks for extraction system\n\nTesting approach:\n- Test initialization with various configurations\n- Verify extraction triggers at appropriate points\n- Test shutdown procedures and resource cleanup",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 7,
+          "title": "Implement Multiple Extraction Modes and API",
+          "description": "Create different extraction modes (automatic, manual, batch) and develop the API for targeted extraction requests.",
+          "dependencies": [
+            1,
+            2,
+            5
+          ],
+          "details": "Implementation details:\n1. Implement automatic extraction mode that runs without explicit calls\n2. Create manual extraction API for targeted extraction requests\n3. Develop batch processing for historical conversations\n4. Add mode switching functionality\n5. Implement priority system for extraction requests\n6. Create API documentation\n7. Add examples for each extraction mode\n\nTesting approach:\n- Test each extraction mode with sample conversations\n- Verify API correctly handles extraction requests\n- Test batch processing with large datasets",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 8,
+          "title": "Optimize Extraction Performance",
+          "description": "Implement performance optimizations including tiered models, caching, and background processing.",
+          "dependencies": [
+            1,
+            5,
+            6,
+            7
+          ],
+          "details": "Implementation details:\n1. Implement tiered extraction models (light/standard/comprehensive)\n2. Add caching system to prevent redundant extractions\n3. Implement rate limiting to manage resource usage\n4. Create background processing queue for extraction tasks\n5. Add performance monitoring metrics\n6. Implement adaptive extraction based on system load\n7. Create optimization settings for different deployment environments\n\nTesting approach:\n- Benchmark different extraction models\n- Test caching with repeated extraction requests\n- Verify background processing doesn't impact system performance",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 9,
+          "title": "Create Documentation and Update MUXI Facade",
+          "description": "Document the extraction system and update the MUXI facade to include extraction configuration.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "details": "Implementation details:\n1. Document extraction patterns and information types\n2. Create examples of extracted information formats\n3. Update MUXI facade constructor to include extraction configuration\n4. Add documentation for configuration options\n5. Create usage examples and best practices\n6. Document privacy considerations and data handling\n7. Add troubleshooting guide for common issues\n\nTesting approach:\n- Verify documentation accuracy with code review\n- Test MUXI facade with extraction configuration\n- Validate examples work as documented",
+          "status": "pending",
+          "parentTaskId": 15
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Implement Interface-Level User ID Generation System",
+      "description": "Design and implement a system for automatic user identification across different interfaces (REST API, WebSocket, CLI) that enables personalization and memory features even when explicit user IDs aren't provided.",
+      "details": "Create a comprehensive user identification system following the specifications in prd-interface-user-id.md:\n\n1. Design a `UserIdentifier` interface with methods for:\n   - Generating new user IDs\n   - Retrieving existing user IDs\n   - Validating user IDs\n   - Managing ID persistence\n\n2. Implement interface-specific strategies:\n   - REST API: Use session tokens, cookies, or device fingerprinting\n   - WebSocket: Leverage connection properties and headers\n   - CLI: Use machine identifiers, configuration files, or interactive prompts\n\n3. Integration points:\n   - Add middleware/interceptors to automatically inject user IDs into request contexts\n   - Modify request handlers to extract and validate user identifiers\n   - Implement fallback mechanisms when explicit IDs aren't available\n\n4. Memory system updates:\n   - Modify memory storage to index by generated IDs\n   - Implement ID resolution and mapping for memory retrieval\n   - Ensure backward compatibility with existing memory systems\n\n5. Configuration options:\n   - ID generation algorithm selection (UUID, sequential, custom)\n   - Persistence duration and storage location\n   - Privacy controls (anonymization options)\n   - Cross-interface ID correlation settings\n\n6. Security considerations:\n   - Implement ID encryption or hashing where appropriate\n   - Add rate limiting for ID generation requests\n   - Create audit logging for ID generation and usage\n   - Ensure compliance with relevant privacy regulations\n\nThe implementation should be modular, allowing for easy addition of new interface types in the future.",
+      "testStrategy": "Testing should verify both functional correctness and security aspects:\n\n1. Unit tests:\n   - Test each interface-specific implementation against the `UserIdentifier` contract\n   - Verify ID generation produces valid, unique identifiers\n   - Test persistence and retrieval mechanisms\n   - Validate error handling for edge cases\n\n2. Integration tests:\n   - Verify automatic ID generation across each interface type\n   - Test cross-interface ID resolution (same user across different interfaces)\n   - Validate memory system integration with generated IDs\n   - Test configuration changes propagate correctly\n\n3. Security tests:\n   - Verify IDs cannot be easily forged or predicted\n   - Test rate limiting functionality\n   - Ensure proper encryption/hashing of sensitive ID data\n   - Validate privacy controls work as expected\n\n4. Performance tests:\n   - Benchmark ID generation under load\n   - Measure memory retrieval performance with generated IDs\n   - Test system behavior with large numbers of concurrent users\n\n5. Manual verification:\n   - Verify personalization features work with generated IDs\n   - Test user experience across multiple sessions\n   - Validate that memory features correctly associate data with the right users\n\nAll tests should be automated where possible and included in the CI/CD pipeline.",
+      "status": "pending",
+      "dependencies": [],
       "priority": "high"
     }
   ],

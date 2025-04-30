@@ -611,6 +611,269 @@
           "parentTaskId": 14
         }
       ]
+    },
+    {
+      "id": 15,
+      "title": "Implement Automatic User Context Extraction System",
+      "description": "Create a MemoryExtractor class and integration system that automatically identifies, evaluates, and stores important user information from conversations to build comprehensive user profiles over time.",
+      "details": "Implement the automatic user context extraction system as specified in prd-auto-user-context.md with the following components:\n\n1. **MemoryExtractor Class**:\n   - Create a class that analyzes conversation text and extracts key user information\n   - Implement methods to assign importance scores (1-10) to extracted information\n   - Implement confidence scoring (0.0-1.0) for extraction reliability\n   - Design storage mechanism to save extracted data to user context memory\n   - Support different extraction models with a pluggable architecture\n\n2. **Integration Points**:\n   - Integrate with Agent class to process conversations after completion\n   - Add hooks in Orchestrator to trigger extraction at appropriate points\n   - Ensure extraction runs asynchronously to avoid performance impacts\n\n3. **Configuration System**:\n   - Create configuration options for enabling/disabling extraction\n   - Add settings for confidence thresholds (default: 0.7)\n   - Implement extraction frequency controls\n   - Add extraction model selection options\n\n4. **User Filtering**:\n   - Skip extraction for anonymous users (user_id=0)\n   - Implement whitelist/blacklist functionality for specific users\n\n5. **Extraction Modes**:\n   - Implement automatic extraction that runs without explicit calls\n   - Create manual extraction API for targeted extraction requests\n   - Support batch processing for historical conversations\n\n6. **Performance Optimization**:\n   - Implement tiered extraction models (light/standard/comprehensive)\n   - Add caching to prevent redundant extractions\n   - Include rate limiting to manage resource usage\n\n7. **Documentation**:\n   - Document the extraction patterns and information types\n   - Create examples of extracted information formats",
+      "testStrategy": "Testing should verify both functionality and performance of the extraction system:\n\n1. **Unit Tests**:\n   - Test MemoryExtractor class methods in isolation\n   - Verify correct importance and confidence scoring\n   - Test extraction with various conversation types\n   - Validate anonymous user filtering works correctly\n\n2. **Integration Tests**:\n   - Verify extraction triggers correctly from Agent and Orchestrator\n   - Test configuration changes propagate correctly\n   - Ensure extracted data is properly stored in user context\n\n3. **Performance Tests**:\n   - Measure extraction time for different conversation lengths\n   - Verify asynchronous operation doesn't block main processes\n   - Test with high volume to ensure system stability\n\n4. **Accuracy Tests**:\n   - Create a dataset of conversations with known information\n   - Measure precision and recall of extraction system\n   - Test with different confidence thresholds\n   - Verify extraction quality across different models\n\n5. **Edge Cases**:\n   - Test with extremely long conversations\n   - Verify behavior with malformed or unusual text\n   - Test with multiple languages\n   - Verify system handles conflicting information appropriately\n\n6. **Manual Verification**:\n   - Review samples of extracted information for accuracy\n   - Compare automatic vs. manual extraction results",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create MemoryExtractor Base Class with Core Functionality",
+          "description": "Implement the foundational MemoryExtractor class with the core extraction methods, importance scoring, and confidence evaluation.",
+          "dependencies": [],
+          "details": "Implementation details:\n1. Create a new MemoryExtractor class in the memory package\n2. Implement the base extraction method that takes conversation text as input\n3. Add methods for importance scoring (1-10) based on information type and relevance\n4. Implement confidence scoring (0.0-1.0) for extraction reliability\n5. Create a pluggable architecture to support different extraction models\n6. Add basic validation methods to verify extracted information\n7. Include logging for extraction process\n\nTesting approach:\n- Unit test each scoring method with sample conversation inputs\n- Test the pluggable architecture with a mock extraction model\n- Verify correct scoring ranges are enforced",
+          "status": "done",
+          "parentTaskId": 15
+        },
+        {
+          "id": 2,
+          "title": "Implement Storage Mechanism for Extracted User Context",
+          "description": "Create the storage system for saving extracted user information to the user context memory with appropriate data structures.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation details:\n1. Design data structures for storing extracted user information\n2. Implement methods to save extracted data to user context memory\n3. Create update mechanisms for existing information (merge, replace, or append strategies)\n4. Add metadata storage for extraction source, timestamp, and confidence score\n5. Implement retrieval methods to access stored information\n6. Add versioning support for tracking information changes over time\n7. Create indexing for efficient information retrieval\n\nTesting approach:\n- Test storage and retrieval with various data types\n- Verify metadata is correctly associated with stored information\n- Test update mechanisms with conflicting information scenarios",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 3,
+          "title": "Develop Configuration System for Extraction Settings",
+          "description": "Create a comprehensive configuration system for controlling extraction behavior, thresholds, and model selection.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation details:\n1. Create a configuration class for extraction settings\n2. Implement options for enabling/disabling extraction\n3. Add confidence threshold settings (default: 0.7)\n4. Implement extraction frequency controls\n5. Add extraction model selection options\n6. Create validation for configuration parameters\n7. Implement configuration persistence\n8. Add methods to update configuration at runtime\n\nTesting approach:\n- Test configuration loading with various settings\n- Verify validation prevents invalid configurations\n- Test runtime configuration updates",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 4,
+          "title": "Implement User Filtering and Privacy Controls",
+          "description": "Add functionality to filter extraction based on user properties and implement privacy protection mechanisms.",
+          "dependencies": [
+            1,
+            3
+          ],
+          "details": "Implementation details:\n1. Implement logic to skip extraction for anonymous users (user_id=0)\n2. Create whitelist/blacklist functionality for specific users\n3. Add user consent tracking mechanism\n4. Implement opt-out functionality for users\n5. Create privacy-focused data retention policies\n6. Add methods to purge extracted data on request\n7. Implement data minimization techniques\n\nTesting approach:\n- Test extraction skipping for anonymous users\n- Verify whitelist/blacklist functionality works correctly\n- Test opt-out mechanism and data purging\n\n<info added on 2025-04-30T21:35:41.516Z>\nAdditional implementation details:\n\n## Privacy Control Implementation\n\n```python\nclass PrivacyManager:\n    def __init__(self, config):\n        self.config = config\n        self.sensitive_patterns = self._load_sensitive_patterns()\n        self.whitelist = self._load_user_list('whitelist')\n        self.blacklist = self._load_user_list('blacklist')\n        \n    def can_extract_for_user(self, user_id):\n        # Skip anonymous users\n        if user_id == 0:\n            return False\n            \n        # Check blacklist first (explicit denial)\n        if user_id in self.blacklist:\n            return False\n            \n        # If whitelist exists and not empty, user must be in it\n        if self.whitelist and user_id not in self.whitelist:\n            return False\n            \n        # Check user consent\n        return self._has_user_consent(user_id)\n    \n    def filter_sensitive_content(self, text):\n        # Apply regex patterns to remove sensitive information\n        for pattern in self.sensitive_patterns:\n            text = re.sub(pattern, '[REDACTED]', text)\n        return text\n```\n\n## Data Minimization Techniques\n\n1. Content truncation - limit extraction to first N characters\n2. Semantic summarization - store condensed versions of content\n3. Selective field extraction - only store relevant fields\n4. PII detection and redaction using NLP models\n\n## Retention Policy Implementation\n\n```python\ndef apply_retention_policy():\n    \"\"\"Purge data older than retention period\"\"\"\n    retention_days = config.get('privacy.retention_days', 90)\n    cutoff_date = datetime.now() - timedelta(days=retention_days)\n    \n    db.execute(\"\"\"\n        DELETE FROM user_memories \n        WHERE created_at < %s\n    \"\"\", (cutoff_date,))\n```\n\n## User Consent Management\n\n- Store consent in `user_privacy_settings` table with timestamp\n- Implement just-in-time consent prompts in UI\n- Provide granular consent options (full extraction, partial, none)\n- Track consent changes in audit log\n\n## Data Purge API\n\n```python\n@app.route('/api/user/memory/purge', methods=['POST'])\n@login_required\ndef purge_user_memory():\n    \"\"\"Endpoint to purge all extracted memories for current user\"\"\"\n    user_id = current_user.id\n    \n    # Log purge request for compliance\n    log_data_purge_request(user_id)\n    \n    # Execute purge\n    db.execute(\"DELETE FROM user_memories WHERE user_id = %s\", (user_id,))\n    \n    return jsonify({\"status\": \"success\"})\n```\n</info added on 2025-04-30T21:35:41.516Z>",
+          "status": "done",
+          "parentTaskId": 15
+        },
+        {
+          "id": 5,
+          "title": "Integrate MemoryExtractor with Agent Class",
+          "description": "Connect the MemoryExtractor to the Agent class to process conversations after completion.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Implementation details:\n1. Add hooks in Agent class to trigger extraction after conversation completion\n2. Implement conversation preprocessing for extraction\n3. Create callback mechanism for extraction results\n4. Add error handling for extraction failures\n5. Implement asynchronous extraction to avoid blocking the main thread\n6. Create methods to access extraction results from Agent\n7. Add logging for integration points\n\nTesting approach:\n- Test extraction triggering after conversation completion\n- Verify asynchronous operation doesn't impact performance\n- Test error handling with simulated extraction failures",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 6,
+          "title": "Integrate MemoryExtractor with Orchestrator",
+          "description": "Add initialization and configuration hooks in the Orchestrator class for the extraction system.",
+          "dependencies": [
+            3,
+            5
+          ],
+          "details": "Implementation details:\n1. Add MemoryExtractor initialization in Orchestrator\n2. Implement configuration loading from environment or settings\n3. Create hooks to trigger extraction at appropriate points\n4. Add methods to access and modify extraction configuration\n5. Implement extraction status monitoring\n6. Create shutdown procedures for extraction processes\n7. Add health checks for extraction system\n\nTesting approach:\n- Test initialization with various configurations\n- Verify extraction triggers at appropriate points\n- Test shutdown procedures and resource cleanup",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 7,
+          "title": "Implement Multiple Extraction Modes and API",
+          "description": "Create different extraction modes (automatic, manual, batch) and develop the API for targeted extraction requests.",
+          "dependencies": [
+            1,
+            2,
+            5
+          ],
+          "details": "Implementation details:\n1. Implement automatic extraction mode that runs without explicit calls\n2. Create manual extraction API for targeted extraction requests\n3. Develop batch processing for historical conversations\n4. Add mode switching functionality\n5. Implement priority system for extraction requests\n6. Create API documentation\n7. Add examples for each extraction mode\n\nTesting approach:\n- Test each extraction mode with sample conversations\n- Verify API correctly handles extraction requests\n- Test batch processing with large datasets",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 8,
+          "title": "Optimize Extraction Performance",
+          "description": "Implement performance optimizations including tiered models, caching, and background processing.",
+          "dependencies": [
+            1,
+            5,
+            6,
+            7
+          ],
+          "details": "Implementation details:\n1. Implement tiered extraction models (light/standard/comprehensive)\n2. Add caching system to prevent redundant extractions\n3. Implement rate limiting to manage resource usage\n4. Create background processing queue for extraction tasks\n5. Add performance monitoring metrics\n6. Implement adaptive extraction based on system load\n7. Create optimization settings for different deployment environments\n\nTesting approach:\n- Benchmark different extraction models\n- Test caching with repeated extraction requests\n- Verify background processing doesn't impact system performance",
+          "status": "pending",
+          "parentTaskId": 15
+        },
+        {
+          "id": 9,
+          "title": "Create Documentation and Update MUXI Facade",
+          "description": "Document the extraction system and update the MUXI facade to include extraction configuration.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "details": "Implementation details:\n1. Document extraction patterns and information types\n2. Create examples of extracted information formats\n3. Update MUXI facade constructor to include extraction configuration\n4. Add documentation for configuration options\n5. Create usage examples and best practices\n6. Document privacy considerations and data handling\n7. Add troubleshooting guide for common issues\n\nTesting approach:\n- Verify documentation accuracy with code review\n- Test MUXI facade with extraction configuration\n- Validate examples work as documented",
+          "status": "pending",
+          "parentTaskId": 15
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Implement Interface-Level User ID Generation System",
+      "description": "Design and implement a system for automatic user identification across different interfaces (REST API, WebSocket, CLI) that enables personalization and memory features even when explicit user IDs aren't provided.",
+      "details": "Create a comprehensive user identification system following the specifications in prd-interface-user-id.md:\n\n1. Design a `UserIdentifier` interface with methods for:\n   - Generating new user IDs\n   - Retrieving existing user IDs\n   - Validating user IDs\n   - Managing ID persistence\n\n2. Implement interface-specific strategies:\n   - REST API: Use session tokens, cookies, or device fingerprinting\n   - WebSocket: Leverage connection properties and headers\n   - CLI: Use machine identifiers, configuration files, or interactive prompts\n\n3. Integration points:\n   - Add middleware/interceptors to automatically inject user IDs into request contexts\n   - Modify request handlers to extract and validate user identifiers\n   - Implement fallback mechanisms when explicit IDs aren't available\n\n4. Memory system updates:\n   - Modify memory storage to index by generated IDs\n   - Implement ID resolution and mapping for memory retrieval\n   - Ensure backward compatibility with existing memory systems\n\n5. Configuration options:\n   - ID generation algorithm selection (UUID, sequential, custom)\n   - Persistence duration and storage location\n   - Privacy controls (anonymization options)\n   - Cross-interface ID correlation settings\n\n6. Security considerations:\n   - Implement ID encryption or hashing where appropriate\n   - Add rate limiting for ID generation requests\n   - Create audit logging for ID generation and usage\n   - Ensure compliance with relevant privacy regulations\n\nThe implementation should be modular, allowing for easy addition of new interface types in the future.",
+      "testStrategy": "Testing should verify both functional correctness and security aspects:\n\n1. Unit tests:\n   - Test each interface-specific implementation against the `UserIdentifier` contract\n   - Verify ID generation produces valid, unique identifiers\n   - Test persistence and retrieval mechanisms\n   - Validate error handling for edge cases\n\n2. Integration tests:\n   - Verify automatic ID generation across each interface type\n   - Test cross-interface ID resolution (same user across different interfaces)\n   - Validate memory system integration with generated IDs\n   - Test configuration changes propagate correctly\n\n3. Security tests:\n   - Verify IDs cannot be easily forged or predicted\n   - Test rate limiting functionality\n   - Ensure proper encryption/hashing of sensitive ID data\n   - Validate privacy controls work as expected\n\n4. Performance tests:\n   - Benchmark ID generation under load\n   - Measure memory retrieval performance with generated IDs\n   - Test system behavior with large numbers of concurrent users\n\n5. Manual verification:\n   - Verify personalization features work with generated IDs\n   - Test user experience across multiple sessions\n   - Validate that memory features correctly associate data with the right users\n\nAll tests should be automated where possible and included in the CI/CD pipeline.",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create Core UserIdentifier Interface and Base Classes",
+          "description": "Define the core UserIdentifier interface and implement abstract base classes that will be extended by interface-specific implementations.",
+          "dependencies": [],
+          "details": "Implementation steps:\n1. Create a `UserIdentifier` interface with methods for generating, retrieving, validating, and persisting user IDs\n2. Implement a `BaseUserIdentifier` abstract class with common functionality\n3. Define enums for ID generation algorithms (UUID, sequential, custom)\n4. Create utility classes for ID validation and formatting\n5. Implement a factory class for creating appropriate identifier instances\n6. Add configuration models for ID generation settings\n\nTesting approach:\n- Unit test the base implementation with mocks\n- Verify ID generation follows expected patterns\n- Test validation logic with valid and invalid IDs",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 2,
+          "title": "Implement REST API User Identifier Strategy",
+          "description": "Create a REST API-specific implementation of the UserIdentifier interface using cookies, headers, and device fingerprinting.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n1. Create `RestApiUserIdentifier` class extending BaseUserIdentifier\n2. Implement cookie-based user ID storage and retrieval\n3. Add header-based fallback mechanism\n4. Integrate basic device fingerprinting for anonymous users\n5. Implement session token generation and validation\n6. Create middleware for automatically extracting/injecting user IDs in REST requests\n\nTesting approach:\n- Mock HTTP requests and verify ID extraction\n- Test cookie persistence across multiple requests\n- Verify fingerprinting produces consistent results for the same client",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 3,
+          "title": "Implement WebSocket User Identifier Strategy",
+          "description": "Create a WebSocket-specific implementation of the UserIdentifier interface using connection properties and handshake data.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n1. Create `WebSocketUserIdentifier` class extending BaseUserIdentifier\n2. Extract user identifiers from WebSocket handshake headers\n3. Implement connection-based identification using socket properties\n4. Create mechanism to maintain ID across reconnections\n5. Add WebSocket interceptor to inject user ID into message context\n6. Implement WebSocket-specific ID persistence strategy\n\nTesting approach:\n- Mock WebSocket connections and verify ID extraction\n- Test ID persistence across disconnections and reconnections\n- Verify handshake data is properly utilized for identification",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 4,
+          "title": "Implement CLI User Identifier Strategy",
+          "description": "Create a CLI-specific implementation of the UserIdentifier interface using machine identifiers and local configuration files.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n1. Create `CliUserIdentifier` class extending BaseUserIdentifier\n2. Implement machine identifier extraction (hostname, MAC address, etc.)\n3. Create local configuration file storage for persistent IDs\n4. Add interactive prompt fallback for ID generation\n5. Implement CLI-specific ID validation rules\n6. Create CLI command context enrichment with user ID\n\nTesting approach:\n- Test with various machine configurations\n- Verify configuration file persistence\n- Test interactive prompt flows with simulated inputs",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 5,
+          "title": "Create Middleware and Interceptors for Automatic ID Injection",
+          "description": "Implement middleware and interceptors for each interface type to automatically inject user IDs into request contexts.",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "Implementation steps:\n1. Create REST API middleware for user ID extraction and injection\n2. Implement WebSocket message interceptor for ID context enrichment\n3. Add CLI command preprocessor for ID injection\n4. Create unified RequestContext interface with user ID field\n5. Implement fallback chain for when primary ID method fails\n6. Add configuration options for middleware behavior\n\nTesting approach:\n- Integration tests with mock requests through middleware\n- Test fallback mechanisms by forcing primary methods to fail\n- Verify context enrichment across different interface types",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 6,
+          "title": "Integrate User Identification with Memory Systems",
+          "description": "Update memory storage and retrieval systems to work with the new user identification system.",
+          "dependencies": [
+            5
+          ],
+          "details": "Implementation steps:\n1. Modify memory storage interfaces to index by generated user IDs\n2. Implement ID resolution and mapping for memory retrieval\n3. Create migration utilities for existing memory data\n4. Add memory context enrichment with user ID information\n5. Implement cross-session memory persistence based on user IDs\n6. Create memory isolation mechanisms for privacy\n\nTesting approach:\n- Test memory storage and retrieval with various user IDs\n- Verify backward compatibility with existing memory systems\n- Test memory isolation between different users",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 7,
+          "title": "Implement ID Generation Algorithm Selection and Configuration",
+          "description": "Create a configurable system for selecting and customizing ID generation algorithms with appropriate settings.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps:\n1. Implement UUID-based ID generation strategy\n2. Create sequential ID generation with appropriate synchronization\n3. Add custom ID generation with pattern support\n4. Implement configuration system for algorithm selection\n5. Add validation rules for each algorithm type\n6. Create factory methods for instantiating appropriate generators\n\nTesting approach:\n- Test each algorithm for uniqueness and pattern compliance\n- Verify configuration correctly selects algorithms\n- Performance test ID generation under load",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 8,
+          "title": "Implement Security and Privacy Features",
+          "description": "Add security features including ID encryption, rate limiting, audit logging, and privacy controls.",
+          "dependencies": [
+            2,
+            3,
+            4,
+            7
+          ],
+          "details": "Implementation steps:\n1. Implement ID encryption and hashing where appropriate\n2. Add rate limiting for ID generation requests\n3. Create audit logging for ID generation and usage\n4. Implement privacy-focused fingerprinting techniques\n5. Add anonymization options for IDs\n6. Create compliance checks for privacy regulations\n\nTesting approach:\n- Security testing of encryption mechanisms\n- Verify rate limiting prevents abuse\n- Test audit logs for completeness\n- Verify anonymization properly obscures identifying information",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 9,
+          "title": "Create Comprehensive Test Suite",
+          "description": "Develop a comprehensive test suite covering all user identification strategies and integration points.",
+          "dependencies": [
+            5,
+            6,
+            8
+          ],
+          "details": "Implementation steps:\n1. Create unit tests for each UserIdentifier implementation\n2. Implement integration tests for middleware and interceptors\n3. Add end-to-end tests for complete identification flows\n4. Create performance tests for ID generation and lookup\n5. Implement security and penetration tests\n6. Add regression tests for backward compatibility\n\nTesting approach:\n- Automated test suite with high coverage\n- Manual testing of edge cases\n- Load testing for performance characteristics",
+          "status": "pending",
+          "parentTaskId": 16
+        },
+        {
+          "id": 10,
+          "title": "Document User Identification System",
+          "description": "Create comprehensive documentation for the user identification system including examples, best practices, and integration guides.",
+          "dependencies": [
+            9
+          ],
+          "details": "Implementation steps:\n1. Create API documentation for all interfaces and classes\n2. Write developer guides for each interface type\n3. Add examples of common integration patterns\n4. Document configuration options and best practices\n5. Create troubleshooting guide for common issues\n6. Add security and privacy considerations documentation\n\nTesting approach:\n- Review documentation for completeness and accuracy\n- Have developers test integration following the documentation\n- Verify examples work as described",
+          "status": "pending",
+          "parentTaskId": 16
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Implement Centralized MCP Service Architecture",
+      "description": "Design and implement a singleton MCPService class to centralize all MCP server communications, with supporting components for tool parsing, thread safety, and configurable timeouts.",
+      "details": "Create a comprehensive centralized architecture for MCP service communication with the following components:\n\n1. **MCPService Singleton Class**:\n   - Implement a singleton pattern for the MCPService class\n   - Design methods to handle all MCP server connections\n   - Include connection pooling to optimize performance\n   - Implement retry logic for failed connections\n\n2. **ToolParser Component**:\n   - Create a dedicated parser to handle various tool call formats in LLM responses\n   - Support JSON, XML, and plain text formats\n   - Implement error handling for malformed tool calls\n   - Design an extensible architecture to easily add new tool formats\n\n3. **Agent Class Updates**:\n   - Refactor the Agent class to use the centralized MCPService\n   - Remove any direct MCP server connection code\n   - Ensure backward compatibility with existing agent implementations\n\n4. **Thread-Safe Implementation**:\n   - Implement locks for tool invocation to ensure thread safety\n   - Use ReentrantLock or similar mechanism for critical sections\n   - Add deadlock detection and prevention mechanisms\n\n5. **Configurable Timeouts**:\n   - Add timeout configuration at orchestrator level (global default)\n   - Implement agent-level timeout overrides\n   - Support per-request timeout specifications\n   - Create a timeout hierarchy where more specific settings override general ones\n\n6. **Configuration Management**:\n   - Design a configuration system for the MCPService\n   - Support both file-based and programmatic configuration\n   - Include environment variable overrides for deployment flexibility",
+      "testStrategy": "Implement a comprehensive testing strategy with the following components:\n\n1. **Unit Tests**:\n   - Test MCPService singleton behavior (getInstance method, etc.)\n   - Verify ToolParser correctly handles various input formats\n   - Test timeout configuration at all levels\n   - Validate thread safety with concurrent access tests\n\n2. **Integration Tests**:\n   - Create mock MCP server to test full request/response cycle\n   - Verify Agent class correctly uses the MCPService\n   - Test error handling and retry logic with simulated failures\n   - Validate timeout behavior with deliberately slow responses\n\n3. **Load Testing**:\n   - Test system under high concurrency (50+ simultaneous requests)\n   - Measure performance metrics before and after implementation\n   - Verify connection pooling works as expected under load\n\n4. **Edge Cases**:\n   - Test behavior when MCP server is unreachable\n   - Verify correct handling of malformed responses\n   - Test timeout edge cases (exactly at timeout boundary)\n   - Validate behavior during partial system failures\n\n5. **Regression Testing**:\n   - Ensure existing agent functionality works with new architecture\n   - Verify no performance degradation in common operations\n   - Test backward compatibility with legacy components",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high"
     }
   ],
   "metadata": {
