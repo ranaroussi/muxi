@@ -1,0 +1,160 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Automatic User Context Extraction Implementation
+
+This rule outlines the implementation guidelines for the automatic user information extraction system in the MUXI Framework. This feature allows agents to automatically identify and remember important user information from conversations.
+
+## Core Components
+
+### MemoryExtractor Class
+
+The `MemoryExtractor` class provides the core extraction functionality:
+
+```python
+# Example MemoryExtractor integration
+class MemoryExtractor:
+    def __init__(
+        self,
+        orchestrator,
+        extraction_model=None,  # Note: Separate model for extraction to optimize costs
+        confidence_threshold=0.7,
+        auto_extract=True,
+        extraction_interval=1
+    ):
+        # Implementation follows PRD specification
+```
+
+### Extraction Process Flow
+
+The standard flow for processing a conversation:
+
+1. Agent receives user message and generates response
+2. Agent checks if extraction is enabled and the interval condition is met
+3. If conditions are met, extracts information using the extraction_model or falls back to agent model
+4. Processes results, checking confidence threshold
+5. Handles conflicts with existing information
+6. Stores results in context memory with appropriate metadata
+
+## Configuration Guidelines
+
+### Model Selection
+
+```python
+# Create a dedicated extraction model (optimized for cost)
+extraction_model = OpenAIModel(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    model="gpt-3.5-turbo",  # Lower cost model for extraction
+)
+
+# Use a higher-capability model for the main conversation
+agent_model = AnthropicModel(
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
+    model="claude-3-opus-20240229"
+)
+
+# Configure the orchestrator to use the extraction model
+app = muxi(
+    auto_extract_context=True,
+    extraction_model=extraction_model,
+    # Other parameters...
+)
+```
+
+### Extraction Settings
+
+- `extraction_interval`: Set higher (e.g., 3-5) for frequent conversations, lower (1-2) for important interactions
+- `confidence_threshold`: Use higher values (0.8+) for sensitive applications
+- `auto_extract`: Set to False when users request privacy or for testing
+
+## Implementation Details
+
+### Prompt Engineering
+
+The extraction prompt should:
+1. Be clear about the extraction task
+2. Request specific information format (JSON)
+3. Specify required fields (key, value, confidence, importance)
+4. Provide examples for common extraction patterns
+5. Emphasize privacy (avoid extracting sensitive data)
+
+Example prompt structure:
+```python
+def _create_extraction_prompt(self, conversation):
+    return (
+        "Based on the following conversation, extract important information about the user "
+        "that should be remembered for future interactions. For each piece of information, "
+        # ... additional prompt details ...
+    )
+```
+
+### Conflict Resolution
+
+When new information conflicts with existing data:
+1. Compare importance scores
+2. Consider information recency
+3. Implement type-specific merging where appropriate
+4. Maintain provenance information
+
+## Testing Guidelines
+
+1. **Unit Tests**:
+   - Test extraction from various conversation patterns
+   - Verify confidence thresholding works correctly
+   - Test conflict resolution logic
+
+2. **Integration Tests**:
+   - Test with different model providers
+   - Verify memory persistence across sessions
+   - Test with multi-turn conversations
+
+3. **Performance Tests**:
+   - Measure extraction latency
+   - Verify minimal impact on conversation responsiveness
+
+## Common Implementation Pitfalls
+
+1. **Extraction Quality**:
+   - Avoid overly complex prompts that confuse the extraction model
+   - Don't use tiny models (e.g., ada) that can't follow structured instruction
+
+2. **Performance Issues**:
+   - Implement caching for repeated extractions of similar content
+   - Consider batching extractions for multi-turn processing
+
+3. **Privacy Concerns**:
+   - Always provide opt-out mechanisms
+   - Avoid storing sensitive information (SSNs, passwords, etc.)
+   - Implement retention policies for automatically extracted data
+
+## Example Implementation Steps
+
+1. Create the `MemoryExtractor` class in `packages/server/src/muxi/memory/extraction.py`
+2. Update the `Orchestrator` class to support extraction configuration
+3. Modify the `Agent.process_message()` method to trigger extraction
+4. Update the MUXI facade to expose extraction configuration
+5. Add extraction-related CLI commands for testing and management
+6. Implement conflict resolution logic for common information types
+7. Add extraction statistics tracking for monitoring and debugging
+
+## Reference Implementation
+
+```python
+# Example implementation structure
+async def _extract_user_information(self, conversation):
+    """Extract user information using the extraction model."""
+    model = self.extraction_model or self.orchestrator.default_model
+    prompt = self._create_extraction_prompt(conversation)
+    extraction_response = await model.generate(prompt)
+
+    try:
+        # Primary approach - parse JSON
+        extraction_results = json.loads(extraction_response)
+    except json.JSONDecodeError:
+        # Fallback parsing
+        extraction_results = self._parse_fallback_extraction(extraction_response)
+
+    return extraction_results
+```

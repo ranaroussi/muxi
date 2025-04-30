@@ -4,6 +4,8 @@
 
 The current development focus is on implementing the complete REST API as defined in the `.context/scratchpad/api.md` specification file. This involves standardizing all API endpoints, implementing authentication, error handling, and ensuring proper documentation. This work is considered high priority as it forms the foundation for client applications to interact with the MUXI Framework.
 
+Additionally, we're preparing to implement automatic user information extraction from conversations, a significant enhancement to the context memory system. This feature will allow agents to identify and store important user information without requiring explicit code.
+
 ### Primary Areas of Focus
 
 1. **API Implementation**: Implementing the full set of REST endpoints defined in the API specification
@@ -14,6 +16,7 @@ The current development focus is on implementing the complete REST API as define
 6. **SQLite Vector Integration**: Enhancing local deployment capabilities with sqlite-vec extension
 7. **Agent-to-Agent Protocol**: Implementing the A2A protocol for inter-agent communication
 8. **MCP Server Interface**: Creating an SSE-based MCP server endpoint for MCP host integration
+9. **Automatic Information Extraction**: Implementing a system to automatically identify and store important user information from conversations
 
 ## Recent Changes
 
