@@ -7,11 +7,11 @@ managed by its parent orchestrator.
 
 import datetime
 import uuid
-from typing import Any, Dict, List, Optional, Set, Union
-
-from loguru import logger
+from typing import Any, Dict, List, Optional, Union
 
 from muxi.core.mcp import MCPMessage
+from muxi.core.mcp_service import MCPService
+from muxi.core.tool_parser import ToolParser
 from muxi.models.base import BaseModel
 from muxi.knowledge.base import KnowledgeSource
 
@@ -20,7 +20,13 @@ from muxi.knowledge.base import KnowledgeSource
 class MCPServer:
     """Represents a connected MCP server."""
 
-    def __init__(self, name: str, url: str, credentials: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        name: str,
+        url: str,
+        credentials: Optional[Dict[str, Any]] = None,
+        request_timeout: int = 60
+    ):
         """
         Initialize an MCP server.
 
@@ -28,10 +34,13 @@ class MCPServer:
             name: The name of the server
             url: The URL of the server
             credentials: Optional credentials for authentication
+            request_timeout: Timeout in seconds for requests to this server
         """
         self.name = name
         self.url = url
         self.credentials = credentials or {}
+        self.server_id = f"server_{name.lower().replace(' ', '_')}"
+        self.request_timeout = request_timeout
 
 
 class Agent:
@@ -48,110 +57,67 @@ class Agent:
         system_message: Optional[str] = None,
         agent_id: Optional[str] = None,
         name: Optional[str] = None,
-        knowledge: Optional[List[KnowledgeSource]] = None,
+        mcp_server: Optional[MCPServer] = None,
+        knowledge_sources: Optional[List[KnowledgeSource]] = None,
+        request_timeout: Optional[int] = None,
     ):
         """
-        Initialize an agent.
+        Initialize the agent with a model, orchestrator, and optional parameters.
 
         Args:
-            model: The language model to use for generating responses.
-            orchestrator: The orchestrator managing this agent, providing memory access.
+            model: The language model for the agent to use.
+            orchestrator: The orchestrator that manages this agent.
             system_message: Optional system message to set the agent's behavior.
-            agent_id: Optional unique identifier for the agent.
-            name: Optional name for the agent.
-            knowledge: Optional list of knowledge sources for the agent.
+            agent_id: Optional unique ID for the agent. If None, generates a UUID.
+            name: Optional name for the agent (e.g., "Customer Service Bot").
+            mcp_server: Optional MCP server for tool calling and external integrations.
+            knowledge_sources: Optional list of knowledge sources to augment the agent.
+            request_timeout: Optional timeout in seconds for MCP requests
+                (default: use orchestrator's timeout).
         """
         self.model = model
         self.orchestrator = orchestrator
-        self.name = name or "AI Assistant"
+
+        # Set up agent identification
         self.agent_id = agent_id or str(uuid.uuid4())
+        self.name = name or f"Agent-{self.agent_id}"
 
+        # Set up system message
         self.system_message = system_message or (
-            "You are a helpful AI assistant."
+            "You are a helpful assistant that responds accurately to user queries. "
+            "Provide detailed, factual responses and be transparent about uncertainty."
         )
 
-        # Initialize knowledge handler if knowledge sources are provided
-        self.knowledge_handler = None
-        if knowledge:
-            # Initialize knowledge handler synchronously
-            from muxi.knowledge.handler import KnowledgeHandler
-            sources_len = len(knowledge) if knowledge else 0
-            self.knowledge_handler = KnowledgeHandler(
-                knowledge_sources=knowledge if knowledge else None,
-                agent_id=self.agent_id if not knowledge else None
-            )
-            logger.info(f"Initialized knowledge handler with {sources_len} sources")
+        # Set up MCP integration
+        self.mcp_server = mcp_server
 
-            # Store knowledge sources for async processing later
-            self._pending_knowledge_sources = knowledge
+        # Set request timeout (use orchestrator's if not specified)
+        if request_timeout is not None:
+            self.request_timeout = request_timeout
+        elif hasattr(orchestrator, 'request_timeout'):
+            self.request_timeout = orchestrator.request_timeout
+        else:
+            self.request_timeout = 60  # Default fallback
 
-        # Initialize MCP handler with no tools - we'll use MCP servers instead
-        from muxi.core.mcp_handler import MCPHandler
-        self.mcp_handler = MCPHandler(self.model)
-        # Update system message in MCP handler if method exists
-        if hasattr(self.mcp_handler, 'set_system_message'):
-            self.mcp_handler.set_system_message(self.system_message)
+        # Set up knowledge sources
+        self.knowledge_sources = knowledge_sources or []
 
-        # Keep track of connected MCP servers
-        self.mcp_servers = []
-        self._active_mcp_servers: Set[MCPServer] = set()
+        # Set up MCP service access
+        self._mcp_service = MCPService.get_instance()
 
-    async def _initialize_knowledge(self, knowledge_sources: List[KnowledgeSource]) -> None:
+        # Initialize the context with system message
+        self._messages = []
+        if self.system_message:
+            self._messages.append({"role": "system", "content": self.system_message})
+
+    def get_mcp_service(self) -> MCPService:
         """
-        Initialize knowledge sources for the agent.
+        Get the centralized MCP service.
 
-        Args:
-            knowledge_sources: List of knowledge sources to initialize.
+        Returns:
+            The MCP service instance
         """
-        from muxi.knowledge.handler import KnowledgeHandler
-        # Initialize with either knowledge sources or agent_id
-        sources_len = len(knowledge_sources) if knowledge_sources else 0
-        self.knowledge_handler = KnowledgeHandler(
-            knowledge_sources=knowledge_sources if knowledge_sources else None,
-            agent_id=self.agent_id if not knowledge_sources else None
-        )
-        logger.info(f"Initialized knowledge handler with {sources_len} sources")
-
-        # Initialize with any pending sources
-        has_pending = hasattr(self.knowledge_handler, "_pending_sources")
-        sources = self.knowledge_handler._pending_sources if has_pending else []
-
-        if has_pending and sources:
-            for source in sources:
-                await self.add_knowledge(source)
-
-    async def initialize_pending_knowledge(self) -> None:
-        """Process any pending knowledge sources that were provided during initialization."""
-        if hasattr(self, '_pending_knowledge_sources') and self._pending_knowledge_sources:
-            for source in self._pending_knowledge_sources:
-                await self.add_knowledge(source)
-            delattr(self, '_pending_knowledge_sources')
-
-    @property
-    def buffer_memory(self):
-        """Returns orchestrator's buffer memory."""
-        return self.orchestrator.buffer_memory if self.orchestrator else None
-
-    @property
-    def long_term_memory(self):
-        """Returns orchestrator's long-term memory."""
-        return self.orchestrator.long_term_memory if self.orchestrator else None
-
-    @property
-    def is_multi_user(self):
-        """Returns whether long-term memory is multi-user."""
-        if self.orchestrator and hasattr(self.orchestrator, "is_multi_user"):
-            return self.orchestrator.is_multi_user
-        return False
-
-    def use_mcp_server(self, mcp_server: MCPServer) -> None:
-        """
-        Configure the agent to use an MCP server.
-
-        Args:
-            mcp_server: The MCP server to use.
-        """
-        self.mcp_servers.append(mcp_server)
+        return self._mcp_service
 
     async def process_message(
         self, message: Union[str, MCPMessage], user_id: Optional[int] = None
@@ -169,52 +135,97 @@ class Agent:
         # Convert string message to MCPMessage if needed
         if isinstance(message, str):
             content = message
-            # Enhance message with context memory if available
-            enhanced_message = await self._enhance_with_context_memory(content, user_id)
-            message = MCPMessage(role="user", content=enhanced_message)
+            message_obj = MCPMessage(role="user", content=content)
         else:
             content = message.content
-            # Store original content before processing
-            timestamp = datetime.datetime.now().timestamp()
+            message_obj = message
 
-            # Add message to buffer memory through orchestrator
-            if self.orchestrator and hasattr(self.orchestrator, "add_to_buffer_memory"):
-                self.orchestrator.add_to_buffer_memory(
-                    message=content,
-                    metadata={"role": "user", "timestamp": timestamp},
-                    agent_id=self.agent_id
-                )
-
-            # If using multi-user memory, also store there with user context
-            if self.is_multi_user and user_id is not None and self.orchestrator:
-                await self.orchestrator.add_to_long_term_memory(
-                    content=content,
-                    metadata={"role": "user", "timestamp": timestamp},
-                    agent_id=self.agent_id,
-                    user_id=user_id
-                )
-
-        # Process the message using the MCP handler
-        # This will handle tool calls automatically if the model's response includes them
-        response = await self.mcp_handler.process_message(message)
-
-        # Store assistant response in memory through orchestrator
-        if self.orchestrator and hasattr(self.orchestrator, "add_to_buffer_memory"):
-            timestamp = datetime.datetime.now().timestamp()
-            self.orchestrator.add_to_buffer_memory(
-                message=response.content,
-                metadata={"role": "assistant", "timestamp": timestamp},
-                agent_id=self.agent_id
-            )
-
-        # Also store in long-term memory if multi-user
-        if self.is_multi_user and user_id is not None and self.orchestrator:
-            timestamp = datetime.datetime.now().timestamp()
-            await self.orchestrator.add_to_long_term_memory(
-                content=response.content,
-                metadata={"role": "assistant", "timestamp": timestamp},
+        # Let orchestrator handle memory management
+        timestamp = datetime.datetime.now().timestamp()
+        if self.orchestrator and hasattr(self.orchestrator, "add_message_to_memory"):
+            await self.orchestrator.add_message_to_memory(
+                content=content,
+                role="user",
+                timestamp=timestamp,
                 agent_id=self.agent_id,
                 user_id=user_id
+            )
+
+        # Add message to conversation context
+        self._messages.append({"role": "user", "content": message_obj.content})
+
+        # Process the message with the model directly
+        raw_response = await self.model.chat(self._messages)
+
+        # Parse the response to detect and handle tool calls
+        cleaned_text, tool_calls = ToolParser.parse(raw_response)
+
+        # If tool calls were found, process them
+        if tool_calls and self.mcp_server:
+            # Process each tool call
+            for tool_call in tool_calls:
+                try:
+                    # Use the server_id from the MCP server configuration
+                    server_id = self.mcp_server.server_id
+
+                    # Invoke the tool using the MCP service
+                    result = await self.invoke_tool(
+                        server_id=server_id,
+                        tool_name=tool_call.tool_name,
+                        parameters=tool_call.parameters
+                    )
+
+                    # Store the result with the tool call
+                    tool_call.set_result(result)
+                except Exception as e:
+                    error_msg = f"Error processing tool call {tool_call.tool_name}: {str(e)}"
+                    tool_call.set_result({"error": error_msg, "status": "error"})
+
+            # Replace tool calls with results in the response
+            final_content = ToolParser.replace_tool_calls_with_results(raw_response, tool_calls)
+
+            # Add an entry to the conversation history for each tool call
+            for tool_call in tool_calls:
+                tool_info = {
+                    "role": "function",
+                    "name": tool_call.tool_name,
+                    "content": str(tool_call.result)
+                }
+                self._messages.append(tool_info)
+        else:
+            # No tool calls found, use the raw response
+            final_content = raw_response
+
+        # Create response message
+        response = MCPMessage(role="assistant", content=final_content)
+
+        # Add response to conversation context
+        self._messages.append({"role": "assistant", "content": response.content})
+
+        # Let orchestrator handle memory management for the response
+        if self.orchestrator and hasattr(self.orchestrator, "add_message_to_memory"):
+            timestamp = datetime.datetime.now().timestamp()
+            await self.orchestrator.add_message_to_memory(
+                content=response.content,
+                role="assistant",
+                timestamp=timestamp,
+                agent_id=self.agent_id,
+                user_id=user_id
+            )
+
+        # User information extraction is handled by the orchestrator
+        if (
+            user_id is not None
+            and user_id != 0  # Skip extraction for anonymous users
+            and self.orchestrator
+            and hasattr(self.orchestrator, "handle_user_information_extraction")
+        ):
+            # Process this conversation turn for user information extraction
+            await self.orchestrator.handle_user_information_extraction(
+                user_message=content,
+                agent_response=response.content,
+                user_id=user_id,
+                agent_id=self.agent_id
             )
 
         return response
@@ -224,14 +235,16 @@ class Agent:
         Run the agent with the given input text.
 
         Args:
-            input_text: The text to process.
-            use_memory: Whether to use memory for retrieving context.
+            input_text: The input text to process.
+            use_memory: Whether to use memory for context.
 
         Returns:
-            The agent's response as a string.
+            The agent's response text.
         """
-        # Get relevant memories if enabled
+        # Initialize context
         context = ""
+
+        # Retrieve relevant memories if requested
         if use_memory:
             memories = await self.get_relevant_memories(input_text)
             if memories:
@@ -241,363 +254,60 @@ class Agent:
         # Combine context with input
         full_input = f"{context}User: {input_text}"
 
-        # Process with MCP to handle any tool calls
+        # Process with the model
         response = await self.process_message(full_input)
-
-        # Store the interaction in memory for future reference
-        await self._store_in_memory(input_text, response.content)
 
         return response.content
 
-    async def _store_in_memory(self, input_text: str, response_text: str) -> None:
+    async def get_relevant_memories(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """
-        Store the interaction in memory.
+        Get relevant memories for a user query.
 
         Args:
-            input_text: The input text from the user.
-            response_text: The response text from the agent.
-        """
-        if not self.orchestrator:
-            return
-
-        # Create combined text for embedding
-        combined_text = f"User: {input_text}\nAssistant: {response_text}"
-
-        # Get embedding if model supports it
-        embedding = None
-        if hasattr(self.model, 'embed'):
-            embedding = await self.model.embed(combined_text)
-
-        # Store metadata
-        metadata = {
-            "input": input_text,
-            "response": response_text,
-            "type": "conversation",
-        }
-
-        # Store in orchestrator's buffer memory
-        if hasattr(self.orchestrator, "add_to_buffer_memory"):
-            msg = combined_text if embedding is None else embedding
-            self.orchestrator.add_to_buffer_memory(
-                message=msg,
-                metadata=metadata,
-                agent_id=self.agent_id
-            )
-
-        # Store in orchestrator's long-term memory
-        if hasattr(self.orchestrator, "add_to_long_term_memory"):
-            await self.orchestrator.add_to_long_term_memory(
-                content=combined_text,
-                embedding=embedding,
-                metadata=metadata,
-                agent_id=self.agent_id
-            )
-
-    def clear_memory(self, clear_long_term: bool = False, user_id: Optional[int] = None) -> None:
-        """
-        Clear the agent's memory.
-
-        Args:
-            clear_long_term: Whether to clear long-term memory as well.
-            user_id: Optional user ID for multi-user support.
-        """
-        if not self.orchestrator:
-            return
-
-        # Use orchestrator's memory clearing
-        if hasattr(self.orchestrator, "clear_memory"):
-            self.orchestrator.clear_memory(
-                clear_long_term=clear_long_term,
-                agent_id=self.agent_id,
-                user_id=user_id
-            )
-
-    async def get_relevant_memories(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
-        """
-        Search for memories relevant to the given query.
-
-        Args:
-            query: The query to search for.
-            k: The maximum number of memories to return.
+            query: The user query to find relevant memories for.
+            limit: Maximum number of memories to retrieve.
 
         Returns:
-            A list of relevant memory items.
+            A list of relevant memories.
         """
-        # Only use orchestrator's search method
-        if self.orchestrator and hasattr(self.orchestrator, "search_memory"):
-            return await self.orchestrator.search_memory(
-                query=query,
-                agent_id=self.agent_id,
-                k=k
-            )
-        return []
+        if not self.orchestrator or not hasattr(self.orchestrator, "search_buffer_memory"):
+            return []
 
-    async def connect_mcp_server(
+        memories = self.orchestrator.search_buffer_memory(
+            query=query,
+            limit=limit,
+            agent_id=self.agent_id
+        )
+
+        return memories
+
+    async def invoke_tool(
         self,
-        name: str,
-        url: str,
-        credentials: Optional[Dict[str, Any]] = None
-    ) -> bool:
+        server_id: str,
+        tool_name: str,
+        parameters: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
-        Connect to an MCP server to access tools.
-
-        This method integrates with MCP servers that provide tools for the agent.
+        Invoke a tool on a connected MCP server.
 
         Args:
-            name: The name to assign to the server connection.
-            url: The URL of the MCP server.
-            credentials: Optional credentials for authentication.
+            server_id: The server ID to send the tool call to
+            tool_name: The name of the tool to call
+            parameters: The parameters to pass to the tool
 
         Returns:
-            True if connected successfully, False otherwise.
+            The result of the tool call
+
+        Raises:
+            ValueError: If server_id is not valid
+            Exception: Any error from the MCP service
         """
-        try:
-            # Import MCPHandler for MCP server connections
-            from muxi.core.mcp_handler import MCPHandler
+        if not server_id:
+            raise ValueError("Invalid server_id provided")
 
-            # Create MCP client if it doesn't exist yet
-            if not hasattr(self, 'mcp_handler'):
-                self.mcp_handler = MCPHandler(self.model)
-
-            # Connect to the MCP server
-            await self.mcp_handler.connect(name, url, credentials or {})
-
-            # Add to active servers
-            server = MCPServer(name=name, url=url)
-            self._active_mcp_servers.add(server)
-
-            logger.info(f"Connected to MCP server '{name}' at {url}")
-            return True
-
-        except Exception as e:
-            logger.error(f"Error connecting to MCP server '{name}': {str(e)}")
-            return False
-
-    async def disconnect_mcp_server(self, name: str) -> bool:
-        """
-        Disconnect from an MCP server.
-
-        Args:
-            name: The name of the server connection to disconnect.
-
-        Returns:
-            True if disconnected successfully, False otherwise.
-        """
-        if not hasattr(self, 'mcp_handler'):
-            logger.warning(f"No MCP handler to disconnect from server '{name}'")
-            return False
-
-        try:
-            await self.mcp_handler.disconnect(name)
-
-            # Remove from active servers
-            self._active_mcp_servers = {
-                server for server in self._active_mcp_servers
-                if server.name != name
-            }
-
-            logger.info(f"Disconnected from MCP server '{name}'")
-            return True
-        except Exception as e:
-            logger.error(f"Error disconnecting from MCP server '{name}': {str(e)}")
-            return False
-
-    async def _enhance_with_context_memory(
-        self, message: str, user_id: Optional[int] = None
-    ) -> str:
-        """
-        Enhance the message with user context memory if available.
-
-        Args:
-            message: The original message to enhance
-            user_id: User ID to retrieve context memory for
-
-        Returns:
-            Enhanced message with user context information
-        """
-        # Skip if any required component is missing
-        if not self.orchestrator:
-            return message
-        if not self.long_term_memory:
-            return message
-        if user_id is None:
-            return message
-        if not self.is_multi_user:
-            return message
-
-        try:
-            # Get context memory for the user via orchestrator
-            if hasattr(self.orchestrator, "get_user_context_memory"):
-                knowledge = await self.orchestrator.get_user_context_memory(
-                    user_id=user_id,
-                    agent_id=self.agent_id
-                )
-            else:
-                # Fallback to direct access if orchestrator doesn't have the method
-                knowledge = await self.long_term_memory.get_user_context_memory(user_id=user_id)
-
-            # If no knowledge found, return original message
-            if not knowledge:
-                return message
-
-            # Create context with user information
-            context = "Information about the user:\n"
-
-            # Add basic information if available
-            if "name" in knowledge:
-                context += f"- Name: {knowledge['name']}\n"
-
-            if "age" in knowledge:
-                context += f"- Age: {knowledge['age']}\n"
-
-            # Add location if available
-            if "location" in knowledge and isinstance(knowledge['location'], dict):
-                location = knowledge['location']
-                city = location.get('city', '')
-                country = location.get('country', '')
-                if city and country:
-                    context += f"- Location: {city}, {country}\n"
-                elif city:
-                    context += f"- Location: {city}\n"
-                elif country:
-                    context += f"- Location: {country}\n"
-
-            # Add interests if available
-            if "interests" in knowledge:
-                interests = knowledge['interests']
-                if isinstance(interests, list):
-                    context += f"- Interests: {', '.join(interests)}\n"
-                else:
-                    context += f"- Interests: {interests}\n"
-
-            # Add job if available
-            if "job" in knowledge:
-                context += f"- Job: {knowledge['job']}\n"
-
-            # Add family information if available
-            if "family" in knowledge and isinstance(knowledge['family'], dict):
-                family = knowledge['family']
-                if "spouse" in family:
-                    context += f"- Spouse: {family['spouse']}\n"
-                if "children" in family and isinstance(family['children'], list):
-                    children = family['children']
-                    child_str = ', '.join(children)
-                    context += f"- Children: {child_str}\n"
-
-            # Add preferences if available
-            if "preferences" in knowledge and isinstance(knowledge['preferences'], dict):
-                prefs = knowledge['preferences']
-                context += "- Preferences:\n"
-                for key, value in prefs.items():
-                    context += f"  - {key}: {value}\n"
-
-            # Include any other top-level keys that weren't specifically handled
-            excluded_keys = [
-                "name", "age", "location", "interests",
-                "job", "family", "preferences"
-            ]
-            for key, value in knowledge.items():
-                if key not in excluded_keys:
-                    # Skip complex objects for generic handling
-                    if not isinstance(value, (dict, list)):
-                        context += f"- {key}: {value}\n"
-
-            # Combine context with original message
-            enhanced_message = f"{context}\nUser message: {message}"
-            return enhanced_message
-
-        except Exception as e:
-            # If anything goes wrong, just return the original message
-            logger.error(f"Error enhancing message with context memory: {e}")
-            return message
-
-    # Knowledge-related methods
-    async def add_knowledge(self, knowledge_source: KnowledgeSource) -> int:
-        """
-        Add a knowledge source to the agent.
-
-        Args:
-            knowledge_source: The knowledge source to add.
-
-        Returns:
-            Number of chunks added to the knowledge base.
-        """
-        # Initialize knowledge handler if not already created
-        if self.knowledge_handler is None:
-            from muxi.knowledge.handler import KnowledgeHandler
-            self.knowledge_handler = KnowledgeHandler(self.agent_id)
-            logger.info(f"Initialized knowledge handler for agent {self.agent_id}")
-
-        # Add knowledge to handler
-        if hasattr(self.model, 'generate_embeddings'):
-            return await self.knowledge_handler.add_file(
-                knowledge_source, self.model.generate_embeddings
-            )
-        elif hasattr(self.model, 'embed'):
-            # Adapt the embed method to match generate_embeddings signature
-            async def generate_embeddings_adapter(texts):
-                return [await self.model.embed(text) for text in texts]
-
-            return await self.knowledge_handler.add_file(
-                knowledge_source, generate_embeddings_adapter
-            )
-        else:
-            logger.error("Model does not support embeddings, cannot add knowledge")
-            return 0
-
-    async def remove_knowledge(self, file_path: str) -> bool:
-        """
-        Remove a knowledge source from the agent.
-
-        Args:
-            file_path: Path to the file to remove.
-
-        Returns:
-            True if the file was removed, False otherwise.
-        """
-        if self.knowledge_handler is None:
-            return False
-
-        return await self.knowledge_handler.remove_file(file_path)
-
-    def get_knowledge_sources(self) -> List[str]:
-        """
-        Get a list of knowledge sources.
-
-        Returns:
-            List of file paths in the knowledge base.
-        """
-        if self.knowledge_handler is None:
-            return []
-
-        return self.knowledge_handler.get_sources()
-
-    async def search_knowledge(
-        self, query: str, top_k: int = 5, threshold: float = 0.0
-    ) -> List[Dict[str, Any]]:
-        """
-        Search the knowledge base for relevant information.
-
-        Args:
-            query: The query to search for.
-            top_k: Maximum number of results to return.
-            threshold: Minimum relevance score (0-1) to include a result.
-
-        Returns:
-            List of relevant documents.
-        """
-        if self.knowledge_handler is None:
-            return []
-
-        # Use the appropriate embedding function
-        if hasattr(self.model, 'generate_embeddings'):
-            return await self.knowledge_handler.search(
-                query, self.model.generate_embeddings, top_k, threshold
-            )
-        elif hasattr(self.model, 'embed'):
-            return await self.knowledge_handler.search(
-                query, self.model.embed, top_k, threshold
-            )
-        else:
-            logger.error("Model does not support embeddings, cannot search knowledge")
-            return []
+        return await self._mcp_service.invoke_tool(
+            server_id=server_id,
+            tool_name=tool_name,
+            parameters=parameters,
+            request_timeout=self.request_timeout
+        )
