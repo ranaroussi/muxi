@@ -18,8 +18,10 @@ The stated goal is to offer a comprehensive platform that will serve as a solid 
 - 🤖 **Multi-Agent Support**: Create and manage multiple AI agents with different capabilities
 - 🧠 **Memory Systems**: Short-term and long-term memory for contextual interactions
   - FAISS for short-term buffer memory
-  - PostgreSQL with pgvector for scalable long-term memory
   - SQLite with sqlite-vec for local or lightweight deployments
+  - PostgreSQL with pgvector for scalable long-term memory
+  - Memobase for user-level profile-based memory system
+  - Automatic extraction of user information from conversations and storing it in context memory
 - 🔌 **MCP Client Integration**: Connect to external services via Model Context Protocol servers
   - Support for HTTP+SSE transport for web-based MCP servers
   - Support for Command-line transport for local executable servers
