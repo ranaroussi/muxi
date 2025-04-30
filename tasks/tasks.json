@@ -475,6 +475,142 @@
           "parentTaskId": 13
         }
       ]
+    },
+    {
+      "id": 14,
+      "title": "Implement Interface-Level User ID Generation System",
+      "description": "Develop a system that generates consistent and meaningful user IDs across all interfaces (REST API, WebSocket, CLI) when explicit user IDs are not provided, as specified in the PRD.",
+      "details": "Create a centralized user ID generation service that works across all interfaces:\n\n1. Implement the core UserIdGenerator service that:\n   - Follows the algorithm specified in the PRD document at .context/prds/prd-interface-user-id.md\n   - Generates deterministic IDs based on available client information (IP, session, device fingerprints, etc.)\n   - Handles collision detection and resolution\n   - Includes appropriate privacy protections and anonymization techniques\n\n2. Integrate the UserIdGenerator with each interface:\n   - REST API: Extract client information from requests and generate IDs when Authorization header is missing\n   - WebSocket: Generate IDs during connection establishment if not provided\n   - CLI: Use local environment/config information to generate persistent IDs\n\n3. Implement ID persistence and lookup:\n   - Create storage mechanism for mapping generated IDs to client signatures\n   - Ensure generated IDs remain consistent for returning users\n   - Implement appropriate TTL/expiry policies as specified in the PRD\n\n4. Add configuration options:\n   - Enable/disable automatic ID generation\n   - Configure ID format and algorithm parameters\n   - Set security/privacy thresholds\n\n5. Ensure proper documentation is added for all interfaces explaining the automatic ID generation behavior.",
+      "testStrategy": "1. Unit Tests:\n   - Test UserIdGenerator with various input combinations\n   - Verify deterministic behavior (same inputs produce same IDs)\n   - Test collision handling\n   - Verify privacy protection mechanisms\n\n2. Integration Tests:\n   - For each interface (REST, WebSocket, CLI), verify ID generation when explicit ID not provided\n   - Test persistence of generated IDs across multiple requests from same client\n   - Verify cross-interface consistency (same client should get same ID regardless of interface)\n\n3. Security Tests:\n   - Ensure IDs cannot be manipulated or predicted\n   - Verify privacy compliance (no PII in generated IDs)\n   - Test ID generation with proxies/VPNs to ensure proper handling\n\n4. Performance Tests:\n   - Benchmark ID generation under load\n   - Test concurrent ID generation scenarios\n\n5. Specific Test Cases:\n   - Anonymous REST API client gets consistent ID across multiple requests\n   - WebSocket reconnection preserves user ID\n   - CLI commands from same environment maintain user context\n   - Client changing IP but with same device fingerprint gets same ID (if configured)\n   - Two different clients don't receive the same generated ID",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create Core UserIdGenerator Interface and Base Implementation",
+          "description": "Define the core interface and base implementation for the UserIdGenerator service that will be used across all application interfaces.",
+          "dependencies": [],
+          "details": "1. Create a `UserIdGenerator` interface with methods for generating, validating, and looking up user IDs.\n2. Implement a base class that follows the algorithm in the PRD.\n3. Include methods for extracting client information (IP, user agent, device fingerprints).\n4. Implement the deterministic hashing algorithm for generating IDs based on client signatures.\n5. Add unit tests to verify the core ID generation logic works as expected.\n6. Test with various input combinations to ensure consistency and uniqueness.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 2,
+          "title": "Implement Collision Detection and Resolution Strategy",
+          "description": "Add collision detection and resolution mechanisms to ensure uniqueness of generated user IDs.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Implement a collision detection system that checks if a generated ID already exists.\n2. Create a resolution strategy that adds incremental suffixes or alternative hashing when collisions occur.\n3. Add performance optimizations to minimize collision checks.\n4. Implement a bloom filter or similar data structure for efficient collision detection.\n5. Add unit tests with forced collisions to verify resolution works correctly.\n6. Benchmark collision resolution performance with large datasets.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 3,
+          "title": "Develop Privacy Protection and Anonymization Features",
+          "description": "Implement privacy protection and anonymization techniques to ensure generated IDs don't expose sensitive user information.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Add data sanitization to remove personally identifiable information before ID generation.\n2. Implement configurable anonymization levels as specified in the PRD.\n3. Create a mechanism to rotate or refresh anonymization salts periodically.\n4. Add privacy compliance checks to ensure generated IDs meet requirements.\n5. Implement unit tests that verify sensitive information isn't leaked in generated IDs.\n6. Create documentation on privacy protections for developers.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 4,
+          "title": "Create Persistent Storage for User ID Mapping",
+          "description": "Implement a storage mechanism to persistently map generated IDs to client signatures for consistency across sessions.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Design a database schema for storing user ID mappings.\n2. Implement a repository layer for CRUD operations on ID mappings.\n3. Add TTL/expiry mechanisms as specified in the PRD.\n4. Implement caching for frequently accessed mappings.\n5. Create database migration scripts.\n6. Add integration tests for the storage layer.\n7. Implement cleanup jobs for expired mappings.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 5,
+          "title": "Integrate UserIdGenerator with REST API Interface",
+          "description": "Integrate the UserIdGenerator service with the REST API interface to automatically generate IDs when Authorization headers are missing.",
+          "dependencies": [
+            1,
+            3,
+            4
+          ],
+          "details": "1. Create middleware/interceptor for REST API requests.\n2. Extract client information from HTTP headers and request data.\n3. Check for missing Authorization headers and trigger ID generation.\n4. Add the generated ID to the request context for downstream handlers.\n5. Implement response headers to communicate generated IDs to clients.\n6. Add integration tests for REST API ID generation.\n7. Update API documentation to explain automatic ID generation behavior.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 6,
+          "title": "Integrate UserIdGenerator with WebSocket Interface",
+          "description": "Integrate the UserIdGenerator service with the WebSocket interface to generate IDs during connection establishment.",
+          "dependencies": [
+            1,
+            3,
+            4
+          ],
+          "details": "1. Modify WebSocket connection handlers to extract client information.\n2. Implement ID generation during the WebSocket handshake process.\n3. Store generated IDs in the WebSocket session context.\n4. Add mechanisms to communicate generated IDs to WebSocket clients.\n5. Create integration tests for WebSocket connections with and without explicit IDs.\n6. Update WebSocket documentation to explain ID generation behavior.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 7,
+          "title": "Integrate UserIdGenerator with CLI Interface",
+          "description": "Integrate the UserIdGenerator service with the CLI interface to generate persistent IDs based on local environment information.",
+          "dependencies": [
+            1,
+            3,
+            4
+          ],
+          "details": "1. Implement CLI-specific client information extraction.\n2. Create a local storage mechanism for CLI-generated IDs.\n3. Ensure consistency of IDs across CLI sessions.\n4. Add CLI commands to view and manage generated IDs.\n5. Implement integration tests for CLI ID generation.\n6. Update CLI documentation to explain ID generation and persistence.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 8,
+          "title": "Implement Configuration System for ID Generation",
+          "description": "Create a comprehensive configuration system to control ID generation behavior across all interfaces.",
+          "dependencies": [
+            1,
+            5,
+            6,
+            7
+          ],
+          "details": "1. Design a configuration schema for ID generation options.\n2. Implement configuration loading from environment variables, config files, and code.\n3. Add options for enabling/disabling automatic ID generation per interface.\n4. Create configuration for ID format, algorithm parameters, and security thresholds.\n5. Implement runtime configuration updates.\n6. Add validation for configuration values.\n7. Create documentation for all configuration options.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 9,
+          "title": "Develop Comprehensive Testing Suite",
+          "description": "Create a comprehensive testing suite to verify the ID generation system works correctly across all interfaces and edge cases.",
+          "dependencies": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "details": "1. Implement end-to-end tests covering all interfaces.\n2. Create load tests to verify performance under high concurrency.\n3. Add security tests to verify privacy protections.\n4. Implement tests for edge cases like network failures and partial client information.\n5. Create integration tests with actual databases and caches.\n6. Add tests for configuration changes and their effects.\n7. Implement continuous integration pipeline for automated testing.",
+          "status": "pending",
+          "parentTaskId": 14
+        },
+        {
+          "id": 10,
+          "title": "Create Documentation and Examples",
+          "description": "Develop comprehensive documentation and examples for the user ID generation system.",
+          "dependencies": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "details": "1. Create developer documentation explaining the ID generation system architecture.\n2. Write interface-specific guides for REST API, WebSocket, and CLI integration.\n3. Add code examples for common use cases.\n4. Create diagrams illustrating the ID generation flow.\n5. Document configuration options and their effects.\n6. Add troubleshooting guides for common issues.\n7. Create user-facing documentation explaining the privacy implications.\n8. Update the main application documentation to reference the new ID generation system.",
+          "status": "pending",
+          "parentTaskId": 14
+        }
+      ]
     }
   ],
   "metadata": {
