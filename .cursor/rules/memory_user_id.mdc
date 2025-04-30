@@ -3,82 +3,201 @@ description:
 globs:
 alwaysApply: false
 ---
-# Anonymous User Memory Handling
+# Handling Anonymous Users in Memory Operations
 
-This rule outlines how to properly handle memory operations for anonymous users (user_id=0) in the MUXI Framework. Anonymous users should not have their data stored in or retrieved from long-term memory or have automatic context extraction performed.
+In the MUXI framework, user_id=0 represents an anonymous or system user. For privacy and data organization reasons, memory operations should be skipped for these users.
 
-## Core Principles
+## Key Principles
 
-1. **Skip Storage for Anonymous Users**: When user_id=0, do not store data in long-term memory
-2. **Skip Retrieval for Anonymous Users**: When user_id=0, return empty results instead of querying memory
-3. **Skip Context Extraction**: Do not perform automatic information extraction for anonymous users
-4. **Return Valid Defaults**: Return appropriate empty defaults ([], {}, etc.) rather than null values
+1. **Skip Memory Operations**: All memory storage and retrieval operations should check for `user_id == 0` and skip the operation if true.
+
+2. **Return Empty Results**: Memory retrieval operations should return empty results (empty lists, dictionaries, etc.) when `user_id == 0`.
+
+3. **Skip Automatic Extraction**: Information extraction should not be performed for anonymous users.
+
+4. **Early Returns**: Check for anonymous users early in methods to avoid unnecessary processing.
 
 ## Implementation Pattern
 
-Always check for user_id=0 before performing memory operations:
-
 ```python
-# Example for storing data
-async def add_to_memory(data, user_id=None):
-    # Set default value if None
-    user_id = user_id if user_id is not None else self.default_user_id
-
+def memory_operation(self, user_id: int, *args, **kwargs):
     # Skip operations for anonymous users
     if user_id == 0:
-        # Return appropriate default value
-        return 0  # or [] or {} depending on the context
+        return []  # or {}, None, etc. depending on the expected return type
 
-    # Proceed with normal operations for authenticated users
-    # ...
+    # Continue with normal operation
+    ...
 ```
+
+## Anonymous Users in Orchestrator
+
+The Orchestrator centralizes user ID handling for memory operations:
 
 ```python
-# Example for retrieving data
-async def get_from_memory(query, user_id=None):
-    # Set default value if None
-    user_id = user_id if user_id is not None else self.default_user_id
+async def add_to_long_term_memory(self, content, metadata, agent_id, user_id):
+    # Skip for anonymous users
+    if not self.long_term_memory or user_id == 0:
+        return
 
-    # Skip operations for anonymous users
-    if user_id == 0:
-        # Return appropriate empty result
-        return []  # or {} depending on the context
+    # Add agent_id and user_id to metadata
+    full_metadata = {
+        "agent_id": agent_id,
+        "user_id": user_id,
+        **metadata
+    }
 
-    # Proceed with normal operations for authenticated users
-    # ...
+    await self.long_term_memory.add(content, full_metadata)
 ```
 
-## Check Locations
+## Anonymous Users in Extraction
 
-Implement these checks in the following components:
+Extraction processes respect the anonymous user principle:
 
-1. **Memobase Methods**:
-   - `add()`
-   - `search()`
-   - `add_user_context_memory()`
-   - `get_user_context_memory()`
-   - `clear_user_context_memory()`
-   - `get_user_memories()`
-   - `clear_user_memory()`
+```python
+async def handle_user_information_extraction(self, user_message, agent_response, user_id, agent_id, extraction_model=None):
+    # Skip extraction for anonymous users
+    if user_id == 0:
+        return
 
-2. **Memory Extractor**:
-   - `process_conversation_turn()`
+    # Continue with extraction process
+    ...
+```
 
-3. **Long-Term Memory (direct access)**:
-   - When bypassing Memobase and accessing long-term memory directly
+## Context Memory and Anonymous Users
 
-## Handling Multi-User vs. Single-User Mode
+Context memory operations follow the same pattern:
 
-In multi-user mode (is_multi_user=True):
-- Always perform the user_id=0 check as described above
+```python
+async def get_user_context_memory(self, user_id):
+    if not self.user_context_memory or user_id == 0:
+        return {}
 
-In single-user mode (is_multi_user=False):
-- The check is less critical since there's one shared context
-- Still recommended for consistency and future-proofing
+    return await self.user_context_memory.get(user_id)
+```
 
-## Testing Considerations
+## Testing Anonymous User Handling
 
-When writing tests:
-1. Test with user_id=0 to verify operations are skipped
-2. Test with valid user_id to verify operations work normally
-3. Test with both None and explicit 0 to verify default handling
+Tests should verify that operations correctly handle anonymous users:
+
+```python
+@async_test
+async def test_anonymous_user_skipped(self):
+    # Setup a test with user_id=0
+    user_message = "Hi, I'm anonymous"
+    agent_response = "Hello there"
+
+    # Execute the operation
+    await self.extractor.process_conversation_turn(
+        user_message=user_message,
+        agent_response=agent_response,
+        user_id=0,  # Anonymous user ID
+        message_count=1
+    )
+
+    # Verify that no actions were taken
+    self.mock_model.generate.assert_not_called()
+    self.mock_orchestrator.add_user_context_memory.assert_not_called()
+```
+
+This ensures consistent handling of anonymous users throughout the codebase, protecting privacy and simplifying implementation.
+
+## Return Values for Anonymous Users
+
+| Operation Type | Return Value | Example |
+|---------------|--------------|---------|
+| Search operations | Empty list | `[]` |
+| Context retrieval | Empty dict | `{}` |
+| Add operations | Zero or dummy ID | `0` |
+| Delete operations | Success indicator | `True` |
+| Modify operations | No-op (void) | N/A |
+
+## Affected Components
+
+- **Memobase**: All memory storage/retrieval methods
+- **MemoryExtractor**: Conversation processing methods
+- **Agent**: Message processing methods that trigger extraction
+- **Orchestrator**: Memory-related utility methods
+
+## Component-Specific Guidelines
+
+### Memobase
+
+- Check user_id at the beginning of each method
+- Return appropriate empty values for anonymous users
+- Don't attempt to create or access collections for user_id=0
+
+### MemoryExtractor
+
+- Skip extraction entirely for anonymous users
+- Check user_id before starting extraction process
+- Return early from process_conversation_turn
+
+### Agent
+
+- Don't increment message count for anonymous users
+- Skip extraction calls for anonymous users
+- Don't attempt to enhance messages with context for anonymous users
+
+### Orchestrator
+
+- Skip memory operations for anonymous users in convenience methods
+- Don't initialize extractor for single-user mode
+- Add checks in extract_user_information method
+
+## When to Apply
+
+Apply these checks in:
+
+1. Methods that store data in memory
+2. Methods that retrieve data from memory
+3. Methods that process user data for extraction
+4. Methods that manage user-specific context
+
+## Memory Management Methods
+
+Key methods that should include anonymous user checks:
+
+```
+Memobase:
+- add()
+- search()
+- delete()
+- clear_user_memory()
+- get_user_memories()
+- add_user_context_memory()
+- get_user_context_memory()
+- import_user_context_memory()
+- clear_user_context_memory()
+- update_user_context_memory()
+
+MemoryExtractor:
+- process_conversation_turn()
+- purge_user_data()
+
+Agent:
+- process_message()
+- _enhance_with_context_memory()
+
+Orchestrator:
+- add_to_long_term_memory()
+- search_memory()
+- clear_memory()
+- extract_user_information()
+- get_user_context_memory()
+- add_user_context_memory()
+```
+
+## Testing
+
+When testing memory operations:
+- Include test cases with user_id=0
+- Verify that no data is stored/retrieved for anonymous users
+- Confirm that appropriate empty results are returned
+- Check that extraction is skipped for anonymous users
+
+## Security and Privacy Implications
+
+- Prevents accidental storage of anonymous user data
+- Maintains strict separation between identified and anonymous interactions
+- Aligns with privacy best practices by minimizing data collection
+- Reduces the risk of data leakage across users

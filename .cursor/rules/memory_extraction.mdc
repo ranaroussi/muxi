@@ -3,158 +3,212 @@ description:
 globs:
 alwaysApply: false
 ---
-# Automatic User Context Extraction Implementation
+# Automatic User Information Extraction
 
-This rule outlines the implementation guidelines for the automatic user information extraction system in the MUXI Framework. This feature allows agents to automatically identify and remember important user information from conversations.
+The MUXI framework includes automatic extraction of important user information from conversations. This rule documents how the extraction system works and how to implement and extend it.
 
-## Core Components
+## Key Components
 
-### MemoryExtractor Class
+1. **MemoryExtractor Class**: Responsible for analyzing conversations and extracting user information
+2. **Extraction Process**: Triggered after conversations, analyzes text to identify important information
+3. **Importance Scoring**: Assigns relevance scores to determine what information to store
+4. **Confidence Assessment**: Evaluates certainty of extracted information to prevent storing incorrect data
+5. **Conflict Resolution**: Handles updates when new information contradicts existing data
+6. **Privacy Controls**: Ensures user privacy and data protection
 
-The `MemoryExtractor` class provides the core extraction functionality:
+## Implementation Guidelines
+
+### Architecture Overview
+
+The automatic extraction system follows a centralized approach:
+
+1. **Orchestrator-Centered**: The extraction logic is centralized in the Orchestrator, which manages the process for all agents
+2. **Agent Delegation**: Agents delegate extraction to their parent Orchestrator through the `handle_user_information_extraction` method
+3. **Asynchronous Processing**: Extraction runs asynchronously to avoid blocking conversation flow
+
+This design ensures consistent extraction behavior across all agents and simplifies maintenance.
+
+### Recent Refactoring
+
+A key refactoring was made to fully centralize extraction logic in the Orchestrator:
+
+1. Extraction parameters are no longer needed in Agent constructor
+2. The Agent only needs a reference to the Orchestrator that handles extraction
+3. The Agent delegates extraction to the Orchestrator, passing only the necessary conversation data
+4. Extraction-specific privacy checks (e.g., for anonymous users) happen at both Agent and Orchestrator levels
+5. The Orchestrator processes extraction asynchronously to avoid impacting conversation performance
+
+Benefits of this approach:
+- Cleaner separation of concerns (Agent focuses on conversation, Orchestrator on extraction)
+- Centralized implementation reduces code duplication
+- Consistent application of privacy rules
+- Extraction behavior can be modified at the orchestrator level without changing agents
+- Better testability and easier maintenance
+
+### Extraction Triggers
+
+- Check `auto_extract_user_info` flag in the Orchestrator
+- Extraction is triggered after completing a conversation turn
+- For performance reasons, extraction can be set to run only after every N messages
+- Set extraction_interval in MemoryExtractor to control frequency (default: 1)
+
+### Privacy Settings
+
+- Anonymous users (user_id = 0) are automatically excluded from extraction (both at Agent and Orchestrator levels)
+- Users can opt out of extraction via the `opt_out_user` method
+- Sensitive information keywords are automatically detected and excluded
+- Whitelist/blacklist functionality allows site-wide control
+- User data can be purged with `purge_user_data` method
+
+### Implementation
+
+#### Orchestrator Configuration
 
 ```python
-# Example MemoryExtractor integration
-class MemoryExtractor:
-    def __init__(
-        self,
-        orchestrator,
-        extraction_model=None,  # Note: Separate model for extraction to optimize costs
-        confidence_threshold=0.7,
-        auto_extract=True,
-        extraction_interval=1
-    ):
-        # Implementation follows PRD specification
+# Initialize Orchestrator with extraction settings
+orchestrator = Orchestrator(
+    buffer_memory=buffer_memory,
+    long_term_memory=long_term_memory,
+    auto_extract_user_info=True,
+    extraction_model=extraction_model  # Optional, defaults to agent model
+)
 ```
 
-### Extraction Process Flow
-
-The standard flow for processing a conversation:
-
-1. Agent receives user message and generates response
-2. Agent checks if extraction is enabled and the interval condition is met
-3. If conditions are met, extracts information using the extraction_model or falls back to agent model
-4. Processes results, checking confidence threshold
-5. Handles conflicts with existing information
-6. Stores results in context memory with appropriate metadata
-
-## Configuration Guidelines
-
-### Model Selection
+#### Agent Configuration
 
 ```python
-# Create a dedicated extraction model (optimized for cost)
+# Initialize Agent - no extraction settings needed
+agent = Agent(
+    model=model,
+    orchestrator=orchestrator,
+    system_message="You are a helpful assistant...",
+    is_multi_user=True
+)
+```
+
+### Information Flow
+
+1. Agent processes user message
+2. Agent delegates extraction to Orchestrator via `handle_user_information_extraction`
+3. Orchestrator runs extraction asynchronously via `_run_extraction`
+4. MemoryExtractor analyzes conversation and identifies key information
+5. Extracted information is stored in the user's context memory
+6. Subsequent conversations have access to this context memory
+
+### Extraction Methods
+
+The key methods involved in the extraction process:
+
+1. **Agent.process_message**: After processing a conversation, delegates extraction to the Orchestrator.
+2. **Orchestrator.handle_user_information_extraction**: Centralized entry point for extraction, handles message counting and runs extraction asynchronously.
+3. **Orchestrator._run_extraction**: Internal method that performs the actual extraction, using the specified extraction model.
+4. **MemoryExtractor.process_conversation_turn**: Analyzes the conversation and extracts relevant information.
+
+### Extraction Model
+
+Extraction model is configured at the Orchestrator level:
+
+```python
+# Using a specialized model for extraction
 extraction_model = OpenAIModel(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    model="gpt-3.5-turbo",  # Lower cost model for extraction
+    model="gpt-4o",  # More capable for extraction
+    temperature=0.0,  # Deterministic extraction
+    max_tokens=1024
 )
 
-# Use a higher-capability model for the main conversation
-agent_model = AnthropicModel(
-    api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-3-opus-20240229"
-)
-
-# Configure the orchestrator to use the extraction model
-app = muxi(
-    auto_extract_context=True,
-    extraction_model=extraction_model,
-    # Other parameters...
+# Configure the orchestrator with extraction model
+orchestrator = Orchestrator(
+    buffer_memory=buffer_memory,
+    long_term_memory=long_term_memory,
+    auto_extract_user_info=True,
+    extraction_model=extraction_model
 )
 ```
 
-### Extraction Settings
+### Processing and Storage
 
-- `extraction_interval`: Set higher (e.g., 3-5) for frequent conversations, lower (1-2) for important interactions
-- `confidence_threshold`: Use higher values (0.8+) for sensitive applications
-- `auto_extract`: Set to False when users request privacy or for testing
+The extraction process:
 
-## Implementation Details
+1. Creates a prompt describing what information to extract
+2. Sends conversation text to LLM for analysis
+3. LLM identifies key information with importance and confidence scores
+4. Information is formatted as structured data
+5. Sensitive information is filtered out
+6. New information is merged with existing context
+7. Results are stored in user_context_memory
 
-### Prompt Engineering
+### Accessing Extracted Information
 
-The extraction prompt should:
-1. Be clear about the extraction task
-2. Request specific information format (JSON)
-3. Specify required fields (key, value, confidence, importance)
-4. Provide examples for common extraction patterns
-5. Emphasize privacy (avoid extracting sensitive data)
-
-Example prompt structure:
-```python
-def _create_extraction_prompt(self, conversation):
-    return (
-        "Based on the following conversation, extract important information about the user "
-        "that should be remembered for future interactions. For each piece of information, "
-        # ... additional prompt details ...
-    )
-```
-
-### Conflict Resolution
-
-When new information conflicts with existing data:
-1. Compare importance scores
-2. Consider information recency
-3. Implement type-specific merging where appropriate
-4. Maintain provenance information
-
-## Testing Guidelines
-
-1. **Unit Tests**:
-   - Test extraction from various conversation patterns
-   - Verify confidence thresholding works correctly
-   - Test conflict resolution logic
-
-2. **Integration Tests**:
-   - Test with different model providers
-   - Verify memory persistence across sessions
-   - Test with multi-turn conversations
-
-3. **Performance Tests**:
-   - Measure extraction latency
-   - Verify minimal impact on conversation responsiveness
-
-## Common Implementation Pitfalls
-
-1. **Extraction Quality**:
-   - Avoid overly complex prompts that confuse the extraction model
-   - Don't use tiny models (e.g., ada) that can't follow structured instruction
-
-2. **Performance Issues**:
-   - Implement caching for repeated extractions of similar content
-   - Consider batching extractions for multi-turn processing
-
-3. **Privacy Concerns**:
-   - Always provide opt-out mechanisms
-   - Avoid storing sensitive information (SSNs, passwords, etc.)
-   - Implement retention policies for automatically extracted data
-
-## Example Implementation Steps
-
-1. Create the `MemoryExtractor` class in `packages/server/src/muxi/memory/extraction.py`
-2. Update the `Orchestrator` class to support extraction configuration
-3. Modify the `Agent.process_message()` method to trigger extraction
-4. Update the MUXI facade to expose extraction configuration
-5. Add extraction-related CLI commands for testing and management
-6. Implement conflict resolution logic for common information types
-7. Add extraction statistics tracking for monitoring and debugging
-
-## Reference Implementation
+Extracted information is automatically included in future conversations:
 
 ```python
-# Example implementation structure
-async def _extract_user_information(self, conversation):
-    """Extract user information using the extraction model."""
-    model = self.extraction_model or self.orchestrator.default_model
-    prompt = self._create_extraction_prompt(conversation)
-    extraction_response = await model.generate(prompt)
+# Get all context memory for a user
+user_context = await orchestrator.get_user_context_memory(user_id=123)
 
-    try:
-        # Primary approach - parse JSON
-        extraction_results = json.loads(extraction_response)
-    except json.JSONDecodeError:
-        # Fallback parsing
-        extraction_results = self._parse_fallback_extraction(extraction_response)
-
-    return extraction_results
+# Add or update specific information
+await orchestrator.add_user_context_memory(
+    user_id=123,
+    knowledge={
+        "preferred_language": {
+            "value": "Python",
+            "importance": 0.8
+        }
+    },
+    source="manual_input",
+    importance=0.9
+)
 ```
+
+## Testing
+
+The implementation includes comprehensive tests for:
+
+1. Extraction functionality in the MemoryExtractor
+2. Orchestrator's extraction handling
+3. Agent's extraction delegation
+4. Anonymous user handling
+5. Opt-out mechanisms
+6. Custom extraction model support
+7. Disabled extraction behavior
+
+Run the tests with:
+
+```bash
+python -m pytest tests/test_extractor.py -v
+```
+
+## Configuration Options
+
+- `auto_extract`: Enable/disable automatic extraction
+- `extraction_model`: Model to use for extraction
+- `confidence_threshold`: Minimum confidence score (0.0-1.0)
+- `extraction_interval`: Process every N messages
+- `opt_out_users`: Set of user IDs that have opted out
+- `whitelist_users`: If set, only extract info for these users
+- `blacklist_users`: Don't extract info for these users
+- `retention_days`: How long to keep extracted information
+
+## Extraction Data Format
+
+Extracted information is stored with this structure:
+
+```python
+knowledge_updates[key] = {
+    "value": value,
+    "importance": importance,
+    "source": "automatic_extraction",
+    "timestamp": time.time(),
+    "confidence": confidence
+}
+```
+
+## Best Practices
+
+1. **Tune extraction interval** based on conversation patterns (1-5 is recommended)
+2. **Set appropriate confidence threshold** (0.7-0.8 works well in most cases)
+3. **Review extracted information periodically** to evaluate quality
+4. **Provide clear opt-out mechanisms** for privacy-conscious users
+5. **Consider using simpler models** for extraction to optimize costs
+6. **Implement retention policies** to automatically age out older information
+7. **Centralize extraction logic** in the Orchestrator for better maintainability
+8. **Run extraction asynchronously** to avoid impacting conversation performance

@@ -1,0 +1,250 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Centralized MCP Service Architecture
+
+This rule documents the Centralized MCP (Machine-Conversation Protocol) Service architecture in the MUXI framework.
+
+## Architecture Overview
+
+The MUXI framework implements a centralized approach to MCP handling, where Agents communicate directly with MCP servers through a shared `MCPService` rather than maintaining their own MCP handlers.
+
+```mermaid
+graph TD
+    Agent1 --> MCPService
+    Agent2 --> MCPService
+    Agent3 --> MCPService
+    MCPService --> MCPServer1
+    MCPService --> MCPServer2
+    MCPService --> MCPServer3
+```
+
+## Key Components
+
+### 1. MCPService (Singleton)
+
+A centralized service that manages connections to MCP servers and handles the protocol details for Agent communications. Implemented as a singleton to ensure a single point of management for all MCP connections.
+
+Location: `packages/core/src/muxi/core/mcp_service.py`
+
+Key features:
+- Manages a registry of MCP servers and their connections
+- Provides a thread-safe mechanism for tool invocation
+- Handles authentication and connection management
+- Implements error handling and logging
+- Configurable request timeouts at multiple levels
+
+```python
+# Get the singleton instance
+mcp_service = MCPService.get_instance()
+
+# Register an MCP server
+server_id = await mcp_service.register_mcp_server(
+    server_id="my-server",
+    url="http://example.com",
+    credentials={"api_key": "my-api-key"},
+    request_timeout=60  # Default timeout in seconds
+)
+
+# Invoke a tool on the server
+result = await mcp_service.invoke_tool(
+    server_id=server_id,
+    tool_name="my_tool",
+    parameters={"param1": "value1"},
+    request_timeout=30  # Override timeout for this specific request
+)
+```
+
+### 2. Agent-Service Integration
+
+Agents are configured to use the MCPService for tool invocations rather than maintaining their own MCP handlers.
+
+```python
+# In Agent class
+async def invoke_tool(self, server_id, tool_name, parameters):
+    mcp_service = self.get_mcp_service()
+    return await mcp_service.invoke_tool(
+        server_id=server_id,
+        tool_name=tool_name,
+        parameters=parameters,
+        request_timeout=self.request_timeout  # Use agent's timeout setting
+    )
+```
+
+### 3. ToolParser
+
+A utility that parses LLM responses to identify and extract tool calls.
+
+Location: `packages/core/src/muxi/core/tool_parser.py`
+
+Capabilities:
+- Parses tool calls in various formats (JSON blocks, function calls, explicit tags)
+- Extracts tool name and parameters
+- Removes tool calls from text or replaces them with results
+
+```python
+# Parse a raw LLM response
+cleaned_text, tool_calls = ToolParser.parse(raw_response)
+
+# Process each tool call
+for tool_call in tool_calls:
+    result = await invoke_tool(
+        tool_name=tool_call.tool_name,
+        parameters=tool_call.parameters
+    )
+    tool_call.set_result(result)
+
+# Replace tool calls with results
+final_text = ToolParser.replace_tool_calls_with_results(raw_response, tool_calls)
+```
+
+## Timeout Configuration
+
+The MCP service implements a multi-level timeout configuration system that allows developers to set timeouts at different levels of granularity:
+
+1. **Orchestrator Level**: Default timeout for all MCP requests from all agents
+   ```python
+   orchestrator = Orchestrator(request_timeout=60)  # 60 seconds default
+   ```
+
+2. **Agent Level**: Override the orchestrator's default for a specific agent
+   ```python
+   agent = orchestrator.create_agent(
+       agent_id="weather-agent",
+       model=weather_model,
+       system_message="You're a weather assistant.",
+       request_timeout=30  # 30 seconds for this agent only
+   )
+   ```
+
+3. **Server Registration Level**: Set a default for a specific MCP server
+   ```python
+   server_id = await orchestrator.register_mcp_server(
+       server_id="weather-api",
+       url="https://api.weather.com",
+       credentials={"api_key": "key"},
+       request_timeout=45  # 45 seconds for this server
+   )
+   ```
+
+4. **Per-Request Level**: Override all defaults for a specific tool invocation
+   ```python
+   result = await agent.invoke_tool(
+       server_id="weather-api",
+       tool_name="get_forecast",
+       parameters={"location": "New York"},
+       request_timeout=15  # 15 seconds for this specific call
+   )
+   ```
+
+The system uses the most specific timeout configuration available, falling back to broader defaults as needed:
+1. Per-request timeout (if specified)
+2. Agent's timeout (if specified)
+3. Server's registration timeout (if specified)
+4. Orchestrator's default timeout
+5. Global default (60 seconds)
+
+## Implementation Flow
+
+1. **Initialization**:
+   - The Orchestrator initializes the MCPService singleton during its own initialization
+   - Agents access the MCPService via the `get_mcp_service()` method
+
+2. **Server Registration**:
+   - MCP servers are registered with the MCPService either:
+     - Directly through the Orchestrator's `register_mcp_server` method
+     - Via configuration at startup
+
+3. **Tool Invocation Flow**:
+   - Agent receives a user message and passes it to its model
+   - Model generates a response that may include tool calls
+   - ToolParser extracts tool calls from the response
+   - For each tool call:
+     - Agent invokes the tool via MCPService
+     - Result is attached to the tool call
+   - Tool calls in the response are replaced with their results
+   - Final response is returned to the user
+
+## Best Practices
+
+1. **Server Management**:
+   - Register servers at startup in the application initialization
+   - Use consistent server IDs across application components
+   - Store credentials securely (e.g., environment variables)
+
+2. **Tool Invocation**:
+   - Handle errors gracefully, using try/except blocks
+   - Include appropriate timeouts for tool calls
+   - Log tool invocations and results for debugging
+
+3. **Agent Configuration**:
+   - Set up MCP servers appropriate to each agent's capabilities
+   - Configure appropriate server access permissions for each agent
+
+4. **Tool Response Handling**:
+   - Format tool results appropriately for user consumption
+   - Provide explanations of tool outputs when necessary
+   - Handle errors in a user-friendly way
+
+## Example: Complete Flow
+
+```python
+# 1. Register an MCP server during application startup
+server_id = await orchestrator.register_mcp_server(
+    server_id="weather-api",
+    url="https://api.weather.com",
+    credentials={"api_key": os.getenv("WEATHER_API_KEY")},
+    request_timeout=45  # 45 seconds for this server
+)
+
+# 2. Create an agent that can use this server
+agent = orchestrator.create_agent(
+    agent_id="weather-agent",
+    model=weather_model,
+    system_message="You're a weather assistant. Use tools when needed.",
+    request_timeout=30  # 30 seconds for this agent only
+)
+
+# 3. When the agent processes a message that needs a tool
+async def process_message(self, message):
+    # Get model response
+    raw_response = await self.model.chat(message)
+
+    # Parse for tool calls
+    cleaned_text, tool_calls = ToolParser.parse(raw_response)
+
+    # Process tool calls
+    for tool_call in tool_calls:
+        result = await self.invoke_tool(
+            server_id="weather-api",
+            tool_name=tool_call.tool_name,
+            parameters=tool_call.parameters,
+            request_timeout=self.request_timeout  # Use agent's timeout setting
+        )
+        tool_call.set_result(result)
+
+    # Create final response with tool results
+    final_response = ToolParser.replace_tool_calls_with_results(
+        raw_response, tool_calls
+    )
+
+    return final_response
+```
+
+## Comparison to Previous Architecture
+
+Before the centralized MCPService:
+- Each Agent had its own MCP handler instance
+- The Orchestrator had to manage and distribute MCP handlers
+- Duplication of connection management and handler logic
+- Inconsistent error handling and connection state across agents
+
+With the centralized MCPService:
+- Single point of management for all MCP connections
+- Consistent error handling and connection state
+- More efficient resource usage (connection pooling)
+- Cleaner Agent implementation with delegation to the service
+- Better separation of concerns
+- Simplified testing and mocking
