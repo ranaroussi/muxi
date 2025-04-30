@@ -1,11 +1,19 @@
 # Task ID: 8
-# Title: Expand LLM Provider Support
+# Title: Complete MemoryExtractor Implementation
 # Status: pending
-# Dependencies: 1
-# Priority: medium
-# Description: Implement support for additional LLM providers including Anthropic, Gemini, Grok, and local models.
+# Dependencies: 1, 2
+# Priority: high
+# Description: Enhance and optimize the existing MemoryExtractor system for automatic user information extraction from conversations.
 # Details:
-Create provider interfaces for Anthropic, Gemini, and Grok. Implement local model support for Llama, Mistral, and DeepSeek. Develop a model router for fallback and cost optimization. Standardize prompt formatting across providers. Implement caching mechanisms for responses. Create configuration options for each provider. Add streaming support for compatible providers.
+The core MemoryExtractor implementation and integration with Agent and Orchestrator classes is already functional. This task focuses on enhancing and optimizing the existing implementation with the following improvements:
+
+1. Improve entity recognition for various information types
+2. Add or refine confidence scoring and conflict resolution for contradictory information
+3. Create configurable extraction thresholds and sensitivity controls
+4. Implement privacy controls including PII detection and handling
+5. Add performance optimizations including tiered model selection
+6. Optimize extraction process to further reduce conversation latency impact
+7. Extend feature set based on existing implementation
 
 # Test Strategy:
-Test each provider with sample prompts. Verify streaming capabilities. Test fallback mechanisms in the model router. Benchmark performance and cost across providers. Create integration tests with mock API responses.
+Test extraction accuracy improvements with various conversation types. Verify PII handling compliance with privacy regulations. Benchmark extraction performance to ensure minimal latency impact. Test conflict resolution with contradictory information. Compare performance metrics before and after optimizations to quantify improvements.

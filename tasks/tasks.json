@@ -2,295 +2,149 @@
   "tasks": [
     {
       "id": 1,
-      "title": "Implement Core REST API Endpoints",
-      "description": "Develop the foundational REST API endpoints for agent management, conversation management, and memory operations as specified in api.md.",
+      "title": "Implement Context Memory Templates",
+      "description": "Create a template system for defining common context memory structures with support for inheritance, extension, and validation.",
       "status": "pending",
       "dependencies": [],
       "priority": "high",
-      "details": "Implement RESTful endpoints following the api.md specification. Create controllers for agent management (CRUD operations), conversation management (create, retrieve, update conversations), and memory operations. Use standard HTTP methods (GET, POST, PUT, DELETE) with proper status codes. Ensure JSON response formatting is consistent. Set up routing with proper URL patterns and versioning support (e.g., /v1/agents).",
-      "testStrategy": "Create unit tests for each endpoint using a testing framework. Verify correct response codes, payload validation, and error handling. Use mock services to isolate API layer testing.",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Set up API project structure and routing framework",
-          "description": "Create the foundational structure for the REST API including project setup, routing configuration, error handling middleware, and API versioning support.",
-          "dependencies": [],
-          "details": "1. Initialize the API project structure with appropriate folders (controllers, routes, models, middleware, utils)\n2. Set up the main server file with Express.js or similar framework\n3. Implement API versioning support (e.g., /v1/)\n4. Create middleware for request validation, error handling, and logging\n5. Implement standardized response formatting for consistent JSON outputs\n6. Configure CORS and security headers\n7. Test the base API structure with a simple health check endpoint (/v1/health)\n8. Document the project structure for other developers",
-          "status": "pending",
-          "parentTaskId": 1
-        },
-        {
-          "id": 2,
-          "title": "Implement Agent Management API endpoints",
-          "description": "Create the CRUD endpoints for agent management as specified in api.md, including creating, retrieving, updating, and deleting agents.",
-          "dependencies": [
-            1
-          ],
-          "details": "1. Create an agent model/schema based on api.md specifications\n2. Implement the following endpoints:\n   - GET /v1/agents - List all agents\n   - GET /v1/agents/:id - Get a specific agent\n   - POST /v1/agents - Create a new agent\n   - PUT /v1/agents/:id - Update an agent\n   - DELETE /v1/agents/:id - Delete an agent\n3. Add request validation for each endpoint\n4. Implement proper HTTP status codes (200, 201, 400, 404, etc.)\n5. Write unit tests for each endpoint using Jest or similar\n6. Test with Postman or similar tool to verify functionality\n7. Document the endpoints with examples",
-          "status": "pending",
-          "parentTaskId": 1
-        },
-        {
-          "id": 3,
-          "title": "Implement Conversation Management API endpoints",
-          "description": "Develop the endpoints for creating, retrieving, and updating conversations between users and agents.",
-          "dependencies": [
-            1,
-            2
-          ],
-          "details": "1. Create a conversation model/schema that references agents\n2. Implement the following endpoints:\n   - GET /v1/conversations - List conversations\n   - GET /v1/conversations/:id - Get a specific conversation\n   - POST /v1/conversations - Create a new conversation\n   - PUT /v1/conversations/:id - Update a conversation\n   - GET /v1/conversations/:id/messages - Get messages in a conversation\n   - POST /v1/conversations/:id/messages - Add a message to a conversation\n3. Ensure proper relationships between conversations and agents\n4. Implement pagination for conversation listing and message retrieval\n5. Add filtering capabilities (by date, agent, etc.)\n6. Write unit tests for each endpoint\n7. Test conversation flows end-to-end",
-          "status": "pending",
-          "parentTaskId": 1
-        },
-        {
-          "id": 4,
-          "title": "Implement Memory Operations API endpoints",
-          "description": "Create endpoints for managing agent memory operations including storing, retrieving, and updating memory entries.",
-          "dependencies": [
-            1,
-            2
-          ],
-          "details": "1. Create a memory model/schema that links to agents\n2. Implement the following endpoints:\n   - GET /v1/agents/:id/memory - Retrieve an agent's memory\n   - POST /v1/agents/:id/memory - Add to an agent's memory\n   - PUT /v1/agents/:id/memory/:memoryId - Update a specific memory entry\n   - DELETE /v1/agents/:id/memory/:memoryId - Delete a memory entry\n   - GET /v1/agents/:id/memory/search - Search within an agent's memory\n3. Implement memory indexing for efficient retrieval\n4. Add query parameters for memory filtering and searching\n5. Ensure proper validation of memory entries\n6. Write unit tests for memory operations\n7. Test memory persistence and retrieval accuracy",
-          "status": "pending",
-          "parentTaskId": 1
-        },
-        {
-          "id": 5,
-          "title": "Implement API documentation and integration testing",
-          "description": "Create comprehensive API documentation using OpenAPI/Swagger and implement integration tests to ensure all endpoints work together correctly.",
-          "dependencies": [
-            2,
-            3,
-            4
-          ],
-          "details": "1. Generate OpenAPI/Swagger documentation for all implemented endpoints\n2. Set up an interactive API documentation interface\n3. Create integration tests that test complete workflows:\n   - Creating an agent, starting a conversation, and storing memory\n   - Retrieving conversations with their associated agents\n   - Testing memory operations in context of conversations\n4. Implement API rate limiting and throttling\n5. Add authentication middleware (if required by api.md)\n6. Perform load testing to ensure API performance\n7. Create example API client code snippets\n8. Document error codes and troubleshooting guidance",
-          "status": "pending",
-          "parentTaskId": 1
-        }
-      ]
+      "details": "Develop a template system that allows defining common context memory structures in both code and configuration files (YAML/JSON). Implement standard templates for user preferences, personal information, and session data. Support template inheritance and extension for customization. Add validation for template-based data. The implementation should minimize performance overhead while providing a flexible structure for developers.",
+      "testStrategy": "Create unit tests for template creation, inheritance, validation, and usage. Develop integration tests to verify template functionality with actual memory storage. Benchmark performance to ensure minimal overhead."
     },
     {
       "id": 2,
-      "title": "Add Authentication and Security for REST API",
-      "description": "Implement API key authentication, rate limiting, and throttling for the REST API endpoints.",
+      "title": "Develop Context Memory Namespaces",
+      "description": "Implement hierarchical namespaces for context memory organization with appropriate access controls and query capabilities.",
       "status": "pending",
       "dependencies": [
         1
       ],
       "priority": "high",
-      "details": "Create middleware for API key validation. Implement rate limiting using a token bucket or similar algorithm. Add request throttling to prevent abuse. Create an API key management system with generation, revocation, and permission scoping. Implement proper error responses for authentication failures (401) and rate limit exceeded (429). Store API keys securely with hashing.",
-      "testStrategy": "Test authentication with valid and invalid API keys. Verify rate limiting by sending requests exceeding the limit. Test API key management operations. Create integration tests that simulate various authentication scenarios.",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Create API Key Storage and Management System",
-          "description": "Implement a secure storage system for API keys with functionality for generation, hashing, and management",
-          "dependencies": [],
-          "details": "Implementation details:\n1. Design a database schema for storing API keys with fields for: key_id, hashed_key, user_id, created_at, last_used, permissions/scopes, active status, and expiration\n2. Implement a secure hashing function using bcrypt or similar algorithm to store API keys\n3. Create functions for generating new API keys with configurable length and entropy\n4. Implement methods for key revocation (setting active status to false)\n5. Add functionality for permission/scope assignment to keys\n6. Create admin endpoints for key management (generation, revocation, scope modification)\n7. Testing approach: Write unit tests for key generation, hashing, and validation functions; create integration tests for the key management endpoints",
-          "status": "pending",
-          "parentTaskId": 2
-        },
-        {
-          "id": 2,
-          "title": "Implement API Key Authentication Middleware",
-          "description": "Create middleware to validate API keys for protected endpoints",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation details:\n1. Create middleware function that extracts API key from request headers, query parameters, or Authorization header\n2. Implement key validation logic that checks the provided key against stored hashed keys\n3. Add functionality to verify key hasn't expired and is still active\n4. Implement permission/scope checking to ensure the key has access to the requested resource\n5. Create proper 401 Unauthorized responses with informative error messages for authentication failures\n6. Add request logging for authentication attempts (successful and failed)\n7. Testing approach: Write unit tests with mock requests containing valid and invalid API keys; test different authentication failure scenarios; ensure proper error responses",
-          "status": "pending",
-          "parentTaskId": 2
-        },
-        {
-          "id": 3,
-          "title": "Implement Rate Limiting Functionality",
-          "description": "Create a token bucket or similar rate limiting algorithm to restrict API usage",
-          "dependencies": [
-            1,
-            2
-          ],
-          "details": "Implementation details:\n1. Research and select appropriate rate limiting algorithm (token bucket recommended)\n2. Implement the rate limiting logic with configurable rates per API key or user\n3. Create a storage mechanism for tracking request counts (Redis recommended for distributed systems)\n4. Implement different rate limit tiers based on user permissions or subscription levels\n5. Add headers to responses showing rate limit status (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)\n6. Create 429 Too Many Requests responses when limits are exceeded\n7. Testing approach: Write tests that simulate rapid API calls to trigger rate limiting; verify correct headers and 429 responses",
-          "status": "pending",
-          "parentTaskId": 2
-        },
-        {
-          "id": 4,
-          "title": "Add Request Throttling Mechanism",
-          "description": "Implement request throttling to prevent API abuse and ensure service stability",
-          "dependencies": [
-            3
-          ],
-          "details": "Implementation details:\n1. Design a throttling mechanism that limits concurrent requests from the same client\n2. Implement logic to track ongoing requests per API key or IP address\n3. Create configurable throttling parameters (max concurrent requests, cool-down period)\n4. Add functionality to queue or reject requests that exceed throttling limits\n5. Implement proper error responses for throttled requests with retry-after headers\n6. Create monitoring for throttling events to detect potential abuse patterns\n7. Testing approach: Write tests that simulate concurrent requests to verify throttling behavior; test with different throttling configurations",
-          "status": "pending",
-          "parentTaskId": 2
-        },
-        {
-          "id": 5,
-          "title": "Integrate Security Features and Create Documentation",
-          "description": "Connect all security components, add global error handling, and create documentation for API security",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4
-          ],
-          "details": "Implementation details:\n1. Integrate authentication, rate limiting, and throttling middleware into the main application\n2. Create a configuration system for security parameters (rate limits, throttling settings, key expiration policies)\n3. Implement global error handling for security-related errors with appropriate status codes\n4. Add security headers to all API responses (Content-Security-Policy, X-Content-Type-Options, etc.)\n5. Create comprehensive documentation for API consumers explaining authentication requirements, rate limits, and error codes\n6. Implement a developer dashboard showing API usage, rate limit status, and key management\n7. Testing approach: Perform end-to-end testing of the complete security system; verify all components work together correctly; test edge cases and error scenarios",
-          "status": "pending",
-          "parentTaskId": 2
-        }
-      ]
+      "details": "Create a namespace system that organizes different types of context data with hierarchical structure. Implement efficient mapping to database structures while preserving backward compatibility. Add support for querying data across multiple namespaces. Create access control mechanisms for namespace-level permissions. Support namespace-specific configuration options. Develop utilities for namespace management (creation, deletion, listing).",
+      "testStrategy": "Test namespace creation, deletion, and listing. Verify access control mechanisms with different permission levels. Test cross-namespace queries and validate performance. Ensure backward compatibility with existing code through regression tests."
     },
     {
       "id": 3,
-      "title": "Implement WebSocket API",
-      "description": "Develop the WebSocket API for real-time communication with support for multi-modal messages as specified in api.md.",
+      "title": "Complete Memory REST API Endpoints",
+      "description": "Implement the remaining REST API endpoints for memory operations as specified in api.md.",
       "status": "pending",
       "dependencies": [
+        1,
         2
       ],
       "priority": "high",
-      "details": "Set up WebSocket server with proper connection handling. Implement message types for text, images, and audio as defined in api.md. Create handlers for different message types. Implement reconnection logic with exponential backoff. Add support for attachments with proper binary data handling. Ensure proper error handling with standardized error messages. Implement authentication for WebSocket connections.",
-      "testStrategy": "Create WebSocket client tests that verify connection establishment, message sending/receiving, and reconnection behavior. Test with different message types and attachments. Verify proper error handling and recovery mechanisms.",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Set up WebSocket server with connection handling",
-          "description": "Implement the core WebSocket server with proper connection establishment, maintenance, and termination capabilities.",
-          "dependencies": [],
-          "details": "1. Choose and set up a WebSocket library (like ws, Socket.IO)\n2. Create a WebSocket server that listens on a configurable port\n3. Implement connection event handlers (open, close, error)\n4. Set up ping/pong mechanism to detect stale connections\n5. Implement basic logging for connection events\n6. Create a connection pool to track active connections\n7. Testing: Write tests to verify connection establishment, maintenance over time, and proper termination",
-          "status": "pending",
-          "parentTaskId": 3
-        },
-        {
-          "id": 2,
-          "title": "Implement authentication for WebSocket connections",
-          "description": "Add authentication mechanisms to verify client identity before establishing WebSocket connections.",
-          "dependencies": [
-            1
-          ],
-          "details": "1. Review authentication requirements from api.md\n2. Implement token validation on connection request\n3. Create middleware to authenticate connection requests\n4. Add user/client identification to connection objects\n5. Implement connection rejection for invalid credentials\n6. Set up secure token transmission\n7. Testing: Write tests with valid and invalid authentication attempts, verify proper rejection of unauthorized connections",
-          "status": "pending",
-          "parentTaskId": 3
-        },
-        {
-          "id": 3,
-          "title": "Implement message types and handlers",
-          "description": "Create the message type definitions and corresponding handlers for text, images, and audio as specified in api.md.",
-          "dependencies": [
-            1,
-            2
-          ],
-          "details": "1. Define message type schemas for text, images, and audio based on api.md\n2. Implement message parsing and validation\n3. Create handler functions for each message type\n4. Set up message routing based on type\n5. Implement acknowledgment responses\n6. Add message queuing for handling high loads\n7. Testing: Create tests for each message type, verify proper routing and handling",
-          "status": "pending",
-          "parentTaskId": 3
-        },
-        {
-          "id": 4,
-          "title": "Add support for binary data and attachments",
-          "description": "Implement binary data handling for attachments like images and audio files.",
-          "dependencies": [
-            3
-          ],
-          "details": "1. Configure WebSocket server for binary data transmission\n2. Implement buffer handling for binary messages\n3. Create utilities for encoding/decoding binary data\n4. Add attachment size validation\n5. Implement streaming for large attachments\n6. Set up temporary storage for attachments if needed\n7. Testing: Test binary data transmission with various file types and sizes, verify data integrity",
-          "status": "pending",
-          "parentTaskId": 3
-        },
-        {
-          "id": 5,
-          "title": "Implement reconnection logic and error handling",
-          "description": "Add client reconnection capabilities with exponential backoff and standardized error handling.",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4
-          ],
-          "details": "1. Define standardized error message format as specified in api.md\n2. Implement error types and codes\n3. Create error handling middleware\n4. Implement reconnection logic with exponential backoff\n5. Add connection state tracking\n6. Implement message buffering during disconnections\n7. Create client-side reconnection examples\n8. Testing: Simulate network failures and verify reconnection behavior, test error handling for various error scenarios",
-          "status": "pending",
-          "parentTaskId": 3
-        }
-      ]
+      "details": "Complete the implementation of context memory CRUD operations via REST API following RESTful principles. Create endpoints for memory search with filtering and pagination. Add endpoints for memory extraction settings management. Implement bulk operations for memory management. Include proper validation for all endpoints and support both synchronous and streaming responses where appropriate. Document all endpoints with OpenAPI/Swagger.",
+      "testStrategy": "Create API tests for each endpoint covering success and error cases. Test pagination, filtering, and bulk operations. Verify API documentation accuracy with Swagger UI. Perform load testing to ensure endpoint performance under stress."
     },
     {
       "id": 4,
-      "title": "Enhance CLI Interface",
-      "description": "Improve the command-line interface to support all API operations with better formatting and user experience.",
+      "title": "Optimize Vector Operations Performance",
+      "description": "Improve performance of vector similarity search and memory access operations across all database backends.",
       "status": "pending",
       "dependencies": [
-        1,
-        2,
         3
       ],
       "priority": "medium",
-      "details": "Refactor CLI to use a command pattern for all API operations. Add support for multi-modal interactions (text, images, audio). Implement configuration management commands for API keys and preferences. Improve output formatting with colors and structured data. Add progress indicators for long-running operations. Implement interactive mode for conversation. Create help documentation for all commands.",
-      "testStrategy": "Create automated tests for CLI commands using command execution and output parsing. Test configuration persistence. Verify all API operations can be performed through CLI. Create user acceptance testing script for manual verification."
+      "details": "Optimize vector similarity search operations for both PostgreSQL and SQLite backends. Implement advanced caching for frequently accessed memory entries. Add query optimization for large-scale memory stores. Create performance benchmarks for different scenarios. Support batch operations for memory insertions. Include configuration options to tune performance parameters.",
+      "testStrategy": "Benchmark vector operations before and after optimization to verify 50% performance improvement target. Test with various dataset sizes to ensure scalability. Validate that optimizations work consistently across both PostgreSQL and SQLite backends."
     },
     {
       "id": 5,
-      "title": "Develop Web UI Core",
-      "description": "Create a responsive web interface with real-time updates using WebSocket for agent interactions.",
+      "title": "Implement Migration Tools",
+      "description": "Develop tools for transferring data between different vector database backends with validation and logging.",
       "status": "pending",
       "dependencies": [
-        3
+        4
       ],
       "priority": "medium",
-      "details": "Set up a modern web framework (React/Vue/Angular). Create responsive layouts for mobile and desktop. Implement WebSocket connection for real-time updates. Build chat interface with support for multi-modal content. Create authentication screens and session management. Implement error handling and user notifications. Design and implement the agent interaction UI with message history.",
-      "testStrategy": "Implement unit tests for UI components. Create end-to-end tests for critical user flows. Test responsive design across different screen sizes. Verify WebSocket reconnection behavior. Test multi-modal content rendering."
+      "details": "Create command-line tools for memory data migration between PostgreSQL and SQLite backends. Support incremental migration to minimize downtime. Implement data validation during migrations to ensure 100% data integrity. Add schema evolution capabilities for backward compatibility. Provide detailed logging and reporting for migration operations. Ensure tools handle large datasets efficiently and support resumable migrations in case of interruption.",
+      "testStrategy": "Test migration between PostgreSQL and SQLite in both directions with various dataset sizes. Verify data integrity after migration. Test interruption and resumption of migration process. Validate schema evolution with different versions."
     },
     {
       "id": 6,
-      "title": "Implement Agent-to-Agent Communication Protocol",
-      "description": "Develop the A2A protocol for inter-agent communication with capability discovery and task delegation.",
+      "title": "Enhance Vector Database Implementations",
+      "description": "Add advanced features for scalability and performance to vector database implementations.",
       "status": "pending",
       "dependencies": [
-        1,
-        3
+        4
       ],
       "priority": "medium",
-      "details": "Design and implement the A2A protocol message format. Create capability discovery mechanism for agents to advertise their abilities. Implement task delegation between agents with proper request/response handling. Develop context sharing with isolation boundaries. Create conversation lifecycle management for A2A interactions. Implement authentication and security for A2A communications. Build external agent integration interfaces.",
-      "testStrategy": "Create unit tests for protocol message handling. Develop integration tests with multiple agents communicating. Test capability discovery with mock agents. Verify task delegation with various scenarios. Test security boundaries and authentication."
+      "details": "Add support for clustering and sharding in PostgreSQL. Implement advanced indexing strategies for both database backends. Create database-specific optimizations based on usage patterns. Develop guidance for database selection based on deployment scenarios. Add monitoring and metrics for vector operations. Maintain compatibility with both PostgreSQL and SQLite while ensuring optimizations don't compromise stability.",
+      "testStrategy": "Test clustering and sharding capabilities with large datasets. Benchmark different indexing strategies. Validate monitoring and metrics accuracy. Ensure compatibility across database versions and configurations."
     },
     {
       "id": 7,
-      "title": "Enhance Vector Database Support",
-      "description": "Optimize vector operations and add support for additional vector databases with migration tools.",
+      "title": "Add Multi-Modal Memory Support",
+      "description": "Extend memory systems to support image, audio, and document content with cross-modal search capabilities.",
       "status": "pending",
       "dependencies": [
-        1
+        3,
+        4
       ],
       "priority": "medium",
-      "details": "Optimize existing vector operations for improved performance. Implement adapters for additional vector databases (Milvus, Qdrant). Create database abstraction layer for consistent API. Develop migration tools for transferring between database types. Implement benchmarking tools for performance comparison. Add support for clustering and sharding configurations. Create guidance documentation for database selection (SQLite vs PostgreSQL).",
-      "testStrategy": "Benchmark vector operations before and after optimization. Test database adapters with actual database instances. Verify migration tools with sample datasets. Create integration tests for each supported database. Test clustering and sharding configurations."
+      "details": "Implement storage and retrieval mechanisms for multi-modal content including images, audio, and documents. Create cross-modal search capabilities. Develop efficient storage mechanisms for binary data. Support content type detection and automatic processing. Integrate with WebSocket for multi-modal streaming. Utilize appropriate embedding models for different content types and ensure database compatibility for binary storage.",
+      "testStrategy": "Test storage and retrieval of different content types. Verify cross-modal search functionality. Benchmark performance with various content sizes. Test WebSocket integration for streaming multi-modal content."
     },
     {
       "id": 8,
-      "title": "Expand LLM Provider Support",
-      "description": "Implement support for additional LLM providers including Anthropic, Gemini, Grok, and local models.",
+      "title": "Complete MemoryExtractor Implementation",
+      "description": "Enhance and optimize the existing MemoryExtractor system for automatic user information extraction from conversations.",
       "status": "pending",
       "dependencies": [
-        1
+        1,
+        2
       ],
-      "priority": "medium",
-      "details": "Create provider interfaces for Anthropic, Gemini, and Grok. Implement local model support for Llama, Mistral, and DeepSeek. Develop a model router for fallback and cost optimization. Standardize prompt formatting across providers. Implement caching mechanisms for responses. Create configuration options for each provider. Add streaming support for compatible providers.",
-      "testStrategy": "Test each provider with sample prompts. Verify streaming capabilities. Test fallback mechanisms in the model router. Benchmark performance and cost across providers. Create integration tests with mock API responses."
+      "priority": "high",
+      "details": "The core MemoryExtractor implementation and integration with Agent and Orchestrator classes is already functional. This task focuses on enhancing and optimizing the existing implementation with the following improvements:\n\n1. Improve entity recognition for various information types\n2. Add or refine confidence scoring and conflict resolution for contradictory information\n3. Create configurable extraction thresholds and sensitivity controls\n4. Implement privacy controls including PII detection and handling\n5. Add performance optimizations including tiered model selection\n6. Optimize extraction process to further reduce conversation latency impact\n7. Extend feature set based on existing implementation",
+      "testStrategy": "Test extraction accuracy improvements with various conversation types. Verify PII handling compliance with privacy regulations. Benchmark extraction performance to ensure minimal latency impact. Test conflict resolution with contradictory information. Compare performance metrics before and after optimizations to quantify improvements."
     },
     {
       "id": 9,
-      "title": "Implement Multi-Modal Capabilities",
-      "description": "Add support for document processing, image processing, and audio processing capabilities.",
+      "title": "Implement Interface-Level User ID Generation",
+      "description": "Create a system for automatic user identification across different interfaces for personalization without explicit login.",
       "status": "pending",
       "dependencies": [
         3,
         8
       ],
-      "priority": "low",
-      "details": "Implement document processing for PDF and Office documents with OCR for scanned content. Create image preprocessing pipeline with vision-capable model integration. Develop audio file handling with speech-to-text and text-to-speech capabilities. Implement streaming audio support. Create standardized interfaces for multi-modal content. Develop content extraction and summarization pipelines. Integrate with appropriate external services or libraries for specialized processing.",
-      "testStrategy": "Test document processing with various file types. Verify OCR accuracy with test documents. Test image processing pipeline with sample images. Verify audio processing with different audio formats. Create integration tests for end-to-end multi-modal workflows."
+      "priority": "high",
+      "details": "Implement the UserIdentifier interface and strategies for REST API, WebSocket, and CLI. Create persistent storage for user ID mapping. Develop privacy-preserving fingerprinting techniques. Add middleware for automatic ID injection into request contexts. Implement configuration system for ID generation behavior. Integrate with memory systems for consistent access. Balance uniqueness with privacy in ID generation and support both stateful and stateless operation modes.",
+      "testStrategy": "Test user identification across different interfaces. Verify persistence of user IDs between sessions. Test privacy-preserving aspects of the implementation. Validate integration with memory systems for personalized experiences."
     },
     {
       "id": 10,
-      "title": "Create Comprehensive Testing and Documentation",
-      "description": "Develop unit tests, integration tests, performance benchmarks, and comprehensive documentation.",
+      "title": "Create Documentation for Memory System Enhancements",
+      "description": "Develop comprehensive documentation for all memory system enhancements including examples and best practices.",
+      "status": "pending",
+      "dependencies": [
+        1,
+        2,
+        3,
+        7,
+        8,
+        9
+      ],
+      "priority": "medium",
+      "details": "Create detailed documentation for context memory templates, namespaces, API endpoints, multi-modal capabilities, MemoryExtractor, and UserIdentifier. Include examples, best practices, and migration guides. Update existing documentation to reflect new capabilities. Provide guidance on selecting appropriate features based on deployment requirements.",
+      "testStrategy": "Review documentation for accuracy and completeness. Test examples to ensure they work as documented. Gather feedback from developers on clarity and usefulness."
+    },
+    {
+      "id": 11,
+      "title": "Implement Performance Monitoring and Metrics",
+      "description": "Add comprehensive monitoring and metrics for memory operations to track performance and usage patterns.",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6,
+        7
+      ],
+      "priority": "low",
+      "details": "Implement metrics collection for vector operations, memory access patterns, and extraction processes. Create dashboards for monitoring memory system performance. Add alerting for performance degradation. Implement logging for debugging and troubleshooting. Ensure minimal overhead from monitoring activities.",
+      "testStrategy": "Verify accuracy of collected metrics. Test alerting mechanisms. Measure monitoring overhead to ensure minimal impact on performance. Validate usefulness of dashboards for identifying performance issues."
+    },
+    {
+      "id": 12,
+      "title": "Conduct End-to-End Testing and Performance Validation",
+      "description": "Perform comprehensive testing of all memory system enhancements to ensure they meet requirements and performance targets.",
       "status": "pending",
       "dependencies": [
         1,
@@ -301,585 +155,18 @@
         6,
         7,
         8,
-        9
+        9,
+        11
       ],
-      "priority": "medium",
-      "details": "Implement unit tests for all components with high coverage. Create integration tests for API and WebSocket endpoints. Develop performance benchmarks for critical operations. Generate OpenAPI/Swagger documentation from code. Write comprehensive CLI documentation. Create user guides for advanced use cases. Develop example projects showcasing API usage. Implement automated documentation generation from code comments.",
-      "testStrategy": "Verify test coverage metrics. Review documentation for completeness and accuracy. Test example projects to ensure they work as documented. Have team members perform documentation review and usability testing."
-    },
-    {
-      "id": 11,
-      "title": "Set Up Deployment and Package Distribution",
-      "description": "Create Docker containerization, Kubernetes deployment, and cloud deployment guides with monitoring integration.",
-      "status": "pending",
-      "dependencies": [
-        1,
-        2,
-        3,
-        7
-      ],
-      "priority": "low",
-      "details": "Create Dockerfile and docker-compose configuration. Develop Kubernetes manifests for deployment. Write deployment guides for AWS, GCP, and Azure. Implement monitoring and logging integration. Set up continuous integration workflow with GitHub Actions. Create automatic version bumping for releases. Develop SQLite deployment guides for serverless and edge environments. Implement health check endpoints.",
-      "testStrategy": "Test Docker builds and container functionality. Verify Kubernetes deployments in test environment. Test CI/CD pipeline with sample changes. Validate monitoring and logging functionality. Test deployment guides by following them in clean environments."
-    },
-    {
-      "id": 12,
-      "title": "Develop Language-Specific SDKs",
-      "description": "Create SDKs for TypeScript/JavaScript, Go, Java/Kotlin, C#/.NET, and Rust with shared development tools.",
-      "status": "pending",
-      "dependencies": [
-        1,
-        2,
-        3,
-        10
-      ],
-      "priority": "low",
-      "details": "Develop TypeScript/JavaScript SDK for web and Node.js. Create Go SDK for backend integration. Implement Java/Kotlin SDK for Android and JVM environments. Build C#/.NET SDK for Windows integration. Develop Rust SDK for systems programming. Create shared API client generators and test suites. Implement consistent error handling across SDKs. Add documentation and examples for each SDK. Set up package distribution for each language's ecosystem.",
-      "testStrategy": "Create unit tests for each SDK. Develop integration tests that verify API compatibility. Test examples in each SDK. Verify package installation process. Create cross-language test scenarios to ensure consistent behavior."
-    },
-    {
-      "id": 13,
-      "title": "Implement Automatic User Information Extraction System",
-      "description": "Develop a system that automatically identifies and extracts key user information from conversations and stores it in the user context memory for future reference.",
-      "details": "Create a module that processes conversation content to identify and extract relevant user information based on the patterns defined in the PRD. The implementation should:\n\n1. Build an extraction pipeline with the following components:\n   - Entity recognition system to identify personal information (names, locations, preferences, etc.)\n   - Information categorization to classify extracted data (personal details, preferences, important dates, etc.)\n   - Confidence scoring mechanism to rate the reliability of extracted information\n   - Conflict resolution for handling contradictory information\n\n2. Develop pattern recognition capabilities that can identify:\n   - Direct statements (\"My name is...\", \"I live in...\")\n   - Implied information (\"I'll be traveling to Paris next week\")\n   - Preference indicators (\"I prefer...\", \"I don't like...\")\n\n3. Implement privacy controls including:\n   - Configurable sensitivity levels for information extraction\n   - Clear opt-out mechanisms\n   - Data retention policies compliant with privacy regulations\n\n4. Create an API for:\n   - Retrieving extracted user information\n   - Managing extracted information (edit, delete, confirm)\n   - Configuring extraction sensitivity and categories\n\n5. Develop integration with the existing user context memory system to:\n   - Store extracted information in the appropriate format\n   - Update information when new details are discovered\n   - Handle information retrieval requests\n\nThe system should be designed to run in real-time during conversations with minimal latency impact.",
-      "testStrategy": "Testing should verify both the accuracy of information extraction and the system's integration with user context memory:\n\n1. Unit tests:\n   - Test entity recognition with various input formats and phrasings\n   - Verify categorization logic for different types of user information\n   - Test confidence scoring with ambiguous and clear statements\n   - Validate privacy filter functionality\n\n2. Integration tests:\n   - Verify extracted information is correctly stored in user context memory\n   - Test information retrieval API returns accurate data\n   - Validate update mechanisms when new/conflicting information is detected\n\n3. Performance tests:\n   - Measure extraction latency under various conversation loads\n   - Test system performance with concurrent users\n   - Benchmark memory usage during extraction operations\n\n4. Accuracy validation:\n   - Create a dataset of 100+ conversation snippets with known user information\n   - Calculate precision, recall, and F1 scores for the extraction system\n   - Target >90% accuracy for high-confidence extractions\n\n5. Privacy compliance tests:\n   - Verify opt-out mechanisms properly prevent information extraction\n   - Test that sensitive information is handled according to privacy settings\n   - Validate data retention policies are correctly implemented\n\n6. End-to-end scenarios:\n   - Simulate multi-turn conversations with gradually revealed user information\n   - Test extraction across conversation sessions\n   - Verify conflict resolution with contradictory information provided over time",
-      "status": "pending",
-      "dependencies": [],
       "priority": "high",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Design and implement the MemoryExtractor base class",
-          "description": "Create the foundational MemoryExtractor class with core interfaces and abstract methods that will be used throughout the extraction system",
-          "dependencies": [],
-          "details": "Implementation details:\n1. Create a new file `memory_extractor.py` in the appropriate directory\n2. Define the MemoryExtractor class with the following components:\n   - Constructor that accepts configuration parameters (sensitivity levels, categories to extract)\n   - Abstract methods for extract(), categorize(), score_confidence(), and resolve_conflicts()\n   - Define data structures for storing extracted information\n   - Implement utility methods for data validation and formatting\n3. Create enums or constants for information categories (PERSONAL_INFO, PREFERENCES, IMPORTANT_DATES, etc.)\n4. Add logging functionality for debugging and monitoring\n5. Implement configuration validation\n\nTesting approach:\n- Write unit tests for configuration validation\n- Test the base class instantiation with various configurations",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 2,
-          "title": "Implement entity recognition system",
-          "description": "Build the entity recognition component that identifies personal information from conversations",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation details:\n1. Create a new class `EntityRecognizer` that extends or works with MemoryExtractor\n2. Implement pattern matching for direct statements using regex patterns (\"My name is...\", \"I live in...\", etc.)\n3. Integrate with an NLP library (like spaCy) for named entity recognition\n4. Implement methods to extract entities like:\n   - Personal names\n   - Locations\n   - Dates and times\n   - Contact information\n5. Add context awareness to improve extraction accuracy\n6. Implement model selection logic to optimize for cost vs. accuracy based on configuration\n\nTesting approach:\n- Create unit tests with sample conversation snippets\n- Test with various entity types\n- Verify correct extraction of different entity formats",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 3,
-          "title": "Implement information categorization system",
-          "description": "Develop the component that classifies extracted information into appropriate categories",
-          "dependencies": [
-            1,
-            2
-          ],
-          "details": "Implementation details:\n1. Create a `CategoryClassifier` class that processes extracted entities\n2. Implement classification logic for categorizing information into:\n   - Personal details (name, age, location)\n   - Preferences (likes, dislikes)\n   - Important dates (birthdays, anniversaries)\n   - Professional information (job, skills)\n   - Relationships (family, friends)\n3. Add confidence scoring for categorization\n4. Implement category-specific validation rules\n5. Create methods to format categorized data for storage\n\nTesting approach:\n- Test classification accuracy with diverse inputs\n- Verify correct categorization of ambiguous information\n- Test edge cases and unusual inputs",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 4,
-          "title": "Implement confidence scoring mechanism",
-          "description": "Build the system that rates the reliability of extracted information",
-          "dependencies": [
-            1,
-            2,
-            3
-          ],
-          "details": "Implementation details:\n1. Create a `ConfidenceScorer` class with methods to evaluate information reliability\n2. Implement scoring algorithms based on:\n   - Extraction method used (direct statement vs. implied)\n   - Consistency with previously known information\n   - Clarity of the source statement\n   - Recency and frequency of mention\n3. Define confidence thresholds for different information types\n4. Implement methods to handle low-confidence information (flagging for confirmation)\n5. Add decay functions for confidence over time\n\nTesting approach:\n- Test scoring with various input types\n- Verify appropriate confidence levels for different extraction scenarios\n- Test threshold behavior",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 5,
-          "title": "Implement conflict resolution system",
-          "description": "Develop the component that handles contradictory information in user data",
-          "dependencies": [
-            1,
-            4
-          ],
-          "details": "Implementation details:\n1. Create a `ConflictResolver` class with methods to identify and resolve contradictions\n2. Implement detection algorithms for contradictory information\n3. Create resolution strategies:\n   - Timestamp-based (newer information wins)\n   - Confidence-based (higher confidence wins)\n   - Frequency-based (more frequently mentioned wins)\n   - Hybrid approaches\n4. Add methods to flag unresolvable conflicts for human review\n5. Implement logging for conflict resolution decisions\n\nTesting approach:\n- Test with contradictory information scenarios\n- Verify correct resolution based on different strategies\n- Test edge cases with multiple conflicts",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 6,
-          "title": "Implement pattern recognition for implied information",
-          "description": "Extend the extraction system to identify implied information from conversations",
-          "dependencies": [
-            2,
-            3
-          ],
-          "details": "Implementation details:\n1. Enhance the entity recognition system to detect implied information\n2. Implement pattern matching for statements like \"I'll be traveling to Paris next week\"\n3. Add contextual analysis to extract:\n   - Future plans and intentions\n   - Preferences without direct statements\n   - Emotional responses to topics\n4. Implement temporal reasoning to understand time-related implications\n5. Add methods to extract relationships between entities\n\nTesting approach:\n- Test with subtle, implied information in conversations\n- Verify correct extraction of intentions and plans\n- Test with complex, multi-sentence implications",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 7,
-          "title": "Implement privacy controls and compliance features",
-          "description": "Add privacy protection mechanisms and regulatory compliance features",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation details:\n1. Implement configurable sensitivity levels for information extraction\n2. Add methods to identify and handle sensitive personal information\n3. Create opt-out mechanism and respect user privacy preferences\n4. Implement data retention policies with automatic expiration\n5. Add anonymization capabilities for sensitive data\n6. Create audit logging for privacy-related actions\n7. Implement GDPR, CCPA, and other regulatory compliance features\n\nTesting approach:\n- Test sensitivity level configurations\n- Verify opt-out functionality\n- Test data retention and expiration\n- Validate compliance with privacy regulations",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 8,
-          "title": "Develop API for user information management",
-          "description": "Create the API interface for retrieving and managing extracted user information",
-          "dependencies": [
-            1,
-            3,
-            5,
-            7
-          ],
-          "details": "Implementation details:\n1. Design and implement API endpoints for:\n   - Retrieving extracted user information by category\n   - Editing or deleting specific information\n   - Confirming uncertain information\n   - Configuring extraction sensitivity and categories\n2. Implement authentication and authorization for API access\n3. Add rate limiting and security measures\n4. Create documentation for API usage\n5. Implement versioning for API compatibility\n\nTesting approach:\n- Test all API endpoints with various inputs\n- Verify authentication and authorization\n- Test error handling and edge cases\n- Validate API documentation accuracy",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 9,
-          "title": "Integrate with user context memory system",
-          "description": "Connect the extraction system with the existing user context memory for storage and retrieval",
-          "dependencies": [
-            1,
-            3,
-            4,
-            5,
-            8
-          ],
-          "details": "Implementation details:\n1. Implement integration with the existing user context memory system\n2. Create methods to:\n   - Store extracted information in the appropriate format\n   - Update information when new details are discovered\n   - Handle information retrieval requests\n3. Implement caching for frequently accessed information\n4. Add hooks for memory system events (updates, deletions)\n5. Create migration utilities for existing user data\n6. Implement integration with Agent and Orchestrator components\n\nTesting approach:\n- Test storage and retrieval operations\n- Verify update mechanisms with new information\n- Test integration with Agent and Orchestrator\n- Validate performance with large datasets",
-          "status": "pending",
-          "parentTaskId": 13
-        },
-        {
-          "id": 10,
-          "title": "Implement performance optimization and end-to-end testing",
-          "description": "Optimize the system for real-time performance and conduct comprehensive testing",
-          "dependencies": [
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9
-          ],
-          "details": "Implementation details:\n1. Implement asynchronous processing for non-blocking operation\n2. Add caching mechanisms for frequent extraction patterns\n3. Optimize NLP model loading and usage\n4. Implement batch processing for multiple extractions\n5. Add performance monitoring and metrics collection\n6. Create comprehensive end-to-end tests\n7. Implement A/B testing framework for extraction strategies\n8. Add documentation for the entire system\n\nTesting approach:\n- Conduct performance testing under various loads\n- Measure and optimize latency for real-time conversations\n- Run end-to-end tests with realistic conversation scenarios\n- Validate system behavior with edge cases and stress tests",
-          "status": "pending",
-          "parentTaskId": 13
-        }
-      ]
-    },
-    {
-      "id": 14,
-      "title": "Implement Interface-Level User ID Generation System",
-      "description": "Develop a system that generates consistent and meaningful user IDs across all interfaces (REST API, WebSocket, CLI) when explicit user IDs are not provided, as specified in the PRD.",
-      "details": "Create a centralized user ID generation service that works across all interfaces:\n\n1. Implement the core UserIdGenerator service that:\n   - Follows the algorithm specified in the PRD document at .context/prds/prd-interface-user-id.md\n   - Generates deterministic IDs based on available client information (IP, session, device fingerprints, etc.)\n   - Handles collision detection and resolution\n   - Includes appropriate privacy protections and anonymization techniques\n\n2. Integrate the UserIdGenerator with each interface:\n   - REST API: Extract client information from requests and generate IDs when Authorization header is missing\n   - WebSocket: Generate IDs during connection establishment if not provided\n   - CLI: Use local environment/config information to generate persistent IDs\n\n3. Implement ID persistence and lookup:\n   - Create storage mechanism for mapping generated IDs to client signatures\n   - Ensure generated IDs remain consistent for returning users\n   - Implement appropriate TTL/expiry policies as specified in the PRD\n\n4. Add configuration options:\n   - Enable/disable automatic ID generation\n   - Configure ID format and algorithm parameters\n   - Set security/privacy thresholds\n\n5. Ensure proper documentation is added for all interfaces explaining the automatic ID generation behavior.",
-      "testStrategy": "1. Unit Tests:\n   - Test UserIdGenerator with various input combinations\n   - Verify deterministic behavior (same inputs produce same IDs)\n   - Test collision handling\n   - Verify privacy protection mechanisms\n\n2. Integration Tests:\n   - For each interface (REST, WebSocket, CLI), verify ID generation when explicit ID not provided\n   - Test persistence of generated IDs across multiple requests from same client\n   - Verify cross-interface consistency (same client should get same ID regardless of interface)\n\n3. Security Tests:\n   - Ensure IDs cannot be manipulated or predicted\n   - Verify privacy compliance (no PII in generated IDs)\n   - Test ID generation with proxies/VPNs to ensure proper handling\n\n4. Performance Tests:\n   - Benchmark ID generation under load\n   - Test concurrent ID generation scenarios\n\n5. Specific Test Cases:\n   - Anonymous REST API client gets consistent ID across multiple requests\n   - WebSocket reconnection preserves user ID\n   - CLI commands from same environment maintain user context\n   - Client changing IP but with same device fingerprint gets same ID (if configured)\n   - Two different clients don't receive the same generated ID",
-      "status": "pending",
-      "dependencies": [],
-      "priority": "high",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Create Core UserIdGenerator Interface and Base Implementation",
-          "description": "Define the core interface and base implementation for the UserIdGenerator service that will be used across all application interfaces.",
-          "dependencies": [],
-          "details": "1. Create a `UserIdGenerator` interface with methods for generating, validating, and looking up user IDs.\n2. Implement a base class that follows the algorithm in the PRD.\n3. Include methods for extracting client information (IP, user agent, device fingerprints).\n4. Implement the deterministic hashing algorithm for generating IDs based on client signatures.\n5. Add unit tests to verify the core ID generation logic works as expected.\n6. Test with various input combinations to ensure consistency and uniqueness.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 2,
-          "title": "Implement Collision Detection and Resolution Strategy",
-          "description": "Add collision detection and resolution mechanisms to ensure uniqueness of generated user IDs.",
-          "dependencies": [
-            1
-          ],
-          "details": "1. Implement a collision detection system that checks if a generated ID already exists.\n2. Create a resolution strategy that adds incremental suffixes or alternative hashing when collisions occur.\n3. Add performance optimizations to minimize collision checks.\n4. Implement a bloom filter or similar data structure for efficient collision detection.\n5. Add unit tests with forced collisions to verify resolution works correctly.\n6. Benchmark collision resolution performance with large datasets.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 3,
-          "title": "Develop Privacy Protection and Anonymization Features",
-          "description": "Implement privacy protection and anonymization techniques to ensure generated IDs don't expose sensitive user information.",
-          "dependencies": [
-            1
-          ],
-          "details": "1. Add data sanitization to remove personally identifiable information before ID generation.\n2. Implement configurable anonymization levels as specified in the PRD.\n3. Create a mechanism to rotate or refresh anonymization salts periodically.\n4. Add privacy compliance checks to ensure generated IDs meet requirements.\n5. Implement unit tests that verify sensitive information isn't leaked in generated IDs.\n6. Create documentation on privacy protections for developers.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 4,
-          "title": "Create Persistent Storage for User ID Mapping",
-          "description": "Implement a storage mechanism to persistently map generated IDs to client signatures for consistency across sessions.",
-          "dependencies": [
-            1,
-            2
-          ],
-          "details": "1. Design a database schema for storing user ID mappings.\n2. Implement a repository layer for CRUD operations on ID mappings.\n3. Add TTL/expiry mechanisms as specified in the PRD.\n4. Implement caching for frequently accessed mappings.\n5. Create database migration scripts.\n6. Add integration tests for the storage layer.\n7. Implement cleanup jobs for expired mappings.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 5,
-          "title": "Integrate UserIdGenerator with REST API Interface",
-          "description": "Integrate the UserIdGenerator service with the REST API interface to automatically generate IDs when Authorization headers are missing.",
-          "dependencies": [
-            1,
-            3,
-            4
-          ],
-          "details": "1. Create middleware/interceptor for REST API requests.\n2. Extract client information from HTTP headers and request data.\n3. Check for missing Authorization headers and trigger ID generation.\n4. Add the generated ID to the request context for downstream handlers.\n5. Implement response headers to communicate generated IDs to clients.\n6. Add integration tests for REST API ID generation.\n7. Update API documentation to explain automatic ID generation behavior.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 6,
-          "title": "Integrate UserIdGenerator with WebSocket Interface",
-          "description": "Integrate the UserIdGenerator service with the WebSocket interface to generate IDs during connection establishment.",
-          "dependencies": [
-            1,
-            3,
-            4
-          ],
-          "details": "1. Modify WebSocket connection handlers to extract client information.\n2. Implement ID generation during the WebSocket handshake process.\n3. Store generated IDs in the WebSocket session context.\n4. Add mechanisms to communicate generated IDs to WebSocket clients.\n5. Create integration tests for WebSocket connections with and without explicit IDs.\n6. Update WebSocket documentation to explain ID generation behavior.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 7,
-          "title": "Integrate UserIdGenerator with CLI Interface",
-          "description": "Integrate the UserIdGenerator service with the CLI interface to generate persistent IDs based on local environment information.",
-          "dependencies": [
-            1,
-            3,
-            4
-          ],
-          "details": "1. Implement CLI-specific client information extraction.\n2. Create a local storage mechanism for CLI-generated IDs.\n3. Ensure consistency of IDs across CLI sessions.\n4. Add CLI commands to view and manage generated IDs.\n5. Implement integration tests for CLI ID generation.\n6. Update CLI documentation to explain ID generation and persistence.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 8,
-          "title": "Implement Configuration System for ID Generation",
-          "description": "Create a comprehensive configuration system to control ID generation behavior across all interfaces.",
-          "dependencies": [
-            1,
-            5,
-            6,
-            7
-          ],
-          "details": "1. Design a configuration schema for ID generation options.\n2. Implement configuration loading from environment variables, config files, and code.\n3. Add options for enabling/disabling automatic ID generation per interface.\n4. Create configuration for ID format, algorithm parameters, and security thresholds.\n5. Implement runtime configuration updates.\n6. Add validation for configuration values.\n7. Create documentation for all configuration options.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 9,
-          "title": "Develop Comprehensive Testing Suite",
-          "description": "Create a comprehensive testing suite to verify the ID generation system works correctly across all interfaces and edge cases.",
-          "dependencies": [
-            5,
-            6,
-            7,
-            8
-          ],
-          "details": "1. Implement end-to-end tests covering all interfaces.\n2. Create load tests to verify performance under high concurrency.\n3. Add security tests to verify privacy protections.\n4. Implement tests for edge cases like network failures and partial client information.\n5. Create integration tests with actual databases and caches.\n6. Add tests for configuration changes and their effects.\n7. Implement continuous integration pipeline for automated testing.",
-          "status": "pending",
-          "parentTaskId": 14
-        },
-        {
-          "id": 10,
-          "title": "Create Documentation and Examples",
-          "description": "Develop comprehensive documentation and examples for the user ID generation system.",
-          "dependencies": [
-            5,
-            6,
-            7,
-            8
-          ],
-          "details": "1. Create developer documentation explaining the ID generation system architecture.\n2. Write interface-specific guides for REST API, WebSocket, and CLI integration.\n3. Add code examples for common use cases.\n4. Create diagrams illustrating the ID generation flow.\n5. Document configuration options and their effects.\n6. Add troubleshooting guides for common issues.\n7. Create user-facing documentation explaining the privacy implications.\n8. Update the main application documentation to reference the new ID generation system.",
-          "status": "pending",
-          "parentTaskId": 14
-        }
-      ]
-    },
-    {
-      "id": 15,
-      "title": "Implement Automatic User Context Extraction System",
-      "description": "Create a MemoryExtractor class and integration system that automatically identifies, evaluates, and stores important user information from conversations to build comprehensive user profiles over time.",
-      "details": "Implement the automatic user context extraction system as specified in prd-auto-user-context.md with the following components:\n\n1. **MemoryExtractor Class**:\n   - Create a class that analyzes conversation text and extracts key user information\n   - Implement methods to assign importance scores (1-10) to extracted information\n   - Implement confidence scoring (0.0-1.0) for extraction reliability\n   - Design storage mechanism to save extracted data to user context memory\n   - Support different extraction models with a pluggable architecture\n\n2. **Integration Points**:\n   - Integrate with Agent class to process conversations after completion\n   - Add hooks in Orchestrator to trigger extraction at appropriate points\n   - Ensure extraction runs asynchronously to avoid performance impacts\n\n3. **Configuration System**:\n   - Create configuration options for enabling/disabling extraction\n   - Add settings for confidence thresholds (default: 0.7)\n   - Implement extraction frequency controls\n   - Add extraction model selection options\n\n4. **User Filtering**:\n   - Skip extraction for anonymous users (user_id=0)\n   - Implement whitelist/blacklist functionality for specific users\n\n5. **Extraction Modes**:\n   - Implement automatic extraction that runs without explicit calls\n   - Create manual extraction API for targeted extraction requests\n   - Support batch processing for historical conversations\n\n6. **Performance Optimization**:\n   - Implement tiered extraction models (light/standard/comprehensive)\n   - Add caching to prevent redundant extractions\n   - Include rate limiting to manage resource usage\n\n7. **Documentation**:\n   - Document the extraction patterns and information types\n   - Create examples of extracted information formats",
-      "testStrategy": "Testing should verify both functionality and performance of the extraction system:\n\n1. **Unit Tests**:\n   - Test MemoryExtractor class methods in isolation\n   - Verify correct importance and confidence scoring\n   - Test extraction with various conversation types\n   - Validate anonymous user filtering works correctly\n\n2. **Integration Tests**:\n   - Verify extraction triggers correctly from Agent and Orchestrator\n   - Test configuration changes propagate correctly\n   - Ensure extracted data is properly stored in user context\n\n3. **Performance Tests**:\n   - Measure extraction time for different conversation lengths\n   - Verify asynchronous operation doesn't block main processes\n   - Test with high volume to ensure system stability\n\n4. **Accuracy Tests**:\n   - Create a dataset of conversations with known information\n   - Measure precision and recall of extraction system\n   - Test with different confidence thresholds\n   - Verify extraction quality across different models\n\n5. **Edge Cases**:\n   - Test with extremely long conversations\n   - Verify behavior with malformed or unusual text\n   - Test with multiple languages\n   - Verify system handles conflicting information appropriately\n\n6. **Manual Verification**:\n   - Review samples of extracted information for accuracy\n   - Compare automatic vs. manual extraction results",
-      "status": "pending",
-      "dependencies": [],
-      "priority": "high",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Create MemoryExtractor Base Class with Core Functionality",
-          "description": "Implement the foundational MemoryExtractor class with the core extraction methods, importance scoring, and confidence evaluation.",
-          "dependencies": [],
-          "details": "Implementation details:\n1. Create a new MemoryExtractor class in the memory package\n2. Implement the base extraction method that takes conversation text as input\n3. Add methods for importance scoring (1-10) based on information type and relevance\n4. Implement confidence scoring (0.0-1.0) for extraction reliability\n5. Create a pluggable architecture to support different extraction models\n6. Add basic validation methods to verify extracted information\n7. Include logging for extraction process\n\nTesting approach:\n- Unit test each scoring method with sample conversation inputs\n- Test the pluggable architecture with a mock extraction model\n- Verify correct scoring ranges are enforced",
-          "status": "done",
-          "parentTaskId": 15
-        },
-        {
-          "id": 2,
-          "title": "Implement Storage Mechanism for Extracted User Context",
-          "description": "Create the storage system for saving extracted user information to the user context memory with appropriate data structures.",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation details:\n1. Design data structures for storing extracted user information\n2. Implement methods to save extracted data to user context memory\n3. Create update mechanisms for existing information (merge, replace, or append strategies)\n4. Add metadata storage for extraction source, timestamp, and confidence score\n5. Implement retrieval methods to access stored information\n6. Add versioning support for tracking information changes over time\n7. Create indexing for efficient information retrieval\n\nTesting approach:\n- Test storage and retrieval with various data types\n- Verify metadata is correctly associated with stored information\n- Test update mechanisms with conflicting information scenarios",
-          "status": "pending",
-          "parentTaskId": 15
-        },
-        {
-          "id": 3,
-          "title": "Develop Configuration System for Extraction Settings",
-          "description": "Create a comprehensive configuration system for controlling extraction behavior, thresholds, and model selection.",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation details:\n1. Create a configuration class for extraction settings\n2. Implement options for enabling/disabling extraction\n3. Add confidence threshold settings (default: 0.7)\n4. Implement extraction frequency controls\n5. Add extraction model selection options\n6. Create validation for configuration parameters\n7. Implement configuration persistence\n8. Add methods to update configuration at runtime\n\nTesting approach:\n- Test configuration loading with various settings\n- Verify validation prevents invalid configurations\n- Test runtime configuration updates",
-          "status": "pending",
-          "parentTaskId": 15
-        },
-        {
-          "id": 4,
-          "title": "Implement User Filtering and Privacy Controls",
-          "description": "Add functionality to filter extraction based on user properties and implement privacy protection mechanisms.",
-          "dependencies": [
-            1,
-            3
-          ],
-          "details": "Implementation details:\n1. Implement logic to skip extraction for anonymous users (user_id=0)\n2. Create whitelist/blacklist functionality for specific users\n3. Add user consent tracking mechanism\n4. Implement opt-out functionality for users\n5. Create privacy-focused data retention policies\n6. Add methods to purge extracted data on request\n7. Implement data minimization techniques\n\nTesting approach:\n- Test extraction skipping for anonymous users\n- Verify whitelist/blacklist functionality works correctly\n- Test opt-out mechanism and data purging\n\n<info added on 2025-04-30T21:35:41.516Z>\nAdditional implementation details:\n\n## Privacy Control Implementation\n\n```python\nclass PrivacyManager:\n    def __init__(self, config):\n        self.config = config\n        self.sensitive_patterns = self._load_sensitive_patterns()\n        self.whitelist = self._load_user_list('whitelist')\n        self.blacklist = self._load_user_list('blacklist')\n        \n    def can_extract_for_user(self, user_id):\n        # Skip anonymous users\n        if user_id == 0:\n            return False\n            \n        # Check blacklist first (explicit denial)\n        if user_id in self.blacklist:\n            return False\n            \n        # If whitelist exists and not empty, user must be in it\n        if self.whitelist and user_id not in self.whitelist:\n            return False\n            \n        # Check user consent\n        return self._has_user_consent(user_id)\n    \n    def filter_sensitive_content(self, text):\n        # Apply regex patterns to remove sensitive information\n        for pattern in self.sensitive_patterns:\n            text = re.sub(pattern, '[REDACTED]', text)\n        return text\n```\n\n## Data Minimization Techniques\n\n1. Content truncation - limit extraction to first N characters\n2. Semantic summarization - store condensed versions of content\n3. Selective field extraction - only store relevant fields\n4. PII detection and redaction using NLP models\n\n## Retention Policy Implementation\n\n```python\ndef apply_retention_policy():\n    \"\"\"Purge data older than retention period\"\"\"\n    retention_days = config.get('privacy.retention_days', 90)\n    cutoff_date = datetime.now() - timedelta(days=retention_days)\n    \n    db.execute(\"\"\"\n        DELETE FROM user_memories \n        WHERE created_at < %s\n    \"\"\", (cutoff_date,))\n```\n\n## User Consent Management\n\n- Store consent in `user_privacy_settings` table with timestamp\n- Implement just-in-time consent prompts in UI\n- Provide granular consent options (full extraction, partial, none)\n- Track consent changes in audit log\n\n## Data Purge API\n\n```python\n@app.route('/api/user/memory/purge', methods=['POST'])\n@login_required\ndef purge_user_memory():\n    \"\"\"Endpoint to purge all extracted memories for current user\"\"\"\n    user_id = current_user.id\n    \n    # Log purge request for compliance\n    log_data_purge_request(user_id)\n    \n    # Execute purge\n    db.execute(\"DELETE FROM user_memories WHERE user_id = %s\", (user_id,))\n    \n    return jsonify({\"status\": \"success\"})\n```\n</info added on 2025-04-30T21:35:41.516Z>",
-          "status": "done",
-          "parentTaskId": 15
-        },
-        {
-          "id": 5,
-          "title": "Integrate MemoryExtractor with Agent Class",
-          "description": "Connect the MemoryExtractor to the Agent class to process conversations after completion.",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4
-          ],
-          "details": "Implementation details:\n1. Add hooks in Agent class to trigger extraction after conversation completion\n2. Implement conversation preprocessing for extraction\n3. Create callback mechanism for extraction results\n4. Add error handling for extraction failures\n5. Implement asynchronous extraction to avoid blocking the main thread\n6. Create methods to access extraction results from Agent\n7. Add logging for integration points\n\nTesting approach:\n- Test extraction triggering after conversation completion\n- Verify asynchronous operation doesn't impact performance\n- Test error handling with simulated extraction failures",
-          "status": "pending",
-          "parentTaskId": 15
-        },
-        {
-          "id": 6,
-          "title": "Integrate MemoryExtractor with Orchestrator",
-          "description": "Add initialization and configuration hooks in the Orchestrator class for the extraction system.",
-          "dependencies": [
-            3,
-            5
-          ],
-          "details": "Implementation details:\n1. Add MemoryExtractor initialization in Orchestrator\n2. Implement configuration loading from environment or settings\n3. Create hooks to trigger extraction at appropriate points\n4. Add methods to access and modify extraction configuration\n5. Implement extraction status monitoring\n6. Create shutdown procedures for extraction processes\n7. Add health checks for extraction system\n\nTesting approach:\n- Test initialization with various configurations\n- Verify extraction triggers at appropriate points\n- Test shutdown procedures and resource cleanup",
-          "status": "pending",
-          "parentTaskId": 15
-        },
-        {
-          "id": 7,
-          "title": "Implement Multiple Extraction Modes and API",
-          "description": "Create different extraction modes (automatic, manual, batch) and develop the API for targeted extraction requests.",
-          "dependencies": [
-            1,
-            2,
-            5
-          ],
-          "details": "Implementation details:\n1. Implement automatic extraction mode that runs without explicit calls\n2. Create manual extraction API for targeted extraction requests\n3. Develop batch processing for historical conversations\n4. Add mode switching functionality\n5. Implement priority system for extraction requests\n6. Create API documentation\n7. Add examples for each extraction mode\n\nTesting approach:\n- Test each extraction mode with sample conversations\n- Verify API correctly handles extraction requests\n- Test batch processing with large datasets",
-          "status": "pending",
-          "parentTaskId": 15
-        },
-        {
-          "id": 8,
-          "title": "Optimize Extraction Performance",
-          "description": "Implement performance optimizations including tiered models, caching, and background processing.",
-          "dependencies": [
-            1,
-            5,
-            6,
-            7
-          ],
-          "details": "Implementation details:\n1. Implement tiered extraction models (light/standard/comprehensive)\n2. Add caching system to prevent redundant extractions\n3. Implement rate limiting to manage resource usage\n4. Create background processing queue for extraction tasks\n5. Add performance monitoring metrics\n6. Implement adaptive extraction based on system load\n7. Create optimization settings for different deployment environments\n\nTesting approach:\n- Benchmark different extraction models\n- Test caching with repeated extraction requests\n- Verify background processing doesn't impact system performance",
-          "status": "pending",
-          "parentTaskId": 15
-        },
-        {
-          "id": 9,
-          "title": "Create Documentation and Update MUXI Facade",
-          "description": "Document the extraction system and update the MUXI facade to include extraction configuration.",
-          "dependencies": [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8
-          ],
-          "details": "Implementation details:\n1. Document extraction patterns and information types\n2. Create examples of extracted information formats\n3. Update MUXI facade constructor to include extraction configuration\n4. Add documentation for configuration options\n5. Create usage examples and best practices\n6. Document privacy considerations and data handling\n7. Add troubleshooting guide for common issues\n\nTesting approach:\n- Verify documentation accuracy with code review\n- Test MUXI facade with extraction configuration\n- Validate examples work as documented",
-          "status": "pending",
-          "parentTaskId": 15
-        }
-      ]
-    },
-    {
-      "id": 16,
-      "title": "Implement Interface-Level User ID Generation System",
-      "description": "Design and implement a system for automatic user identification across different interfaces (REST API, WebSocket, CLI) that enables personalization and memory features even when explicit user IDs aren't provided.",
-      "details": "Create a comprehensive user identification system following the specifications in prd-interface-user-id.md:\n\n1. Design a `UserIdentifier` interface with methods for:\n   - Generating new user IDs\n   - Retrieving existing user IDs\n   - Validating user IDs\n   - Managing ID persistence\n\n2. Implement interface-specific strategies:\n   - REST API: Use session tokens, cookies, or device fingerprinting\n   - WebSocket: Leverage connection properties and headers\n   - CLI: Use machine identifiers, configuration files, or interactive prompts\n\n3. Integration points:\n   - Add middleware/interceptors to automatically inject user IDs into request contexts\n   - Modify request handlers to extract and validate user identifiers\n   - Implement fallback mechanisms when explicit IDs aren't available\n\n4. Memory system updates:\n   - Modify memory storage to index by generated IDs\n   - Implement ID resolution and mapping for memory retrieval\n   - Ensure backward compatibility with existing memory systems\n\n5. Configuration options:\n   - ID generation algorithm selection (UUID, sequential, custom)\n   - Persistence duration and storage location\n   - Privacy controls (anonymization options)\n   - Cross-interface ID correlation settings\n\n6. Security considerations:\n   - Implement ID encryption or hashing where appropriate\n   - Add rate limiting for ID generation requests\n   - Create audit logging for ID generation and usage\n   - Ensure compliance with relevant privacy regulations\n\nThe implementation should be modular, allowing for easy addition of new interface types in the future.",
-      "testStrategy": "Testing should verify both functional correctness and security aspects:\n\n1. Unit tests:\n   - Test each interface-specific implementation against the `UserIdentifier` contract\n   - Verify ID generation produces valid, unique identifiers\n   - Test persistence and retrieval mechanisms\n   - Validate error handling for edge cases\n\n2. Integration tests:\n   - Verify automatic ID generation across each interface type\n   - Test cross-interface ID resolution (same user across different interfaces)\n   - Validate memory system integration with generated IDs\n   - Test configuration changes propagate correctly\n\n3. Security tests:\n   - Verify IDs cannot be easily forged or predicted\n   - Test rate limiting functionality\n   - Ensure proper encryption/hashing of sensitive ID data\n   - Validate privacy controls work as expected\n\n4. Performance tests:\n   - Benchmark ID generation under load\n   - Measure memory retrieval performance with generated IDs\n   - Test system behavior with large numbers of concurrent users\n\n5. Manual verification:\n   - Verify personalization features work with generated IDs\n   - Test user experience across multiple sessions\n   - Validate that memory features correctly associate data with the right users\n\nAll tests should be automated where possible and included in the CI/CD pipeline.",
-      "status": "pending",
-      "dependencies": [],
-      "priority": "high",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Create Core UserIdentifier Interface and Base Classes",
-          "description": "Define the core UserIdentifier interface and implement abstract base classes that will be extended by interface-specific implementations.",
-          "dependencies": [],
-          "details": "Implementation steps:\n1. Create a `UserIdentifier` interface with methods for generating, retrieving, validating, and persisting user IDs\n2. Implement a `BaseUserIdentifier` abstract class with common functionality\n3. Define enums for ID generation algorithms (UUID, sequential, custom)\n4. Create utility classes for ID validation and formatting\n5. Implement a factory class for creating appropriate identifier instances\n6. Add configuration models for ID generation settings\n\nTesting approach:\n- Unit test the base implementation with mocks\n- Verify ID generation follows expected patterns\n- Test validation logic with valid and invalid IDs",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 2,
-          "title": "Implement REST API User Identifier Strategy",
-          "description": "Create a REST API-specific implementation of the UserIdentifier interface using cookies, headers, and device fingerprinting.",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation steps:\n1. Create `RestApiUserIdentifier` class extending BaseUserIdentifier\n2. Implement cookie-based user ID storage and retrieval\n3. Add header-based fallback mechanism\n4. Integrate basic device fingerprinting for anonymous users\n5. Implement session token generation and validation\n6. Create middleware for automatically extracting/injecting user IDs in REST requests\n\nTesting approach:\n- Mock HTTP requests and verify ID extraction\n- Test cookie persistence across multiple requests\n- Verify fingerprinting produces consistent results for the same client",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 3,
-          "title": "Implement WebSocket User Identifier Strategy",
-          "description": "Create a WebSocket-specific implementation of the UserIdentifier interface using connection properties and handshake data.",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation steps:\n1. Create `WebSocketUserIdentifier` class extending BaseUserIdentifier\n2. Extract user identifiers from WebSocket handshake headers\n3. Implement connection-based identification using socket properties\n4. Create mechanism to maintain ID across reconnections\n5. Add WebSocket interceptor to inject user ID into message context\n6. Implement WebSocket-specific ID persistence strategy\n\nTesting approach:\n- Mock WebSocket connections and verify ID extraction\n- Test ID persistence across disconnections and reconnections\n- Verify handshake data is properly utilized for identification",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 4,
-          "title": "Implement CLI User Identifier Strategy",
-          "description": "Create a CLI-specific implementation of the UserIdentifier interface using machine identifiers and local configuration files.",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation steps:\n1. Create `CliUserIdentifier` class extending BaseUserIdentifier\n2. Implement machine identifier extraction (hostname, MAC address, etc.)\n3. Create local configuration file storage for persistent IDs\n4. Add interactive prompt fallback for ID generation\n5. Implement CLI-specific ID validation rules\n6. Create CLI command context enrichment with user ID\n\nTesting approach:\n- Test with various machine configurations\n- Verify configuration file persistence\n- Test interactive prompt flows with simulated inputs",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 5,
-          "title": "Create Middleware and Interceptors for Automatic ID Injection",
-          "description": "Implement middleware and interceptors for each interface type to automatically inject user IDs into request contexts.",
-          "dependencies": [
-            2,
-            3,
-            4
-          ],
-          "details": "Implementation steps:\n1. Create REST API middleware for user ID extraction and injection\n2. Implement WebSocket message interceptor for ID context enrichment\n3. Add CLI command preprocessor for ID injection\n4. Create unified RequestContext interface with user ID field\n5. Implement fallback chain for when primary ID method fails\n6. Add configuration options for middleware behavior\n\nTesting approach:\n- Integration tests with mock requests through middleware\n- Test fallback mechanisms by forcing primary methods to fail\n- Verify context enrichment across different interface types",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 6,
-          "title": "Integrate User Identification with Memory Systems",
-          "description": "Update memory storage and retrieval systems to work with the new user identification system.",
-          "dependencies": [
-            5
-          ],
-          "details": "Implementation steps:\n1. Modify memory storage interfaces to index by generated user IDs\n2. Implement ID resolution and mapping for memory retrieval\n3. Create migration utilities for existing memory data\n4. Add memory context enrichment with user ID information\n5. Implement cross-session memory persistence based on user IDs\n6. Create memory isolation mechanisms for privacy\n\nTesting approach:\n- Test memory storage and retrieval with various user IDs\n- Verify backward compatibility with existing memory systems\n- Test memory isolation between different users",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 7,
-          "title": "Implement ID Generation Algorithm Selection and Configuration",
-          "description": "Create a configurable system for selecting and customizing ID generation algorithms with appropriate settings.",
-          "dependencies": [
-            1
-          ],
-          "details": "Implementation steps:\n1. Implement UUID-based ID generation strategy\n2. Create sequential ID generation with appropriate synchronization\n3. Add custom ID generation with pattern support\n4. Implement configuration system for algorithm selection\n5. Add validation rules for each algorithm type\n6. Create factory methods for instantiating appropriate generators\n\nTesting approach:\n- Test each algorithm for uniqueness and pattern compliance\n- Verify configuration correctly selects algorithms\n- Performance test ID generation under load",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 8,
-          "title": "Implement Security and Privacy Features",
-          "description": "Add security features including ID encryption, rate limiting, audit logging, and privacy controls.",
-          "dependencies": [
-            2,
-            3,
-            4,
-            7
-          ],
-          "details": "Implementation steps:\n1. Implement ID encryption and hashing where appropriate\n2. Add rate limiting for ID generation requests\n3. Create audit logging for ID generation and usage\n4. Implement privacy-focused fingerprinting techniques\n5. Add anonymization options for IDs\n6. Create compliance checks for privacy regulations\n\nTesting approach:\n- Security testing of encryption mechanisms\n- Verify rate limiting prevents abuse\n- Test audit logs for completeness\n- Verify anonymization properly obscures identifying information",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 9,
-          "title": "Create Comprehensive Test Suite",
-          "description": "Develop a comprehensive test suite covering all user identification strategies and integration points.",
-          "dependencies": [
-            5,
-            6,
-            8
-          ],
-          "details": "Implementation steps:\n1. Create unit tests for each UserIdentifier implementation\n2. Implement integration tests for middleware and interceptors\n3. Add end-to-end tests for complete identification flows\n4. Create performance tests for ID generation and lookup\n5. Implement security and penetration tests\n6. Add regression tests for backward compatibility\n\nTesting approach:\n- Automated test suite with high coverage\n- Manual testing of edge cases\n- Load testing for performance characteristics",
-          "status": "pending",
-          "parentTaskId": 16
-        },
-        {
-          "id": 10,
-          "title": "Document User Identification System",
-          "description": "Create comprehensive documentation for the user identification system including examples, best practices, and integration guides.",
-          "dependencies": [
-            9
-          ],
-          "details": "Implementation steps:\n1. Create API documentation for all interfaces and classes\n2. Write developer guides for each interface type\n3. Add examples of common integration patterns\n4. Document configuration options and best practices\n5. Create troubleshooting guide for common issues\n6. Add security and privacy considerations documentation\n\nTesting approach:\n- Review documentation for completeness and accuracy\n- Have developers test integration following the documentation\n- Verify examples work as described",
-          "status": "pending",
-          "parentTaskId": 16
-        }
-      ]
-    },
-    {
-      "id": 17,
-      "title": "Implement Centralized MCP Service Architecture",
-      "description": "Design and implement a singleton MCPService class to centralize all MCP server communications, with supporting components for tool parsing, thread safety, and configurable timeouts.",
-      "details": "Create a comprehensive centralized architecture for MCP service communication with the following components:\n\n1. **MCPService Singleton Class**:\n   - Implement a singleton pattern for the MCPService class\n   - Design methods to handle all MCP server connections\n   - Include connection pooling to optimize performance\n   - Implement retry logic for failed connections\n\n2. **ToolParser Component**:\n   - Create a dedicated parser to handle various tool call formats in LLM responses\n   - Support JSON, XML, and plain text formats\n   - Implement error handling for malformed tool calls\n   - Design an extensible architecture to easily add new tool formats\n\n3. **Agent Class Updates**:\n   - Refactor the Agent class to use the centralized MCPService\n   - Remove any direct MCP server connection code\n   - Ensure backward compatibility with existing agent implementations\n\n4. **Thread-Safe Implementation**:\n   - Implement locks for tool invocation to ensure thread safety\n   - Use ReentrantLock or similar mechanism for critical sections\n   - Add deadlock detection and prevention mechanisms\n\n5. **Configurable Timeouts**:\n   - Add timeout configuration at orchestrator level (global default)\n   - Implement agent-level timeout overrides\n   - Support per-request timeout specifications\n   - Create a timeout hierarchy where more specific settings override general ones\n\n6. **Configuration Management**:\n   - Design a configuration system for the MCPService\n   - Support both file-based and programmatic configuration\n   - Include environment variable overrides for deployment flexibility",
-      "testStrategy": "Implement a comprehensive testing strategy with the following components:\n\n1. **Unit Tests**:\n   - Test MCPService singleton behavior (getInstance method, etc.)\n   - Verify ToolParser correctly handles various input formats\n   - Test timeout configuration at all levels\n   - Validate thread safety with concurrent access tests\n\n2. **Integration Tests**:\n   - Create mock MCP server to test full request/response cycle\n   - Verify Agent class correctly uses the MCPService\n   - Test error handling and retry logic with simulated failures\n   - Validate timeout behavior with deliberately slow responses\n\n3. **Load Testing**:\n   - Test system under high concurrency (50+ simultaneous requests)\n   - Measure performance metrics before and after implementation\n   - Verify connection pooling works as expected under load\n\n4. **Edge Cases**:\n   - Test behavior when MCP server is unreachable\n   - Verify correct handling of malformed responses\n   - Test timeout edge cases (exactly at timeout boundary)\n   - Validate behavior during partial system failures\n\n5. **Regression Testing**:\n   - Ensure existing agent functionality works with new architecture\n   - Verify no performance degradation in common operations\n   - Test backward compatibility with legacy components",
-      "status": "done",
-      "dependencies": [],
-      "priority": "high"
+      "details": "Conduct end-to-end testing of all memory system enhancements. Validate that performance targets are met (50% improvement in vector search, support for 3+ content modalities, 90% accuracy in information extraction). Test migration between PostgreSQL and SQLite with verification of 100% data integrity. Identify and address any integration issues between components.",
+      "testStrategy": "Create comprehensive test scenarios covering all enhanced functionality. Benchmark performance against baseline measurements. Test with realistic data volumes and usage patterns. Validate that all success metrics defined in the PRD are achieved."
     }
   ],
   "metadata": {
-    "projectName": "MUXI Framework Implementation",
+    "projectName": "Memory System Enhancements",
     "totalTasks": 12,
-    "sourceFile": "/Users/ran/Projects/muxi/framework/.context/scratchpad/updated_tasks.txt",
-    "generatedAt": "2023-12-15"
+    "sourceFile": "/Users/ran/Projects/muxi/framework/scripts/prd.txt",
+    "generatedAt": "2023-11-14"
   }
 }

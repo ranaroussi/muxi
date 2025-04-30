@@ -1,74 +1,11 @@
 # Task ID: 3
-# Title: Implement WebSocket API
+# Title: Complete Memory REST API Endpoints
 # Status: pending
-# Dependencies: 2
+# Dependencies: 1, 2
 # Priority: high
-# Description: Develop the WebSocket API for real-time communication with support for multi-modal messages as specified in api.md.
+# Description: Implement the remaining REST API endpoints for memory operations as specified in api.md.
 # Details:
-Set up WebSocket server with proper connection handling. Implement message types for text, images, and audio as defined in api.md. Create handlers for different message types. Implement reconnection logic with exponential backoff. Add support for attachments with proper binary data handling. Ensure proper error handling with standardized error messages. Implement authentication for WebSocket connections.
+Complete the implementation of context memory CRUD operations via REST API following RESTful principles. Create endpoints for memory search with filtering and pagination. Add endpoints for memory extraction settings management. Implement bulk operations for memory management. Include proper validation for all endpoints and support both synchronous and streaming responses where appropriate. Document all endpoints with OpenAPI/Swagger.
 
 # Test Strategy:
-Create WebSocket client tests that verify connection establishment, message sending/receiving, and reconnection behavior. Test with different message types and attachments. Verify proper error handling and recovery mechanisms.
-
-# Subtasks:
-## 1. Set up WebSocket server with connection handling [pending]
-### Dependencies: None
-### Description: Implement the core WebSocket server with proper connection establishment, maintenance, and termination capabilities.
-### Details:
-1. Choose and set up a WebSocket library (like ws, Socket.IO)
-2. Create a WebSocket server that listens on a configurable port
-3. Implement connection event handlers (open, close, error)
-4. Set up ping/pong mechanism to detect stale connections
-5. Implement basic logging for connection events
-6. Create a connection pool to track active connections
-7. Testing: Write tests to verify connection establishment, maintenance over time, and proper termination
-
-## 2. Implement authentication for WebSocket connections [pending]
-### Dependencies: 3.1
-### Description: Add authentication mechanisms to verify client identity before establishing WebSocket connections.
-### Details:
-1. Review authentication requirements from api.md
-2. Implement token validation on connection request
-3. Create middleware to authenticate connection requests
-4. Add user/client identification to connection objects
-5. Implement connection rejection for invalid credentials
-6. Set up secure token transmission
-7. Testing: Write tests with valid and invalid authentication attempts, verify proper rejection of unauthorized connections
-
-## 3. Implement message types and handlers [pending]
-### Dependencies: 3.1, 3.2
-### Description: Create the message type definitions and corresponding handlers for text, images, and audio as specified in api.md.
-### Details:
-1. Define message type schemas for text, images, and audio based on api.md
-2. Implement message parsing and validation
-3. Create handler functions for each message type
-4. Set up message routing based on type
-5. Implement acknowledgment responses
-6. Add message queuing for handling high loads
-7. Testing: Create tests for each message type, verify proper routing and handling
-
-## 4. Add support for binary data and attachments [pending]
-### Dependencies: 3.3
-### Description: Implement binary data handling for attachments like images and audio files.
-### Details:
-1. Configure WebSocket server for binary data transmission
-2. Implement buffer handling for binary messages
-3. Create utilities for encoding/decoding binary data
-4. Add attachment size validation
-5. Implement streaming for large attachments
-6. Set up temporary storage for attachments if needed
-7. Testing: Test binary data transmission with various file types and sizes, verify data integrity
-
-## 5. Implement reconnection logic and error handling [pending]
-### Dependencies: 3.1, 3.2, 3.3, 3.4
-### Description: Add client reconnection capabilities with exponential backoff and standardized error handling.
-### Details:
-1. Define standardized error message format as specified in api.md
-2. Implement error types and codes
-3. Create error handling middleware
-4. Implement reconnection logic with exponential backoff
-5. Add connection state tracking
-6. Implement message buffering during disconnections
-7. Create client-side reconnection examples
-8. Testing: Simulate network failures and verify reconnection behavior, test error handling for various error scenarios
-
+Create API tests for each endpoint covering success and error cases. Test pagination, filtering, and bulk operations. Verify API documentation accuracy with Swagger UI. Perform load testing to ensure endpoint performance under stress.
