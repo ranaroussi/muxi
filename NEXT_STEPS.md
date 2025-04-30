@@ -10,6 +10,10 @@ Core components of the muxi framework now implemented:
    - [x] Fixed message handling to properly use role/content attributes
    - [x] Improved process_message and process_tool_call methods
    - [x] Standardized message structure for compatibility with all LLM providers
+   - [x] Implemented centralized MCPService as a singleton pattern
+   - [x] Added ToolParser for extracting tool calls from LLM responses
+   - [x] Added configurable request timeouts at orchestrator, agent, and per-request levels
+   - [x] Implemented thread-safe tool invocation with locks for concurrent access
 2. **Memory System**:
    - [x] Buffer memory using FAISS for short-term context
    - [x] Long-term memory using PostgreSQL with pgvector
@@ -21,6 +25,7 @@ Core components of the muxi framework now implemented:
    - [x] Migration system for schema version control
 3. **MCP Server Integration**:
    - [x] MCP Handler for communication with external services
+   - [x] Centralized MCPService for managing all MCP server communications
    - [x] MCP message processing
    - [x] Example MCP servers (Calculator, Web Search)
    - [x] Implement proper transport abstraction with factory pattern
@@ -177,12 +182,13 @@ Building on the api.md specifications, enhance the WebSocket API:
 
 - [ ] Unit tests for all new API endpoints
 - [ ] Integration tests for API and WebSocket endpoints
+- [ ] Create e2e tests for the framework
 - [ ] Performance benchmarks for API endpoints
 - [ ] Complete CLI documentation
 - [ ] Expand API documentation beyond api.md with practical examples
 - [ ] User guides for advanced use cases
 - [ ] Example projects showcasing API usage
-- [ ] Generate API documentation with Sphinx
+- [ ] Generate API documentation with Fumadocs
 
 ### 9. Deployment & Package Distribution
 
