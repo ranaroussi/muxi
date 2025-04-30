@@ -1,0 +1,129 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# A2A Security Layer Implementation Guidelines
+
+The A2A security layer is a critical component of the MUXI Framework as outlined in the whitepaper. It ensures safe and controlled inter-agent communication, preventing potential security risks while enabling powerful agent collaboration.
+
+## Core Security Components
+
+- **Permission System**: Controls which agents can communicate with each other
+  ```python
+  # Example permission check in A2A handler
+  def can_communicate(source_agent_id, target_agent_id, operation):
+      permission = permissions.get_agent_permission(source_agent_id)
+      return permission.can_access(target_agent_id, operation)
+  ```
+
+- **Context Isolation**: Prevents unauthorized access to user data or sensitive information
+  ```python
+  # Example of context isolation implementation
+  class ContextIsolation:
+      def create_safe_context(self, agent_id, user_context, target_agent_id):
+          # Create isolated copy with only permitted data fields
+          return IsolatedContext(
+              user_id=user_context.user_id,
+              permitted_fields=self.get_permitted_fields(agent_id, target_agent_id)
+          )
+  ```
+
+- **Rate Limiting**: Prevents abuse of inter-agent communication
+  ```python
+  # Example rate limiting implementation
+  class A2ARateLimiter:
+      def check_rate_limit(self, source_agent_id, operation):
+          current_rate = self.get_current_rate(source_agent_id, operation)
+          max_rate = self.get_max_rate(source_agent_id, operation)
+
+          if current_rate > max_rate:
+              raise RateLimitExceeded(f"Rate limit exceeded for {source_agent_id}")
+
+          self.increment_counter(source_agent_id, operation)
+  ```
+
+- **Audit Logging**: Records all inter-agent communication for security analysis
+  ```python
+  # Example audit logging implementation
+  def log_a2a_interaction(source_agent_id, target_agent_id, operation, context_hash, result):
+      logger.security(
+          event="a2a_communication",
+          source=source_agent_id,
+          target=target_agent_id,
+          operation=operation,
+          context_hash=context_hash,
+          result_status=result.status,
+          timestamp=datetime.now().isoformat()
+      )
+  ```
+
+## Implementation Requirements
+
+1. **All A2A Communications Must Be Authorized**
+   - Every inter-agent request must pass through permission system
+   - Default deny policy (only allow explicitly permitted communications)
+   - Permissions should be configurable at orchestrator level
+
+2. **Context Sharing Must Be Controlled**
+   - Only share minimum required context between agents
+   - User-specific data must be explicitly permitted for sharing
+   - Context should be immutable during transfer to prevent modification
+
+3. **Rate Limiting Is Required**
+   - Implement per-agent, per-operation rate limits
+   - Consider global limits to prevent system abuse
+   - Adaptive limits based on system load and usage patterns
+
+4. **Audit Logging Is Mandatory**
+   - Log all A2A communication attempts (successful and failed)
+   - Include contextual information for security analysis
+   - Logs should be tamper-evident and preserved for analysis
+   - Support for visualization and pattern detection
+
+## Security Testing Approach
+
+- **Boundary Testing**: Verify context isolation boundaries cannot be breached
+- **Permission Testing**: Confirm permissions are enforced across all operations
+- **Penetration Testing**: Attempt to bypass security controls from within agents
+- **Audit Analysis**: Verify logging captures all necessary information for security analysis
+
+## Integration with Orchestrator
+
+The security layer should be tightly integrated with the orchestrator:
+
+```python
+class Orchestrator:
+    def __init__(self, ...):
+        # Initialize the A2A security layer
+        self.a2a_security = A2ASecurity(
+            permission_model=config.a2a.permissions,
+            rate_limits=config.a2a.rate_limits,
+            audit_config=config.a2a.audit
+        )
+
+    async def route_a2a_request(self, source_agent_id, target_agent_id, request):
+        # 1. Check permissions
+        self.a2a_security.verify_permission(source_agent_id, target_agent_id, request.operation)
+
+        # 2. Check rate limits
+        self.a2a_security.check_rate_limit(source_agent_id, request.operation)
+
+        # 3. Create isolated context
+        safe_context = self.a2a_security.create_safe_context(
+            source_agent_id, request.context, target_agent_id
+        )
+
+        # 4. Log the request
+        request_id = self.a2a_security.log_request(source_agent_id, target_agent_id, request)
+
+        # 5. Process the actual request
+        result = await self.agents[target_agent_id].process_a2a_request(request_id, safe_context)
+
+        # 6. Log the result
+        self.a2a_security.log_result(request_id, result)
+
+        return result
+```
+
+Follow these guidelines to ensure that the A2A security layer is properly implemented according to the whitepaper specifications, balancing the power of inter-agent communication with appropriate security controls.

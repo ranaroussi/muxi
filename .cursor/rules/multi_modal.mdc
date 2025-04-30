@@ -1,0 +1,239 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Multi-Modal Capabilities Implementation Guidelines
+
+The MUXI Framework's whitepaper outlines comprehensive multi-modal capabilities, allowing agents to process and generate content across text, images, audio, and documents. This rule provides guidelines for implementing these features according to the whitepaper specifications.
+
+## Core Multi-Modal Components
+
+### 1. Document Processing
+
+- **PDF Document Handling**
+  ```python
+  # Example PDF processing implementation
+  async def process_pdf(file_path, options=None):
+      from muxi.multimodal.document import PDFProcessor
+      processor = PDFProcessor()
+      result = await processor.extract_content(
+          file_path,
+          extract_text=True,
+          extract_images=options.get('extract_images', False),
+          extract_tables=options.get('extract_tables', False)
+      )
+      return result
+  ```
+
+- **Office Document Support**
+  - Support Word, Excel, PowerPoint, and other common formats
+  - Extract structured and unstructured content
+  - Preserve formatting information where relevant
+
+- **OCR Capabilities**
+  - Extract text from images within documents
+  - Support multiple languages and character sets
+  - Handle low-quality scans with appropriate preprocessing
+
+- **Document Summarization**
+  - Generate executive summaries of documents
+  - Extract key points and main ideas
+  - Create hierarchical summaries based on document structure
+
+### 2. Image Analysis
+
+- **Vision Model Integration**
+  ```python
+  # Example vision model integration
+  async def analyze_image(image_path, analysis_type="general"):
+      from muxi.multimodal.vision import VisionProcessor
+      processor = VisionProcessor()
+      if analysis_type == "general":
+          return await processor.describe_image(image_path)
+      elif analysis_type == "objects":
+          return await processor.detect_objects(image_path)
+      elif analysis_type == "text":
+          return await processor.extract_text(image_path)
+  ```
+
+- **Image Content Understanding**
+  - Detailed image descriptions
+  - Object detection and recognition
+  - Scene understanding and context recognition
+  - Visual question answering
+
+- **Image Preprocessing Pipeline**
+  - Resize and normalize images for model input
+  - Apply appropriate transformations based on analysis type
+  - Handle various image formats and color spaces
+
+### 3. Audio Processing
+
+- **Speech Processing**
+  ```python
+  # Example speech processing implementation
+  async def process_speech(audio_file, operation="transcribe"):
+      from muxi.multimodal.audio import AudioProcessor
+      processor = AudioProcessor()
+      if operation == "transcribe":
+          return await processor.transcribe(audio_file)
+      elif operation == "synthesize":
+          return await processor.text_to_speech(audio_file)
+  ```
+
+- **Speech-to-Text Transcription**
+  - Support for multiple languages and accents
+  - Speaker identification
+  - Timestamp generation for word-level alignment
+  - Handling of background noise and low-quality audio
+
+- **Text-to-Speech Synthesis**
+  - Natural-sounding voice generation
+  - Multiple voice options and styles
+  - Emotional tone variation
+  - Custom pronunciation rules
+
+- **Real-time Audio Streaming**
+  - Low-latency processing for conversational interfaces
+  - Stream chunking and processing
+  - Progressive result delivery
+
+## Integration Requirements
+
+### WebSocket Implementation
+
+```python
+# Example WebSocket handler for multi-modal messages
+async def handle_multimodal_message(websocket, message):
+    message_type = message.get("type")
+
+    if message_type == "text":
+        return await process_text_message(websocket, message)
+    elif message_type == "image":
+        return await process_image_message(websocket, message)
+    elif message_type == "audio":
+        return await process_audio_message(websocket, message)
+    elif message_type == "document":
+        return await process_document_message(websocket, message)
+    elif message_type == "mixed":
+        return await process_mixed_message(websocket, message)
+```
+
+### Memory Storage for Multi-Modal Content
+
+```python
+# Example multi-modal memory implementation
+class MultiModalMemory:
+    async def store(self, content_type, content, metadata=None):
+        """Store multi-modal content in memory."""
+        if content_type == "text":
+            return await self._store_text(content, metadata)
+        elif content_type == "image":
+            return await self._store_image(content, metadata)
+        elif content_type == "audio":
+            return await self._store_audio(content, metadata)
+        elif content_type == "document":
+            return await self._store_document(content, metadata)
+
+    async def retrieve(self, query, content_types=None, limit=5):
+        """Retrieve multi-modal content based on query."""
+        results = []
+
+        # Filter by content types if specified
+        types_to_search = content_types or ["text", "image", "audio", "document"]
+
+        for content_type in types_to_search:
+            type_results = await self._retrieve_by_type(query, content_type)
+            results.extend(type_results)
+
+        # Sort by relevance and limit results
+        results.sort(key=lambda x: x["relevance"], reverse=True)
+        return results[:limit]
+```
+
+### Agent Processing of Multi-Modal Inputs
+
+Agents should be able to process multi-modal inputs in a unified way:
+
+```python
+class Agent:
+    async def process_multimodal_message(self, message):
+        components = self._extract_components(message)
+
+        # Process each component
+        results = {}
+        for component_type, component in components.items():
+            processor = self._get_processor(component_type)
+            results[component_type] = await processor.process(component)
+
+        # Generate unified response
+        return await self._generate_unified_response(results)
+```
+
+## Implementation Guidelines
+
+1. **Seamless Modality Switching**
+   - Allow users to switch between modalities within the same conversation
+   - Maintain context across modality switches
+   - Support mixed-modal messages (e.g., text with image)
+
+2. **Consistent API Design**
+   - Use consistent patterns for all modalities
+   - Implement proper error handling for each modality
+   - Support streaming for all content types where applicable
+
+3. **Processing Pipeline**
+   - Implement preprocessing steps for each modality
+   - Support batched processing for efficiency
+   - Provide progress reporting for long-running operations
+
+4. **Memory Considerations**
+   - Store multi-modal content efficiently
+   - Consider storage requirements for different modalities
+   - Implement caching strategies for large content
+
+5. **Unified Response Generation**
+   - Combine insights from multiple modalities
+   - Generate appropriate response format based on context
+   - Support multi-modal responses (e.g., text with generated images)
+
+## Integration with MCP
+
+Multi-modal capabilities should be exposed through MCP tools:
+
+```python
+# Example MCP tool registration for multi-modal capabilities
+def register_multimodal_tools(mcp_handler):
+    mcp_handler.register_tool(
+        name="process_document",
+        description="Process a document file (PDF, Word, etc.)",
+        parameters={
+            "file_path": {"type": "string", "description": "Path to the document file"},
+            "options": {"type": "object", "description": "Processing options"}
+        },
+        handler=process_document
+    )
+
+    mcp_handler.register_tool(
+        name="analyze_image",
+        description="Analyze the content of an image",
+        parameters={
+            "image_path": {"type": "string", "description": "Path to the image file"},
+            "analysis_type": {"type": "string", "enum": ["general", "objects", "text"]}
+        },
+        handler=analyze_image
+    )
+
+    mcp_handler.register_tool(
+        name="process_speech",
+        description="Process speech audio",
+        parameters={
+            "audio_file": {"type": "string", "description": "Path to the audio file"},
+            "operation": {"type": "string", "enum": ["transcribe", "synthesize"]}
+        },
+        handler=process_speech
+    )
+```
+
+Following these guidelines will ensure that multi-modal capabilities are implemented according to the whitepaper specifications, providing a comprehensive framework for working with diverse content types.

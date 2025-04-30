@@ -128,7 +128,22 @@ Based on the updated priority list, the following tasks have been prioritized:
    - Add external agent integration
    - Implement security and authentication
 
-6. **Vector Database Enhancements**:
+6. **A2A Security Layer** (New Priority):
+   - Design and implement comprehensive permission system for controlling inter-agent communication
+   - Develop context isolation to prevent unauthorized access to user data or sensitive information
+   - Implement rate limiting to prevent abuse of inter-agent communication
+   - Create audit logging system to record all inter-agent communications for security analysis
+   - Develop security controls in line with the whitepaper specifications
+
+7. **Multi-Modal Capabilities** (Raised Priority):
+   - Implement document processing with PDF and Office document support
+   - Develop image analysis with vision-capable models
+   - Create audio processing with speech-to-text and text-to-speech capabilities
+   - Implement real-time streaming through WebSocket interfaces
+   - Ensure proper handling of multi-modal interactions across all interface types
+   - Build comprehensive examples demonstrating multi-modal agent capabilities
+
+8. **Vector Database Enhancements**:
    - Optimize vector operations for improved performance
    - Add support for additional vector databases (e.g., Milvus, Qdrant)
    - Add migration tools for transferring between database types
@@ -136,51 +151,38 @@ Based on the updated priority list, the following tasks have been prioritized:
    - Develop guidance for choosing between SQLite and PostgreSQL
    - Support for vector database clustering and sharding
 
-7. **LLM Providers**:
+9. **LLM Providers**:
    - Implement Anthropic LLM provider
    - Implement Gemini LLM provider
    - Implement Grok LLM provider
    - Add support for local models (e.g., Llama, Mistral, DeepSeek)
    - Create a model router for fallback and cost optimization
 
-8. **Testing and Documentation**:
-   - Unit tests for all new API endpoints
-   - Integration tests for API and WebSocket endpoints
-   - Performance benchmarks for API endpoints
-   - Complete CLI documentation
-   - Expand API documentation beyond api.md with practical examples
-   - User guides for advanced use cases
-   - Example projects showcasing API usage
+10. **Testing and Documentation**:
+    - Unit tests for all new API endpoints
+    - Integration tests for API and WebSocket endpoints
+    - Performance benchmarks for API endpoints
+    - Complete CLI documentation
+    - Expand API documentation beyond api.md with practical examples
+    - User guides for advanced use cases
+    - Example projects showcasing API usage
 
-9. **Deployment & Package Distribution**:
-   - Docker containerization
-   - Kubernetes deployment
-   - Cloud deployment guides (AWS, GCP, Azure)
-   - Monitoring and logging integration
-   - Continuous integration workflow with GitHub Actions or similar tools
-   - Automatic version bumping for releases
-   - SQLite deployment guides for serverless and edge environments
+11. **Deployment & Package Distribution**:
+    - Docker containerization
+    - Kubernetes deployment
+    - Cloud deployment guides (AWS, GCP, Azure)
+    - Monitoring and logging integration
+    - Continuous integration workflow with GitHub Actions or similar tools
+    - Automatic version bumping for releases
+    - SQLite deployment guides for serverless and edge environments
 
-10. **Language-Specific SDKs**:
+12. **Language-Specific SDKs**:
     - TypeScript/JavaScript SDK
     - Go SDK
     - Java/Kotlin SDK
     - Rust SDK
     - C#/.NET SDK
     - SDK Development Tools
-
-11. **Multi-Modal Capabilities**:
-    - **Document Processing**: PDF handling, Office documents, OCR, document summarization
-    - **Image Processing**: Image attachments, preprocessing pipeline, vision-capable model integration
-    - **Audio Processing**: Audio file handling, speech-to-text, text-to-speech, streaming audio
-
-12. **Security Enhancements**:
-    - API security (rate limiting, input validation, IP restrictions)
-    - Enhanced authentication methods
-    - Data encryption at rest and in transit
-    - Compliance with security standards
-    - Security auditing and vulnerability scanning
-    - Privacy controls and data protection mechanisms
 
 ## Active Decisions and Considerations
 

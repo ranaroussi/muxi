@@ -31,6 +31,19 @@ MUXI Framework is a powerful platform for building AI agents with memory, MCP se
   - Task delegation between specialized agents
   - Context sharing with proper isolation
   - Security and authentication
+- 🔒 **A2A Security Layer**: Comprehensive security controls for agent interactions
+  - Permission system for controlling which agents can communicate
+  - Context isolation preventing unauthorized access to sensitive information
+  - Rate limiting to prevent abuse of inter-agent communication
+  - Audit logging for security analysis of agent interactions
+  - Visualization of agent communication patterns as directed acyclic graphs (DAGs)
+- 🎭 **Multi-Modal Capabilities**: Support for various content types and interaction modes
+  - Document processing for PDF and Office documents with OCR and summarization
+  - Image analysis with vision-capable models for content understanding
+  - Audio processing with speech-to-text and text-to-speech capabilities
+  - Real-time streaming through WebSocket interfaces
+  - Seamless mode switching in conversations
+  - Cross-modal memory and retrieval
 - 🌐 **Multiple Interfaces**: REST API, WebSockets, CLI, Web UI, etc.
 - 🔄 **Intelligent Message Routing**: Automatically direct messages to the most appropriate agent
 - 📊 **Multi-User Support**: User-specific memory partitioning for multi-tenant applications

@@ -175,13 +175,43 @@ The MUXI Framework v0.4.0 will introduce several advanced features with a focus 
   - Context sharing with proper isolation
   - Security and authentication foundation
 
+- **A2A Security Layer**:
+  - Permission system for controlling inter-agent communication
+  - Context isolation to prevent unauthorized access to sensitive information
+  - Basic rate limiting for A2A interactions
+  - Audit logging for inter-agent communications
+  - Security controls as described in the whitepaper
+
+- **Multi-Modal Capabilities (Initial Implementation)**:
+  - Foundation for document processing (PDF, Office documents)
+  - Basic image analysis with vision-capable models
+  - Initial audio processing with speech-to-text capabilities
+  - Websocket-based streaming for multi-modal content
+  - Cross-modality memory storage and retrieval
+
 ## Upcoming Releases
 
 ### v0.5.0 (Planned Q2 2025) - Scaling & Integration
 
-The MUXI Framework v0.5.0 will focus on advanced integration capabilities, vector database enhancements, and expanding LLM provider support.
+The MUXI Framework v0.5.0 will focus on advanced integration capabilities, comprehensive multi-modal support, advanced A2A security, vector database enhancements, and expanding LLM provider support.
 
 #### Planned Features
+
+- **Advanced A2A Security Layer**:
+  - Enhanced permission system with fine-grained controls
+  - Sophisticated context isolation with security boundaries
+  - Advanced rate limiting with adaptive thresholds
+  - Comprehensive audit logging with security analysis tools
+  - Visualization of agent communication patterns
+  - Integration with enterprise security frameworks
+
+- **Comprehensive Multi-Modal Capabilities**:
+  - Advanced document processing with knowledge extraction
+  - Sophisticated image analysis with object detection and segmentation
+  - Comprehensive audio processing with speaker identification
+  - Seamless cross-modal reasoning and content generation
+  - Multi-modal memory with advanced retrieval capabilities
+  - Synchronized streaming across all modalities
 
 - **Vector Database Enhancements**:
   - Optimized vector operations for improved performance

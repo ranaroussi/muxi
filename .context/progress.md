@@ -157,7 +157,60 @@ The following components are partially implemented or planned for future develop
    - ⏳ Authentication shared with REST API
    - ⏳ Unified credential management
 
-### 6. Vector Database Enhancements
+### 6. A2A Security Layer
+
+1. **Inter-Agent Security Framework**:
+   - ⏳ Comprehensive permission system for controlling which agents can communicate with each other
+   - ⏳ Context isolation mechanisms to prevent unauthorized access to user data or sensitive information
+   - ⏳ Rate limiting implementation to prevent abuse of inter-agent communication
+   - ⏳ Audit logging system for recording all inter-agent communications for security analysis
+   - ⏳ Directed Acyclic Graph (DAG) visualization of agent interactions
+   - ⏳ Security controls aligned with whitepaper specifications
+   - ⏳ Integration with existing authentication system
+
+2. **Security Testing and Verification**:
+   - ⏳ Comprehensive test suite for permission validation
+   - ⏳ Penetration testing framework for A2A communication
+   - ⏳ Security boundary enforcement tests
+   - ⏳ Audit log verification tools
+
+### 7. Multi-Modal Capabilities
+
+1. **Document Processing**:
+   - ⏳ PDF document handling and analysis
+   - ⏳ Office document processing (Word, Excel, PowerPoint)
+   - ⏳ OCR for image-based text extraction
+   - ⏳ Document summarization capabilities
+   - ⏳ Structured data extraction from documents
+   - ⏳ Knowledge graph generation from document content
+
+2. **Image Analysis**:
+   - ⏳ Image attachment support in all interfaces
+   - ⏳ Image preprocessing pipeline
+   - ⏳ Integration with vision-capable models
+   - ⏳ Image description and content analysis
+   - ⏳ Object detection and recognition
+   - ⏳ Image segmentation capabilities
+   - ⏳ Agent interaction with visual content
+
+3. **Audio Processing**:
+   - ⏳ Audio file handling across interfaces
+   - ⏳ Speech-to-text transcription services
+   - ⏳ Text-to-speech synthesis
+   - ⏳ Real-time audio streaming capabilities
+   - ⏳ Voice recognition and speaker identification
+   - ⏳ Audio sentiment analysis
+   - ⏳ Multi-lingual audio support
+
+4. **Multi-Modal Integration**:
+   - ⏳ Seamless mode switching in conversations
+   - ⏳ Multi-modal memory capabilities
+   - ⏳ Combined reasoning across text, image, and audio inputs
+   - ⏳ Cross-modal search and retrieval
+   - ⏳ Multi-modal content generation
+   - ⏳ Synchronized streaming across modalities
+
+### 8. Vector Database Enhancements
 
 1. **Performance Optimizations**:
    - ⏳ Improved indexing for vector operations
@@ -170,7 +223,7 @@ The following components are partially implemented or planned for future develop
    - ⏳ Advanced vector operations (clustering, etc.)
    - ⏳ Vector database clustering and sharding
 
-### 7. LLM Providers
+### 9. LLM Providers
 
 1. **Provider Integrations**:
    - ⏳ Anthropic provider
@@ -179,7 +232,7 @@ The following components are partially implemented or planned for future develop
    - ⏳ Local model support (Llama, Mistral, DeepSeek)
    - ⏳ Model router for fallback and cost optimization
 
-### 8. Testing and Documentation
+### 10. Testing and Documentation
 
 1. **Testing Infrastructure**:
    - ⏳ Unit tests for all new API endpoints
@@ -192,7 +245,7 @@ The following components are partially implemented or planned for future develop
    - ⏳ Example projects and tutorials
    - ⏳ User guides for advanced use cases
 
-### 9. Deployment & Package Distribution
+### 11. Deployment & Package Distribution
 
 1. **Containerization**:
    - ⏳ Docker configuration
@@ -207,7 +260,7 @@ The following components are partially implemented or planned for future develop
    - ⏳ GitHub Actions workflows
    - ⏳ Automatic version bumping
 
-### 10. Language-Specific SDKs
+### 12. Language-Specific SDKs
 
 1. **Client Libraries**:
    - ⏳ TypeScript/JavaScript SDK for web and Node.js
@@ -228,25 +281,7 @@ The following components are partially implemented or planned for future develop
    - ⏳ Shared test suite for validation
    - ⏳ Version synchronization tools
 
-### 11. Multi-Modal Capabilities
-
-1. **Document Processing**:
-   - ⏳ PDF and Office document support
-   - ⏳ OCR for scanned documents
-   - ⏳ Document summarization
-
-2. **Image Processing**:
-   - ⏳ Image attachment support
-   - ⏳ Image preprocessing pipeline
-   - ⏳ Vision-capable model integration
-
-3. **Audio Processing**:
-   - ⏳ Audio file handling
-   - ⏳ Speech-to-text integration
-   - ⏳ Text-to-speech for responses
-   - ⏳ Streaming audio capabilities
-
-### 12. Security Enhancements
+### 13. Security Enhancements
 
 1. **API Security**:
    - ⏳ Rate limiting and throttling
