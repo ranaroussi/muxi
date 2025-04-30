@@ -1,0 +1,84 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Anonymous User Memory Handling
+
+This rule outlines how to properly handle memory operations for anonymous users (user_id=0) in the MUXI Framework. Anonymous users should not have their data stored in or retrieved from long-term memory or have automatic context extraction performed.
+
+## Core Principles
+
+1. **Skip Storage for Anonymous Users**: When user_id=0, do not store data in long-term memory
+2. **Skip Retrieval for Anonymous Users**: When user_id=0, return empty results instead of querying memory
+3. **Skip Context Extraction**: Do not perform automatic information extraction for anonymous users
+4. **Return Valid Defaults**: Return appropriate empty defaults ([], {}, etc.) rather than null values
+
+## Implementation Pattern
+
+Always check for user_id=0 before performing memory operations:
+
+```python
+# Example for storing data
+async def add_to_memory(data, user_id=None):
+    # Set default value if None
+    user_id = user_id if user_id is not None else self.default_user_id
+
+    # Skip operations for anonymous users
+    if user_id == 0:
+        # Return appropriate default value
+        return 0  # or [] or {} depending on the context
+
+    # Proceed with normal operations for authenticated users
+    # ...
+```
+
+```python
+# Example for retrieving data
+async def get_from_memory(query, user_id=None):
+    # Set default value if None
+    user_id = user_id if user_id is not None else self.default_user_id
+
+    # Skip operations for anonymous users
+    if user_id == 0:
+        # Return appropriate empty result
+        return []  # or {} depending on the context
+
+    # Proceed with normal operations for authenticated users
+    # ...
+```
+
+## Check Locations
+
+Implement these checks in the following components:
+
+1. **Memobase Methods**:
+   - `add()`
+   - `search()`
+   - `add_user_context_memory()`
+   - `get_user_context_memory()`
+   - `clear_user_context_memory()`
+   - `get_user_memories()`
+   - `clear_user_memory()`
+
+2. **Memory Extractor**:
+   - `process_conversation_turn()`
+
+3. **Long-Term Memory (direct access)**:
+   - When bypassing Memobase and accessing long-term memory directly
+
+## Handling Multi-User vs. Single-User Mode
+
+In multi-user mode (is_multi_user=True):
+- Always perform the user_id=0 check as described above
+
+In single-user mode (is_multi_user=False):
+- The check is less critical since there's one shared context
+- Still recommended for consistency and future-proofing
+
+## Testing Considerations
+
+When writing tests:
+1. Test with user_id=0 to verify operations are skipped
+2. Test with valid user_id to verify operations work normally
+3. Test with both None and explicit 0 to verify default handling
