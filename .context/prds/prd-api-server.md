@@ -517,6 +517,69 @@ The API Server will include comprehensive monitoring and observability features:
    - Span collection for performance analysis
    - Real-time trace streaming via SSE
 
+## Deployment Considerations
+
+### Initialization and Configuration
+
+The API Server must be initialized with configuration parameters that define its operational environment:
+
+1. **MUXI Service Connection**:
+   - Configurable URI for the MUXI service (defaults to `localhost:3000`)
+   - Allows for distributed installation where API Server and MUXI service run on different hosts
+   - Connection parameters (timeout, retry policy, etc.)
+   - TLS/SSL certificate configuration for secure communication
+
+2. **Server Configuration**:
+   - Host and port bindings
+   - SSL/TLS certificate paths
+   - Worker process count
+   - Connection limits and timeouts
+   - Maximum request size
+   - CORS configuration
+
+3. **Environment-specific Settings**:
+   - Development vs. production mode
+   - Debug logging toggle
+   - Performance profiling options
+
+### Production Deployment Best Practices
+
+For production deployments, the following best practices are recommended:
+
+1. **Reverse Proxy Integration**:
+   - Deploy behind Caddy, Traefik, Nginx, or other reverse proxy
+   - Offload TLS termination to the reverse proxy
+   - Configure appropriate headers (X-Forwarded-For, etc.)
+   - Implement path-based routing if needed
+   - Enable HTTP/2 for improved performance
+
+2. **Load Balancing**:
+   - Utilize multiple API Server instances behind a load balancer
+   - Configure sticky sessions for WebRTC and SSE connections
+   - Implement health checks for automatic instance replacement
+   - Use Redis or similar for session state sharing
+
+3. **Security Enhancement**:
+   - Rate limiting at reverse proxy level
+   - Web Application Firewall (WAF) integration
+   - DDoS protection
+   - IP filtering for admin endpoints
+   - Regular security audits
+
+4. **Monitoring Integration**:
+   - Prometheus metrics exposure
+   - Grafana dashboard templates
+   - Log aggregation (ELK, Datadog, etc.)
+   - Distributed tracing with OpenTelemetry
+
+5. **High Availability**:
+   - Multi-region deployment
+   - Automatic failover
+   - Backup and recovery procedures
+   - Blue-green deployment support
+
+A comprehensive deployment guide will be provided in the documentation site, including specific configuration examples for Caddy, Traefik, and other popular reverse proxies.
+
 ## Future Extensions
 
 1. **API Key Management**:
