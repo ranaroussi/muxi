@@ -48,64 +48,99 @@ MUXI Framework is currently in active development. The core feature roadmap is o
 
 ## Version 0.4.0 (In Development)
 
-- 🔄 API Implementations
-  - 🔄 REST API for agent interactions
-  - 🔄 WebSocket API for streaming responses
+- 🔄 REST API & MCP Server Implementation
+  - 🔄 Complete REST API endpoints from api.md
+  - 🔄 Authentication with API keys
+  - 🔄 Streaming support with SSE
+  - 🔄 Standardized error handling
+  - 🔄 API versioning support
+- 🔄 WebSocket API Implementation
+  - 🔄 Real-time communication
+  - 🔄 Multi-modal message support
+  - 🔄 Error handling and recovery
+  - 🔄 Reconnection logic
 - 🔄 CLI Enhancements
-  - 🔄 Interactive mode improvements
-  - 🔄 Configuration management
+  - 🔄 Support for all API operations
+  - 🔄 Improved user experience
+  - 🔄 Configuration management commands
 - 🔄 Web UI (Basic implementation)
-  - 🔄 Chat interface
-  - 🔄 Agent management
+  - 🔄 Responsive design
+  - 🔄 Real-time updates via WebSocket
+  - 🔄 Agent management dashboard
+- 🔄 Agent-to-Agent (A2A) Communication
+  - 🔄 Capability discovery
+  - 🔄 Task delegation
+  - 🔄 Context sharing with isolation
+  - 🔄 Security and authentication
 
 ## Version 0.5.0 (Planned)
 
-- 📅 A2A (Agent-to-Agent) Communication
-  - 📅 Structured message format
-  - 📅 Capability registration and discovery
-  - 📅 Task delegation
-  - 📅 Context sharing
-  - 📅 Security and authentication
-- 📅 Multi-modal support
-  - 📅 Image understanding
-  - 📅 Audio processing
-- 📅 MCP Server Enhancements
-  - 📅 Non-SSE client compatibility bridge
-  - 📅 Enhanced security
 - 📅 LLM Provider Expansion
-  - 📅 Claude/Anthropic
-  - 📅 LLama models
+  - 📅 Anthropic/Claude
   - 📅 Google Gemini
-  - 📅 Local models
+  - 📅 Grok
+  - 📅 Local models (Llama, Mistral, DeepSeek)
+- 📅 Deployment & Package Distribution
+  - 📅 Docker containerization
+  - 📅 Kubernetes deployment
+  - 📅 Cloud deployment guides
+  - 📅 CI/CD integration
+- 📅 Logging and Tracing System
+  - 📅 Comprehensive trace ID system
+  - 📅 Component-level tracing
+  - 📅 CLI trace viewing tools
+  - 📅 Cloud integration
+- 📅 Initial Multi-modal Support
+  - 📅 Basic document processing
+  - 📅 Simple image analysis
+  - 📅 Foundations for audio processing
+
+## Version 0.6.0 (Planned)
+
+- 📅 TypeScript/JavaScript SDK
+  - 📅 REST API client
+  - 📅 WebSocket client
+  - 📅 MCP server integration
+- 📅 Comprehensive Multi-modal Support
+  - 📅 Advanced document processing
+  - 📅 Sophisticated image analysis
+  - 📅 Audio processing with speech-to-text
+- 📅 Memory System Enhancements
+  - 📅 Context memory templates
+  - 📅 Context memory namespaces
+  - 📅 Optimized vector operations
+  - 📅 User information extraction
+  - 📅 Interface-level user ID generation
 
 ## Future Roadmap
 
-- 📅 Language-Specific SDKs
-  - 📅 TypeScript/JavaScript
+- 📅 Additional Language SDKs
   - 📅 Go
-  - 📅 Python
   - 📅 Java/Kotlin
+  - 📅 Rust
+  - 📅 C#/.NET
+- 📅 Testing & Documentation
+  - 📅 Comprehensive test suite
+  - 📅 API documentation
+  - 📅 Example projects
 - 📅 Enhanced tools and capabilities
   - 📅 Advanced task delegation
   - 📅 Autonomous planning
   - 📅 Advanced RAG techniques
-- 📅 Integration with external systems
-  - 📅 Database connectors
-  - 📅 Web API integrations
-  - 📅 Enterprise systems
 - 📅 Advanced Multi-Agent Systems
   - 📅 Agent swarms
   - 📅 Custom agent roles
   - 📅 Hierarchical agent structures
   - 📅 Collaborative problem-solving
-- 📅 Observability and monitoring
-  - 📅 Telemetry
-  - 📅 Performance metrics
-  - 📅 Debugging tools
-- 📅 Community plugins
-  - 📅 Plugin architecture
-  - 📅 Plugin marketplace
-  - 📅 Plugin management
+- 📅 Security Enhancements
+  - 📅 Advanced authentication methods
+  - 📅 Role-based access control
+  - 📅 Data encryption and protection
+  - 📅 Security auditing
+- 📅 API Stabilization
+  - 📅 Backward compatibility guarantees
+  - 📅 Standardized error handling
+  - 📅 Comprehensive documentation
 
 ## Legend
 

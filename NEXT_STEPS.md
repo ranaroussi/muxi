@@ -144,7 +144,9 @@ Building on the api.md specifications, enhance the WebSocket API:
   - [ ] Build user-friendly configuration interface
   - [ ] Create agent management dashboard
 
-### 5. Agent-to-Agent Communication
+### 5. Agent-to-Agent Communication (A2A)
+
+Based on prd-a2a.md specifications:
 
 - [ ] Implement the A2A protocol for inter-agent communication
   - [ ] Capability discovery mechanism
@@ -160,16 +162,7 @@ Building on the api.md specifications, enhance the WebSocket API:
   - [ ] Streaming response handling
   - [ ] Authentication shared with REST API
 
-### 6. Vector Database Enhancements
-
-- [ ] Optimize vector operations for improved performance
-- [ ] Add support for additional vector databases (e.g., Milvus, Qdrant)
-- [ ] Add migration tools for transferring between database types
-- [ ] Create performance benchmarks for different vector database options
-- [ ] Develop guidance for choosing between SQLite and PostgreSQL
-- [ ] Support for vector database clustering and sharding
-
-### 7. LLM Providers
+### 6. LLM Providers
 
 - [x] Implement OpenAI LLM provider
 - [ ] Implement Anthropic LLM provider
@@ -178,19 +171,7 @@ Building on the api.md specifications, enhance the WebSocket API:
 - [ ] Add support for local models (e.g., Llama, Mistral, DeepSeek)
 - [ ] Create a model router for fallback and cost optimization
 
-### 8. Testing and Documentation
-
-- [ ] Unit tests for all new API endpoints
-- [ ] Integration tests for API and WebSocket endpoints
-- [ ] Create e2e tests for the framework
-- [ ] Performance benchmarks for API endpoints
-- [ ] Complete CLI documentation
-- [ ] Expand API documentation beyond api.md with practical examples
-- [ ] User guides for advanced use cases
-- [ ] Example projects showcasing API usage
-- [ ] Generate API documentation with Fumadocs
-
-### 9. Deployment & Package Distribution
+### 7. Deployment & Package Distribution
 
 - [ ] Docker containerization
 - [ ] Kubernetes deployment
@@ -200,38 +181,31 @@ Building on the api.md specifications, enhance the WebSocket API:
 - [ ] Automatic version bumping for releases
 - [ ] SQLite deployment guides for serverless and edge environments
 
-### 10. Language-Specific SDKs
+### 8. Logging and Tracing System
 
-Develop SDKs for popular programming languages to increase framework adoptability:
+Based on prd-tracing-and-logging.md specifications:
 
-- [ ] TypeScript/JavaScript SDK
-  - [ ] REST API client with full endpoint coverage
-  - [ ] WebSocket client implementation
-  - [ ] MCP server protocol implementation for JavaScript tools
-  - [ ] Comprehensive examples and documentation
-  - [ ] NPM package distribution
+- [ ] Implement comprehensive tracing system
+  - [ ] Trace lifecycle management with unique trace IDs
+  - [ ] Component-level tracing (user, orchestrator, agent, MCP)
+  - [ ] Multiple output formats (stdout, file logs)
+  - [ ] External service integration (Papertrail, Kafka)
+- [ ] Create CLI tools for trace viewing and analysis
+  - [ ] Implement `muxi trace` command
+  - [ ] Support filtering by component, operation, and trace ID
+  - [ ] Enable log following functionality
+- [ ] Implement performance-optimized logging
+  - [ ] Minimal impact on response times
+  - [ ] Asynchronous logging where appropriate
+  - [ ] Sampling in high-traffic environments
+- [ ] Add cloud integration for MUXI Cloud deployments
+  - [ ] Structured JSON output format
+  - [ ] Support for Vector collection agent
+  - [ ] ClickHouse integration
 
-- [ ] Go SDK
-  - [ ] API client library
-  - [ ] MCP server implementation helpers
-  - [ ] Utilities for agent configuration
+### 9. Multi-Modal Capabilities
 
-- [ ] Other Language SDKs
-  - [ ] Java/Kotlin SDK
-  - [ ] Rust SDK
-  - [ ] C#/.NET SDK
-  - [ ] PHP SDK
-  - [ ] Ruby SDK (optional)
-
-- [ ] SDK Development Tools
-  - [ ] API client generators from OpenAPI spec
-  - [ ] Shared test suite for SDK validations
-  - [ ] Consistent interface definitions across languages
-  - [ ] Version syncing mechanisms with core framework
-
-### 11. Multi-Modal Capabilities
-
-Transform agents into omni agents capable of handling various media types as specified in api.md WebSocket section:
+Transform agents into omni agents capable of handling various media types:
 
 #### Document Processing
 - [ ] PDF processing and text extraction
@@ -267,7 +241,66 @@ Transform agents into omni agents capable of handling various media types as spe
   - [ ] Design WebSocket protocol for audio streaming
   - [ ] Implement real-time audio processing
 
-### 12. Security Enhancements
+### 10. Language-Specific SDKs
+
+Focus on TypeScript/JavaScript SDK first:
+
+- [ ] TypeScript/JavaScript SDK
+  - [ ] REST API client with full endpoint coverage
+  - [ ] WebSocket client implementation
+  - [ ] MCP server protocol implementation for JavaScript tools
+  - [ ] Comprehensive examples and documentation
+  - [ ] NPM package distribution
+
+### 11. Memory System Enhancements
+
+Based on memory-system-enhancements.md specifications:
+
+- [ ] Implement context memory templates for common use cases
+- [ ] Add context memory namespaces for better organization
+- [ ] Complete memory-related REST API endpoints
+- [ ] Optimize vector operations for improved performance
+- [ ] Develop data migration tools between database backends
+- [ ] Enhance multi-modal content support in memory systems
+- [ ] Complete automatic user information extraction implementation
+- [ ] Implement interface-level user ID generation
+- [ ] Add advanced vector database features for scalability
+
+### 12. Testing and Documentation
+
+- [ ] Unit tests for all new API endpoints
+- [ ] Integration tests for API and WebSocket endpoints
+- [ ] Create e2e tests for the framework
+- [ ] Performance benchmarks for API endpoints
+- [ ] Complete CLI documentation
+- [ ] Expand API documentation beyond api.md with practical examples
+- [ ] User guides for advanced use cases
+- [ ] Example projects showcasing API usage
+- [ ] Generate API documentation with Fumadocs
+
+### 13. Additional Language SDKs
+
+After completing TypeScript/JavaScript SDK:
+
+- [ ] Go SDK
+  - [ ] API client library
+  - [ ] MCP server implementation helpers
+  - [ ] Utilities for agent configuration
+
+- [ ] Other Language SDKs
+  - [ ] Java/Kotlin SDK
+  - [ ] Rust SDK
+  - [ ] C#/.NET SDK
+  - [ ] PHP SDK
+  - [ ] Ruby SDK (optional)
+
+- [ ] SDK Development Tools
+  - [ ] API client generators from OpenAPI spec
+  - [ ] Shared test suite for SDK validations
+  - [ ] Consistent interface definitions across languages
+  - [ ] Version syncing mechanisms with core framework
+
+### 14. Security Enhancements
 
 - [ ] Enhance API security
   - [ ] Rate limiting and throttling
@@ -286,7 +319,7 @@ Transform agents into omni agents capable of handling various media types as spe
   - [ ] Security logging
   - [ ] Access monitoring
 
-### Stability and Performance
+### 15. Stability and Performance
 
 - [x] Comprehensive error monitoring
 - [x] Database schema optimization and indexing
