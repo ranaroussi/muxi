@@ -139,21 +139,21 @@ The API Server will validate each incoming request against these keys and enforc
 
 1. **Decorator Method**:
 
-```python
-	@app.get("/endpoint", operation_id="get_some_resource")
-	@app.verify_user_key  # or @app.verify_admin_key
-	async def get_resource():
-	    # Implementation
-```
+    ```python
+    @app.get("/endpoint", operation_id="get_some_resource")
+    @app.verify_user_key  # or @app.verify_admin_key
+    async def get_resource():
+        # Implementation
+    ```
 
 2. **Dependency Injection Method**:
 
-```python
-	@app.get("/endpoint", operation_id="get_some_resource",
-	         dependencies=[Depends(verify_user_key)])
-	async def get_resource():
-	    # Implementation
-```
+    ```python
+    @app.get("/endpoint", operation_id="get_some_resource",
+             dependencies=[Depends(verify_user_key)])
+    async def get_resource():
+        # Implementation
+    ```
 
 ### Endpoint Categories
 
