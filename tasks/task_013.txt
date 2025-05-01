@@ -1,273 +1,464 @@
 # Task ID: 13
-# Title: Implement Automatic User Information Extraction System
+# Title: Implement Unified MUXI API Server with Multi-Protocol Support
 # Status: pending
 # Dependencies: None
 # Priority: high
-# Description: Develop a system that automatically identifies and extracts key user information from conversations and stores it in the user context memory for future reference.
+# Description: Design and implement the core MUXI API Server that integrates REST API, SSE streaming, Model Context Protocol (MCP), and WebRTC signaling with authentication leveraging the MUXI service level authentication system as specified in the PRD.
 # Details:
-Create a module that processes conversation content to identify and extract relevant user information based on the patterns defined in the PRD. The implementation should:
+Create a unified server architecture that serves as the foundation for all client interactions with MUXI. The implementation should:
 
-1. Build an extraction pipeline with the following components:
-   - Entity recognition system to identify personal information (names, locations, preferences, etc.)
-   - Information categorization to classify extracted data (personal details, preferences, important dates, etc.)
-   - Confidence scoring mechanism to rate the reliability of extracted information
-   - Conflict resolution for handling contradictory information
+1. Support multiple communication protocols:
+   - REST API endpoints for standard request/response interactions
+   - Server-Sent Events (SSE) for real-time data streaming to clients, including logging and tracing
+   - Model Context Protocol (MCP) for specialized device communication using FastAPI_MCP
+   - WebRTC signaling for peer-to-peer connections
 
-2. Develop pattern recognition capabilities that can identify:
-   - Direct statements ("My name is...", "I live in...")
-   - Implied information ("I'll be traveling to Paris next week")
-   - Preference indicators ("I prefer...", "I don't like...")
+2. Leverage MUXI service level authentication:
+   - Validate requests against API keys sent to the MUXI service
+   - Implement explicit access level specification for each endpoint using decorators or dependency injection
+   - Enforce permission validation across all protocols
 
-3. Implement privacy controls including:
-   - Configurable sensitivity levels for information extraction
-   - Clear opt-out mechanisms
-   - Data retention policies compliant with privacy regulations
+3. Create a modular architecture that:
+   - Uses a shared core for authentication, logging, and security
+   - Maintains protocol-specific handlers that implement the appropriate interfaces
+   - Provides unified error handling and response formatting
+   - Includes comprehensive request logging and monitoring
+   - Assigns explicit operation_id for MCP tool names to each endpoint
 
-4. Create an API for:
-   - Retrieving extracted user information
-   - Managing extracted information (edit, delete, confirm)
-   - Configuring extraction sensitivity and categories
+4. Ensure the server is:
+   - Horizontally scalable to handle increasing load
+   - Configurable via environment variables and config files
+   - Properly documented with API specifications
+   - Containerized for easy deployment
 
-5. Develop integration with the existing user context memory system to:
-   - Store extracted information in the appropriate format
-   - Update information when new details are discovered
-   - Handle information retrieval requests
+5. Deployment considerations:
+   - The API server must be initialized with a configurable URI of the MUXI service (defaults to localhost:3000) to allow distributed installation
+   - Documentation must include best practices for production deployment behind reverse proxies like Caddy/Traefik
 
-The system should be designed to run in real-time during conversations with minimal latency impact.
+The implementation will completely replace the existing API code with NO backward compatibility requirements. All clients will need to migrate to the new API structure. The implementation should follow the architectural diagrams in the PRD and adhere to the security requirements specified for each protocol type.
 
 # Test Strategy:
-Testing should verify both the accuracy of information extraction and the system's integration with user context memory:
+Testing should verify all aspects of the unified server implementation:
 
-1. Unit tests:
-   - Test entity recognition with various input formats and phrasings
-   - Verify categorization logic for different types of user information
-   - Test confidence scoring with ambiguous and clear statements
-   - Validate privacy filter functionality
+1. Unit Tests:
+   - Test each protocol handler independently
+   - Verify authentication logic with MUXI service level authentication
+   - Test access level enforcement via decorators/dependency injection
+   - Test error handling for each protocol
 
-2. Integration tests:
-   - Verify extracted information is correctly stored in user context memory
-   - Test information retrieval API returns accurate data
-   - Validate update mechanisms when new/conflicting information is detected
+2. Integration Tests:
+   - Verify cross-protocol functionality
+   - Test authentication across different protocols
+   - Ensure proper resource sharing between protocol handlers
+   - Verify FastAPI_MCP integration for Model Context Protocol
+   - Test configuration of MUXI service URI and connection handling
 
-3. Performance tests:
-   - Measure extraction latency under various conversation loads
-   - Test system performance with concurrent users
-   - Benchmark memory usage during extraction operations
+3. Load Testing:
+   - Simulate multiple concurrent connections across protocols
+   - Verify server performance under high load
+   - Test horizontal scaling with multiple server instances
 
-4. Accuracy validation:
-   - Create a dataset of 100+ conversation snippets with known user information
-   - Calculate precision, recall, and F1 scores for the extraction system
-   - Target >90% accuracy for high-confidence extractions
+4. Security Testing:
+   - Verify API key validation against MUXI service
+   - Test access level enforcement for different endpoint permissions
+   - Verify proper isolation between different access levels
+   - Test for common vulnerabilities (injection, XSS, etc.)
 
-5. Privacy compliance tests:
-   - Verify opt-out mechanisms properly prevent information extraction
-   - Test that sensitive information is handled according to privacy settings
-   - Validate data retention policies are correctly implemented
+5. Protocol-Specific Tests:
+   - REST API: Test all endpoints with various inputs and verify operation_id assignments
+   - SSE: Verify event streaming for logging and tracing based on the tracing system PRD
+   - MCP: Test FastAPI_MCP integration with Model Context Protocol
+   - WebRTC: Verify signaling functionality with test clients
 
-6. End-to-end scenarios:
-   - Simulate multi-turn conversations with gradually revealed user information
-   - Test extraction across conversation sessions
-   - Verify conflict resolution with contradictory information provided over time
+6. Deployment Tests:
+   - Verify functionality when deployed behind various reverse proxies (Caddy, Traefik)
+   - Test different MUXI service URI configurations
+   - Validate containerized deployment in various environments
+
+All tests should be automated and included in the CI/CD pipeline. Documentation should include examples of using each protocol with the server.
 
 # Subtasks:
-## 1. Design and implement the MemoryExtractor base class [pending]
+## 1. Set up Core Server Architecture and Project Structure [pending]
 ### Dependencies: None
-### Description: Create the foundational MemoryExtractor class with core interfaces and abstract methods that will be used throughout the extraction system
+### Description: Create the foundational server architecture with modular design patterns and establish the project structure for the unified MUXI API Server.
 ### Details:
 Implementation details:
-1. Create a new file `memory_extractor.py` in the appropriate directory
-2. Define the MemoryExtractor class with the following components:
-   - Constructor that accepts configuration parameters (sensitivity levels, categories to extract)
-   - Abstract methods for extract(), categorize(), score_confidence(), and resolve_conflicts()
-   - Define data structures for storing extracted information
-   - Implement utility methods for data validation and formatting
-3. Create enums or constants for information categories (PERSONAL_INFO, PREFERENCES, IMPORTANT_DATES, etc.)
-4. Add logging functionality for debugging and monitoring
-5. Implement configuration validation
+1. Initialize a new Node.js/Express.js project with TypeScript support
+2. Set up the folder structure following a modular architecture pattern (controllers, services, middleware, utils, etc.)
+3. Configure environment variables and config file loading
+4. Implement a basic server setup with health check endpoint
+5. Set up logging infrastructure with request ID tracking
+6. Configure error handling middleware with standardized error responses
+7. Implement containerization with Docker (Dockerfile and docker-compose.yml)
+8. Set up CI/CD pipeline configuration
+9. Implement configurable MUXI service URI (default: localhost:3000) through environment variables and config files
+10. Create initialization logic to validate connection to MUXI service on startup
 
 Testing approach:
-- Write unit tests for configuration validation
-- Test the base class instantiation with various configurations
+- Unit tests for configuration loading
+- Integration test for health check endpoint
+- Verify Docker container builds and runs correctly
+- Test MUXI service URI configuration with different values
 
-## 2. Implement entity recognition system [pending]
+## 2. Implement Authentication Integration with MUXI Service [pending]
 ### Dependencies: 13.1
-### Description: Build the entity recognition component that identifies personal information from conversations
+### Description: Integrate with the MUXI service level authentication system for API key validation and implement explicit access level specification for endpoints.
 ### Details:
 Implementation details:
-1. Create a new class `EntityRecognizer` that extends or works with MemoryExtractor
-2. Implement pattern matching for direct statements using regex patterns ("My name is...", "I live in...", etc.)
-3. Integrate with an NLP library (like spaCy) for named entity recognition
-4. Implement methods to extract entities like:
-   - Personal names
-   - Locations
-   - Dates and times
-   - Contact information
-5. Add context awareness to improve extraction accuracy
-6. Implement model selection logic to optimize for cost vs. accuracy based on configuration
+1. Create authentication middleware to validate API keys against the MUXI service
+2. Implement decorators or dependency injection for explicit access level specification
+3. Develop permission enforcement logic based on access levels
+4. Create utilities for handling authentication responses and errors
+5. Implement caching for frequent authentication requests to improve performance
+6. Add rate limiting for authentication attempts
+7. Create testing utilities for simulating different authentication scenarios
+8. Document the authentication flow and access level requirements
+9. Ensure authentication works with configurable MUXI service URI
+10. Implement connection retry and fallback mechanisms for authentication service
 
 Testing approach:
-- Create unit tests with sample conversation snippets
-- Test with various entity types
-- Verify correct extraction of different entity formats
+- Unit tests for authentication middleware
+- Integration tests with mock MUXI service responses
+- Security tests for permission enforcement
+- Performance tests for authentication under load
+- Test authentication with different MUXI service URI configurations
 
-## 3. Implement information categorization system [pending]
+<info added on 2025-05-01T22:22:57.213Z>
+Additional information:
+
+The API Server will leverage the existing MUXI service authentication system rather than implementing its own key generation or storage mechanisms. Authentication will be handled through:
+
+1. Integration with MUXI's API key validation endpoints via HTTP client
+2. Implementation of FastAPI-compatible authentication methods:
+   - Function decorators (e.g., `@app.verify_user_key`)
+   - Dependency injection (e.g., `dependencies=[Depends(verify_user_key)]`)
+3. Creation of access level specification utilities that:
+   - Parse MUXI-provided JWT tokens or API key metadata
+   - Extract role/permission information from MUXI authentication responses
+   - Map MUXI permission structures to API Server endpoint requirements
+4. Development of a permission verification layer that:
+   - Validates incoming requests against MUXI-provided API keys
+   - Enforces access control based on endpoint-specific requirements
+   - Handles authentication failures with appropriate error responses
+
+The authentication flow will maintain a clear separation of concerns, with the API Server acting as a client to the MUXI authentication service rather than managing credentials directly.
+</info added on 2025-05-01T22:22:57.213Z>
+
+## 3. Develop Core REST API Endpoints [pending]
 ### Dependencies: 13.1, 13.2
-### Description: Develop the component that classifies extracted information into appropriate categories
+### Description: Implement the core REST API endpoints for standard request/response interactions with proper routing, controllers, and service layers.
 ### Details:
 Implementation details:
-1. Create a `CategoryClassifier` class that processes extracted entities
-2. Implement classification logic for categorizing information into:
-   - Personal details (name, age, location)
-   - Preferences (likes, dislikes)
-   - Important dates (birthdays, anniversaries)
-   - Professional information (job, skills)
-   - Relationships (family, friends)
-3. Add confidence scoring for categorization
-4. Implement category-specific validation rules
-5. Create methods to format categorized data for storage
+1. Define the REST API routes and controller structure
+2. Implement request validation middleware using a schema validation library
+3. Create controller handlers for each endpoint with proper error handling
+4. Assign explicit operation_id for MCP tool names to each endpoint
+5. Implement access level specification using decorators or dependency injection
+6. Develop service layer for business logic separation
+7. Implement data access layer for persistence operations
+8. Add pagination, filtering, and sorting capabilities for list endpoints
+9. Implement request throttling and rate limiting
+10. Create OpenAPI/Swagger documentation for the REST endpoints
+11. Ensure all endpoints work correctly when deployed behind reverse proxies like Caddy/Traefik
 
 Testing approach:
-- Test classification accuracy with diverse inputs
-- Verify correct categorization of ambiguous information
-- Test edge cases and unusual inputs
+- Unit tests for controllers and services
+- Integration tests for each endpoint
+- Verification of operation_id assignments
+- Load tests to verify rate limiting
+- API contract tests using the OpenAPI specification
+- Test endpoints when deployed behind different reverse proxy configurations
 
-## 4. Implement confidence scoring mechanism [pending]
-### Dependencies: 13.1, 13.2, 13.3
-### Description: Build the system that rates the reliability of extracted information
-### Details:
-Implementation details:
-1. Create a `ConfidenceScorer` class with methods to evaluate information reliability
-2. Implement scoring algorithms based on:
-   - Extraction method used (direct statement vs. implied)
-   - Consistency with previously known information
-   - Clarity of the source statement
-   - Recency and frequency of mention
-3. Define confidence thresholds for different information types
-4. Implement methods to handle low-confidence information (flagging for confirmation)
-5. Add decay functions for confidence over time
+<info added on 2025-05-01T22:23:40.725Z>
+Additional implementation requirements:
 
-Testing approach:
-- Test scoring with various input types
-- Verify appropriate confidence levels for different extraction scenarios
-- Test threshold behavior
+1. Ensure every API endpoint has a unique and explicit operation_id parameter that will serve as the MCP tool name. These identifiers should follow the naming convention: `{resource}_{action}` (e.g., `user_create`, `document_update`).
 
-## 5. Implement conflict resolution system [pending]
-### Dependencies: 13.1, 13.4
-### Description: Develop the component that handles contradictory information in user data
-### Details:
-Implementation details:
-1. Create a `ConflictResolver` class with methods to identify and resolve contradictions
-2. Implement detection algorithms for contradictory information
-3. Create resolution strategies:
-   - Timestamp-based (newer information wins)
-   - Confidence-based (higher confidence wins)
-   - Frequency-based (more frequently mentioned wins)
-   - Hybrid approaches
-4. Add methods to flag unresolvable conflicts for human review
-5. Implement logging for conflict resolution decisions
+2. The operation_id must be documented in both the code and OpenAPI specification to maintain consistency.
 
-Testing approach:
-- Test with contradictory information scenarios
-- Verify correct resolution based on different strategies
-- Test edge cases with multiple conflicts
+3. This implementation will completely replace the existing API codebase with no backward compatibility considerations. All clients will need to migrate to the new API structure.
 
-## 6. Implement pattern recognition for implied information [pending]
+4. Create a mapping document that lists all new endpoints with their operation_ids to facilitate client migration.
+
+5. Remove all legacy endpoint handlers and routing configurations during implementation.
+
+6. Implement comprehensive logging for each endpoint that includes the operation_id to aid in monitoring and debugging.
+</info added on 2025-05-01T22:23:40.725Z>
+
+## 4. Implement Server-Sent Events (SSE) for Logging and Tracing [pending]
 ### Dependencies: 13.2, 13.3
-### Description: Extend the extraction system to identify implied information from conversations
+### Description: Add support for Server-Sent Events to enable real-time logging and tracing data streaming from server to clients based on the tracing system PRD.
 ### Details:
 Implementation details:
-1. Enhance the entity recognition system to detect implied information
-2. Implement pattern matching for statements like "I'll be traveling to Paris next week"
-3. Add contextual analysis to extract:
-   - Future plans and intentions
-   - Preferences without direct statements
-   - Emotional responses to topics
-4. Implement temporal reasoning to understand time-related implications
-5. Add methods to extract relationships between entities
+1. Create an SSE connection handler with proper headers and formatting
+2. Implement client connection tracking and management
+3. Develop event publishing mechanism for logging and tracing events
+4. Integrate with the tracing system as specified in the tracing system PRD
+5. Add authentication middleware specific to SSE connections
+6. Implement connection heartbeats and timeout handling
+7. Create event filtering capabilities based on client subscriptions
+8. Add reconnection support with event IDs and last-event-id header handling
+9. Implement backpressure handling for slow clients
+10. Ensure SSE connections work properly when deployed behind reverse proxies
 
 Testing approach:
-- Test with subtle, implied information in conversations
-- Verify correct extraction of intentions and plans
-- Test with complex, multi-sentence implications
+- Unit tests for SSE formatting and event publishing
+- Integration tests with mock clients
+- Verification of tracing system integration
+- Load tests with multiple concurrent connections
+- Reconnection and recovery tests
+- Test SSE functionality when deployed behind different reverse proxy configurations
 
-## 7. Implement privacy controls and compliance features [pending]
+<info added on 2025-05-01T22:23:19.579Z>
+Based on the PRD requirements, here's additional implementation information for the SSE endpoints:
+
+Implementation of SSE Endpoints:
+
+1. Create dedicated endpoints:
+   - `/api/v1/logs/stream` - For application logs streaming
+   - `/api/v1/traces/stream` - For trace events streaming
+
+2. Endpoint query parameters for filtering:
+   - `level=[debug|info|warn|error]` - Filter logs by severity level
+   - `service=<service-name>` - Filter by originating service
+   - `traceId=<trace-id>` - Filter events belonging to specific trace
+   - `spanId=<span-id>` - Filter events belonging to specific span
+   - `from=<timestamp>` - Filter events after timestamp
+   - `limit=<number>` - Limit number of events per batch
+
+3. Event format structure:
+   ```
+   event: log
+   id: <event-unique-id>
+   data: {"timestamp":"2023-06-15T10:30:45Z","level":"info","message":"User login successful","service":"auth-service","traceId":"abc123"}
+
+   event: trace
+   id: <event-unique-id>
+   data: {"timestamp":"2023-06-15T10:30:45Z","traceId":"abc123","spanId":"span456","name":"db-query","duration":45,"status":"ok"}
+   ```
+
+4. Implement buffering strategy:
+   - Buffer up to 1000 most recent events per connection
+   - Implement catch-up mechanism using `Last-Event-ID` header
+   - Use Redis pub/sub for horizontal scaling of SSE connections
+
+5. Rate limiting considerations:
+   - Implement token bucket algorithm (100 events/second per client)
+   - Add response headers for rate limit status
+</info added on 2025-05-01T22:23:19.579Z>
+
+## 5. Integrate FastAPI_MCP for Model Context Protocol [pending]
+### Dependencies: 13.2, 13.3
+### Description: Integrate the FastAPI_MCP library to implement the Model Context Protocol (MCP) for specialized device communication.
+### Details:
+Implementation details:
+1. Integrate the FastAPI_MCP library into the server architecture
+2. Configure FastAPI_MCP with appropriate settings for the MUXI environment
+3. Map API endpoints to corresponding MCP operations with explicit operation_ids
+4. Integrate authentication with the MUXI service level authentication
+5. Implement access level enforcement for MCP operations
+6. Add protocol versioning support
+7. Create connection state management for stateful operations
+8. Implement protocol-specific error handling and recovery
+9. Ensure MCP functionality works correctly when deployed behind reverse proxies
+
+Testing approach:
+- Unit tests for FastAPI_MCP integration
+- Integration tests with mock devices
+- Protocol compliance tests
+- Authentication and access level enforcement tests
+- Error handling and recovery tests
+- Test MCP functionality when deployed behind different reverse proxy configurations
+
+<info added on 2025-05-01T22:22:37.176Z>
+The subtask already correctly refers to MCP as "Model Context Protocol" in both the title and description. I'll add specific details about the FastAPI_MCP library implementation and operation_id requirements:
+
+Implementation notes:
+- The FastAPI_MCP library provides a standardized way to expose model capabilities as tools through the Model Context Protocol
+- Each API endpoint must be decorated with an explicit `operation_id` that will serve as the MCP tool name in the protocol
+- Example endpoint definition:
+  ```python
+  @app.post("/device/command", operation_id="send_device_command")
+  async def send_command(command: DeviceCommand):
+      # Implementation
+  ```
+- The operation_id must follow MCP naming conventions: lowercase with underscores, descriptive of the operation
+- Implement the required MCP discovery endpoint that returns all available tools and their schemas
+- Ensure all tool schemas are properly documented using Pydantic models for automatic OpenAPI generation
+- Configure FastAPI_MCP to handle both synchronous and asynchronous tool execution patterns
+</info added on 2025-05-01T22:22:37.176Z>
+
+## 6. Implement WebRTC Signaling Service [pending]
+### Dependencies: 13.2, 13.4
+### Description: Create the WebRTC signaling service to facilitate peer-to-peer connections between clients with offer/answer exchange and ICE candidate handling.
+### Details:
+Implementation details:
+1. Design the signaling protocol for WebRTC session establishment
+2. Implement offer/answer exchange endpoints
+3. Create ICE candidate exchange mechanism
+4. Develop room/session management for multi-party connections
+5. Add authentication and authorization for signaling operations
+6. Implement connection state tracking and cleanup
+7. Create fallback mechanisms for failed connections
+8. Add metrics collection for connection success rates
+9. Ensure WebRTC signaling works correctly when deployed behind reverse proxies
+
+Testing approach:
+- Unit tests for signaling message handling
+- Integration tests with WebRTC client libraries
+- End-to-end tests for successful peer connections
+- Stress tests with multiple simultaneous connection attempts
+- Test WebRTC signaling when deployed behind different reverse proxy configurations
+
+## 7. Implement Unified Logging and Monitoring System [pending]
+### Dependencies: 13.3, 13.4, 13.5, 13.6
+### Description: Develop a comprehensive logging and monitoring system across all protocols with request tracking, error reporting, and performance metrics.
+### Details:
+Implementation details:
+1. Design a unified logging format with consistent fields across protocols
+2. Implement request/response logging for all protocols
+3. Add performance metric collection (response times, throughput, etc.)
+4. Create error aggregation and reporting mechanism
+5. Implement log rotation and archiving
+6. Add distributed tracing support for cross-service requests
+7. Develop monitoring dashboards for key metrics
+8. Implement alerting for critical errors and performance degradation
+9. Ensure logging works correctly with various deployment configurations including reverse proxies
+
+Testing approach:
+- Verify log output format and content
+- Test log rotation under high volume
+- Validate metric collection accuracy
+- Test alerting mechanisms with simulated failures
+- Verify logging functionality when deployed behind different reverse proxy configurations
+
+## 8. Implement Horizontal Scaling and Load Balancing [pending]
+### Dependencies: 13.3, 13.4, 13.5, 13.6
+### Description: Enhance the server architecture to support horizontal scaling with proper state management, load balancing, and instance coordination.
+### Details:
+Implementation details:
+1. Refactor stateful components to use external state stores (Redis, etc.)
+2. Implement instance discovery and registration
+3. Add load balancing configuration for different protocols
+4. Create sticky session support for protocols requiring connection persistence
+5. Implement distributed locking for critical operations
+6. Add graceful shutdown handling
+7. Develop auto-scaling configuration based on load metrics
+8. Create deployment templates for orchestration platforms (Kubernetes, etc.)
+9. Ensure proper functionality when deployed behind reverse proxies in a distributed environment
+10. Document configuration requirements for distributed deployment with MUXI service URI
+
+Testing approach:
+- Multi-instance tests for state consistency
+- Load distribution tests
+- Failover and recovery tests
+- Performance tests under scaled conditions
+- Test distributed deployment with various MUXI service URI configurations
+
+## 9. Develop Comprehensive API Documentation [pending]
+### Dependencies: 13.3, 13.4, 13.5, 13.6
+### Description: Create detailed documentation for all supported protocols, including API references, authentication guides, and example implementations.
+### Details:
+Implementation details:
+1. Generate OpenAPI/Swagger documentation for REST endpoints with operation_ids
+2. Document Model Context Protocol (MCP) integration with FastAPI_MCP
+3. Develop integration guides for SSE streaming for logging and tracing
+4. Write WebRTC signaling implementation examples
+5. Document authentication flow with MUXI service and access level requirements
+6. Create SDK examples for common programming languages
+7. Implement interactive API explorer
+8. Develop troubleshooting guides and FAQs
+9. Create a migration guide for clients moving from the old API to the new implementation
+10. Document best practices for production deployment behind reverse proxies like Caddy/Traefik
+11. Include configuration examples for different deployment scenarios with MUXI service URI
+
+Testing approach:
+- Validate documentation accuracy against implementation
+- Test example code for functionality
+- Conduct documentation reviews with stakeholders
+- Verify interactive API explorer functionality
+- Test deployment instructions with different reverse proxy configurations
+
+## 10. Implement End-to-End Testing and Performance Optimization [pending]
+### Dependencies: 13.3, 13.4, 13.5, 13.6, 13.7, 13.8
+### Description: Develop comprehensive end-to-end tests across all protocols and optimize server performance for production deployment.
+### Details:
+Implementation details:
+1. Create end-to-end test suites for each protocol
+2. Implement integration test scenarios across multiple protocols
+3. Develop load testing scripts for performance benchmarking
+4. Profile and optimize critical code paths
+5. Implement caching strategies for frequently accessed data
+6. Optimize database queries and connection pooling
+7. Fine-tune server configuration for production environment
+8. Create performance baseline documentation
+9. Test performance when deployed behind various reverse proxies
+10. Optimize configuration for different deployment scenarios
+
+Testing approach:
+- End-to-end functional tests across all protocols
+- Performance tests under various load conditions
+- Security and penetration testing
+- Regression testing after optimizations
+- Test performance with different reverse proxy configurations and MUXI service URI settings
+
+## 11. Create Deployment Documentation and Best Practices [pending]
+### Dependencies: 13.8, 13.9
+### Description: Develop comprehensive documentation for deploying the API server in various production environments, with special focus on reverse proxy configurations and distributed deployment.
+### Details:
+Implementation details:
+1. Document MUXI service URI configuration options and defaults
+2. Create detailed guides for deploying behind Caddy reverse proxy
+3. Create detailed guides for deploying behind Traefik reverse proxy
+4. Document best practices for SSL/TLS termination
+5. Create configuration examples for handling WebSocket and SSE connections through proxies
+6. Document header forwarding requirements for proper client IP and protocol detection
+7. Create deployment checklists for production environments
+8. Document monitoring and logging considerations for proxied deployments
+9. Create troubleshooting guides for common deployment issues
+10. Document performance optimization strategies for different deployment scenarios
+
+Testing approach:
+- Validate all deployment configurations in test environments
+- Test proxy configurations with all supported protocols
+- Verify documentation accuracy through deployment exercises
+- Test troubleshooting procedures against simulated issues
+
+## 12. Create Deployment Documentation [pending]
+### Dependencies: 13.9
+### Description: Develop comprehensive documentation for deploying the API server in production environments, including best practices for reverse proxy configuration and distributed installation.
+### Details:
+Implementation details:
+1. Document server initialization with MUXI service URI configuration
+2. Create deployment guides for common reverse proxies (Caddy, Traefik, Nginx)
+3. Document security best practices for production deployments
+4. Provide load balancing and high availability configuration examples
+5. Develop monitoring and observability integration guides
+6. Document environment variables and configuration options
+7. Create troubleshooting and performance tuning guide
+
+Testing approach:
+- Verify documentation accuracy by deploying in test environments
+- Review by DevOps specialists
+- Usability testing with deployment scenarios
+
+## 13. Implement Distributed Configuration [pending]
 ### Dependencies: 13.1
-### Description: Add privacy protection mechanisms and regulatory compliance features
+### Description: Implement configuration system for the API server to support distributed installation with the MUXI service running on different hosts.
 ### Details:
 Implementation details:
-1. Implement configurable sensitivity levels for information extraction
-2. Add methods to identify and handle sensitive personal information
-3. Create opt-out mechanism and respect user privacy preferences
-4. Implement data retention policies with automatic expiration
-5. Add anonymization capabilities for sensitive data
-6. Create audit logging for privacy-related actions
-7. Implement GDPR, CCPA, and other regulatory compliance features
+1. Create configuration module for API server settings
+2. Implement MUXI service URI configuration (default: localhost:3000)
+3. Add connection parameters (timeout, retry policy, etc.)
+4. Implement TLS/SSL certification configuration for secure communication
+5. Create environment variable support for all configuration options
+6. Implement configuration file support (JSON, YAML, or environment file)
+7. Add validation for configuration parameters
+8. Create dynamic configuration reloading capability
 
 Testing approach:
-- Test sensitivity level configurations
-- Verify opt-out functionality
-- Test data retention and expiration
-- Validate compliance with privacy regulations
-
-## 8. Develop API for user information management [pending]
-### Dependencies: 13.1, 13.3, 13.5, 13.7
-### Description: Create the API interface for retrieving and managing extracted user information
-### Details:
-Implementation details:
-1. Design and implement API endpoints for:
-   - Retrieving extracted user information by category
-   - Editing or deleting specific information
-   - Confirming uncertain information
-   - Configuring extraction sensitivity and categories
-2. Implement authentication and authorization for API access
-3. Add rate limiting and security measures
-4. Create documentation for API usage
-5. Implement versioning for API compatibility
-
-Testing approach:
-- Test all API endpoints with various inputs
-- Verify authentication and authorization
-- Test error handling and edge cases
-- Validate API documentation accuracy
-
-## 9. Integrate with user context memory system [pending]
-### Dependencies: 13.1, 13.3, 13.4, 13.5, 13.8
-### Description: Connect the extraction system with the existing user context memory for storage and retrieval
-### Details:
-Implementation details:
-1. Implement integration with the existing user context memory system
-2. Create methods to:
-   - Store extracted information in the appropriate format
-   - Update information when new details are discovered
-   - Handle information retrieval requests
-3. Implement caching for frequently accessed information
-4. Add hooks for memory system events (updates, deletions)
-5. Create migration utilities for existing user data
-6. Implement integration with Agent and Orchestrator components
-
-Testing approach:
-- Test storage and retrieval operations
-- Verify update mechanisms with new information
-- Test integration with Agent and Orchestrator
-- Validate performance with large datasets
-
-## 10. Implement performance optimization and end-to-end testing [pending]
-### Dependencies: 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9
-### Description: Optimize the system for real-time performance and conduct comprehensive testing
-### Details:
-Implementation details:
-1. Implement asynchronous processing for non-blocking operation
-2. Add caching mechanisms for frequent extraction patterns
-3. Optimize NLP model loading and usage
-4. Implement batch processing for multiple extractions
-5. Add performance monitoring and metrics collection
-6. Create comprehensive end-to-end tests
-7. Implement A/B testing framework for extraction strategies
-8. Add documentation for the entire system
-
-Testing approach:
-- Conduct performance testing under various loads
-- Measure and optimize latency for real-time conversations
-- Run end-to-end tests with realistic conversation scenarios
-- Validate system behavior with edge cases and stress tests
+- Unit tests for configuration loading and validation
+- Integration tests with MUXI service running on different hosts
+- Performance tests for various connection settings
+- Security tests for TLS/SSL configurations
 

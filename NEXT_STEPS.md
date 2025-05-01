@@ -94,25 +94,53 @@ Things to do next to enhance the framework, ordered by priority:
 
 ### 1. REST API & MCP Server Implementation
 
-Based on the api.md specifications, implement the full REST API for MUXI:
+Based on the prd-api-server.md specifications, implement the unified MUXI API Server:
 
-- [ ] Implement standard REST API endpoints according to api.md spec
-  - [ ] Agent management endpoints (GET/POST/PATCH/DELETE /agents)
-  - [ ] Conversation management endpoints (POST /agents/{agent_id}/chat)
-  - [ ] Memory operations endpoints (GET/DELETE /agents/{agent_id}/memory)
-  - [ ] Context memory CRUD operations
-  - [ ] MCP server management endpoints
-  - [ ] Knowledge management endpoints
-  - [ ] System information endpoints
-- [ ] Implement authentication with API keys
-  - [ ] Add API key generation mechanism
-  - [ ] Implement bearer token authentication
-  - [ ] Add support for IP-based restrictions
-- [ ] Add streaming support for chat endpoints with SSE
-- [ ] Implement proper error handling with standardized error format
-- [ ] Add API versioning support
-- [ ] Implement rate limiting and throttling
-- [ ] Create API documentation using OpenAPI/Swagger
+- [ ] Implement unified API Server architecture
+  - [ ] Core API server with shared components (auth, logging, rate limiting)
+  - [ ] Configuration system with environment variable support
+  - [ ] Structured error handling and response format
+  - [ ] Consistent response structure across all endpoints
+- [ ] Implement REST API endpoints
+  - [ ] User/Interface endpoints for agent interaction
+    - [ ] Agent chat endpoints (POST /api/v1/agents/{agent_id}/chat)
+    - [ ] Orchestrator chat endpoints (POST /api/v1/chat)
+    - [ ] Conversation history endpoints (GET /api/v1/conversations)
+  - [ ] Developer/Management endpoints
+    - [ ] Agent management (GET/POST/PATCH/DELETE /api/v1/agents)
+    - [ ] Memory operations (GET/DELETE /api/v1/agents/{agent_id}/memory)
+    - [ ] Context memory CRUD operations
+    - [ ] MCP server management
+    - [ ] Knowledge management
+    - [ ] System information and monitoring
+- [ ] Implement dual-key authentication system
+  - [ ] User/Interface API keys for client access (sk_muxi_user_*)
+  - [ ] Administrative API keys for system management (sk_muxi_admin_*)
+  - [ ] Automatic key generation mechanism
+  - [ ] Secure key storage and validation
+- [ ] Add SSE streaming support
+  - [ ] Stream agent responses in real-time
+  - [ ] Event-based streaming format
+  - [ ] Connection recovery mechanism
+  - [ ] Tool call event streaming
+- [ ] Implement MCP protocol support
+  - [ ] Integrate FastMCP or similar library
+  - [ ] Tool definition discovery and exposure
+  - [ ] Request routing to appropriate agents
+  - [ ] Streaming MCP responses
+- [ ] Set up WebRTC signaling server (foundation for multi-modal)
+  - [ ] Session management endpoints
+  - [ ] Signaling protocol implementation
+  - [ ] Integration with agent message processing
+- [ ] Add security features
+  - [ ] CORS configuration
+  - [ ] Security headers
+  - [ ] Input validation
+  - [ ] Rate limiting per endpoint and per key
+- [ ] Create OpenAPI/Swagger documentation
+  - [ ] Document all endpoints with examples
+  - [ ] Create interactive API playground
+  - [ ] Include authentication instructions
 
 ### 2. WebSocket API Implementation
 
