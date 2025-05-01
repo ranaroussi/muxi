@@ -60,22 +60,43 @@
 <h2 id="version-040-in-development">Version 0.4.0 (In Development)</h2>
 
 <ul>
-  <li>🔄 API Implementations
+  <li>🔄 REST API &amp; MCP Server Implementation
     <ul>
-      <li>🔄 REST API for agent interactions</li>
-      <li>🔄 WebSocket API for streaming responses</li>
+      <li>🔄 Complete REST API endpoints from api.md</li>
+      <li>🔄 Authentication with API keys</li>
+      <li>🔄 Streaming support with SSE</li>
+      <li>🔄 Standardized error handling</li>
+      <li>🔄 API versioning support</li>
+    </ul>
+  </li>
+  <li>🔄 WebSocket API Implementation
+    <ul>
+      <li>🔄 Real-time communication</li>
+      <li>🔄 Multi-modal message support</li>
+      <li>🔄 Error handling and recovery</li>
+      <li>🔄 Reconnection logic</li>
     </ul>
   </li>
   <li>🔄 CLI Enhancements
     <ul>
-      <li>🔄 Interactive mode improvements</li>
-      <li>🔄 Configuration management</li>
+      <li>🔄 Support for all API operations</li>
+      <li>🔄 Improved user experience</li>
+      <li>🔄 Configuration management commands</li>
     </ul>
   </li>
   <li>🔄 Web UI (Basic implementation)
     <ul>
-      <li>🔄 Chat interface</li>
-      <li>🔄 Agent management</li>
+      <li>🔄 Responsive design</li>
+      <li>🔄 Real-time updates via WebSocket</li>
+      <li>🔄 Agent management dashboard</li>
+    </ul>
+  </li>
+  <li>🔄 Agent-to-Agent (A2A) Communication
+    <ul>
+      <li>🔄 Capability discovery</li>
+      <li>🔄 Task delegation</li>
+      <li>🔄 Context sharing with isolation</li>
+      <li>🔄 Security and authentication</li>
     </ul>
   </li>
 </ul>
@@ -83,33 +104,63 @@
 <h2 id="version-050-planned">Version 0.5.0 (Planned)</h2>
 
 <ul>
-  <li>📅 A2A (Agent-to-Agent) Communication
-    <ul>
-      <li>📅 Structured message format</li>
-      <li>📅 Capability registration and discovery</li>
-      <li>📅 Task delegation</li>
-      <li>📅 Context sharing</li>
-      <li>📅 Security and authentication</li>
-    </ul>
-  </li>
-  <li>📅 Multi-modal support
-    <ul>
-      <li>📅 Image understanding</li>
-      <li>📅 Audio processing</li>
-    </ul>
-  </li>
-  <li>📅 MCP Server Enhancements
-    <ul>
-      <li>📅 Non-SSE client compatibility bridge</li>
-      <li>📅 Enhanced security</li>
-    </ul>
-  </li>
   <li>📅 LLM Provider Expansion
     <ul>
-      <li>📅 Claude/Anthropic</li>
-      <li>📅 LLama models</li>
+      <li>📅 Anthropic/Claude</li>
       <li>📅 Google Gemini</li>
-      <li>📅 Local models</li>
+      <li>📅 Grok</li>
+      <li>📅 Local models (Llama, Mistral, DeepSeek)</li>
+    </ul>
+  </li>
+  <li>📅 Deployment &amp; Package Distribution
+    <ul>
+      <li>📅 Docker containerization</li>
+      <li>📅 Kubernetes deployment</li>
+      <li>📅 Cloud deployment guides</li>
+      <li>📅 CI/CD integration</li>
+    </ul>
+  </li>
+  <li>📅 Logging and Tracing System
+    <ul>
+      <li>📅 Comprehensive trace ID system</li>
+      <li>📅 Component-level tracing</li>
+      <li>📅 CLI trace viewing tools</li>
+      <li>📅 Cloud integration</li>
+    </ul>
+  </li>
+  <li>📅 Initial Multi-modal Support
+    <ul>
+      <li>📅 Basic document processing</li>
+      <li>📅 Simple image analysis</li>
+      <li>📅 Foundations for audio processing</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="version-060-planned">Version 0.6.0 (Planned)</h2>
+
+<ul>
+  <li>📅 TypeScript/JavaScript SDK
+    <ul>
+      <li>📅 REST API client</li>
+      <li>📅 WebSocket client</li>
+      <li>📅 MCP server integration</li>
+    </ul>
+  </li>
+  <li>📅 Comprehensive Multi-modal Support
+    <ul>
+      <li>📅 Advanced document processing</li>
+      <li>📅 Sophisticated image analysis</li>
+      <li>📅 Audio processing with speech-to-text</li>
+    </ul>
+  </li>
+  <li>📅 Memory System Enhancements
+    <ul>
+      <li>📅 Context memory templates</li>
+      <li>📅 Context memory namespaces</li>
+      <li>📅 Optimized vector operations</li>
+      <li>📅 User information extraction</li>
+      <li>📅 Interface-level user ID generation</li>
     </ul>
   </li>
 </ul>
@@ -117,12 +168,19 @@
 <h2 id="future-roadmap">Future Roadmap</h2>
 
 <ul>
-  <li>📅 Language-Specific SDKs
+  <li>📅 Additional Language SDKs
     <ul>
-      <li>📅 TypeScript/JavaScript</li>
       <li>📅 Go</li>
-      <li>📅 Python</li>
       <li>📅 Java/Kotlin</li>
+      <li>📅 Rust</li>
+      <li>📅 C#/.NET</li>
+    </ul>
+  </li>
+  <li>📅 Testing &amp; Documentation
+    <ul>
+      <li>📅 Comprehensive test suite</li>
+      <li>📅 API documentation</li>
+      <li>📅 Example projects</li>
     </ul>
   </li>
   <li>📅 Enhanced tools and capabilities
@@ -130,13 +188,6 @@
       <li>📅 Advanced task delegation</li>
       <li>📅 Autonomous planning</li>
       <li>📅 Advanced RAG techniques</li>
-    </ul>
-  </li>
-  <li>📅 Integration with external systems
-    <ul>
-      <li>📅 Database connectors</li>
-      <li>📅 Web API integrations</li>
-      <li>📅 Enterprise systems</li>
     </ul>
   </li>
   <li>📅 Advanced Multi-Agent Systems
@@ -147,18 +198,19 @@
       <li>📅 Collaborative problem-solving</li>
     </ul>
   </li>
-  <li>📅 Observability and monitoring
+  <li>📅 Security Enhancements
     <ul>
-      <li>📅 Telemetry</li>
-      <li>📅 Performance metrics</li>
-      <li>📅 Debugging tools</li>
+      <li>📅 Advanced authentication methods</li>
+      <li>📅 Role-based access control</li>
+      <li>📅 Data encryption and protection</li>
+      <li>📅 Security auditing</li>
     </ul>
   </li>
-  <li>📅 Community plugins
+  <li>📅 API Stabilization
     <ul>
-      <li>📅 Plugin architecture</li>
-      <li>📅 Plugin marketplace</li>
-      <li>📅 Plugin management</li>
+      <li>📅 Backward compatibility guarantees</li>
+      <li>📅 Standardized error handling</li>
+      <li>📅 Comprehensive documentation</li>
     </ul>
   </li>
 </ul>
