@@ -139,7 +139,7 @@ The API Server will validate each incoming request against these keys and enforc
 
 1. **Decorator Method**:
 
-	```python
+```python
 	@app.get("/endpoint", operation_id="get_some_resource")
 	@app.verify_user_key  # or @app.verify_admin_key
 	async def get_resource():
@@ -148,7 +148,7 @@ The API Server will validate each incoming request against these keys and enforc
 
 2. **Dependency Injection Method**:
 
-	```python
+```python
 	@app.get("/endpoint", operation_id="get_some_resource",
 	         dependencies=[Depends(verify_user_key)])
 	async def get_resource():
@@ -231,7 +231,7 @@ The REST API will follow the specifications outlined in the API specification do
 
 #### User/Interface Endpoints
 
-```http
+```
 # Chat with orchestrator
 POST /api/v1/chat
 POST /api/v1/chat/stream (SSE)
@@ -246,7 +246,7 @@ GET /api/v1/conversations/{user_id}
 
 #### Developer/Management Endpoints
 
-```http
+```
 # Agent management
 GET /api/v1/agents
 POST /api/v1/agents
@@ -285,7 +285,7 @@ GET /api/v1/system/usage
 
 ### MCP Protocol Endpoints
 
-```http
+```
 # MCP streaming endpoint
 GET /api/v1/mcp/stream (SSE)
 
@@ -298,7 +298,7 @@ POST /api/v1/mcp/request
 
 ### WebRTC Endpoints
 
-```http
+```
 # WebRTC signaling
 POST /api/v1/rtc/offer
 POST /api/v1/rtc/answer
@@ -312,7 +312,7 @@ DELETE /api/v1/rtc/sessions/{session_id}
 
 ### Logging and Tracing Endpoints
 
-```http
+```
 # Real-time trace log streaming
 GET /api/v1/logs/trace/stream (SSE)
 
