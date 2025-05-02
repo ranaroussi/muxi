@@ -505,7 +505,6 @@ The MUXI CLI client will provide a powerful, flexible interface to the MUXI API 
 
      Please create a profile with admin privileges or update your current profile.
      ```
-
    - Include helpful suggestions for obtaining the proper permissions
    - Avoid technical jargon in error messages
    - Provide links to documentation for more information
