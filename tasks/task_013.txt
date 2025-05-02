@@ -3,7 +3,7 @@
 # Status: pending
 # Dependencies: None
 # Priority: high
-# Description: Design and implement the core MUXI API Server that integrates REST API, SSE streaming, Model Context Protocol (MCP), and WebRTC signaling with authentication leveraging the MUXI service level authentication system as specified in the PRD.
+# Description: Design and implement the core MUXI API that integrates REST API, SSE streaming, Model Context Protocol (MCP), and WebRTC signaling with authentication leveraging the MUXI Core authentication system as specified in the PRD.
 # Details:
 Create a unified server architecture that serves as the foundation for all client interactions with MUXI. The implementation should:
 
@@ -13,8 +13,8 @@ Create a unified server architecture that serves as the foundation for all clien
    - Model Context Protocol (MCP) for specialized device communication using FastAPI_MCP
    - WebRTC signaling for peer-to-peer connections
 
-2. Leverage MUXI service level authentication:
-   - Validate requests against API keys sent to the MUXI service
+2. Leverage MUXI Core authentication:
+   - Validate requests against API keys sent to the MUXI Core
    - Implement explicit access level specification for each endpoint using decorators or dependency injection
    - Enforce permission validation across all protocols
 
@@ -32,7 +32,7 @@ Create a unified server architecture that serves as the foundation for all clien
    - Containerized for easy deployment
 
 5. Deployment considerations:
-   - The API server must be initialized with a configurable URI of the MUXI service (defaults to localhost:3000) to allow distributed installation
+   - The MUXI API must be initialized with a configurable URI of the MUXI Core (defaults to localhost:3000) to allow distributed installation
    - Documentation must include best practices for production deployment behind reverse proxies like Caddy/Traefik
 
 The implementation will completely replace the existing API code with NO backward compatibility requirements. All clients will need to migrate to the new API structure. The implementation should follow the architectural diagrams in the PRD and adhere to the security requirements specified for each protocol type.
@@ -42,7 +42,7 @@ Testing should verify all aspects of the unified server implementation:
 
 1. Unit Tests:
    - Test each protocol handler independently
-   - Verify authentication logic with MUXI service level authentication
+   - Verify authentication logic with MUXI Core authentication
    - Test access level enforcement via decorators/dependency injection
    - Test error handling for each protocol
 
@@ -51,7 +51,7 @@ Testing should verify all aspects of the unified server implementation:
    - Test authentication across different protocols
    - Ensure proper resource sharing between protocol handlers
    - Verify FastAPI_MCP integration for Model Context Protocol
-   - Test configuration of MUXI service URI and connection handling
+   - Test configuration of MUXI Core URI and connection handling
 
 3. Load Testing:
    - Simulate multiple concurrent connections across protocols
@@ -59,7 +59,7 @@ Testing should verify all aspects of the unified server implementation:
    - Test horizontal scaling with multiple server instances
 
 4. Security Testing:
-   - Verify API key validation against MUXI service
+   - Verify API key validation against MUXI Core
    - Test access level enforcement for different endpoint permissions
    - Verify proper isolation between different access levels
    - Test for common vulnerabilities (injection, XSS, etc.)
@@ -72,7 +72,7 @@ Testing should verify all aspects of the unified server implementation:
 
 6. Deployment Tests:
    - Verify functionality when deployed behind various reverse proxies (Caddy, Traefik)
-   - Test different MUXI service URI configurations
+   - Test different MUXI Core URI configurations
    - Validate containerized deployment in various environments
 
 All tests should be automated and included in the CI/CD pipeline. Documentation should include examples of using each protocol with the server.
@@ -80,7 +80,7 @@ All tests should be automated and included in the CI/CD pipeline. Documentation 
 # Subtasks:
 ## 1. Set up Core Server Architecture and Project Structure [pending]
 ### Dependencies: None
-### Description: Create the foundational server architecture with modular design patterns and establish the project structure for the unified MUXI API Server.
+### Description: Create the foundational server architecture with modular design patterns and establish the project structure for the unified MUXI API.
 ### Details:
 Implementation details:
 1. Initialize a new Node.js/Express.js project with TypeScript support
@@ -91,14 +91,14 @@ Implementation details:
 6. Configure error handling middleware with standardized error responses
 7. Implement containerization with Docker (Dockerfile and docker-compose.yml)
 8. Set up CI/CD pipeline configuration
-9. Implement configurable MUXI service URI (default: localhost:3000) through environment variables and config files
-10. Create initialization logic to validate connection to MUXI service on startup
+9. Implement configurable MUXI Core URI (default: localhost:3000) through environment variables and config files
+10. Create initialization logic to validate connection to MUXI Core on startup
 
 Testing approach:
 - Unit tests for configuration loading
 - Integration test for health check endpoint
 - Verify Docker container builds and runs correctly
-- Test MUXI service URI configuration with different values
+- Test MUXI Core URI configuration with different values
 
 ## 2. Implement Authentication Integration with MUXI Service [pending]
 ### Dependencies: 13.1
@@ -255,7 +255,7 @@ Implementation details:
 1. Integrate the FastAPI_MCP library into the server architecture
 2. Configure FastAPI_MCP with appropriate settings for the MUXI environment
 3. Map API endpoints to corresponding MCP operations with explicit operation_ids
-4. Integrate authentication with the MUXI service level authentication
+4. Integrate authentication with the MUXI Core authentication
 5. Implement access level enforcement for MCP operations
 6. Add protocol versioning support
 7. Create connection state management for stateful operations
@@ -346,14 +346,14 @@ Implementation details:
 7. Develop auto-scaling configuration based on load metrics
 8. Create deployment templates for orchestration platforms (Kubernetes, etc.)
 9. Ensure proper functionality when deployed behind reverse proxies in a distributed environment
-10. Document configuration requirements for distributed deployment with MUXI service URI
+10. Document configuration requirements for distributed deployment with MUXI Core URI
 
 Testing approach:
 - Multi-instance tests for state consistency
 - Load distribution tests
 - Failover and recovery tests
 - Performance tests under scaled conditions
-- Test distributed deployment with various MUXI service URI configurations
+- Test distributed deployment with various MUXI Core URI configurations
 
 ## 9. Develop Comprehensive API Documentation [pending]
 ### Dependencies: 13.3, 13.4, 13.5, 13.6
@@ -364,13 +364,13 @@ Implementation details:
 2. Document Model Context Protocol (MCP) integration with FastAPI_MCP
 3. Develop integration guides for SSE streaming for logging and tracing
 4. Write WebRTC signaling implementation examples
-5. Document authentication flow with MUXI service and access level requirements
+5. Document authentication flow with MUXI Core and access level requirements
 6. Create SDK examples for common programming languages
 7. Implement interactive API explorer
 8. Develop troubleshooting guides and FAQs
 9. Create a migration guide for clients moving from the old API to the new implementation
 10. Document best practices for production deployment behind reverse proxies like Caddy/Traefik
-11. Include configuration examples for different deployment scenarios with MUXI service URI
+11. Include configuration examples for different deployment scenarios with MUXI Core URI
 
 Testing approach:
 - Validate documentation accuracy against implementation
@@ -400,14 +400,14 @@ Testing approach:
 - Performance tests under various load conditions
 - Security and penetration testing
 - Regression testing after optimizations
-- Test performance with different reverse proxy configurations and MUXI service URI settings
+- Test performance with different reverse proxy configurations and MUXI Core URI settings
 
 ## 11. Create Deployment Documentation and Best Practices [pending]
 ### Dependencies: 13.8, 13.9
-### Description: Develop comprehensive documentation for deploying the API server in various production environments, with special focus on reverse proxy configurations and distributed deployment.
+### Description: Develop comprehensive documentation for deploying the MUXI API in various production environments, with special focus on reverse proxy configurations and distributed deployment.
 ### Details:
 Implementation details:
-1. Document MUXI service URI configuration options and defaults
+1. Document MUXI Core URI configuration options and defaults
 2. Create detailed guides for deploying behind Caddy reverse proxy
 3. Create detailed guides for deploying behind Traefik reverse proxy
 4. Document best practices for SSL/TLS termination
@@ -426,10 +426,10 @@ Testing approach:
 
 ## 12. Create Deployment Documentation [pending]
 ### Dependencies: 13.9
-### Description: Develop comprehensive documentation for deploying the API server in production environments, including best practices for reverse proxy configuration and distributed installation.
+### Description: Develop comprehensive documentation for deploying the MUXI API in production environments, including best practices for reverse proxy configuration and distributed installation.
 ### Details:
 Implementation details:
-1. Document server initialization with MUXI service URI configuration
+1. Document server initialization with MUXI Core URI configuration
 2. Create deployment guides for common reverse proxies (Caddy, Traefik, Nginx)
 3. Document security best practices for production deployments
 4. Provide load balancing and high availability configuration examples
@@ -444,11 +444,11 @@ Testing approach:
 
 ## 13. Implement Distributed Configuration [pending]
 ### Dependencies: 13.1
-### Description: Implement configuration system for the API server to support distributed installation with the MUXI service running on different hosts.
+### Description: Implement configuration system for the MUXI API to support distributed installation with the MUXI Core running on different hosts.
 ### Details:
 Implementation details:
-1. Create configuration module for API server settings
-2. Implement MUXI service URI configuration (default: localhost:3000)
+1. Create configuration module for MUXI API settings
+2. Implement MUXI Core URI configuration (default: localhost:3000)
 3. Add connection parameters (timeout, retry policy, etc.)
 4. Implement TLS/SSL certification configuration for secure communication
 5. Create environment variable support for all configuration options
@@ -458,7 +458,7 @@ Implementation details:
 
 Testing approach:
 - Unit tests for configuration loading and validation
-- Integration tests with MUXI service running on different hosts
+- Integration tests with MUXI Core running on different hosts
 - Performance tests for various connection settings
 - Security tests for TLS/SSL configurations
 

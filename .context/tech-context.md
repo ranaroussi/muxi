@@ -2,57 +2,115 @@
 
 This document outlines the technical context of the MUXI Framework, including technologies used, development setup, constraints, and dependencies.
 
-## Technologies Used
+## Core Technologies
+
+The MUXI Framework is built using the following core technologies:
 
 ### Programming Languages
 
-- **Python**: Primary development language (3.10+)
-- **JavaScript**: Used for web UI components
+- **Python**: Primary language for MUXI Core and implementation of most framework features
+- **TypeScript/JavaScript**: Used for MUXI Web UI and potentially some components of MUXI API
+- **React**: Front-end library for MUXI Web UI
 
-### Core Libraries & Frameworks
+### Key Libraries and Frameworks
 
-- **FastAPI**: Web framework for API development
-- **asyncio**: Asynchronous I/O library for Python
+- **FastAPI**: Web framework for building MUXI API endpoints
+- **FastAPI_MCP**: Extension for Model Context Protocol support
 - **SQLAlchemy**: ORM for database interactions
-- **FAISS**: Vector similarity search for buffer memory
-- **pgvector**: PostgreSQL extension for vector operations
-- **sqlite-vec**: SQLite extension for vector similarity search
-- **pydantic**: Data validation and settings management
-- **websockets**: WebSocket protocol implementation
-- **httpx**: HTTP client for Python with async support
-- **rich**: Terminal formatting and UI
+- **Pydantic**: Data validation and settings management
+- **Click/Typer**: CLI framework for MUXI CLI
+- **HTTPX**: HTTP client for asynchronous requests
+- **LangChain**: Building blocks for LLM applications
+- **WebRTC**: For real-time media communication
 
-### LLM Integration
+### Databases & Storage
 
-- **OpenAI API**: Primary LLM provider
-- (Planned) Anthropic, Gemini, Grok, and local model integrations
+- **PostgreSQL**: Primary relational database
+- **Vector Databases**:
+  - Qdrant (Default)
+  - Pinecone
+  - ChromaDB
+  - FAISS
 
-### MCP Integration
+### Deployment & Infrastructure
 
-- **Model Context Protocol (MCP)**: Standard for tool integration
-- **MCP Python SDK**: Official Python SDK for MCP
+- **Docker**: Containerization of components
+- **Docker Compose**: Local development and simple deployments
+- **Kubernetes**: Production deployments and scaling (optional)
 
-### Database
+## System Components
 
-- **PostgreSQL**: Primary database for long-term memory
-- **pgvector**: PostgreSQL extension for vector operations
-- **SQLite**: Alternative database for long-term memory in local deployments
-- **sqlite-vec**: SQLite extension for vector similarity search
+The MUXI Framework is structured around several key components:
 
-### Web Technologies
+### MUXI Core
 
-- **Server-Sent Events (SSE)**: For streaming responses
-- **WebSockets**: For bidirectional communication
-- **HTML/CSS/JavaScript**: For web UI
+Core orchestration and agent management system:
 
-### Developer Tools
+- **Orchestrator**: Central component managing agents and memory
+- **Agent System**: Implementation of agent capabilities
+- **Memory Management**: Short-term and long-term memory systems
+- **Knowledge Integration**: Domain knowledge integration
+- **Tool Execution**: Handling tool connections and requests
 
-- **pytest**: Testing framework
-- **black**: Code formatting
-- **flake8**: Linting
-- **mypy**: Type checking
-- **alembic**: Database migrations
-- **sphinx**: Documentation generation
+### MUXI API
+
+Communication interface providing multiple protocols:
+
+- **REST API**: HTTP endpoints for standard request/response
+- **SSE Endpoints**: Server-Sent Events for streaming
+- **MCP Integration**: Model Context Protocol implementation
+- **WebRTC Signaling**: Real-time media capabilities
+
+### MUXI CLI
+
+Command-line interface for MUXI interaction:
+
+- **Command Structure**: Hierarchical commands
+- **Profile System**: Configuration profiles
+- **Output Formatting**: Multiple output formats (text, JSON, YAML)
+- **Interactive Mode**: REPL-like environment for chat
+
+### MUXI Web UI
+
+Browser-based interface:
+
+- **React Frontend**: SPA for managing MUXI
+- **Chat Interface**: Real-time interaction with agents
+- **Configuration UI**: Visual configuration
+- **Analytics Dashboard**: Usage statistics
+
+## Development Approach
+
+### Repository Structure
+
+The monorepo contains multiple packages:
+
+- `packages/core`: MUXI Core implementation
+- `packages/server`: MUXI API implementation
+- `packages/cli`: MUXI CLI implementation
+- `packages/web`: MUXI Web UI implementation
+- `packages/muxi`: Meta-package that installs everything
+
+### API Design
+
+- RESTful endpoints with proper HTTP methods
+- OpenAPI/Swagger documentation
+- MCP (Model Context Protocol) compatibility
+- SSE for streaming responses
+- WebRTC for media exchange
+
+### Testing Strategy
+
+- Unit tests for core functionality
+- Integration tests for component interaction
+- End-to-end tests for user workflows
+- Performance testing for scalability validation
+
+### Deployment Options
+
+- Single-machine deployment (all components)
+- Network-distributed deployment (components on different servers)
+- Cross-network deployment (components across different networks)
 
 ## Development Setup
 

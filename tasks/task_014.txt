@@ -3,9 +3,9 @@
 # Status: pending
 # Dependencies: 13
 # Priority: medium
-# Description: Develop a command-line interface client that interacts with the MUXI API Server, providing terminal-based access to all MUXI features as specified in the prd-cli-client.md PRD.
+# Description: Develop a command-line interface client that interacts with the MUXI Core, providing terminal-based access to all MUXI features as specified in the prd-cli-client.md PRD.
 # Details:
-Implement a comprehensive CLI client for MUXI that consumes the API Server endpoints. The implementation should follow the 6 distinct phases outlined in the PRD:
+Implement a comprehensive CLI client for MUXI that consumes the MUXI API endpoints. The implementation should follow the 6 distinct phases outlined in the PRD:
 
 1. Phase 1: Core Infrastructure
    - Project setup and framework selection
@@ -69,7 +69,7 @@ Key implementation features include:
 The CLI should be built using a modern CLI framework that supports argument parsing, help generation, and colorized output. Ensure the code is modular and follows the single responsibility principle to make it maintainable and extensible.
 
 # Test Strategy:
-Testing for the CLI client should include:
+Testing for the MUXI CLI should include:
 
 1. Unit tests:
    - Test each command module in isolation with mocked API responses
@@ -79,7 +79,7 @@ Testing for the CLI client should include:
    - Test permission-based command access controls
 
 2. Integration tests:
-   - Test against a running API server instance
+   - Test against a running MUXI Core instance
    - Verify all commands produce expected results
    - Test authentication flows including token refresh
    - Validate proper handling of rate limits and server errors
@@ -327,7 +327,7 @@ Additional implementation details for authentication mechanisms:
 
 ## 4. Develop API client and request handling [pending]
 ### Dependencies: 14.3
-### Description: Create the core API client that handles requests to the MUXI API Server with proper error handling, retries, and caching.
+### Description: Create the core API client that handles requests to the MUXI API with proper error handling, retries, and caching.
 ### Details:
 Implementation details:
 1. Implement base API client with request/response handling

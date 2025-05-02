@@ -1,4 +1,4 @@
-# MUXI API Server PRD
+# MUXI API PRD
 
 > ### REST API, SSE, MCP, and WebRTC Integration
 
@@ -7,7 +7,7 @@
 
 ## Overview
 
-This document outlines the implementation of the MUXI API Server, a comprehensive communication layer that unifies multiple protocols into a single server implementation. The server will provide REST API endpoints, Server-Sent Events (SSE) for streaming, MCP (Model Context Protocol) support, and WebRTC for rich media exchange.
+This document outlines the implementation of the MUXI API, a comprehensive communication layer that unifies multiple protocols into a single server implementation. The server will provide REST API endpoints, Server-Sent Events (SSE) for streaming, MCP (Model Context Protocol) support, and WebRTC for rich media exchange.
 
 ## Problem Statement
 
@@ -23,7 +23,7 @@ Currently, these capabilities exist as separate conceptual components, leading t
 
 ## Objectives
 
-1. Create a unified API Server that combines REST, SSE, MCP, and WebRTC in one process
+1. Create a unified MUXI API that combines REST, SSE, MCP, and WebRTC in one process
 2. Logically separate endpoints into "user/interface" and "developer/management" categories
 3. Implement a consistent authentication mechanism across all protocols
 4. Ensure high performance for concurrent connections and streaming responses
@@ -32,7 +32,7 @@ Currently, these capabilities exist as separate conceptual components, leading t
 
 ## Feature Requirements
 
-### Core API Server Components
+### Core MUXI API Components
 
 1. **REST API Layer**: Standard HTTP endpoints for agent and system management
    - User/Interface endpoints for agent interaction
@@ -61,7 +61,7 @@ Currently, these capabilities exist as separate conceptual components, leading t
    - WebRTC for audio/video exchange
 
 2. **Authentication**:
-   - API key-based authentication leveraging keys set at the MUXI service level
+   - API key-based authentication leveraging keys set at the MUXI Core level
    - Two key types with explicit access level specification:
      - User/Interface key for client access
      - Administrative key for system management
@@ -82,7 +82,7 @@ Currently, these capabilities exist as separate conceptual components, leading t
 
 ## Implementation Approach
 
-The MUXI API Server will be implemented as a unified module that internally contains logical separations for each protocol while sharing common resources like authentication, logging, and connection management. The implementation will not maintain backward compatibility with existing code, allowing for a clean, optimized design.
+The MUXI API will be implemented as a unified module that internally contains logical separations for each protocol while sharing common resources like authentication, logging, and connection management. The implementation will not maintain backward compatibility with existing code, allowing for a clean, optimized design.
 
 **Note:** The new implementation will completely replace the existing API code with no regard for backward compatibility. This allows for a clean, optimized design that follows best practices without legacy constraints.
 
@@ -90,7 +90,7 @@ The MUXI API Server will be implemented as a unified module that internally cont
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                       MUXI API Server                       │
+│                         MUXI API                            │
 │                                                             │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐    │
 │  │    REST API   │  │      SSE      │  │      MCP      │    │
@@ -109,7 +109,7 @@ The MUXI API Server will be implemented as a unified module that internally cont
 └──────────────────────────────┼──────────────────────────────┘
                                │
 ┌──────────────────────────────▼──────────────────────────────┐
-│                         MUXI Service                        │
+│                         MUXI Core                           │
 │                              ↓                              │
 │                      ┌────────────────┐                     │
 │                      │  Orchestrator  │                     │
@@ -123,7 +123,7 @@ The MUXI API Server will be implemented as a unified module that internally cont
 
 ### Authentication System
 
-The API Server will use a dual-key authentication system based on the keys set at the MUXI service level:
+The MUXI API will use a dual-key authentication system based on the keys set at the MUXI Core level:
 
 1. **User/Interface Key**: Limited to chat interactions and user-facing features
    - Used for client applications, chat interfaces
@@ -135,29 +135,87 @@ The API Server will use a dual-key authentication system based on the keys set a
    - Required for sensitive operations
    - Format: `sk_muxi_admin_YOUR_KEY` (when auto-generated)
 
-The API Server will validate each incoming request against these keys and enforce the appropriate access level. Access levels will be specified using one of two methods (but not both in the codebase!):
+The MUXI API will validate each incoming request against these keys and enforce the appropriate access level. Access levels will be specified using decorators:
 
-1. **Decorator Method**:
+```python
+@app.get("/endpoint", operation_id="get_some_resource")
+@requires_user_key  # or @requires_admin_key
+async def get_resource():
+    # Implementation
+```
 
-    ```python
-    @app.get("/endpoint", operation_id="get_some_resource")
-    @app.verify_user_key  # or @app.verify_admin_key
-    async def get_resource():
-        # Implementation
-    ```
+At initialization, the MUXI Core (Orchestrator) and declarative API (muxi) will accept API keys as parameters:
 
-2. **Dependency Injection Method**:
+```python
+# For the Orchestrator approach
+orchestrator = Orchestrator(user_api_key="your_user_key", admin_api_key="your_admin_key")
 
-    ```python
-    @app.get("/endpoint", operation_id="get_some_resource",
-             dependencies=[Depends(verify_user_key)])
-    async def get_resource():
-        # Implementation
-    ```
+# For the declarative approach
+app = muxi(user_api_key="your_user_key", admin_api_key="your_admin_key")
+```
+
+Upon running, the MUXI API will display the following information:
+
+```
+╭──────────────────────────────────────╮
+│  ███╗   ███╗ ██╗   ██╗ ██╗  ██╗ ██╗  │
+│  ████╗ ████║ ██║   ██║ ╚██╗██╔╝ ██║  │
+│  ██╔████╔██║ ██║   ██║  ╚███╔╝  ██║  │
+│  ██║╚██╔╝██║ ██║   ██║  ██╔██╗  ██║  │
+│  ██║ ╚═╝ ██║ ╚██████╔╝ ██╔╝ ██╗ ██║  │
+│  ╚═╝     ╚═╝  ╚═════╝  ╚═╝  ╚═╝ ╚═╝  │
+│───────────────┬──────────────────────│
+│  * MUXI Core  │  Version: 1.2.0      │
+│───────────────┴──────────────────────│
+│                                      │
+│  Running on:                         │
+│  http://0.0.0.0:8000                 │
+│                                      │
+╰──────────────────────────────────────╯
+```
+
+If keys are not provided during initialization, temporary keys will be auto-generated and the startup message will include the generated API keys:
+
+```
+╭──────────────────────────────────────╮
+│  ███╗   ███╗ ██╗   ██╗ ██╗  ██╗ ██╗  │
+│  ████╗ ████║ ██║   ██║ ╚██╗██╔╝ ██║  │
+│  ██╔████╔██║ ██║   ██║  ╚███╔╝  ██║  │
+│  ██║╚██╔╝██║ ██║   ██║  ██╔██╗  ██║  │
+│  ██║ ╚═╝ ██║ ╚██████╔╝ ██╔╝ ██╗ ██║  │
+│  ╚═╝     ╚═╝  ╚═════╝  ╚═╝  ╚═╝ ╚═╝  │
+│───────────────┬──────────────────────│
+│  * MUXI Core  │  Version: 1.2.0      │
+│───────────────┴──────────────────────│
+│                                      │
+│  Running on:                         │
+│  http://0.0.0.0:8000                 │
+│                                      │
+╰─────────────┬────────────────────────╯
+              │
+╭─────────────┴────────────────────────────────────────────────────────╮
+│                                                                      │
+│  API Keys (auto-generated):                                          │
+│                                                                      │
+│   — User:  sk_muxi_user_xxxxxxxxxxxxxxxxxxxxx                        │
+│   — Admin: sk_muxi_admin_xxxxxxxxxxxxxxxxxxxxx                       │
+│                                                                      │
+│  ⚡ Auto-generating API keys should only be used during development.  │
+│  We recommend to explicitly set your own API keys.                   │
+│                                                                      │
+╰──────────────────────────────────────────────────────────────────────╯
+```
+
+API keys are stored in memory during runtime, with no persistent storage or complex key management infrastructure. This places responsibility for key management on developers, which is appropriate for most use cases. For production environments, developers should set their own keys rather than relying on auto-generated ones.
+
+NOTES:
+
+1. All endpoints must have at least `@requires_user_key` applied. If no decorator is specified, `@requires_user_key` should be applied automatically.
+2. Admin keys grant access to all endpoints, including those marked with `@requires_user_key`.
 
 ### Endpoint Categories
 
-The API Server will logically separate endpoints into two categories:
+The MUXI API will logically separate endpoints into two categories:
 
 #### User/Interface Endpoints
 
@@ -380,7 +438,7 @@ POST /api/v1/logs/trace/search
 ### Phase 1: Core REST API & SSE Integration
 
 1. Implement REST API framework with FastAPI
-2. Add authentication system using MUXI service-level API keys
+2. Add authentication system using MUXI Core-level API keys
 3. Implement core agent and chat endpoints
 4. Add SSE streaming capabilities
 5. Deploy with proper CORS and security headers
@@ -419,12 +477,12 @@ POST /api/v1/logs/trace/search
 
 ## Authentication Implementation
 
-The API Server will leverage the API keys set at the MUXI service level. These keys will be:
+The MUXI API will leverage the API keys set at the MUXI Core level. These keys will be:
 
 1. Cryptographically secure random strings
 2. When auto-generated, prefixed with `sk_muxi_user_` or `sk_muxi_admin_` to indicate scope
 3. Validated on every request across all protocols
-4. Accessible to the API server through the MUXI orchestrator
+4. Accessible to the MUXI API through the MUXI orchestrator
 
 ### API Key Header Format
 
@@ -440,11 +498,11 @@ Authorization: Bearer <ADMIN_KEY>
 
 ### API Key Validation
 
-The API server will validate each request by:
+The MUXI API will validate each request by:
 
 1. Extracting the API key from the Authorization header
 2. Checking the key prefix to determine the access level (user or admin)
-3. Validating the key against the keys managed by the MUXI service
+3. Validating the key against the keys managed by the MUXI Core
 4. Enforcing endpoint access restrictions based on the key type
 
 ### Access Level Decoration
@@ -493,7 +551,7 @@ async def chat():
 
 ## Monitoring and Observability
 
-The API Server will include comprehensive monitoring and observability features:
+The MUXI API will include comprehensive monitoring and observability features:
 
 1. **Request Logging**:
    - Structured logs for all requests
@@ -521,11 +579,11 @@ The API Server will include comprehensive monitoring and observability features:
 
 ### Initialization and Configuration
 
-The API Server must be initialized with configuration parameters that define its operational environment:
+The MUXI API must be initialized with configuration parameters that define its operational environment:
 
-1. **MUXI Service Connection**:
-   - Configurable URI for the MUXI service (defaults to `localhost:3000`)
-   - Allows for distributed installation where API Server and MUXI service run on different hosts
+1. **MUXI Core Connection**:
+   - Configurable URI for the MUXI Core (defaults to `localhost:3000`)
+   - Allows for distributed installation where MUXI API and MUXI Core run on different hosts
    - Connection parameters (timeout, retry policy, etc.)
    - TLS/SSL certificate configuration for secure communication
 
@@ -554,7 +612,7 @@ For production deployments, the following best practices are recommended:
    - Enable HTTP/2 for improved performance
 
 2. **Load Balancing**:
-   - Utilize multiple API Server instances behind a load balancer
+   - Utilize multiple MUXI API instances behind a load balancer
    - Configure sticky sessions for WebRTC and SSE connections
    - Implement health checks for automatic instance replacement
    - Use Redis or similar for session state sharing
@@ -622,4 +680,4 @@ A comprehensive deployment guide will be provided in the documentation site, inc
 
 ## Conclusion
 
-The unified MUXI API Server will provide a comprehensive communication layer for the MUXI Framework, combining REST API, SSE streaming, MCP protocol support, and WebRTC capabilities in a single, cohesive implementation. This approach reduces code duplication, ensures consistent authentication and security, and simplifies integration for developers and users. By leveraging FastAPI's capabilities and explicitly specifying operation IDs for MCP tool names, the API server will provide a clean, modern, and developer-friendly interface to the MUXI Framework.
+The unified MUXI API will provide a comprehensive communication layer for the MUXI Framework, combining REST API, SSE streaming, MCP protocol support, and WebRTC capabilities in a single, cohesive implementation. This approach reduces code duplication, ensures consistent authentication and security, and simplifies integration for developers and users. By leveraging FastAPI's capabilities and explicitly specifying operation IDs for MCP tool names, the MUXI API will provide a clean, modern, and developer-friendly interface to the MUXI Framework.

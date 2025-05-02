@@ -1,60 +1,107 @@
 # MUXI Framework System Patterns
 
+This document outlines the core system architecture, design patterns, and component relationships within the MUXI Framework.
+
 ## System Architecture
 
-The MUXI Framework follows a service-oriented architecture with clear separation of concerns and modular components. The high-level architecture is as follows:
+The MUXI Framework follows a modular architecture with several key components:
+
+### High-Level Component Overview
 
 ```
-┌───────────────────┐
-│      Clients      │
-│ (CLI/API/MCP/Web) │
-└─────────┬─────────┘
-          │
-          │  (REST/WS/SSE/WebRTC)
-          │
-┌─────────│───────────────────────────────────────────┐
-│         │                                           │
-│         │    MUXI Server (Local/Remote)             │
-│         │                                           │
-│         │        ┌───────────────┐                  │   ┌──────────────────┐
-│         └───────>│  Orchestrator │----------------------│ Buffer/LT Memory │
-│                  └───────┬───────┘                  │   └──────────────────┘
-│                          │                          │
-│         ┌────────────────┼────────────────┐         │
-│         │                │                │         │
-│         │                │                │         │
-│  ┌──────▼──────┐  ┌──────▼──────┐  ┌──────▼──────┐  │   ┌──────────────────┐
-│  │   Agent 1   │  │   Agent 2   │  │   Agent N   │------│ Domain Knowledge │
-│  └───┬─────↑───┘  └──────↑──────┘  └───↑─────┬───┘  │   └──────────────────┘
-│      │     │             │             │     │      │
-│      │     │             ↓             │     │      │
-│      │     └─────────> (A2A) <─────────┘     │      │
-│      │                   │                   │      │
-│      │            ┌──────↓──────┐            │      │
-│      └───────────>│ MCP Service │<───────────┘      │
-│                   └──────┬──────┘                   │   ┌──────────────────┐
-│                          │                      ------->│   Observability  │
-│                          │                          │   └──────────────────┘
-└──────────────────────────│──────────────────────────┘
-                           │
-                           │ (HTTP/SSE/Command)
-                           │
-┌──────────────────────────↓──────────────────────────┐
-│              MCP Servers (via Command/SSE)          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │   Weather   │  │   Research  │  │     ....    │  │
-│  └─────────────┘  └─────────────┘  └─────────────┘  │
-└─────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                      MUXI Framework Components                     │
+├───────────────┬───────────────┬───────────────┬────────────────────┤
+│   MUXI Core   │    MUXI API   │   MUXI CLI    │   MUXI Web UI      │
+│ (Orchestrator,│  (REST, SSE,  │ (Command-line │  (React-based user │
+│ Agents, Memory│   MCP, WebRTC)│  interface)   │  interface)        │
+└───────┬───────┴───────┬───────┴───────┬───────┴────────┬───────────┘
+        │               │               │                │
+        ▼               ▼               ▼                ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                     Shared Libraries & Utilities                   │
+├───────────────┬───────────────┬───────────────┬────────────────────┤
+│  Vector DBs   │   Language    │  Knowledge    │    Observability   │
+│ & Embeddings  │    Models     │  Integration  │    & Telemetry     │
+└───────────────┴───────────────┴───────────────┴────────────────────┘
 ```
 
-### Key Architectural Components
+### Component Relationships
 
-1. **Orchestrator**: Central component that manages agents and memory systems
-2. **Agent**: Core entity that processes messages with specific capabilities
-3. **Centralized Memory System**: Managed by the orchestrator, storing conversation history and contextual information
-4. **MCP Service**: Centralized service that manages communications with external MCP servers
-5. **Knowledge Base**: Stores and retrieves domain-specific knowledge
-6. **Communication Interfaces**: HTTP API, SSE, WebSockets for interaction
+1. **MUXI Core**: The central orchestration layer for agent management, memory, and core functionality
+   - Manages agent lifecycle, configuration, and state
+   - Handles memory operations (short-term, long-term, vector storage)
+   - Provides knowledge integration and retrieval
+   - Manages tool execution and connectivity
+
+2. **MUXI API**: Communication interface between clients and the MUXI Core
+   - Exposes REST API endpoints for management and interaction
+   - Provides Server-Sent Events (SSE) for streaming responses
+   - Implements Model Context Protocol (MCP) for specialized clients
+   - Offers WebRTC signaling for peer-to-peer connections
+
+3. **MUXI CLI**: Command-line interface for interacting with MUXI API
+   - Provides scriptable access to all MUXI features
+   - Supports profile-based configuration management
+   - Enables both human-friendly and machine-parsable outputs
+
+4. **MUXI Web UI**: Browser-based interface for interacting with MUXI
+   - Provides visual management of agents and configuration
+   - Offers chat interface for agent interaction
+   - Visualizes memory and knowledge connections
+
+## Key Design Patterns
+
+### Core Design Patterns
+
+1. **Modular Component Architecture**
+   - Components are designed with clear boundaries and interfaces
+   - Each component can be deployed and scaled independently
+   - Interface contracts ensure consistent behavior across components
+
+2. **API-First Design**
+   - All functionality is exposed through well-defined APIs
+   - Internal components communicate through standardized interfaces
+   - External integrations use the same APIs as built-in components
+
+3. **Configuration-Driven Behavior**
+   - Components are configurable through environment variables and config files
+   - Different deployment scenarios can be achieved through configuration
+   - Sensible defaults with progressive customization options
+
+### Communication Patterns
+
+1. **Unified Protocol Support**
+   - MUXI API provides multiple protocol options (REST, SSE, MCP, WebRTC)
+   - Consistent authentication and authorization across protocols
+   - Protocol selection based on client needs and use case
+
+2. **Streaming-First Approach**
+   - Streaming responses preferred for real-time user experience
+   - Server-sent events (SSE) for incremental content delivery
+   - WebSocket/WebRTC for bidirectional communication
+
+3. **Asynchronous Processing**
+   - Non-blocking I/O for request handling
+   - Background processing for long-running operations
+   - Webhook support for completion notifications
+
+### Deployment Patterns
+
+1. **Flexible Deployment Options**
+   - Single-machine deployment for development and small installations
+   - Network-distributed deployment for scalability and separation of concerns
+   - Cross-network deployment for enterprise and secure environments
+
+2. **Component Independence**
+   - MUXI Core can run independently for headless operation
+   - MUXI API connects to MUXI Core via configurable URI
+   - MUXI CLI and Web UI connect to MUXI API via configurable endpoints
+
+3. **Containerization Support**
+   - Docker images for all components
+   - Docker Compose for development and simple deployments
+   - Kubernetes support for production orchestration
 
 ## Key Technical Decisions
 

@@ -319,3 +319,71 @@ Documentation in .cursor/rules/ has been updated:
 2. **Enhanced Filtering**: Add more sophisticated filtering for extracted information
 3. **User Control**: Implement user-facing controls for extraction preferences
 4. **Integration**: Connect extraction with other components of the MUXI framework
+
+# Active Context: MUXI Framework Development
+
+## Current Focus
+
+The current focus is on developing the next phase of the MUXI Framework infrastructure, implementing two key components:
+
+1. **MUXI API** - A unified server combining REST API, SSE (Server-Sent Events), MCP (Model Context Protocol), and WebRTC capabilities
+2. **MUXI CLI** - A command-line interface for interacting with the MUXI API
+
+These components will interact with the existing **MUXI Core** (previously referred to as MUXI Service) which handles the orchestration of agents, memory management, and other core functionalities.
+
+## Recent Decisions
+
+1. **Terminology Standardization**:
+   - **MUXI Core**: The fundamental backend services that handle orchestration, agents, memory, etc. (previously referred to as "MUXI Service")
+   - **MUXI API**: The interface layer providing REST API, SSE, MCP, and WebRTC endpoints
+   - **MUXI CLI**: The command-line client providing terminal-based access to MUXI functionality
+
+2. **API Implementation**:
+   - No backward compatibility requirements for the new API implementation
+   - Dual API key authentication (user keys and admin keys) managed at the MUXI Core level
+   - Explicit access level specification using decorators or dependency injection
+   - All endpoints must have explicit operation_id parameters for MCP tools
+
+3. **CLI Client**:
+   - INI-style configuration format similar to AWS CLI with profile support
+   - Clear permission indicators for commands requiring admin privileges
+   - Implementation in phases with clear priorities for features
+   - Support for multiple output formats and streaming
+
+## Architecture Evolution
+
+The MUXI Framework architecture is evolving to support a more modular and distributed deployment model:
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    MUXI CLI     │────▶│    MUXI API     │────▶│    MUXI Core    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │                       │
+        │                       │                       │
+        ▼                       ▼                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Deployment Options                          │
+├─────────────────┬─────────────────┬─────────────────────────────┤
+│ Single Machine  │ Same Network    │ Distributed (Cross-Network) │
+└─────────────────┴─────────────────┴─────────────────────────────┘
+```
+
+Each component can be deployed on the same machine, within the same network, or in a fully distributed setup across different networks, providing flexibility for various deployment scenarios.
+
+## Considerations and Next Steps
+
+1. **Package Alignment**:
+   - The new terminology aligns with the existing package structure:
+     - `core`: MUXI Core implementation
+     - `server`: MUXI API implementation
+     - `cli`: MUXI CLI implementation
+     - `muxi`: Meta-package that installs everything
+
+2. **Authentication Flow**:
+   - Implementing the dual API key system (user and admin keys) at the MUXI Core level
+   - MUXI API will validate keys against MUXI Core for permission checking
+   - MUXI CLI will store and manage keys in profile configurations
+
+3. **Deployment Configuration**:
+   - MUXI API needs to be configured with the URI of MUXI Core (defaults to localhost:3000)
+   - Documentation for deploying each component independently with appropriate configuration
