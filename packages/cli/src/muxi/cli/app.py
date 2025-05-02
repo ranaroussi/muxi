@@ -191,7 +191,7 @@ Type `/help` for available commands or `/exit` to quit.
         # Process regular message
         with console.status("[bold green]Agent is thinking...[/bold green]"):
             try:
-                response = await orchestrator.run(user_input)
+                response = await orchestrator.run_agent(user_input)
                 console.print("\n[bold green]Agent:[/bold green]")
                 console.print(Markdown(response))
             except Exception as e:
