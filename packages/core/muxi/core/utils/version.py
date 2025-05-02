@@ -6,7 +6,6 @@ This module provides utilities for getting and managing version information.
 
 import os
 import json
-from typing import Optional
 
 
 def get_version() -> str:
@@ -33,7 +32,8 @@ def get_version() -> str:
         if os.path.exists(setup_path):
             with open(setup_path, "r") as f:
                 content = f.read()
-                version_match = next((line for line in content.splitlines() if 'version="' in line), None)
+                version_match = next((
+                    line for line in content.splitlines() if 'version="' in line), None)
                 if version_match:
                     import re
                     match = re.search(r'version="([^"]+)"', version_match)

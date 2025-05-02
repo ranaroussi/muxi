@@ -13,7 +13,7 @@ import numpy as np
 from loguru import logger
 
 from muxi.core.utils import load_document, chunk_text
-from muxi.knowledge.base import FileKnowledge
+from muxi.core.knowledge.base import FileKnowledge
 
 
 class KnowledgeHandler:

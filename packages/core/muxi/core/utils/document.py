@@ -5,7 +5,7 @@ This module provides functions for loading and processing documents.
 """
 
 import os
-from typing import List, Optional
+from typing import List
 
 
 def load_document(file_path: str) -> str:

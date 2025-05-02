@@ -60,14 +60,12 @@ class SQLiteVecExtension(Extension):
 
         # Construct the path to the extension file
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        ext_path = os.path.join(
-            base_dir,
-            "extensions",
-            "loadable",
-            "sqlite_vec",
-            platform_id,
-            f"sqlite_vec.{extension}"
-        )
+        loadable_dir = os.path.join(base_dir, "extensions", "loadable", "sqlite_vec", platform_id)
+
+        # Create the loadable directory if it doesn't exist
+        os.makedirs(loadable_dir, exist_ok=True)
+
+        ext_path = os.path.join(loadable_dir, f"sqlite_vec.{extension}")
 
         logger.debug(f"Looking for SQLite Vector extension at: {ext_path}")
         return ext_path
@@ -139,6 +137,9 @@ class SQLiteVecExtension(Extension):
                 conn.load_extension(path)
                 logger.info(f"Loaded SQLite Vector extension from platform path: {path}")
                 return
+            else:
+                logger.warning(f"SQLite Vector extension not found at: {path}")
+                logger.warning(f"You may need to place the sqlite_vec extension at: {path}")
         except Exception as e:
             logger.warning(f"Failed to load platform-specific SQLite Vector extension: {e}")
 
