@@ -17,8 +17,6 @@ from muxi.models.providers.openai import OpenAIModel
 from muxi.server.memory.buffer import BufferMemory
 from muxi.server.memory.long_term import LongTermMemory
 from muxi.server.memory.memobase import Memobase
-from muxi.config_loader import ConfigLoader
-from .credential_manager import CredentialManager
 
 
 class Muxi:
@@ -33,45 +31,41 @@ class Muxi:
         self,
         buffer_memory: Optional[Union[int, BufferMemory]] = None,
         long_term_memory: Optional[Union[str, bool, LongTermMemory, Memobase]] = None,
-        credential_db_connection_string: Optional[str] = None
+        credential_db_connection_string: Optional[str] = None,
+        user_api_key: Optional[str] = None,
+        admin_api_key: Optional[str] = None
     ):
         """
-        Initialize the MUXI facade with memory options.
+        Initialize the declarative interface.
 
         Args:
-            buffer_memory: Optional buffer memory configuration.
-                Can be an integer (buffer size), a BufferMemory instance, or None.
-            long_term_memory: Optional long-term memory configuration.
-                Can be a connection string, a boolean (True for default SQLite),
-                an instance of LongTermMemory/Memobase, or None.
-            credential_db_connection_string: Optional database connection string for
-                credentials storage. If None, will try to use the long_term_memory
-                connection if it's a database string, or fall back to POSTGRES_DATABASE_URL.
+            buffer_memory: Buffer memory configuration
+                - If an integer, specifies the number of messages to keep in the buffer
+                - If a BufferMemory instance, used directly
+            long_term_memory: Long-term memory configuration
+                - If a string, treated as a file path to an SQLite database
+                - If True, creates a default SQLite database in the current directory
+                - If an instance of LongTermMemory or Memobase, used directly
+            credential_db_connection_string: Connection string for the credential database
+                (can also be set via MUXI_DB_CONNECTION_STRING environment variable)
+            user_api_key: Optional API key for user-level access
+            admin_api_key: Optional API key for admin-level access
         """
-        # Create memory objects from configuration
-        _buffer_memory = self._create_buffer_memory(buffer_memory)
-        _long_term_memory = self._create_long_term_memory(
-            long_term_memory,
-            credential_db_connection_string
-        )
+        # Create memory systems from configurations
+        buffer_memory, long_term_memory = self._create_memory_systems({
+            "buffer_memory": buffer_memory,
+            "long_term_memory": long_term_memory
+        })
 
-        # Extract connection string from long_term_memory if it's a string and no credential
-        # connection is provided
-        if credential_db_connection_string is None and isinstance(long_term_memory, str):
-            if long_term_memory.startswith(('postgresql://', 'postgres://')):
-                credential_db_connection_string = long_term_memory
-
-        # Initialize the orchestrator with memory components
+        # Create orchestrator with memory systems
         self.orchestrator = Orchestrator(
-            buffer_memory=_buffer_memory,
-            long_term_memory=_long_term_memory
+            buffer_memory=buffer_memory,
+            long_term_memory=long_term_memory,
+            user_api_key=user_api_key,
+            admin_api_key=admin_api_key
         )
 
-        # Initialize utilities
-        self.config_loader = ConfigLoader()
-        self.credential_manager = CredentialManager(credential_db_connection_string)
-
-        # Store the credential database connection string
+        # Store connection string for memory systems
         self._credential_db_connection_string = credential_db_connection_string
 
     def _create_buffer_memory(
@@ -545,16 +539,19 @@ class Muxi:
 
     def run(self, **kwargs) -> None:
         """
-        Start both the API server and web UI.
+        Start the MUXI server with the current configuration.
+
+        This method displays a splash screen and shows API keys if they were auto-generated.
 
         Args:
-            **kwargs: Additional arguments to pass to the API server
+            **kwargs: Additional arguments to pass to the server
+                - host: Host to bind the server to (default: "0.0.0.0")
+                - port: Port to bind the server to (default: 5050)
+                - reload: Whether to enable auto-reload for development (default: True)
+                - mcp: Whether to enable MCP functionality (default: False)
         """
-        # Import the main entry point
-        from muxi.server import run_server
-
-        # Start the server
-        run_server(**kwargs)
+        # Start the server using the orchestrator's run method
+        self.orchestrator.run(**kwargs)
 
     def get_agent(self, agent_id: str) -> Agent:
         """
