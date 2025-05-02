@@ -46,7 +46,7 @@ muxi-framework/
 │   │   │       │   ├── handler.py   # MCP Handler
 │   │   │       │   └── message.py   # MCP Message structure
 │   │   │       ├── memory/    # Memory systems
-│   │   │       │   ├── buffer.py    # FAISS-backed smart buffer memory
+│   │   │       │   ├── buffer.py    # FAISS-backed buffer memory with context window and buffer multiplier
 │   │   │       │   ├── long_term.py # Long-term memory with vector storage
 │   │   │       │   ├── memobase.py  # Multi-user memory partitioning
 │   │   │       │   ├── sqlite.py    # SQLite vector integration

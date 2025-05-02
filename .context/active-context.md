@@ -26,7 +26,15 @@ Additional priority areas include:
 
 ### Major Changes
 
-1. **Smart Buffer Memory Implementation**:
+1. **Buffer Memory Enhancements**:
+   - Renamed SmartBufferMemory to BufferMemory for clarity and consistency
+   - Added buffer_multiplier parameter to separate context window size from total buffer capacity
+   - Updated configuration system to use buffer_size instead of buffer for better naming consistency
+   - Simplified configuration in muxi constructor: `muxi(buffer_size=10, buffer_multiplier=10, long_term_memory="connection_string")`
+   - Updated all documentation to reflect the new parameter names and semantics
+   - Improved examples to demonstrate appropriate sizing for different use cases
+
+2. **Smart Buffer Memory Implementation**:
    - Implemented a FAISS-backed smart buffer memory to replace the simple deque-based buffer
    - Added hybrid semantic+recency search capabilities for better context retrieval
    - Implemented graceful degradation to recency-only search when a model isn't available
@@ -35,7 +43,7 @@ Additional priority areas include:
    - Integrated thread-safe operations for concurrent access
    - Added comprehensive documentation in `.cursor/rules/smart_buffer_memory.mdc`
 
-2. **Centralized MCP Service Implementation**:
+3. **Centralized MCP Service Implementation**:
    - Implemented a centralized MCPService as a singleton for managing all MCP server connections
    - Created a dedicated ToolParser to handle various tool call formats in LLM responses
    - Updated Agent class to use the centralized service for MCP server interactions
@@ -46,7 +54,7 @@ Additional priority areas include:
    - Added the ability to customize request timeout at various levels: Orchestrator, Agent, and per-request
    - Added comprehensive documentation in `.cursor/rules/mcp_service.mdc`
 
-3. **Package Structure Updates**:
+4. **Package Structure Updates**:
    - Completed migration from src/muxi to direct muxi directories in all packages
    - Updated all import paths to reflect the new structure
    - Reorganized package setup files (from pyproject.toml to setup.py)
@@ -54,7 +62,7 @@ Additional priority areas include:
    - Updated all documentation to reflect new package structure
    - Updated directory references in all MDC rule files
 
-4. **Memory Architecture Migration**:
+5. **Memory Architecture Migration**:
    - Moved memory systems from agent level to orchestrator level for centralized management
    - Orchestrator now owns and manages all memory systems (buffer and long-term)
    - Agent constructor no longer accepts direct memory parameters
@@ -66,7 +74,7 @@ Additional priority areas include:
    - Improved memory sharing across multiple agents for better context consistency
    - Simplified configuration files by moving memory to top-level parameters
 
-5. **SQLite Vector Integration**:
+6. **SQLite Vector Integration**:
    - Added support for sqlite-vec Python package for vector similarity search
    - Simplified extensions handling by using Python package instead of binary extensions
    - Reorganized extension directory structure to improve clarity and maintainability
@@ -74,14 +82,14 @@ Additional priority areas include:
    - Improved vector serialization for compatibility with sqlite-vec
    - Enhanced resilience with fallback mechanisms when package is unavailable
 
-6. **Breaking Changes in Version 1.0**:
+7. **Breaking Changes in Version 1.0**:
    - Removed deprecated methods like `_enhance_with_domain_knowledge()` (replaced by `_enhance_with_context_memory()`)
    - Removed `add_user_domain_knowledge()` (replaced by `add_user_context_memory()`)
    - Updated API signatures by removing the `memory` parameter from the `Agent` class (replaced by `buffer_memory`)
    - Removed backward compatibility for user_id=0 handling
    - Renamed all "domain knowledge" terminology to "context memory" throughout the codebase
 
-7. **Test Improvements**:
+8. **Test Improvements**:
    - Fixed all test warnings and errors
    - Implemented pytest.ini configuration to filter FAISS-related DeprecationWarnings
    - Improved test coverage across all components
@@ -89,19 +97,19 @@ Additional priority areas include:
    - Added comprehensive tests for FAISS-backed smart buffer memory
    - Added tests for MCPService thread safety
 
-8. **Architectural Evolution**:
+9. **Architectural Evolution**:
    - Restructured codebase into modular packages
    - Created setup.py for each package with appropriate dependencies
    - Implemented proper monorepo structure
    - Created development installation scripts
    - Fixed cross-package imports
 
-9. **MCP Integration**:
-   - Enhanced MCP server integration with proper reconnection logic
-   - Implemented transport abstraction with factory pattern
-   - Added support for both HTTP+SSE and Command-line transports
-   - Integrated with the official MCP Python SDK
-   - Made credentials optional for MCP servers that don't require them
+10. **MCP Integration**:
+    - Enhanced MCP server integration with proper reconnection logic
+    - Implemented transport abstraction with factory pattern
+    - Added support for both HTTP+SSE and Command-line transports
+    - Integrated with the official MCP Python SDK
+    - Made credentials optional for MCP servers that don't require them
 
 ### Recent Pull Requests and Commits
 

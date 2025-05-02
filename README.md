@@ -195,14 +195,17 @@ You can also create agents programmatically using the Orchestrator interface:
 ```python
 from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.providers.openai import OpenAIModel
-from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.buffer import BufferMemory
 from muxi.core.memory.long_term import LongTermMemory
 from muxi.core.knowledge.base import FileKnowledge
 
 # Create an orchestrator with memory configuration
-buffer_memory = SmartBufferMemory(max_size=10, model=OpenAIModel(model="text-embedding-ada-002"))
-long_term_memory = LongTermMemory(connection_string="postgresql://user:pass@localhost/muxi")
-# Or use SQLite: LongTermMemory(connection_string="sqlite:///data/memory.db")
+buffer_memory = BufferMemory(
+    max_size=10,                    # Context window size
+    buffer_multiplier=10,           # Total capacity = 10 × 10 = 100 messages
+    model=OpenAIModel(model="text-embedding-ada-002")
+)
+long_term_memory = LongTermMemory("postgresql://user:password@localhost:5432/muxi")
 
 orchestrator = Orchestrator(
     buffer_memory=buffer_memory,
@@ -426,15 +429,16 @@ The FAISS-backed smart buffer memory system provides powerful semantic search ca
 
 ```python
 from muxi.core.orchestrator import Orchestrator
-from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.buffer import BufferMemory
 from muxi.core.models.providers.openai import OpenAIModel
 
 # Create embedding model for vector search
 embedding_model = OpenAIModel(model="text-embedding-ada-002", api_key="your_api_key")
 
 # Create a buffer memory with semantic search capabilities
-buffer = SmartBufferMemory(
-    max_size=100,                 # Store up to 100 messages
+buffer = BufferMemory(
+    max_size=10,                  # Context window size (recent messages)
+    buffer_multiplier=10,         # Total capacity = 10 × 10 = 100 messages
     model=embedding_model,        # Model for generating embeddings
     vector_dimension=1536,        # Dimension for OpenAI embeddings
     recency_bias=0.3              # Balance between semantic (0.7) and recency (0.3)

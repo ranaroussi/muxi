@@ -61,7 +61,8 @@ The default configuration file is located at `config.yaml` in the project root. 
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `memory.buffer_size` | integer | `10` | Size of the buffer memory (number of messages) |
+| `memory.buffer_size` | integer | `10` | Size of the buffer memory context window (number of recent messages) |
+| `memory.buffer_multiplier` | integer | `10` | Multiplier for total buffer capacity (buffer_size × buffer_multiplier) |
 | `memory.search_k` | integer | `4` | Number of memories to retrieve in semantic search |
 | `memory.similarity_threshold` | float | `0.7` | Minimum similarity score for memory matches |
 | `memory.chunk_size` | integer | `1024` | Size of text chunks for embeddings |
@@ -145,74 +146,4 @@ mcp:
 |-----------|------|---------|-------------|
 | `websocket.enabled` | boolean | `true` | Enable WebSocket interface |
 | `websocket.ping_interval` | integer | `30` | WebSocket ping interval in seconds |
-| `websocket.ping_timeout` | integer | `10` | WebSocket ping timeout in seconds |
-| `websocket.max_message_size` | integer | `1048576` | Maximum WebSocket message size in bytes |
-
-## Environment Variables
-
-All configuration options can be set via environment variables using the following format:
-
-```
-MUXI_[SECTION]_[PARAMETER]
-```
-
-For example:
-- `MUXI_APP_PORT=9000`
-- `MUXI_SECURITY_SECRET_KEY=mysecretkey`
-- `MUXI_MODELS_OPENAI_API_KEY=sk-...`
-
-Nested parameters use underscore as separator:
-- `MUXI_SECURITY_RATE_LIMIT_ENABLED=false`
-
-## Programmatic Configuration
-
-When using MUXI programmatically, you can set configuration options during initialization:
-
-```python
-from muxi.core import MuxiApp
-
-app = MuxiApp(
-    config={
-        "app": {
-            "name": "My Custom MUXI App",
-            "port": 9000
-        },
-        "models": {
-            "openai": {
-                "api_key": "sk-...",
-                "default_model": "gpt-4"
-            }
-        }
-    }
-)
-```
-
-## Configuration Precedence
-
-Configuration values are loaded in the following order, with later sources overriding earlier ones:
-
-1. Default values
-2. Configuration file
-3. Environment variables
-4. Programmatic configuration
-
-## Sensitive Configuration
-
-For security reasons, sensitive values like API keys should be provided through environment variables rather than in configuration files, especially in production environments.
-
-When using a configuration file, you can reference environment variables using `${ENV_VAR}` syntax:
-
-```yaml
-models:
-  openai:
-    api_key: "${OPENAI_API_KEY}"
-```
-
-## Validation
-
-MUXI validates configuration options at startup and will raise errors for required values that are missing or invalid. If you see configuration validation errors, check that:
-
-1. All required values are provided
-2. Values are of the correct type
-3. Enum values are from the allowed set
-4. Referenced files or directories exist and are readable
+| `websocket.ping_timeout` | integer | `

@@ -9,7 +9,7 @@ This rule documents the Smart Buffer Memory implementation that combines recency
 
 ## Architecture Overview
 
-The SmartBufferMemory class provides a fixed-size buffer for storing recent messages with semantic search capabilities. This hybrid approach combines:
+The BufferMemory class provides a fixed-size buffer for storing recent messages with semantic search capabilities. This hybrid approach combines:
 
 1. **Vector Similarity Search** - Uses FAISS to find semantically similar content
 2. **Recency-Based Retrieval** - Prioritizes recent messages when appropriate
@@ -31,7 +31,7 @@ graph TD
 
 ### 1. FAISS Integration
 
-The SmartBufferMemory uses FAISS (Facebook AI Similarity Search) for efficient vector storage and retrieval:
+The BufferMemory uses FAISS (Facebook AI Similarity Search) for efficient vector storage and retrieval:
 
 ```python
 # Initialize FAISS index
@@ -67,7 +67,26 @@ async def search(
 - Higher values favor recency, lower values favor semantic similarity
 - Default of 0.3 provides a good balance for most applications
 
-### 3. Graceful Degradation
+### 3. Context Window vs. Total Buffer Size
+
+The BufferMemory introduces two distinct parameters related to size:
+
+```python
+def __init__(
+    self,
+    max_size: int = 10,
+    buffer_multiplier: int = 10,
+    # ... other parameters ...
+)
+```
+
+- `max_size`: Defines the context window size - the number of recent messages included when retrieving by recency
+- `buffer_multiplier`: Multiplies the context window size to determine the total buffer capacity
+- Total buffer capacity = max_size × buffer_multiplier (default: 10 × 10 = 100)
+
+This design addresses the need to have a larger storage capacity for vector similarity search while still maintaining a smaller, focused context window for pure recency-based retrieval.
+
+### 4. Graceful Degradation
 
 The system automatically falls back to recency-based search when:
 - No model is provided for generating embeddings
@@ -88,23 +107,26 @@ if not self.has_vector_search or not self.model:
 
    ```python
    # With model for semantic search
-   buffer = SmartBufferMemory(
-       max_size=100,
-       vector_dimension=1536,
-       model=openai_model
+   buffer = BufferMemory(
+       max_size=10,               # Context window size of 10 messages
+       buffer_multiplier=10,      # Total buffer capacity will be 10x context window (100 messages)
+       vector_dimension=1536,     # Dimension for OpenAI embeddings
+       model=openai_model         # Model used for generating embeddings
    )
 
    # Without model (recency-only)
-   buffer = SmartBufferMemory(max_size=100)
+   buffer = BufferMemory(max_size=10, buffer_multiplier=10)
    ```
 
 2. **Vector Dimension**:
    - Match the dimension to your model's output (1536 for OpenAI embeddings)
    - Consistent dimensions are required across all vectors
 
-3. **Maximum Size**:
-   - Balance between context retention and memory usage
-   - Recommended range: 50-200 items for most applications
+3. **Size Parameters**:
+   - `max_size` (context window): Typically 5-20 messages for most applications
+   - `buffer_multiplier`: Typically 5-20× depending on memory requirements
+   - Total capacity: Balance between semantic context breadth and memory usage
+   - Recommended range for total capacity: 50-400 items for most applications
 
 ### Search Configuration
 
@@ -135,7 +157,7 @@ if not self.has_vector_search or not self.model:
 
 ## Implementation Notes
 
-1. The SmartBufferMemory performs automatic index rebuilding when the buffer is full
+1. The BufferMemory performs automatic index rebuilding when the buffer is full
 2. All operations are thread-safe but not process-safe
 3. The implementation supports both synchronous and asynchronous embedding models
 4. System automatically handles the lifecycle of FAISS indices
@@ -148,6 +170,7 @@ Before the FAISS integration:
 - No semantic search capabilities
 - Limited filtering based on exact matches
 - No ability to find contextually relevant information
+- Single size parameter controlled total buffer capacity
 
 With the new implementation:
 - Semantic search finds relevant context even if not recent
@@ -155,15 +178,17 @@ With the new implementation:
 - Graceful fallback to simpler approach when needed
 - Richer metadata filtering capabilities
 - More nuanced retrieval for better contextual understanding
+- Separate control of context window size and total buffer capacity
 
 ## Integration with Orchestrator
 
-- The SmartBufferMemory is initialized by the Orchestrator:
+- The BufferMemory is initialized by the Orchestrator:
 
 ```python
 # In Orchestrator.__init__
-self.buffer_memory = buffer_memory or SmartBufferMemory(
+self.buffer_memory = buffer_memory or BufferMemory(
     max_size=config.memory.buffer_size,
+    buffer_multiplier=config.memory.buffer_multiplier,
     model=extraction_model
 )
 ```
@@ -193,14 +218,18 @@ async def add_to_memory(self, message):
 ```python
 # Create an orchestrator with smart buffer memory
 from muxi.core.orchestrator import Orchestrator
-from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.buffer import BufferMemory
 from muxi.core.models.providers.openai import OpenAIModel
 
 # Create model for embeddings
 model = OpenAIModel(model="text-embedding-ada-002")
 
 # Create smart buffer memory
-buffer = SmartBufferMemory(max_size=100, model=model)
+buffer = BufferMemory(
+    max_size=10,               # Context window size (recent messages)
+    buffer_multiplier=10,      # Multiplier for total capacity (10 × 10 = 100)
+    model=model                # Model for generating embeddings
+)
 
 # Create orchestrator with buffer
 orchestrator = Orchestrator(buffer_memory=buffer)
@@ -259,4 +288,31 @@ async def process_message(self, message):
     )
 
     return response
+```
+
+### Configuration Examples
+
+```python
+# Different configurations for different use cases
+
+# For high-recall in knowledge-intensive applications
+buffer_high_recall = BufferMemory(
+    max_size=15,
+    buffer_multiplier=20,    # Larger multiplier (300 total messages)
+    recency_bias=0.1         # Strong preference for semantic similarity
+)
+
+# For conversational applications with immediate context
+buffer_conversational = BufferMemory(
+    max_size=10,
+    buffer_multiplier=5,     # Smaller multiplier (50 total messages)
+    recency_bias=0.6         # Strong preference for recency
+)
+
+# For balanced general-purpose use
+buffer_balanced = BufferMemory(
+    max_size=10,
+    buffer_multiplier=10,    # Default multiplier (100 total messages)
+    recency_bias=0.3         # Balanced semantic/recency priority
+)
 ```

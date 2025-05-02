@@ -116,6 +116,7 @@ Things to do next to enhance the framework, ordered by priority:
 Building on the new FAISS-backed smart buffer memory:
 
 - [x] Implement FAISS-backed smart buffer memory with hybrid retrieval
+- [x] Add buffer_multiplier parameter to separate context window size from total capacity
 - [ ] Fine-tune recency bias parameters for different use cases
 - [ ] Add performance benchmarks for memory operations
 - [ ] Optimize vector operations for large context sizes
@@ -458,8 +459,9 @@ This scenario demonstrates a complete workflow from installation to running an a
      model: gpt-4o
      temperature: 0.7
    memory:
-     buffer: 10  # Buffer window size of 10
-     long_term: true  # Enable long-term memory with default SQLite in app's root
+     buffer_size: 10            # Context window size of 10 messages
+     buffer_multiplier: 10      # Total buffer capacity will be 10 × 10 = 100 messages
+     long_term: true            # Enable long-term memory with default SQLite in app's root
      # Or use SQLite explicitly: long_term: "sqlite:///data/memory.db"
      # Or PostgreSQL: long_term: "postgresql://user:password@localhost:5432/muxi"
    knowledge:
@@ -550,15 +552,16 @@ Demonstrates how to use the FAISS-backed smart buffer memory:
 
 ```python
 from muxi.core.orchestrator import Orchestrator
-from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.buffer import BufferMemory
 from muxi.core.models.providers.openai import OpenAIModel
 
 # Create embedding model for vector search
 embedding_model = OpenAIModel(model="text-embedding-ada-002", api_key="your_api_key")
 
 # Create a buffer memory with semantic search capabilities
-buffer = SmartBufferMemory(
-    max_size=100,                 # Store up to 100 messages
+buffer = BufferMemory(
+    max_size=10,                  # Context window size (recent messages)
+    buffer_multiplier=10,         # Total capacity = 10 × 10 = 100 messages
     model=embedding_model,        # Model for generating embeddings
     vector_dimension=1536,        # Dimension for OpenAI embeddings
     recency_bias=0.3              # Balance between semantic (0.7) and recency (0.3)
