@@ -28,37 +28,49 @@ The MUXI framework is structured as follows:
 muxi-framework/
 ├── packages/
 │   ├── core/          # Core components: agents, memory, MCP interface
-│   │   └── src/muxi/core/
-│   │       ├── agent/        # Agent implementation
-│   │       ├── memory/       # Memory subsystems
-│   │       ├── models/       # LLM provider interfaces
-│   │       ├── mcp/          # Model Context Protocol
-│   │       ├── orchestrator/ # Multi-agent coordination
-│   │       └── tools/        # Built-in tools
+│   │   ├── muxi/core/
+│   │   │   ├── agent.py        # Agent implementation
+│   │   │   ├── orchestrator.py # Orchestrator with centralized memory and API keys
+│   │   │   ├── memory/         # Memory subsystems
+│   │   │   │   ├── buffer.py   # FAISS-backed smart buffer memory
+│   │   │   │   ├── long_term.py # Long-term memory with vector storage
+│   │   │   │   ├── memobase.py # Multi-user memory partitioning
+│   │   │   │   ├── sqlite.py   # SQLite vector integration
+│   │   │   │   └── extractor.py # User information extraction
+│   │   │   ├── mcp/            # Model Context Protocol
+│   │   │   │   ├── service.py  # Centralized MCPService singleton
+│   │   │   │   ├── handler.py  # MCP Handler implementation
+│   │   │   │   └── message.py  # MCP Message structure
+│   │   │   ├── models/         # LLM provider interfaces
+│   │   │   ├── config/         # Configuration components
+│   │   │   └── knowledge/      # Knowledge integration
+│   │   ├── setup.py            # Package configuration
+│   │   └── README.md           # Package documentation
 │   │
 │   ├── server/        # REST API and WebSocket server
-│   │   └── src/muxi/server/
-│   │       ├── api/          # REST API endpoints
-│   │       ├── websocket/    # WebSocket implementation
-│   │       ├── auth/         # Authentication
-│   │       └── middleware/   # Server middleware
+│   │   ├── muxi/server/
+│   │   │   ├── api/          # REST API endpoints
+│   │   │   ├── ws/           # WebSocket implementation
+│   │   │   └── config/       # Server configuration
+│   │   ├── setup.py          # Package configuration
+│   │   └── README.md         # Package documentation
 │   │
 │   ├── cli/           # Command-line interface
-│   │   └── src/muxi/cli/
-│   │       ├── commands/     # CLI commands
-│   │       ├── terminal/     # Terminal UI
-│   │       └── mcp_generator/ # MCP server template generator
+│   │   ├── muxi/cli/
+│   │   │   ├── commands/     # CLI commands
+│   │   │   ├── terminal/     # Terminal UI
+│   │   │   └── mcp_generator/ # MCP server template generator
+│   │   ├── setup.py          # Package configuration
+│   │   └── README.md         # Package documentation
 │   │
-│   ├── web/           # Web user interface
-│   │   ├── src/muxi/web/
-│   │   │   ├── api/          # Web-specific API
-│   │   │   └── server/       # Web server
-│   │   └── frontend/         # React-based frontend
+│   ├── meta/          # Meta-package for installation
+│   │   ├── muxi/           # Meta-package source code
+│   │   ├── setup.py        # Package configuration
+│   │   └── README.md       # Package documentation
 │   │
-│   └── muxi/          # Meta-package that integrates all components
-│       └── src/muxi/
-│           ├── __init__.py   # Main entry point
-│           └── client.py     # Client implementation
+│   └── web/           # Web user interface
+│       ├── src/             # Web app source code
+│       └── package.json     # NPM package configuration
 │
 ├── examples/          # Example scripts and applications
 ├── docs/              # Documentation
@@ -71,32 +83,43 @@ muxi-framework/
 
 The foundation of the MUXI framework, containing all essential components:
 
-- **Agent**: Implements the agent architecture and LLM integration
-- **Memory**: Buffer memory, long-term memory, and Memobase implementations
-- **Models**: Interfaces to LLM providers like OpenAI, Anthropic, and Ollama
-- **MCP**: The Model Context Protocol client implementation
-- **Orchestrator**: Multi-agent coordination system
-- **Tools**: Built-in tool implementations for common tasks
+- **Agent**: Implements the agent architecture with delegation to Orchestrator for memory
+- **Orchestrator**:
+  - Central manager for multiple agents with shared memory systems
+  - Handles API key management with user and admin keys
+  - Implements intelligent message routing
+- **Memory**:
+  - Smart buffer memory with FAISS-backed vector search and recency bias
+  - Long-term memory with PostgreSQL and SQLite vector database support
+  - Memobase system for multi-user memory partitioning
+  - Automatic user information extraction
+- **MCP**:
+  - Centralized MCPService as a singleton for thread-safe operations
+  - Multiple transport types (HTTP+SSE, Command-line)
+  - Configurable timeouts at orchestrator, agent, and per-request levels
+- **Models**: Interfaces to LLM providers like OpenAI, Anthropic, and others
+- **Knowledge**: Domain knowledge integration for agent specialization
 
 Key features:
-- Minimal dependencies for lightweight usage
-- Can be used without the server, CLI, or web UI
-- Provides programmatic API for integration into other applications
+- Centralized memory architecture at orchestrator level
+- Thread-safe MCP server interactions
+- Configurable API key system
+- Dual database support (PostgreSQL/SQLite)
 
 ### Server Package (`muxi-server`)
 
 Implements the server components for exposing MUXI functionality via APIs:
 
-- **API**: REST API endpoints for agent management, chat, memory, etc.
+- **API**: REST API endpoints with dual-key authentication (user and admin keys)
 - **WebSocket**: Real-time, bidirectional communication
-- **Authentication**: JWT-based auth system
-- **Middleware**: Request validation, error handling, rate limiting
+- **SSE**: Server-Sent Events for streaming responses
+- **MCP Server**: MCP server implementation for tool hosting
 
 Key features:
 - FastAPI-based implementation
 - WebSocket support for streaming responses
 - Server-Sent Events (SSE) for one-way streaming
-- Comprehensive API for all MUXI functionality
+- Authentication with API keys
 
 ### CLI Package (`muxi-cli`)
 
@@ -112,20 +135,6 @@ Key features:
 - Command completion and help documentation
 - MCP server scaffolding
 
-### Web Package (`muxi-web`)
-
-Web-based interface for MUXI:
-
-- **API**: Web-specific API endpoints
-- **Server**: Web server implementation
-- **Frontend**: React-based UI with streaming support
-
-Key features:
-- Modern React-based interface
-- Real-time communication via WebSockets
-- Agent configuration UI
-- Chat history visualization
-
 ### Meta Package (`muxi`)
 
 The main package that integrates all components:
@@ -136,6 +145,20 @@ The main package that integrates all components:
 
 This is the recommended package for most users who want the full MUXI experience.
 
+### Web Package (`muxi-web`)
+
+Web-based interface for MUXI:
+
+- **Frontend**: React-based UI with streaming support
+- **Components**: Reusable UI components
+- **Services**: API client services
+
+Key features:
+- Modern React-based interface
+- Real-time communication via WebSockets
+- Agent configuration UI
+- Chat history visualization
+
 ## Import Structure
 
 MUXI uses a consistent import structure across all packages:
@@ -143,15 +166,15 @@ MUXI uses a consistent import structure across all packages:
 ```python
 # Core imports
 from muxi.core.agent import Agent
-from muxi.core.memory import BufferMemory, LongTermMemory
-from muxi.core.models.openai import OpenAIModel
-from muxi.core.mcp import MCPHandler
 from muxi.core.orchestrator import Orchestrator
-from muxi.core.tools.weather import WeatherTool
+from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.mcp.service import MCPService
+from muxi.core.models.providers.openai import OpenAIModel
 
 # Server imports
 from muxi.server.api import create_app
-from muxi.server.websocket import WebSocketManager
+from muxi.server.ws import WebSocketManager
 
 # CLI imports
 from muxi.cli.commands import chat_command
@@ -211,6 +234,8 @@ When contributing to MUXI, consider these package-related guidelines:
 3. **Consistent Interfaces**: Public APIs should be consistent across packages
 4. **Proper Re-exporting**: The meta-package should re-export all important interfaces
 5. **Version Compatibility**: Be mindful of version compatibility between packages
+6. **Memory Architecture**: Remember that memory is now centralized at the orchestrator level
+7. **MCP Access**: Always use the MCPService singleton for MCP server interactions
 
 ## Testing Structure
 
@@ -218,18 +243,18 @@ Tests are organized to match the package structure:
 
 ```
 tests/
-├── core/          # Tests for the core package
-├── server/        # Tests for the server package
-├── cli/           # Tests for the CLI package
-├── web/           # Tests for the web package
-└── integration/   # Cross-package integration tests
+├── test_agent.py           # Tests for agent functionality
+├── test_orchestrator.py    # Tests for orchestrator functionality
+├── test_mcp.py             # Tests for MCP functionality
+├── test_memory.py          # Tests for memory systems
+└── [various test files]    # Other tests
 ```
 
-Each package has its own test suite that can be run independently:
+Each component has its own test suite that can be run independently:
 
 ```bash
-# Run core tests
-pytest tests/core
+# Run agent tests
+pytest tests/test_agent.py
 
 # Run all tests
 pytest

@@ -11,12 +11,16 @@ MUXI Framework is a powerful platform for building AI agents with memory, MCP se
 
 - 🤖 **Multi-Agent Support**: Create and manage multiple AI agents with different capabilities
 - 🧠 **Memory Systems**: Short-term and long-term memory for contextual interactions
-  - FAISS for short-term buffer memory
+  - FAISS-backed smart buffer memory with hybrid semantic+recency retrieval
+  - Configurable recency bias to balance semantic relevance with temporal proximity
+  - Graceful degradation to recency-only search when a model isn't available
   - SQLite with sqlite-vec for local or lightweight deployments
   - PostgreSQL with pgvector for scalable long-term memory
   - Memobase for user-level profile-based memory system
   - Automatic extraction of user information from conversations and storing it in context memory
 - 🔌 **MCP Client Integration**: Connect to external services via Model Context Protocol servers
+  - Centralized MCPService singleton for thread-safe operations
+  - Configurable timeouts at orchestrator, agent, and per-request levels
   - Support for HTTP+SSE transport for web-based MCP servers
   - Support for Command-line transport for local executable servers
   - Robust reconnection mechanism with exponential backoff
@@ -134,7 +138,8 @@ load_dotenv()
 
 # Initialize MUXI with memory configuration at the orchestrator level
 app = muxi(
-    buffer_size=10,  # Buffer window size of 10 messages
+    buffer_size=10,  # Context window size of 10 messages
+    buffer_multiplier=10,  # Total buffer capacity will be 10x context window (default: 10)
     long_term="sqlite:///data/memory.db"  # Enable long-term memory with SQLite
     # Alternatively: long_term="postgresql://user:pass@localhost/muxi"
 )
@@ -155,7 +160,8 @@ Example configuration file (`configs/muxi_config.yaml`):
 ```yaml
 # Memory configuration at the top level
 memory:
-  buffer_size: 10  # Buffer window size of 10
+  buffer_size: 10  # Context window size of 10 messages
+  buffer_multiplier: 10  # Total buffer capacity will be 10x context window (default: 10)
   long_term: true  # Enable long-term memory using default SQLite in app's root
   # Or specify SQLite: long_term: "sqlite:///data/memory.db"
   # Or specify PostgreSQL: long_term: "postgresql://user:pass@localhost/muxi"
@@ -188,13 +194,13 @@ You can also create agents programmatically using the Orchestrator interface:
 
 ```python
 from muxi.core.orchestrator import Orchestrator
-from muxi.models.providers.openai import OpenAIModel
-from muxi.server.memory.buffer import BufferMemory
-from muxi.server.memory.long_term import LongTermMemory
-from muxi.knowledge.base import FileKnowledge
+from muxi.core.models.providers.openai import OpenAIModel
+from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.knowledge.base import FileKnowledge
 
 # Create an orchestrator with memory configuration
-buffer_memory = BufferMemory(max_messages=10)
+buffer_memory = SmartBufferMemory(max_size=10, model=OpenAIModel(model="text-embedding-ada-002"))
 long_term_memory = LongTermMemory(connection_string="postgresql://user:pass@localhost/muxi")
 # Or use SQLite: LongTermMemory(connection_string="sqlite:///data/memory.db")
 
@@ -253,7 +259,7 @@ response = await orchestrator.chat("Remember my name is Alice", user_id="user123
 print(response.content)
 
 # Run the server
-# app.run()
+# orchestrator.run()
 ```
 
 ### Using the CLI
@@ -323,11 +329,15 @@ from muxi import muxi
 # Initialize MUXI with memory configuration
 app = muxi(
     buffer_size=10,
+    buffer_multiplier=10,
     long_term=True  # Use default SQLite database
 )
 
 # Add an agent with MCP server capabilities
 app.add_agent("assistant", "configs/assistant.yaml")
+
+# Get centralized MCPService instance
+mcp_service = await app.get_mcp_service()
 
 # Connect to an HTTP-based MCP server with credentials
 await app.get_agent("assistant").connect_mcp_server(
@@ -357,6 +367,7 @@ Example MCP server configuration in YAML:
 # Memory configuration at the top level
 memory:
   buffer_size: 10
+  buffer_multiplier: 10
   long_term: true  # Use default SQLite database
 
 # Agents configuration
@@ -389,6 +400,7 @@ from muxi import muxi
 # Initialize MUXI with memory configuration
 app = muxi(
     buffer_size=10,
+    buffer_multiplier=10,
     long_term="sqlite:///data/memory.db"
 )
 
@@ -408,6 +420,69 @@ app.start_mcp(port=5051)
 
 This allows other MCP clients (like Claude, Cursor, or other AI assistants) to connect to your MUXI agents and use their capabilities.
 
+### Working with Smart Buffer Memory
+
+The FAISS-backed smart buffer memory system provides powerful semantic search capabilities:
+
+```python
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.models.providers.openai import OpenAIModel
+
+# Create embedding model for vector search
+embedding_model = OpenAIModel(model="text-embedding-ada-002", api_key="your_api_key")
+
+# Create a buffer memory with semantic search capabilities
+buffer = SmartBufferMemory(
+    max_size=100,                 # Store up to 100 messages
+    model=embedding_model,        # Model for generating embeddings
+    vector_dimension=1536,        # Dimension for OpenAI embeddings
+    recency_bias=0.3              # Balance between semantic (0.7) and recency (0.3)
+)
+
+# Create orchestrator with the smart buffer memory
+orchestrator = Orchestrator(
+    buffer_memory=buffer,
+    long_term_memory=LongTermMemory(connection_string="postgresql://user:pass@localhost/muxi")
+)
+
+# Add a message to the buffer
+await orchestrator.add_to_buffer_memory(
+    "Important information about quantum computing algorithms",
+    metadata={"topic": "quantum computing", "importance": "high"}
+)
+
+# Search the memory (semantically similar content)
+results = await orchestrator.search_memory(
+    "Tell me about quantum algorithms",
+    k=5
+)
+
+# Search with metadata filtering
+results = await orchestrator.search_memory(
+    "Tell me about important concepts",
+    filter_metadata={"importance": "high"},
+    k=5
+)
+
+# Adjust recency bias for different use cases
+# For human conversations (favor recent)
+results = await orchestrator.search_memory(
+    "What did we just talk about?",
+    recency_bias=0.7,             # Higher value favors recency
+    k=5
+)
+
+# For factual queries (favor semantic)
+results = await orchestrator.search_memory(
+    "Tell me about quantum entanglement",
+    recency_bias=0.1,             # Lower value favors semantic relevance
+    k=5
+)
+```
+
+The smart buffer memory automatically falls back to recency-based search when no embedding model is available or when semantic search fails, ensuring robustness in all scenarios.
+
 ### Intelligent Message Routing
 
 Automatically route user messages to the most appropriate agent based on their content:
@@ -415,9 +490,10 @@ Automatically route user messages to the most appropriate agent based on their c
 ```python
 from muxi import muxi
 
-# Initialize your app with memory and multiple specialized agents
+# Initialize MUXI with memory and multiple specialized agents
 app = muxi(
     buffer_size=10,
+    buffer_multiplier=10,  # Optional: default is 10
     long_term="postgresql://user:pass@localhost/muxi"
 )
 
@@ -452,6 +528,7 @@ from muxi import muxi
 # Initialize MUXI with memory and multiple specialized agents
 app = muxi(
     buffer_size=10,
+    buffer_multiplier=10,
     long_term="sqlite:///data/memory.db"
 )
 
@@ -487,6 +564,7 @@ from muxi import muxi
 # Initialize MUXI with memory configuration
 app = muxi(
     buffer_size=10,
+    buffer_multiplier=10,
     long_term="postgresql://user:pass@localhost/muxi"
 )
 
@@ -538,6 +616,7 @@ USE_LONG_TERM_MEMORY=true
 # Or in your configuration file (YAML)
 memory:
   buffer_size: 10
+  buffer_multiplier: 10
   long_term: "sqlite:///data/memory.db"
   # Or for default SQLite database in app's root directory
   # long_term: true
@@ -545,7 +624,11 @@ memory:
 # Or programmatically
 from muxi import muxi
 
-app = muxi(long_term="sqlite:///data/memory.db")
+app = muxi(
+    buffer_size=10,
+    buffer_multiplier=10,
+    long_term="sqlite:///data/memory.db"
+)
 ```
 
 #### Using PostgreSQL with `pgvector`
@@ -559,12 +642,17 @@ POSTGRES_DATABASE_URL=postgresql://user:password@localhost:5432/muxi
 # Or in your configuration file (YAML)
 memory:
   buffer_size: 10
+  buffer_multiplier: 10
   long_term: "postgresql://user:password@localhost:5432/muxi"
 
 # Or programmatically
 from muxi import muxi
 
-app = muxi(long_term="postgresql://user:password@localhost:5432/muxi")
+app = muxi(
+    buffer_size=10,
+    buffer_multiplier=10,
+    long_term="postgresql://user:password@localhost:5432/muxi"
+)
 ```
 
 ## Technical Details
@@ -585,10 +673,19 @@ The MUXI Framework is organized into a modular architecture with the following c
 muxi-framework/
 ├── packages/
 │   ├── core/          # Core components: agents, memory, MCP interface
+│   │   ├── muxi/core/
+│   │   │   ├── agent.py        # Agent implementation
+│   │   │   ├── orchestrator.py # Orchestrator with centralized memory
+│   │   │   ├── memory/         # Memory subsystems
+│   │   │   │   ├── buffer.py   # FAISS-backed smart buffer memory
+│   │   │   │   └── long_term.py # Vector storage with PostgreSQL/SQLite
+│   │   │   ├── mcp/            # Model Context Protocol
+│   │   │   │   └── service.py  # Centralized MCPService singleton
+│   │   │   └── models/         # LLM provider implementations
 │   ├── server/        # REST API and WebSocket server
 │   ├── cli/           # Command-line interface
 │   ├── web/           # Web user interface
-│   └── muxi/          # Meta-package that integrates all components
+│   └── meta/          # Meta-package that integrates all components
 └── tests/             # Test suite for all components
 ```
 
@@ -611,18 +708,19 @@ MUXI Framework will provide client libraries for popular programming languages:
 
 The MUXI Framework development is focused on the following priorities:
 
-1. **REST API & MCP Server Implementation** - Implementing the full REST API with authentication, streaming, and API documentation
-2. **WebSocket API Implementation** - Enhancing real-time communication with multi-modal message support
-3. **CLI Interfaces** - Improving command-line interface with support for all API operations
-4. **Web UI** - Developing a responsive web interface with real-time updates
-5. **Agent-to-Agent Communication** - Implementing the A2A protocol for inter-agent communication
-6. **Vector Database Enhancements** - Optimizing vector operations and supporting additional databases
-7. **LLM Providers** - Expanding support for various LLM providers (Anthropic, Gemini, Grok, local models)
-8. **Testing and Documentation** - Comprehensive testing and documentation for all components
-9. **Deployment & Package Distribution** - Docker containerization, Kubernetes deployment, and CI/CD pipelines
-10. **Language-Specific SDKs** - Developing client libraries for TypeScript, Go, Java/Kotlin, Rust, and C#/.NET
-11. **Multi-Modal Capabilities** - Adding support for document, image, and audio processing
-12. **Security Enhancements** - Implementing advanced security features for enterprise-grade deployments
+1. **Smart Buffer Memory Optimization** - ✅ Implemented FAISS-backed memory with hybrid retrieval; ongoing optimization
+2. **REST API & MCP Server Implementation** - ✅ Implemented centralized MCP service; in progress: REST API endpoints
+3. **WebSocket API Implementation** - Enhancing real-time communication with multi-modal message support
+4. **CLI Interfaces** - Improving command-line interface with support for all API operations
+5. **Web UI** - Developing a responsive web interface with real-time updates
+6. **Agent-to-Agent Communication** - Implementing the A2A protocol for inter-agent communication
+7. **Vector Database Enhancements** - Optimizing vector operations and supporting additional databases
+8. **LLM Providers** - Expanding support for various LLM providers (Anthropic, Gemini, Grok, local models)
+9. **Testing and Documentation** - Comprehensive testing and documentation for all components
+10. **Deployment & Package Distribution** - Docker containerization, Kubernetes deployment, and CI/CD pipelines
+11. **Language-Specific SDKs** - Developing client libraries for TypeScript, Go, Java/Kotlin, Rust, and C#/.NET
+12. **Multi-Modal Capabilities** - Adding support for document, image, and audio processing
+13. **Security Enhancements** - Implementing advanced security features for enterprise-grade deployments
 
 The [roadmap](docs/roadmap.md) file provides more detailed information about the roadmap.
 

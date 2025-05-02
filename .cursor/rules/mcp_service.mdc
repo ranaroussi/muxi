@@ -5,11 +5,170 @@ alwaysApply: false
 ---
 # Centralized MCP Service Architecture
 
-This rule documents the Centralized MCP (Machine-Conversation Protocol) Service architecture in the MUXI framework.
+## Overview
 
-## Architecture Overview
+MUXI Framework uses a centralized MCP (Model Context Protocol) Service architecture to ensure thread-safety, consistent state management, and efficient resource utilization when communicating with AI models.
 
-The MUXI framework implements a centralized approach to MCP handling, where Agents communicate directly with MCP servers through a shared `MCPService` rather than maintaining their own MCP handlers.
+The core of this architecture is the `MCPService` singleton pattern that:
+
+1. Provides a single point of access for MCP operations
+2. Manages connection state to prevent race conditions
+3. Handles timeout configuration at multiple levels
+4. Ensures proper error propagation and recovery
+
+## MCPService Implementation
+
+Location: `packages/core/muxi/core/mcp/service.py`
+
+The `MCPService` is implemented as a thread-safe singleton with asynchronous locks to prevent race conditions:
+
+```python
+class MCPService:
+    _instance = None
+    _lock = asyncio.Lock()
+
+    @classmethod
+    async def get_instance(cls, **kwargs):
+        async with cls._lock:
+            if cls._instance is None:
+                cls._instance = cls(**kwargs)
+            return cls._instance
+
+    async def create_session(self, **kwargs):
+        """Create a new session with the MCP server."""
+        # Implementation for session creation
+
+    async def invoke_tool(self, session_id, tool_name, params, timeout=None):
+        """Invoke a tool using the MCP protocol."""
+        # Implementation for tool invocation with timeout
+```
+
+## Key Features of the MCPService
+
+1. **Thread-safe Singleton**: The service ensures only one instance exists across the entire application lifecycle, preventing connection issues and resource waste.
+
+2. **Connection Management**: Centralized handling of connection establishment, retries, and error recovery.
+
+3. **Configurable Timeouts**:
+   - Global default timeout
+   - Per-session timeout
+   - Per-request timeout
+   - Hierarchical timeout inheritance
+
+4. **Async Lock Protection**: Critical sections are protected with asyncio locks to prevent race conditions in async code.
+
+5. **Proper Error Handling**: Standardized error handling and propagation throughout the system.
+
+## Integration with Orchestrator
+
+The Orchestrator is responsible for initializing and accessing the MCPService:
+
+```python
+# In Orchestrator
+async def initialize(self):
+    self.mcp_service = await MCPService.get_instance(
+        api_key=self.config.api_key,
+        timeout=self.config.mcp_timeout
+    )
+
+async def invoke_tool(self, tool_name, params):
+    return await self.mcp_service.invoke_tool(
+        session_id=self.session_id,
+        tool_name=tool_name,
+        params=params,
+        timeout=self.tool_timeout
+    )
+```
+
+## Integration with Agent
+
+Agents access MCP functionality through the Orchestrator:
+
+```python
+# In Agent
+async def invoke_tool(self, tool_name, params):
+    return await self.orchestrator.invoke_tool(
+        tool_name=tool_name,
+        params=params,
+        agent_id=self.agent_id
+    )
+```
+
+## MCP Message Parsing
+
+Location: `packages/core/muxi/core/mcp/parser.py`
+
+The Parser handles structured message format conversions:
+
+```python
+class MCPParser:
+    @staticmethod
+    def parse_message(message):
+        """Parse incoming MCP message."""
+        # Implementation details
+
+    @staticmethod
+    def format_message(content, tool_calls):
+        """Format outgoing MCP message."""
+        # Implementation details
+```
+
+## Best Practices for MCP Usage
+
+1. **Always use the MCPService singleton**:
+   ```python
+   # Correct
+   mcp_service = await MCPService.get_instance()
+
+   # Incorrect
+   mcp_service = MCPService()  # This bypasses the singleton pattern
+   ```
+
+2. **Configure appropriate timeouts**:
+   ```python
+   # Global timeout in configuration
+   config.mcp_timeout = 60  # 60 seconds
+
+   # Per-request timeout when needed
+   result = await mcp_service.invoke_tool(tool_name, params, timeout=30)
+   ```
+
+3. **Handle MCP errors appropriately**:
+   ```python
+   try:
+       result = await mcp_service.invoke_tool(tool_name, params)
+   except MCPConnectionError:
+       # Handle connection errors
+   except MCPTimeoutError:
+       # Handle timeout errors
+   except MCPToolError as e:
+       # Handle tool-specific errors
+       print(f"Tool error: {e.message}, code: {e.code}")
+   ```
+
+4. **Implement graceful degradation**:
+   ```python
+   try:
+       result = await mcp_service.invoke_tool("complex_search", params)
+   except MCPError:
+       # Fallback to simpler approach
+       result = await simple_search(params)
+   ```
+
+## Benefits of the Centralized Approach
+
+1. **Consistency**: All MCP operations go through a single service with consistent behavior.
+2. **Resource Efficiency**: Connection pooling and reuse prevents resource waste.
+3. **Simplified Debugging**: Centralized logging and error handling make issues easier to track.
+4. **Configuration Management**: Timeout and retry policies can be managed in one place.
+5. **Thread Safety**: Prevents race conditions in concurrent environments.
+
+## Implementation Notes
+
+1. The MCPService uses asyncio lock primitives to ensure thread safety
+2. Default timeouts cascade from global config → session → request
+3. Error handling is standardized across the entire MCP interaction path
+4. The service handles automatic reconnection after temporary failures
 
 ```mermaid
 graph TD
@@ -27,7 +186,7 @@ graph TD
 
 A centralized service that manages connections to MCP servers and handles the protocol details for Agent communications. Implemented as a singleton to ensure a single point of management for all MCP connections.
 
-Location: `packages/core/src/muxi/core/mcp_service.py`
+Location: `packages/core/muxi/core/mcp/service.py`
 
 Key features:
 - Manages a registry of MCP servers and their connections
@@ -38,7 +197,7 @@ Key features:
 
 ```python
 # Get the singleton instance
-mcp_service = MCPService.get_instance()
+mcp_service = await MCPService.get_instance()
 
 # Register an MCP server
 server_id = await mcp_service.register_mcp_server(
@@ -77,7 +236,7 @@ async def invoke_tool(self, server_id, tool_name, parameters):
 
 A utility that parses LLM responses to identify and extract tool calls.
 
-Location: `packages/core/src/muxi/core/tool_parser.py`
+Location: `packages/core/muxi/core/tool_parser.py`
 
 Capabilities:
 - Parses tool calls in various formats (JSON blocks, function calls, explicit tags)

@@ -1,8 +1,8 @@
-# MUXI Framework - Memory Systems Guidelines
-
-> These rules define best practices for implementing and using memory systems
-
-## Orchestrator-Level Memory Management
+---
+description:
+globs:
+alwaysApply: false
+---
 - Memory systems are initialized and managed at the orchestrator level, not at the agent level
 - Configure memory through the orchestrator constructor: `Orchestrator(buffer_memory=buffer, long_term_memory=long_term)`
 - For the muxi facade, configure memory in the constructor: `muxi(buffer_memory=50, long_term_memory="connection_string", config_file="config.yaml")`
@@ -41,7 +41,22 @@
 ### Programmatic Configuration
 - Initialize memory components first:
   ```python
-  buffer = BufferMemory(15)
+  from muxi.core.models.providers.openai import OpenAIModel
+  from muxi.core.memory.buffer import SmartBufferMemory
+  from muxi.core.memory.long_term import LongTermMemory
+
+  # Create embedding model for FAISS vector search
+  embedding_model = OpenAIModel(model="text-embedding-ada-002")
+
+  # Create smart buffer memory with FAISS
+  buffer = SmartBufferMemory(
+      max_size=100,                    # Maximum number of messages to store
+      model=embedding_model,           # Model for generating embeddings
+      vector_dimension=1536,           # Dimension for OpenAI embeddings
+      recency_bias=0.3                 # Balance between semantic (0.7) and recency (0.3)
+  )
+
+  # Create long-term memory
   long_term = LongTermMemory(connection_string="...")
   ```
 
@@ -62,19 +77,85 @@
   )
   ```
 
-## Buffer Memory (Short-Term)
-- Use FAISS for efficient similarity search
-- Implement proper vector normalization
-- Handle document chunking appropriately
-- Implement memory pruning to stay within context limits
-- Properly serialize vectors for storage
-- Implement efficient retrieval strategies
-- Use appropriate similarity metrics (cosine, dot product, etc.)
-- Optimize index parameters for your specific use case
-- Implement proper error handling for retrieval failures
-- Support metadata storage alongside vectors
-- Implement memory summarization when needed
-- Properly handle updates to existing memories
+## Smart Buffer Memory (Short-Term)
+
+### Hybrid Search Architecture
+- SmartBufferMemory implements a hybrid approach combining:
+  1. Semantic search using FAISS vector similarity
+  2. Recency-based retrieval using buffer positions
+  3. Combined scoring with configurable weighting between the two
+
+- Example implementation:
+  ```python
+  from muxi.core.memory.buffer import SmartBufferMemory
+  from muxi.core.models.providers.openai import OpenAIModel
+
+  # Create buffer with FAISS-backed vector search
+  buffer = SmartBufferMemory(
+      max_size=100,
+      model=OpenAIModel(model="text-embedding-ada-002"),
+      recency_bias=0.3   # 30% weight for recency, 70% for semantic relevance
+  )
+
+  # Add to buffer (through orchestrator)
+  await orchestrator.add_to_buffer_memory(
+      "Important information about quantum computing",
+      metadata={"topic": "science", "importance": "high"}
+  )
+
+  # Search with default parameters (balances semantic and recency)
+  results = await orchestrator.search_memory(
+      "Tell me about quantum computing",
+      k=5
+  )
+
+  # Search with higher recency bias (favor recent messages)
+  results = await orchestrator.search_memory(
+      "What did we just talk about?",
+      recency_bias=0.7,  # 70% weight for recency, 30% for semantic
+      k=3
+  )
+
+  # Search with lower recency bias (favor semantic relevance)
+  results = await orchestrator.search_memory(
+      "Tell me about quantum theory",
+      recency_bias=0.1,  # 10% weight for recency, 90% for semantic
+      k=5
+  )
+
+  # Filter by metadata
+  results = await orchestrator.search_memory(
+      "Tell me important science facts",
+      filter_metadata={"topic": "science", "importance": "high"},
+      k=5
+  )
+  ```
+
+### Key Features and Best Practices
+- Use FAISS for vector similarity search with appropriate index types
+- Configure recency_bias parameter based on use case:
+  - For human conversations (favor recency): 0.5-0.7
+  - For factual queries (favor semantics): 0.1-0.3
+  - Default (balanced approach): 0.3
+- Benefit from graceful degradation to recency-only search when:
+  - No model is provided for generating embeddings
+  - Embedding generation fails
+  - No valid search results are found via vector search
+- Utilize thread-safe operations for concurrent access
+- Use metadata filtering for targeted retrieval
+- Implement proper index rebuilding when buffer is full
+- Optimize memory usage for large context buffers
+- Balance buffer size against vector search performance
+- Configure vector dimensions to match your embedding model (1536 for OpenAI)
+- Properly handle errors during vector operations with fallbacks
+- Store important metadata alongside messages for filtering
+
+### Smart Buffer Memory vs. Simple Memory
+- Smart buffer memory combines semantic+recency for better recall
+- Simple deque memory only retrieves based on recency
+- Smart buffer memory can find relevant information regardless of when it was added
+- Smart buffer supports metadata filtering for targeted retrieval
+- Use SmartBufferMemory whenever possible for improved information retrieval
 
 ## Long-Term Memory - Database Options
 
@@ -185,6 +266,22 @@
 
 ## Memory Retrieval
 - Access memory through orchestrator: `orchestrator.search_memory(agent_id="assistant", query="...", k=3, threshold=0.7)`
+- For smart buffer memory, tune recency_bias to prioritize semantic or recency:
+  ```python
+  # For recent conversations (favor recency)
+  results = await orchestrator.search_memory(
+      "What did we just talk about?",
+      recency_bias=0.7,
+      k=5
+  )
+
+  # For factual information (favor semantics)
+  results = await orchestrator.search_memory(
+      "Tell me about quantum physics",
+      recency_bias=0.1,
+      k=5
+  )
+  ```
 - Implement relevance scoring for retrieved memories
 - Support hybrid search (vector + keyword)
 - Implement proper ranking algorithms

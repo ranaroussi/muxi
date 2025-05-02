@@ -89,26 +89,51 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
 
 ## Project Structure
 
-The MUXI Framework follows a modular architecture:
+The MUXI Framework follows a modular monorepo architecture:
 
 ```
-.github/                  # GitHub configuration (workflows, templates)
-docs/                     # Documentation files
-packages/                 # Source code organized into modules
- └─ core/                 # Core components (Agent, Orchestrator, MCP)
-    └─ src/muxi/core/     # Core module source code
- └─ server/               # API and WebSocket server
-    └─ src/muxi/server/   # Server module source code
- └─ cli/                  # Command-line interface
-    └─ src/muxi/cli/      # CLI module source code
- └─ web/                  # Web dashboard
-    └─ src/muxi/web/      # Web module source code
- └─ meta/                 # Meta-package for MUXI distribution
-tests/                    # Test files
-examples/                 # Example usage
-  └─ configs/             # Example configuration files
-scripts/                  # Utility scripts
+.context/                  # Project context and continuity documentation
+.cursor/                   # Cursor editor configuration and rules
+.github/                   # GitHub configuration (workflows, templates)
+examples/                  # Example usage
+  └─ configs/              # Example configuration files
+migrations/                # Database migration scripts
+packages/                  # Source code organized into modules
+ └─ core/                  # Core components
+    └─ muxi/core/          # Core module with agents, memory, MCP, etc.
+       ├── agent.py        # Agent implementation
+       ├── orchestrator.py # Orchestrator with centralized memory and API keys
+       ├── memory/         # Memory systems including FAISS-backed smart buffer
+       ├── mcp/            # MCP implementation with centralized service
+       ├── models/         # LLM provider interfaces
+       └── config/         # Configuration components
+ └─ server/                # API and WebSocket server
+    └─ muxi/server/        # Server module source code
+ └─ cli/                   # Command-line interface
+    └─ muxi/cli/           # CLI module source code
+ └─ meta/                  # Meta-package for MUXI distribution
+    └─ muxi/               # Meta-package source code
+ └─ web/                   # Web dashboard
+    └─ muxi/web/           # Web app source code
+scripts/                   # Utility scripts
+tests/                     # Test files
 ```
+
+Key architectural components:
+
+1. **Core Package**: Contains the essential framework components including Agent, Orchestrator, Memory systems, and MCP implementation. The orchestrator now centralizes memory management and API key handling.
+
+2. **Memory Systems**: Implemented in `packages/core/muxi/core/memory/`:
+   - SmartBufferMemory with FAISS-backed vector search (buffer.py)
+   - Long-term memory with vector database support (long_term.py)
+   - Multi-user memory partitioning (memobase.py)
+   - Vector database integrations for SQLite and PostgreSQL
+
+3. **MCP Implementation**: Centralized in `packages/core/muxi/core/mcp/service.py` as a singleton service.
+
+4. **Server Components**: REST API with dual-key authentication and WebSocket support.
+
+5. **Meta Package**: Provides a unified interface to all components.
 
 ## Coding Guidelines
 

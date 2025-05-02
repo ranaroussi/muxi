@@ -1,15 +1,48 @@
-# MUXI Framework - MCP (Model Context Protocol) Guidelines
+---
+description:
+globs:
+alwaysApply: false
+---
+# MCP Implementation Guidelines
 
-> These rules define best practices for MCP implementation
->
-> **IMPORTANT UPDATE**: All direct tool implementations have been removed from the framework.
 > The MUXI framework now exclusively uses MCP servers for all specialized capabilities.
-> The old `/packages/server/src/muxi/tools` directory has been removed along with related
-> configurations. All functionality should now be implemented as MCP servers.
 >
-> **NEW UPDATE**: The MCP server functionality has been moved to the API directory and is now
-> started with `run_server(mcp=True)` or the dedicated `start_mcp()` function. The functionality
-> is now properly exported from the package for cleaner imports via `from muxi.server import run_server`.
+> **NEW UPDATE**: The MCP integration has been completely refactored with a centralized MCPService
+> singleton pattern for thread-safety and consistent management of all MCP server connections.
+
+## Centralized MCP Service Architecture
+
+- Always use the MCPService singleton for all MCP server interactions
+- Access the service through the orchestrator: `await orchestrator.get_mcp_service()`
+- Never create multiple instances of MCPService - use the singleton pattern
+- The singleton ensures thread-safe operations with proper locking
+- MCPService handles connection management, tool parsing, and invocation
+- Configurable timeouts at multiple levels:
+  - Global default timeout in MCPService
+  - Per-agent timeout when connecting to MCP servers
+  - Per-request timeout for individual tool invocations
+
+Example usage:
+```python
+# Get the shared MCPService instance
+mcp_service = await orchestrator.get_mcp_service()
+
+# Connect to an MCP server through an agent
+await agent.connect_mcp_server(
+    name="weather",
+    url="http://localhost:5001",
+    credentials={"api_key": "your_api_key"},
+    timeout=30  # 30-second timeout for this server
+)
+
+# Use MCPService directly for advanced use cases
+tool_result = await mcp_service.invoke_tool(
+    server_id="weather",
+    tool_name="get_weather",
+    params={"location": "New York"},
+    timeout=10  # 10-second timeout for this specific invocation
+)
+```
 
 ## Message Format
 - Follow the official MCP specification for message formats
@@ -27,7 +60,8 @@
 
 ## MCP Server Integration
 - MUXI exclusively uses MCP servers for specialized capabilities (no direct tool calls)
-- Register MCP servers with unique identifiers
+- Use MCPService singleton for all MCP server interactions
+- Register MCP servers with unique server_id for consistent identification
 - Include detailed MCP server descriptions
 - Handle MCP server execution errors gracefully
 - Return standardized MCP server results
@@ -38,13 +72,14 @@
 - Log all MCP server calls for debugging and audit
 - Include rate limiting for resource-intensive MCP servers
 - Implement proper error messages for MCP server failures
+- Use thread-safe tool invocation with locks for concurrent access
 
 ## LLM Integration
 - Properly format messages for different LLM providers
 - Handle provider-specific extensions
 - Implement fallback mechanisms for provider outages
 - Properly handle streaming responses
-- Process tool call requests from LLMs
+- Process tool call requests from LLMs using ToolParser
 - Format MCP server results for LLM consumption
 - Handle context limitations appropriately
 - Implement appropriate retry logic
@@ -68,10 +103,11 @@
 - Monitor for abuse patterns
 
 ## External MCP Servers
-- Implement proper connection management
+- Use MCPService for connection management
 - Handle reconnection automatically
 - Implement proper error handling for server errors
 - Support authentication
+- Make credentials optional for MCP servers that don't require them
 - Validate server responses
 - Implement timeout handling
 - Support MCP server discovery
@@ -94,6 +130,7 @@
 - Implement contract testing
 - Test with different LLM providers
 - Use representative test data
+- Test MCPService thread safety with concurrent access patterns
 
 ## Docker Integration
 - Package MCP servers in containerized environments
@@ -164,3 +201,16 @@
 - Document performance characteristics
 - Optimize for different deployment scenarios
 - Balance reliability and performance
+
+## Thread Safety and Concurrency
+- Always use the MCPService singleton to ensure thread-safe operations
+- Utilize async locks for critical sections to prevent race conditions
+- Implement proper async/await patterns throughout the MCP implementation
+- Ensure all shared state is properly protected
+- Handle concurrent MCP server requests appropriately
+- Test with multiple concurrent clients to verify thread safety
+- Implement proper cleanup of resources in all code paths
+- Use thread-safe collections for shared data structures
+- Document any concurrency limitations or requirements
+- Implement proper cancellation support that respects thread safety
+- Ensure consistent state even with concurrent modifications

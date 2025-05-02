@@ -14,8 +14,15 @@ Core components of the muxi framework now implemented:
    - [x] Added ToolParser for extracting tool calls from LLM responses
    - [x] Added configurable request timeouts at orchestrator, agent, and per-request levels
    - [x] Implemented thread-safe tool invocation with locks for concurrent access
+   - [x] Created comprehensive documentation in `.cursor/rules/mcp_service.mdc`
+   - [x] Added proper error handling with consistent patterns throughout MCP interactions
 2. **Memory System**:
-   - [x] Buffer memory using FAISS for short-term context
+   - [x] Implemented FAISS-backed smart buffer memory with hybrid semantic+recency retrieval
+   - [x] Added configurable recency bias parameter to balance semantic relevance with time
+   - [x] Implemented graceful degradation to recency-only search when no model is available
+   - [x] Improved metadata filtering capabilities for more targeted memory retrieval
+   - [x] Added thread-safe operations for concurrent access to memory systems
+   - [x] Created comprehensive documentation in `.cursor/rules/smart_buffer_memory.mdc`
    - [x] Long-term memory using PostgreSQL with pgvector
    - [x] Long-term memory using SQLite with sqlite-vec extension
    - [x] Added proper error handling and fallback mechanisms for vector extensions
@@ -23,6 +30,7 @@ Core components of the muxi framework now implemented:
    - [x] Domain knowledge system for user-specific structured information
    - [x] Robust database schema with optimized tables and indexes
    - [x] Migration system for schema version control
+   - [x] Centralized memory management at orchestrator level
 3. **MCP Server Integration**:
    - [x] MCP Handler for communication with external services
    - [x] Centralized MCPService for managing all MCP server communications
@@ -40,10 +48,16 @@ Core components of the muxi framework now implemented:
    - [x] Agent-level knowledge base for specialized domain knowledge
    - [x] Dynamic embedding generation using the agent's model
    - [x] File-based knowledge sources with efficient caching
+   - [x] Updated agent to use centralized MCPService singleton
+   - [x] Removed direct MCP handler dependency in favor of the shared service
+   - [x] Agent now delegates to orchestrator for all memory operations
 5. **Orchestrator**: For managing multiple agents and their interactions
    - [x] Intelligent message routing with LLM-based agent selection
    - [x] Agent descriptions for specialized capabilities
    - [x] Automatic caching of routing decisions for performance
+   - [x] Centralized memory management for all agents
+   - [x] Centralized API key handling
+   - [x] Enhanced support for multi-user environments
 6. **Configuration System**: For loading and managing configuration
    - [x] Support for YAML and JSON configuration files
    - [x] Environment variable substitution in configurations
@@ -71,6 +85,7 @@ Core components of the muxi framework now implemented:
     - [x] Standardized line length configuration across linting tools
     - [x] Improved VS Code integration with consistent formatting rules
     - [x] Fixed all test warnings and errors
+    - [x] Implemented pytest.ini configuration to filter FAISS-related DeprecationWarnings
 12. **Developer Tools**:
     - [x] MCP Server Generator with interactive CLI wizard
     - [x] Template-based code generation system
@@ -81,6 +96,10 @@ Core components of the muxi framework now implemented:
     - [x] Implemented proper monorepo structure
     - [x] Created development installation scripts
     - [x] Fixed cross-package imports
+    - [x] Completed migration from src/muxi to direct muxi directories
+    - [x] Updated all import paths to reflect the new structure
+    - [x] Created meta package for unified installation
+    - [x] Updated all documentation to reflect new package structure
 14. **Vector Database Support**:
     - [x] SQLite with sqlite-vec integration for local deployments
     - [x] Reorganized extensions directory structure
@@ -92,10 +111,21 @@ Core components of the muxi framework now implemented:
 
 Things to do next to enhance the framework, ordered by priority:
 
-### 1. REST API & MCP Server Implementation
+### 1. Smart Buffer Memory Optimization
+
+Building on the new FAISS-backed smart buffer memory:
+
+- [x] Implement FAISS-backed smart buffer memory with hybrid retrieval
+- [ ] Fine-tune recency bias parameters for different use cases
+- [ ] Add performance benchmarks for memory operations
+- [ ] Optimize vector operations for large context sizes
+- [ ] Implement memory compression for improved storage efficiency
+
+### 2. REST API & MCP Server Implementation
 
 Based on the prd-api-server.md specifications, implement the unified MUXI API Server:
 
+- [x] Implement centralized MCPService as a singleton for MCP server interactions
 - [ ] Implement unified API Server architecture
   - [ ] Core API server with shared components (auth, logging, rate limiting)
   - [ ] Configuration system with environment variable support
@@ -142,7 +172,7 @@ Based on the prd-api-server.md specifications, implement the unified MUXI API Se
   - [ ] Create interactive API playground
   - [ ] Include authentication instructions
 
-### 2. WebSocket API Implementation
+### 3. WebSocket API Implementation
 
 Building on the api.md specifications, enhance the WebSocket API:
 
@@ -152,7 +182,7 @@ Building on the api.md specifications, enhance the WebSocket API:
 - [ ] Add reconnection logic with exponential backoff
 - [ ] Support for attachments as specified in api.md
 
-### 3. CLI Interfaces
+### 4. CLI Interfaces
 
 - [ ] Enhance CLI interface
   - [ ] Add support for all API operations described in api.md
@@ -163,7 +193,7 @@ Building on the api.md specifications, enhance the WebSocket API:
   - [ ] Implement all endpoints described in the spec
   - [ ] Add comprehensive test coverage
 
-### 4. Web UI
+### 5. Web UI
 
 - [ ] Develop web interface
   - [ ] Create responsive UI for mobile and desktop
@@ -172,7 +202,7 @@ Building on the api.md specifications, enhance the WebSocket API:
   - [ ] Build user-friendly configuration interface
   - [ ] Create agent management dashboard
 
-### 5. Agent-to-Agent Communication (A2A)
+### 6. Agent-to-Agent Communication (A2A)
 
 Based on prd-a2a.md specifications:
 
@@ -190,7 +220,7 @@ Based on prd-a2a.md specifications:
   - [ ] Streaming response handling
   - [ ] Authentication shared with REST API
 
-### 6. LLM Providers
+### 7. LLM Providers
 
 - [x] Implement OpenAI LLM provider
 - [ ] Implement Anthropic LLM provider
@@ -199,7 +229,7 @@ Based on prd-a2a.md specifications:
 - [ ] Add support for local models (e.g., Llama, Mistral, DeepSeek)
 - [ ] Create a model router for fallback and cost optimization
 
-### 7. Deployment & Package Distribution
+### 8. Deployment & Package Distribution
 
 - [ ] Docker containerization
 - [ ] Kubernetes deployment
@@ -209,7 +239,7 @@ Based on prd-a2a.md specifications:
 - [ ] Automatic version bumping for releases
 - [ ] SQLite deployment guides for serverless and edge environments
 
-### 8. Logging and Tracing System
+### 9. Logging and Tracing System
 
 Based on prd-tracing-and-logging.md specifications:
 
@@ -231,7 +261,7 @@ Based on prd-tracing-and-logging.md specifications:
   - [ ] Support for Vector collection agent
   - [ ] ClickHouse integration
 
-### 9. Multi-Modal Capabilities
+### 10. Multi-Modal Capabilities
 
 Transform agents into omni agents capable of handling various media types:
 
@@ -269,7 +299,7 @@ Transform agents into omni agents capable of handling various media types:
   - [ ] Design WebSocket protocol for audio streaming
   - [ ] Implement real-time audio processing
 
-### 10. Language-Specific SDKs
+### 11. Language-Specific SDKs
 
 Focus on TypeScript/JavaScript SDK first:
 
@@ -280,9 +310,9 @@ Focus on TypeScript/JavaScript SDK first:
   - [ ] Comprehensive examples and documentation
   - [ ] NPM package distribution
 
-### 11. Memory System Enhancements
+### 12. Memory System Enhancements
 
-Based on memory-system-enhancements.md specifications:
+Building on the new FAISS-backed smart buffer memory:
 
 - [ ] Implement context memory templates for common use cases
 - [ ] Add context memory namespaces for better organization
@@ -294,7 +324,7 @@ Based on memory-system-enhancements.md specifications:
 - [ ] Implement interface-level user ID generation
 - [ ] Add advanced vector database features for scalability
 
-### 12. Testing and Documentation
+### 13. Testing and Documentation
 
 - [ ] Unit tests for all new API endpoints
 - [ ] Integration tests for API and WebSocket endpoints
@@ -306,7 +336,7 @@ Based on memory-system-enhancements.md specifications:
 - [ ] Example projects showcasing API usage
 - [ ] Generate API documentation with Fumadocs
 
-### 13. Additional Language SDKs
+### 14. Additional Language SDKs
 
 After completing TypeScript/JavaScript SDK:
 
@@ -328,7 +358,7 @@ After completing TypeScript/JavaScript SDK:
   - [ ] Consistent interface definitions across languages
   - [ ] Version syncing mechanisms with core framework
 
-### 14. Security Enhancements
+### 15. Security Enhancements
 
 - [ ] Enhance API security
   - [ ] Rate limiting and throttling
@@ -347,7 +377,7 @@ After completing TypeScript/JavaScript SDK:
   - [ ] Security logging
   - [ ] Access monitoring
 
-### 15. Stability and Performance
+### 16. Stability and Performance
 
 - [x] Comprehensive error monitoring
 - [x] Database schema optimization and indexing
@@ -362,6 +392,8 @@ After completing TypeScript/JavaScript SDK:
 Based on api.md roadmap and current progress:
 
 ### Phase 1: Core API (v0.3.0) - In Progress
+- [x] Smart buffer memory with FAISS-backed vector similarity
+- [x] Centralized MCPService as singleton pattern
 - [x] Authentication system
 - [x] Agent management endpoints (basic)
 - [x] Basic conversation endpoints
@@ -511,6 +543,42 @@ This scenario demonstrates a complete workflow from installation to running an a
    ```bash
    python app.py
    ```
+
+### Working with Smart Buffer Memory
+
+Demonstrates how to use the FAISS-backed smart buffer memory:
+
+```python
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.models.providers.openai import OpenAIModel
+
+# Create embedding model for vector search
+embedding_model = OpenAIModel(model="text-embedding-ada-002", api_key="your_api_key")
+
+# Create a buffer memory with semantic search capabilities
+buffer = SmartBufferMemory(
+    max_size=100,                 # Store up to 100 messages
+    model=embedding_model,        # Model for generating embeddings
+    vector_dimension=1536,        # Dimension for OpenAI embeddings
+    recency_bias=0.3              # Balance between semantic (0.7) and recency (0.3)
+)
+
+# Create orchestrator with the smart buffer memory
+orchestrator = Orchestrator(buffer_memory=buffer)
+
+# Add a message to the buffer
+await orchestrator.add_to_buffer_memory(
+    "Important information about quantum computing algorithms",
+    metadata={"topic": "quantum computing", "importance": "high"}
+)
+
+# Search the memory (semantically similar content)
+results = await orchestrator.search_memory(
+    "Tell me about quantum algorithms",
+    k=5
+)
+```
 
 ### RESTful API Server
 

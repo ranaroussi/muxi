@@ -1,0 +1,262 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Smart Buffer Memory with FAISS
+
+This rule documents the Smart Buffer Memory implementation that combines recency-based retrieval with semantic search powered by FAISS.
+
+## Architecture Overview
+
+The SmartBufferMemory class provides a fixed-size buffer for storing recent messages with semantic search capabilities. This hybrid approach combines:
+
+1. **Vector Similarity Search** - Uses FAISS to find semantically similar content
+2. **Recency-Based Retrieval** - Prioritizes recent messages when appropriate
+3. **Combined Scoring** - Balances semantic relevance with recency
+
+```mermaid
+graph TD
+    Query[User Query] --> HasModel{Has Model?}
+    HasModel -->|Yes| VectorSearch[Vector Search]
+    HasModel -->|No| RecencySearch[Recency Search]
+    VectorSearch --> CombineScores[Combine Semantic + Recency Scores]
+    CombineScores --> FilterResults[Filter by Metadata]
+    RecencySearch --> FilterResults
+    FilterResults --> SortResults[Sort by Score]
+    SortResults --> TopK[Return Top K Results]
+```
+
+## Key Components
+
+### 1. FAISS Integration
+
+The SmartBufferMemory uses FAISS (Facebook AI Similarity Search) for efficient vector storage and retrieval:
+
+```python
+# Initialize FAISS index
+self.index = faiss.IndexFlatL2(self.dimension)
+```
+
+- Uses L2 distance for semantic similarity
+- Maintains a mapping between buffer items and FAISS indices
+- Automatically rebuilds the index when needed to maintain consistency
+
+### 2. Hybrid Retrieval
+
+The search method combines semantic relevance with recency bias:
+
+```python
+async def search(
+    self,
+    query: str,
+    limit: int = 10,
+    filter_metadata: Optional[Dict[str, Any]] = None,
+    query_vector: Optional[List[float]] = None,
+    recency_bias: float = 0.3,
+) -> List[Dict[str, Any]]:
+    # ... implementation ...
+
+    # Calculate combined score (semantic + recency)
+    semantic_score = 1.0 / (1.0 + float(distances[0][i]))
+    recency_score = 1.0 - (buffer_idx / len(self.buffer))
+    combined_score = (1 - recency_bias) * semantic_score + recency_bias * recency_score
+```
+
+- `recency_bias` parameter controls balance between semantic relevance and recency
+- Higher values favor recency, lower values favor semantic similarity
+- Default of 0.3 provides a good balance for most applications
+
+### 3. Graceful Degradation
+
+The system automatically falls back to recency-based search when:
+- No model is provided for generating embeddings
+- Embedding generation fails
+- No valid search results are found through vector search
+
+```python
+# If we don't have vector search capability, return most recent messages
+if not self.has_vector_search or not self.model:
+    return self._recency_search(limit, filter_metadata)
+```
+
+## Best Practices
+
+### Configuration
+
+1. **Initialization**:
+
+   ```python
+   # With model for semantic search
+   buffer = SmartBufferMemory(
+       max_size=100,
+       vector_dimension=1536,
+       model=openai_model
+   )
+
+   # Without model (recency-only)
+   buffer = SmartBufferMemory(max_size=100)
+   ```
+
+2. **Vector Dimension**:
+   - Match the dimension to your model's output (1536 for OpenAI embeddings)
+   - Consistent dimensions are required across all vectors
+
+3. **Maximum Size**:
+   - Balance between context retention and memory usage
+   - Recommended range: 50-200 items for most applications
+
+### Search Configuration
+
+1. **Recency Bias Tuning**:
+   - For human conversations: `recency_bias=0.5` (more recency)
+   - For factual queries: `recency_bias=0.2` (more semantic)
+   - Default `recency_bias=0.3` works well for general use
+
+2. **Metadata Filtering**:
+
+   ```python
+   # Filter by specific metadata criteria
+   results = await buffer.search(
+       query="project update",
+       limit=5,
+       filter_metadata={"topic": "project X", "sender": "manager"}
+   )
+   ```
+
+3. **Pre-computed Vectors**:
+   - Reuse vectors when searching multiple times:
+
+   ```python
+   vector = await model.embed(query)
+   results1 = await buffer.search(query, query_vector=vector)
+   results2 = await buffer.search(different_query, query_vector=vector)
+   ```
+
+## Implementation Notes
+
+1. The SmartBufferMemory performs automatic index rebuilding when the buffer is full
+2. All operations are thread-safe but not process-safe
+3. The implementation supports both synchronous and asynchronous embedding models
+4. System automatically handles the lifecycle of FAISS indices
+5. Buffer indices are maintained even when items are removed
+
+## Comparison to Previous Implementation
+
+Before the FAISS integration:
+- Buffer memory was a simple deque with recency-only retrieval
+- No semantic search capabilities
+- Limited filtering based on exact matches
+- No ability to find contextually relevant information
+
+With the new implementation:
+- Semantic search finds relevant context even if not recent
+- Hybrid scoring balances relevance and recency
+- Graceful fallback to simpler approach when needed
+- Richer metadata filtering capabilities
+- More nuanced retrieval for better contextual understanding
+
+## Integration with Orchestrator
+
+- The SmartBufferMemory is initialized by the Orchestrator:
+
+```python
+# In Orchestrator.__init__
+self.buffer_memory = buffer_memory or SmartBufferMemory(
+    max_size=config.memory.buffer_size,
+    model=extraction_model
+)
+```
+
+- All buffer memory access happens through the Orchestrator:
+
+```python
+# In Orchestrator
+async def add_to_buffer_memory(self, message, metadata=None, agent_id=None):
+    # ... implementation ...
+    await self.buffer_memory.add(message, metadata)
+```
+
+- Agents do not directly access buffer memory, but instead go through the Orchestrator:
+
+```python
+# In Agent
+async def add_to_memory(self, message):
+    # ... implementation ...
+    await self.orchestrator.add_to_buffer_memory(message, metadata=metadata, agent_id=self.agent_id)
+```
+
+## Example Usage
+
+### Basic Usage
+
+```python
+# Create an orchestrator with smart buffer memory
+from muxi.core.orchestrator import Orchestrator
+from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.models.providers.openai import OpenAIModel
+
+# Create model for embeddings
+model = OpenAIModel(model="text-embedding-ada-002")
+
+# Create smart buffer memory
+buffer = SmartBufferMemory(max_size=100, model=model)
+
+# Create orchestrator with buffer
+orchestrator = Orchestrator(buffer_memory=buffer)
+```
+
+### Adding Content
+
+```python
+# Add content to buffer
+await orchestrator.add_to_buffer_memory(
+    "Important information about the project",
+    metadata={"topic": "project", "importance": "high"}
+)
+```
+
+### Searching
+
+```python
+# Search with semantic capability
+results = await orchestrator.search_memory(
+    "Tell me about the project status",
+    k=5,
+    use_long_term=False  # Only search buffer memory
+)
+```
+
+### In Agent Context
+
+```python
+# Within an agent method
+async def process_message(self, message):
+    # Search memory for relevant context
+    memory_results = await self.orchestrator.search_memory(
+        query=message.content,
+        agent_id=self.agent_id,
+        k=5
+    )
+
+    # Use memory results to enhance prompt
+    context = self._format_memory_for_prompt(memory_results)
+
+    # Generate response with context
+    response = await self.model.chat(message.content, context=context)
+
+    # Add message and response to memory
+    await self.orchestrator.add_to_buffer_memory(
+        message.content,
+        metadata={"role": "user", "timestamp": time.time()},
+        agent_id=self.agent_id
+    )
+
+    await self.orchestrator.add_to_buffer_memory(
+        response,
+        metadata={"role": "assistant", "timestamp": time.time()},
+        agent_id=self.agent_id
+    )
+
+    return response
+```

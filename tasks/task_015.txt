@@ -1,327 +1,66 @@
 # Task ID: 15
-# Title: Implement Automatic User Context Extraction System
+# Title: Optimize Performance of FAISS-Backed Smart Buffer Memory
 # Status: pending
 # Dependencies: None
-# Priority: high
-# Description: Create a MemoryExtractor class and integration system that automatically identifies, evaluates, and stores important user information from conversations to build comprehensive user profiles over time.
+# Priority: medium
+# Description: Enhance the performance of the recently implemented FAISS-backed smart buffer memory system with hybrid semantic+recency retrieval through profiling and targeted optimizations.
 # Details:
-Implement the automatic user context extraction system as specified in prd-auto-user-context.md with the following components:
+The FAISS-backed smart buffer memory system has already replaced the previous deque-based implementation and successfully implements hybrid semantic+recency retrieval with configurable bias parameters. The system includes graceful degradation when memory limits are reached, thread safety mechanisms, and comprehensive documentation in the rules.
 
-1. **MemoryExtractor Class**:
-   - Create a class that analyzes conversation text and extracts key user information
-   - Implement methods to assign importance scores (1-10) to extracted information
-   - Implement confidence scoring (0.0-1.0) for extraction reliability
-   - Design storage mechanism to save extracted data to user context memory
-   - Support different extraction models with a pluggable architecture
+This optimization task requires:
 
-2. **Integration Points**:
-   - Integrate with Agent class to process conversations after completion
-   - Add hooks in Orchestrator to trigger extraction at appropriate points
-   - Ensure extraction runs asynchronously to avoid performance impacts
+1. Profiling the current implementation to identify performance bottlenecks, particularly in:
+   - Vector embedding generation
+   - FAISS index operations (add, search, delete)
+   - Hybrid scoring algorithm combining semantic similarity and recency
+   - Thread synchronization mechanisms
 
-3. **Configuration System**:
-   - Create configuration options for enabling/disabling extraction
-   - Add settings for confidence thresholds (default: 0.7)
-   - Implement extraction frequency controls
-   - Add extraction model selection options
+2. Implement batch processing for vector operations where applicable to reduce overhead
 
-4. **User Filtering**:
-   - Skip extraction for anonymous users (user_id=0)
-   - Implement whitelist/blacklist functionality for specific users
+3. Evaluate and implement index structure optimizations:
+   - Test different FAISS index types (Flat, IVF, HNSW) for optimal performance/accuracy tradeoff
+   - Tune index parameters based on typical usage patterns
+   - Consider quantization techniques to reduce memory footprint
 
-5. **Extraction Modes**:
-   - Implement automatic extraction that runs without explicit calls
-   - Create manual extraction API for targeted extraction requests
-   - Support batch processing for historical conversations
+4. Optimize the hybrid scoring algorithm:
+   - Pre-compute or cache components where possible
+   - Evaluate mathematical simplifications that preserve ranking order
 
-6. **Performance Optimization**:
-   - Implement tiered extraction models (light/standard/comprehensive)
-   - Add caching to prevent redundant extractions
-   - Include rate limiting to manage resource usage
+5. Implement memory usage optimizations:
+   - Consider selective persistence strategies
+   - Evaluate compression techniques for stored vectors
+   - Implement smarter pruning strategies based on usage patterns
 
-7. **Documentation**:
-   - Document the extraction patterns and information types
-   - Create examples of extracted information formats
+6. Benchmark improvements against the current implementation using realistic workloads
+
+All optimizations must maintain the existing functionality, thread safety, and graceful degradation capabilities.
 
 # Test Strategy:
-Testing should verify both functionality and performance of the extraction system:
+Testing should verify both performance improvements and preservation of functionality:
 
-1. **Unit Tests**:
-   - Test MemoryExtractor class methods in isolation
-   - Verify correct importance and confidence scoring
-   - Test extraction with various conversation types
-   - Validate anonymous user filtering works correctly
+1. Performance Testing:
+   - Create benchmark suite with varying memory sizes (small, medium, large)
+   - Measure and compare key metrics before and after optimization:
+     * Throughput (operations per second)
+     * Latency (p50, p95, p99 percentiles)
+     * Memory usage
+     * CPU utilization
+   - Test under different load conditions (light, moderate, heavy)
+   - Profile with tools like cProfile or line_profiler to verify bottleneck improvements
 
-2. **Integration Tests**:
-   - Verify extraction triggers correctly from Agent and Orchestrator
-   - Test configuration changes propagate correctly
-   - Ensure extracted data is properly stored in user context
+2. Functional Testing:
+   - Verify retrieval quality remains consistent or improves:
+     * Create test dataset with known semantic relationships
+     * Compare retrieval results before and after optimization using precision/recall metrics
+     * Verify recency bias works as expected with controlled test cases
+   - Regression test suite to verify all existing functionality:
+     * Thread safety under concurrent operations
+     * Graceful degradation when memory limits are reached
+     * Correct behavior with edge cases (empty buffer, single item, etc.)
 
-3. **Performance Tests**:
-   - Measure extraction time for different conversation lengths
-   - Verify asynchronous operation doesn't block main processes
-   - Test with high volume to ensure system stability
+3. Integration Testing:
+   - Test in simulated production environment with realistic workloads
+   - Verify compatibility with all components that interact with the memory system
+   - Measure end-to-end performance improvements in typical usage scenarios
 
-4. **Accuracy Tests**:
-   - Create a dataset of conversations with known information
-   - Measure precision and recall of extraction system
-   - Test with different confidence thresholds
-   - Verify extraction quality across different models
-
-5. **Edge Cases**:
-   - Test with extremely long conversations
-   - Verify behavior with malformed or unusual text
-   - Test with multiple languages
-   - Verify system handles conflicting information appropriately
-
-6. **Manual Verification**:
-   - Review samples of extracted information for accuracy
-   - Compare automatic vs. manual extraction results
-
-# Subtasks:
-## 1. Create MemoryExtractor Base Class with Core Functionality [done]
-### Dependencies: None
-### Description: Implement the foundational MemoryExtractor class with the core extraction methods, importance scoring, and confidence evaluation.
-### Details:
-Implementation details:
-1. Create a new MemoryExtractor class in the memory package
-2. Implement the base extraction method that takes conversation text as input
-3. Add methods for importance scoring (1-10) based on information type and relevance
-4. Implement confidence scoring (0.0-1.0) for extraction reliability
-5. Create a pluggable architecture to support different extraction models
-6. Add basic validation methods to verify extracted information
-7. Include logging for extraction process
-
-Testing approach:
-- Unit test each scoring method with sample conversation inputs
-- Test the pluggable architecture with a mock extraction model
-- Verify correct scoring ranges are enforced
-
-## 2. Implement Storage Mechanism for Extracted User Context [pending]
-### Dependencies: 15.1
-### Description: Create the storage system for saving extracted user information to the user context memory with appropriate data structures.
-### Details:
-Implementation details:
-1. Design data structures for storing extracted user information
-2. Implement methods to save extracted data to user context memory
-3. Create update mechanisms for existing information (merge, replace, or append strategies)
-4. Add metadata storage for extraction source, timestamp, and confidence score
-5. Implement retrieval methods to access stored information
-6. Add versioning support for tracking information changes over time
-7. Create indexing for efficient information retrieval
-
-Testing approach:
-- Test storage and retrieval with various data types
-- Verify metadata is correctly associated with stored information
-- Test update mechanisms with conflicting information scenarios
-
-## 3. Develop Configuration System for Extraction Settings [pending]
-### Dependencies: 15.1
-### Description: Create a comprehensive configuration system for controlling extraction behavior, thresholds, and model selection.
-### Details:
-Implementation details:
-1. Create a configuration class for extraction settings
-2. Implement options for enabling/disabling extraction
-3. Add confidence threshold settings (default: 0.7)
-4. Implement extraction frequency controls
-5. Add extraction model selection options
-6. Create validation for configuration parameters
-7. Implement configuration persistence
-8. Add methods to update configuration at runtime
-
-Testing approach:
-- Test configuration loading with various settings
-- Verify validation prevents invalid configurations
-- Test runtime configuration updates
-
-## 4. Implement User Filtering and Privacy Controls [done]
-### Dependencies: 15.1, 15.3
-### Description: Add functionality to filter extraction based on user properties and implement privacy protection mechanisms.
-### Details:
-Implementation details:
-1. Implement logic to skip extraction for anonymous users (user_id=0)
-2. Create whitelist/blacklist functionality for specific users
-3. Add user consent tracking mechanism
-4. Implement opt-out functionality for users
-5. Create privacy-focused data retention policies
-6. Add methods to purge extracted data on request
-7. Implement data minimization techniques
-
-Testing approach:
-- Test extraction skipping for anonymous users
-- Verify whitelist/blacklist functionality works correctly
-- Test opt-out mechanism and data purging
-
-<info added on 2025-04-30T21:35:41.516Z>
-Additional implementation details:
-
-## Privacy Control Implementation
-
-```python
-class PrivacyManager:
-    def __init__(self, config):
-        self.config = config
-        self.sensitive_patterns = self._load_sensitive_patterns()
-        self.whitelist = self._load_user_list('whitelist')
-        self.blacklist = self._load_user_list('blacklist')
-        
-    def can_extract_for_user(self, user_id):
-        # Skip anonymous users
-        if user_id == 0:
-            return False
-            
-        # Check blacklist first (explicit denial)
-        if user_id in self.blacklist:
-            return False
-            
-        # If whitelist exists and not empty, user must be in it
-        if self.whitelist and user_id not in self.whitelist:
-            return False
-            
-        # Check user consent
-        return self._has_user_consent(user_id)
-    
-    def filter_sensitive_content(self, text):
-        # Apply regex patterns to remove sensitive information
-        for pattern in self.sensitive_patterns:
-            text = re.sub(pattern, '[REDACTED]', text)
-        return text
-```
-
-## Data Minimization Techniques
-
-1. Content truncation - limit extraction to first N characters
-2. Semantic summarization - store condensed versions of content
-3. Selective field extraction - only store relevant fields
-4. PII detection and redaction using NLP models
-
-## Retention Policy Implementation
-
-```python
-def apply_retention_policy():
-    """Purge data older than retention period"""
-    retention_days = config.get('privacy.retention_days', 90)
-    cutoff_date = datetime.now() - timedelta(days=retention_days)
-    
-    db.execute("""
-        DELETE FROM user_memories 
-        WHERE created_at < %s
-    """, (cutoff_date,))
-```
-
-## User Consent Management
-
-- Store consent in `user_privacy_settings` table with timestamp
-- Implement just-in-time consent prompts in UI
-- Provide granular consent options (full extraction, partial, none)
-- Track consent changes in audit log
-
-## Data Purge API
-
-```python
-@app.route('/api/user/memory/purge', methods=['POST'])
-@login_required
-def purge_user_memory():
-    """Endpoint to purge all extracted memories for current user"""
-    user_id = current_user.id
-    
-    # Log purge request for compliance
-    log_data_purge_request(user_id)
-    
-    # Execute purge
-    db.execute("DELETE FROM user_memories WHERE user_id = %s", (user_id,))
-    
-    return jsonify({"status": "success"})
-```
-</info added on 2025-04-30T21:35:41.516Z>
-
-## 5. Integrate MemoryExtractor with Agent Class [pending]
-### Dependencies: 15.1, 15.2, 15.3, 15.4
-### Description: Connect the MemoryExtractor to the Agent class to process conversations after completion.
-### Details:
-Implementation details:
-1. Add hooks in Agent class to trigger extraction after conversation completion
-2. Implement conversation preprocessing for extraction
-3. Create callback mechanism for extraction results
-4. Add error handling for extraction failures
-5. Implement asynchronous extraction to avoid blocking the main thread
-6. Create methods to access extraction results from Agent
-7. Add logging for integration points
-
-Testing approach:
-- Test extraction triggering after conversation completion
-- Verify asynchronous operation doesn't impact performance
-- Test error handling with simulated extraction failures
-
-## 6. Integrate MemoryExtractor with Orchestrator [pending]
-### Dependencies: 15.3, 15.5
-### Description: Add initialization and configuration hooks in the Orchestrator class for the extraction system.
-### Details:
-Implementation details:
-1. Add MemoryExtractor initialization in Orchestrator
-2. Implement configuration loading from environment or settings
-3. Create hooks to trigger extraction at appropriate points
-4. Add methods to access and modify extraction configuration
-5. Implement extraction status monitoring
-6. Create shutdown procedures for extraction processes
-7. Add health checks for extraction system
-
-Testing approach:
-- Test initialization with various configurations
-- Verify extraction triggers at appropriate points
-- Test shutdown procedures and resource cleanup
-
-## 7. Implement Multiple Extraction Modes and API [pending]
-### Dependencies: 15.1, 15.2, 15.5
-### Description: Create different extraction modes (automatic, manual, batch) and develop the API for targeted extraction requests.
-### Details:
-Implementation details:
-1. Implement automatic extraction mode that runs without explicit calls
-2. Create manual extraction API for targeted extraction requests
-3. Develop batch processing for historical conversations
-4. Add mode switching functionality
-5. Implement priority system for extraction requests
-6. Create API documentation
-7. Add examples for each extraction mode
-
-Testing approach:
-- Test each extraction mode with sample conversations
-- Verify API correctly handles extraction requests
-- Test batch processing with large datasets
-
-## 8. Optimize Extraction Performance [pending]
-### Dependencies: 15.1, 15.5, 15.6, 15.7
-### Description: Implement performance optimizations including tiered models, caching, and background processing.
-### Details:
-Implementation details:
-1. Implement tiered extraction models (light/standard/comprehensive)
-2. Add caching system to prevent redundant extractions
-3. Implement rate limiting to manage resource usage
-4. Create background processing queue for extraction tasks
-5. Add performance monitoring metrics
-6. Implement adaptive extraction based on system load
-7. Create optimization settings for different deployment environments
-
-Testing approach:
-- Benchmark different extraction models
-- Test caching with repeated extraction requests
-- Verify background processing doesn't impact system performance
-
-## 9. Create Documentation and Update MUXI Facade [pending]
-### Dependencies: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8
-### Description: Document the extraction system and update the MUXI facade to include extraction configuration.
-### Details:
-Implementation details:
-1. Document extraction patterns and information types
-2. Create examples of extracted information formats
-3. Update MUXI facade constructor to include extraction configuration
-4. Add documentation for configuration options
-5. Create usage examples and best practices
-6. Document privacy considerations and data handling
-7. Add troubleshooting guide for common issues
-
-Testing approach:
-- Verify documentation accuracy with code review
-- Test MUXI facade with extraction configuration
-- Validate examples work as documented
-
+Document all performance improvements with quantitative metrics and include in the final PR.

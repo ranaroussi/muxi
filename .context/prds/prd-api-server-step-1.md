@@ -68,8 +68,8 @@ Update the existing API endpoints to use the new authentication system:
 
    - Ensure all routes have at least `@requires_user_key` by default
 
-2. **Orchestrator.run() Method**:
-   - Add a new `run()` method to the Orchestrator class to match the functionality of `muxi.run()`
+2. **Orchestrator.run_agent() Method**:
+   - Add a new `run_agent()` method to the Orchestrator class to match the functionality of `muxi.run()`
    - Display auto-generated API keys (if any) during this startup process
 
 ### 4. Testing and Documentation
@@ -92,7 +92,7 @@ Update the existing API endpoints to use the new authentication system:
 Here are the specific files that will need to be created or modified:
 
 ### Modified Files:
-1. `packages/core/src/muxi/core/orchestrator.py` - Add API key parameters and `run()` method
+1. `packages/core/src/muxi/core/orchestrator.py` - Add API key parameters and `run_agent()` method
 2. `packages/server/src/muxi/api/app.py` - Apply authentication decorators to routes
 3. `packages/muxi/__init__.py` - Update the `muxi` class constructor to accept API keys
 4. `docs/reference/api.md` - Update API documentation
@@ -102,7 +102,7 @@ Here are the specific files that will need to be created or modified:
 1. Update the Orchestrator and muxi constructors to accept API keys
 2. Implement key validation logic
 3. Create the authentication decorators
-4. Add the key display functionality to `run()` methods
+4. Add the key display functionality to `run_agent()` methods
 5. Apply decorators to API routes
 6. Update documentation
 

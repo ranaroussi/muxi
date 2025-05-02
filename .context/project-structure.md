@@ -4,7 +4,7 @@
 muxi-framework/
 ├── .context/                  # Project context and continuity documentation
 │   ├── project-brief.md       # Foundation document with core project goals and requirements
-│   ├── product-context.md     # Why the project exists and problems it solves
+│   ├── product-context.md     # Why the project exists and the problems it solves
 │   ├── system-patterns.md     # System architecture and design patterns
 │   ├── tech-context.md        # Technologies used and development setup
 │   ├── active-context.md      # Current work focus and next steps
@@ -12,6 +12,11 @@ muxi-framework/
 │   ├── project-structure.md   # This file - project structure documentation
 │   └── scratchpad/            # Work-in-progress documentation and notes
 ├── .cursor/                   # Cursor editor configuration files
+│   └── rules/                 # Cursor rules for code patterns and guidelines
+│       ├── mcp_service.mdc    # Centralized MCP Service architecture
+│       ├── 07_memory_systems_guidelines.mdc # Memory systems guidelines
+│       ├── memory_extraction.mdc # Memory extraction guidelines
+│       └── [various .mdc files] # Other guidelines and patterns
 ├── .github/                   # GitHub configuration (actions, templates, etc.)
 ├── .git/                      # Git repository data
 ├── .pytest_cache/             # Pytest cache directory
@@ -27,23 +32,51 @@ muxi-framework/
 ├── migrations/                # Database migration scripts
 ├── packages/                  # Modular packages structure
 │   ├── cli/                   # Command-line interface package
-│   │   ├── pyproject.toml     # Package configuration
-│   │   └── src/muxi/cli/      # CLI package source code
+│   │   ├── muxi/
+│   │   │   └── cli/           # CLI package source code
+│   │   ├── setup.py           # Package configuration
+│   │   └── README.md          # CLI documentation
 │   ├── core/                  # Core functionality package
-│   │   ├── pyproject.toml     # Package configuration
-│   │   └── src/muxi/core/     # Core package source code with agents, memory, tools
-│   ├── muxi/                  # Meta-package that includes core, server, and CLI
-│   │   ├── pyproject.toml     # Package configuration
-│   │   └── src/muxi/          # Meta-package source code
+│   │   ├── muxi/
+│   │   │   └── core/          # Core package source code
+│   │   │       ├── agent.py   # Agent implementation
+│   │   │       ├── orchestrator.py  # Orchestrator with centralized memory and API keys
+│   │   │       ├── mcp/       # Model Context Protocol implementation
+│   │   │       │   ├── service.py   # Centralized MCPService singleton
+│   │   │       │   ├── handler.py   # MCP Handler
+│   │   │       │   └── message.py   # MCP Message structure
+│   │   │       ├── memory/    # Memory systems
+│   │   │       │   ├── buffer.py    # FAISS-backed smart buffer memory
+│   │   │       │   ├── long_term.py # Long-term memory with vector storage
+│   │   │       │   ├── memobase.py  # Multi-user memory partitioning
+│   │   │       │   ├── sqlite.py    # SQLite vector integration
+│   │   │       │   └── extractor.py # User information extraction
+│   │   │       ├── models/    # LLM provider implementations
+│   │   │       ├── config/    # Configuration components
+│   │   │       └── knowledge/ # Knowledge integration
+│   │   ├── setup.py           # Package configuration
+│   │   └── README.md          # Core documentation
+│   ├── meta/                  # Meta-package for installation
+│   │   ├── muxi/              # Meta-package source code
+│   │   ├── setup.py           # Package configuration
+│   │   └── README.md          # Meta-package documentation
 │   ├── server/                # Server implementation package
-│   │   ├── pyproject.toml     # Package configuration
-│   │   └── src/muxi/server/   # Server package with API endpoints and WebSocket
+│   │   ├── muxi/
+│   │   │   └── server/        # Server package source code
+│   │   ├── setup.py           # Package configuration
+│   │   └── README.md          # Server documentation
 │   └── web/                   # Web application package
-│       ├── package.json       # NPM package configuration
-│       ├── public/            # Static web assets
-│       └── src/               # Web app source code
+│   │   ├── muxi/
+│   │   │   └── web/           # Web UI package source code
+│   │   ├── setup.py           # Package configuration
+│   │   └── README.md          # Web UI documentation
 ├── scripts/                   # Utility scripts for project management
 ├── tests/                     # Test files and directories
+│   ├── test_agent.py          # Tests for agent functionality
+│   ├── test_orchestrator.py   # Tests for orchestrator functionality
+│   ├── test_mcp.py            # Tests for MCP functionality
+│   ├── test_memory.py         # Tests for memory systems
+│   └── [various test files]   # Other tests
 ├── .cursorignore              # Files to be ignored by Cursor editor
 ├── .env                       # Environment variables (not in repo)
 ├── .env.example               # Example environment variables
@@ -97,60 +130,76 @@ muxi-framework/
 ## Directories Explanation
 
 ### Development and CI/CD
-- `.cursor/` - Contains configuration for the Cursor editor.
+- `.cursor/` - Contains configuration for the Cursor editor and development guidelines:
+	- `rules/` directory contains MDC files with coding patterns and best practices
+	- Rules document important architectural patterns like the centralized MCP service
+	- Memory system guidelines explain the orchestrator-level memory architecture
+	- Detailed guidelines for different components of the framework
 - `.github/` - GitHub-specific files for actions, workflows, and issue templates.
 - `.git/` - Git repository data.
 - `.pytest_cache/` - Cache directory for pytest.
 
 ### Project Context
 - `.context/` - Structured documentation for project continuity and context:
-  - Core context files in a clear hierarchy (from project-brief to progress)
-  - Project structure documentation (this file)
-  - Scratchpad for works-in-progress like API specifications
-  - Serves as the comprehensive knowledge repository for the project
-  - Maintains continuity and shared understanding across development
+	- Core context files in a clear hierarchy (from project-brief to progress)
+	- Project structure documentation (this file)
+	- Scratchpad for works-in-progress like API specifications
+	- Serves as the comprehensive knowledge repository for the project
+	- Maintains continuity and shared understanding across development
 
 ### Documentation
 - `docs/` - Contains all project documentation in Markdown format, including:
-  - Architecture documentation
-  - User guides
-  - API references
-  - Configuration guides
-  - Development guidelines
-  - Jekyll configuration for documentation site
+	- Architecture documentation
+	- User guides
+	- API references
+	- Configuration guides
+	- Development guidelines
+	- Jekyll configuration for the documentation site
 
 ### Code and Examples
 - `examples/` - Sample code demonstrating how to use the framework:
-  - Basic usage examples
-  - Configuration-based agent setup
-  - Multi-agent orchestration
-  - WebSocket client implementation
+	- Basic usage examples
+	- Configuration-based agent setup
+	- Multi-agent orchestration
+	- WebSocket client implementation
 
 ### Package Structure
 - `packages/` - Modular monorepo structure:
-  - `core/` - Core functionality including agents, memory systems, tools, and MCP handlers
-    - `src/muxi/core/agent.py` - Agent implementation
-    - `src/muxi/core/memory.py` - Memory system implementation
-    - `src/muxi/core/mcp.py` - Model Context Protocol implementation
-    - `src/muxi/core/tools/` - Tool implementations
-  - `server/` - Server implementation with API endpoints and WebSocket
-    - `src/muxi/server/api/` - REST API implementation
-    - `src/muxi/server/ws/` - WebSocket implementation
-    - `src/muxi/server/config/` - Server configuration
-  - `cli/` - Command-line interface for interacting with agents
-    - `src/muxi/cli/commands.py` - CLI commands
-    - `src/muxi/cli/app.py` - CLI application
-  - `web/` - Web application frontend
-    - `src/components/` - React components
-    - `src/services/` - API service implementations
-  - `muxi/` - Meta-package that installs core, server, and CLI
-    - Provides a unified interface to all components
+  	- `core/` - Core functionality including:
+		- Orchestrator with centralized memory management and API key handling
+		- Agent implementation that delegates to the orchestrator for memory access
+		- Centralized MCPService as a singleton for thread-safe MCP server interaction
+		- FAISS-backed smart buffer memory with hybrid semantic+recency retrieval
+		- Memory systems with PostgreSQL and SQLite vector database support
+		- Multi-user support through Memobase memory partitioning
+		- Configurable timeout settings at orchestrator, agent, and per-request levels
+		- LLM provider implementations with standardized interfaces
+		- Knowledge integration components
+  	- `server/` - Server implementation with API endpoints and WebSocket:
+	    - REST API with dual-key authentication (user and admin keys)
+	    - SSE streaming for real-time responses
+	    - MCP server implementation for tool hosting
+	    - Error handling and response standardization
+  	- `cli/` - Command-line interface for interacting with agents:
+	    - Commands for chat and message sending
+	    - Server management functionality
+	    - Configuration management
+  	- `web/` - Web application frontend:
+	    - React-based chat interface
+	    - WebSocket integration for real-time updates
+	    - Configuration management UI
+  	- `meta/` - Meta-package that installs core, server, and CLI:
+	    - Simplified import paths
+	    - Unified installation
+	    - Top-level API exposing core functionality
 
 ### Supporting Directories
-- `migrations/` - Database schema migration scripts.
+- `migrations/` - Database schema migration scripts for vector databases.
 - `scripts/` - Utility scripts for project management and automation.
-- `tests/` - Test files and directories for unit and integration tests.
-  - `tests/test_agent.py` - Tests for agent functionality
-  - `tests/test_mcp.py` - Tests for Model Context Protocol
-  - `tests/test_memory.py` - Tests for memory systems
-  - `tests/test_tools.py` - Tests for tools framework
+- `tests/` - Test files and directories for unit and integration tests:
+	  - Tests for agent functionality
+	  - Tests for orchestrator with centralized memory
+	  - Tests for MCPService and tool invocation
+	  - Tests for FAISS-backed buffer memory
+	  - Tests for SQLite and PostgreSQL vector database integrations
+	  - Tests for API key authentication and validation
