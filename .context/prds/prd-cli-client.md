@@ -60,9 +60,10 @@ The CLI will use an INI-style configuration file similar to AWS CLI and MySQL cl
 
 ```ini
 [default]
+default_profile = local
 output_format = text
 color = true
-default_profile = local
+telemetry = 0 # 0 = off, 1 = on (default)
 
 [profile local]
 host = http://localhost:8000
@@ -452,7 +453,7 @@ Optionally, the CLI can include anonymous usage telemetry to help improve the to
 
 2. **User Preferences**:
    - Opt-out option during installation
-   - Environment variable to disable (MUXI_TELEMETRY=off)
+   - Variable to disable in config file (telemetry = 0)
    - Clear disclosure of collected data
 
 ## Installation Options
