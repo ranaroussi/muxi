@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "muxi"
 version = "0.0.1"
 authors = [
-  {name = "MUXI Team", email = "muxi@automaze.io"},
+  {name = "Ran Aroussi", email = "ran@aroussi.com"},
 ]
 description = "A powerful, extensible framework for building AI agents"
 readme = "README.md"
