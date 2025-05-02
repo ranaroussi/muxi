@@ -17,7 +17,7 @@ sys.path.insert(0, project_root)
 
 # Now import modules that require the path to be set up
 from mcp import JSONRPCRequest  # noqa: E402
-from packages.core.src.muxi.core.mcp_handler import HTTPSSETransport  # noqa: E402
+from muxi.core.mcp.handler import HTTPSSETransport  # noqa: E402
 
 
 @pytest.mark.skip(reason="This test requires a real MCP server and the URL is invalid or outdated")

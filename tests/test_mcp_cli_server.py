@@ -28,7 +28,7 @@ sys.path.insert(0, root_dir)
 # Load the mcp_handler module
 try:
     # First try direct import
-    from packages.core.src.muxi.core.mcp_handler import (
+    from muxi.core.mcp.handler import (
         CommandLineTransport,
         CancellationToken
     )
@@ -40,7 +40,7 @@ except ImportError as e:
     # Use importlib to load the module
     spec = importlib.util.spec_from_file_location(
         "mcp_handler",
-        os.path.join(root_dir, "packages/core/src/muxi/core/mcp_handler.py")
+        os.path.join(root_dir, "packages/core/muxi/core/mcp/handler.py")
     )
     mcp_handler = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mcp_handler)

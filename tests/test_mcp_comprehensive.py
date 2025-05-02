@@ -19,22 +19,66 @@ import sys
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
+import importlib
 
 # Important: Add the root directory to the path before importing from packages
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, root_dir)
 
 # Import after sys.path modification
-from packages.core.src.muxi.core.mcp_handler import (  # noqa: E402
-    CancellationToken,
-    CommandLineTransport,
-    HTTPSSETransport,
-    MCPConnectionError,
-    MCPHandler,
-    MCPRequestError,
-    MCPServerClient,
-    MCPTransportFactory,
-    MCPCancelledError,
-)
+try:
+    # Try direct import
+    from muxi.core.mcp.handler import (  # noqa: E402
+        MCPHandler,
+        MCPServerClient,
+        HTTPSSETransport,
+        CommandLineTransport,
+        MCPTransportFactory,
+        CancellationToken,
+        MCPConnectionError,
+        MCPRequestError,
+        MCPCancelledError
+    )
+    from muxi.core.mcp.message import MCPMessage  # noqa: E402
+    print("✅ Successfully imported MCP classes directly")
+except ImportError as e:
+    print(f"❌ Direct import failed: {e}")
+    print("Trying alternative approach with importlib...")
+
+    # Use importlib as fallback
+    spec = importlib.util.spec_from_file_location(
+        "mcp_handler",
+        os.path.join(root_dir, "packages/core/muxi/core/mcp/handler.py")
+    )
+    if spec and spec.loader:
+        mcp_handler = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mcp_handler)
+        MCPHandler = mcp_handler.MCPHandler
+        MCPServerClient = mcp_handler.MCPServerClient
+        HTTPSSETransport = mcp_handler.HTTPSSETransport
+        CommandLineTransport = mcp_handler.CommandLineTransport
+        MCPTransportFactory = mcp_handler.MCPTransportFactory
+        CancellationToken = mcp_handler.CancellationToken
+        MCPConnectionError = mcp_handler.MCPConnectionError
+        MCPRequestError = mcp_handler.MCPRequestError
+        MCPCancelledError = mcp_handler.MCPCancelledError
+
+        # Also load message module
+        msg_spec = importlib.util.spec_from_file_location(
+            "mcp_message",
+            os.path.join(root_dir, "packages/core/muxi/core/mcp/message.py")
+        )
+        if msg_spec and msg_spec.loader:
+            mcp_message = importlib.util.module_from_spec(msg_spec)
+            msg_spec.loader.exec_module(mcp_message)
+            MCPMessage = mcp_message.MCPMessage
+            print("✅ Successfully imported MCP classes via importlib")
+        else:
+            print("❌ Failed to load message module")
+            sys.exit(1)
+    else:
+        print("❌ Failed to load handler module")
+        sys.exit(1)
 
 
 class TestMCPTransportFactory(unittest.TestCase):
@@ -133,7 +177,7 @@ class TestHTTPSSETransport(unittest.IsolatedAsyncioTestCase):
 
         # Set up patches
         self.http_client_patcher = patch(
-            'packages.core.src.muxi.core.mcp_handler.httpx.AsyncClient'
+            'muxi.core.mcp.handler.httpx.AsyncClient'
         )
         self.mock_http_client_class = self.http_client_patcher.start()
         self.mock_http_client = MagicMock()
@@ -143,7 +187,7 @@ class TestHTTPSSETransport(unittest.IsolatedAsyncioTestCase):
 
         # Mock SSE client - we create=True since EventSource may not exist as a class
         self.sse_patcher = patch(
-            'packages.core.src.muxi.core.mcp_handler.EventSource',
+            'muxi.core.mcp.handler.EventSource',
             create=True
         )
         self.mock_sse_class = self.sse_patcher.start()
@@ -353,7 +397,7 @@ class TestCommandLineTransport(unittest.IsolatedAsyncioTestCase):
 
     async def test_disconnect(self):
         """Test disconnecting from a command-line MCP server."""
-        # Mock the internal disconnect implementation instead of mocking just the process.terminate method
+        # Mock the internal disconnect implementation instead of mocking just the process.terminate
         original_disconnect = self.transport.disconnect
 
         # Patch the disconnect method to track calls
@@ -393,7 +437,7 @@ class TestMCPServerClient(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         """Set up test fixtures."""
         # Create patchers
-        self.factory_patcher = patch('packages.core.src.muxi.core.mcp_handler.MCPTransportFactory')
+        self.factory_patcher = patch('muxi.core.mcp.handler.MCPTransportFactory')
         self.mock_factory = self.factory_patcher.start()
 
         # Set up mock transport

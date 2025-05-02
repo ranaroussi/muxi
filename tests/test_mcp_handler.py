@@ -8,8 +8,8 @@ import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 import json
 
-# Fix imports to use absolute imports from the packages structure
-from packages.core.src.muxi.core.mcp_handler import (
+# Fix imports to use the new structure
+from muxi.core.mcp.handler import (
     MCPHandler,
     MCPServerClient
 )
@@ -110,11 +110,11 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
         self.handler = MCPHandler(model=self.mock_model)
 
         # Set up patches
-        self.transport_patcher = patch('packages.core.src.muxi.core.mcp_handler.HTTPSSETransport')
+        self.transport_patcher = patch('muxi.core.mcp.handler.HTTPSSETransport')
         self.mock_transport_class = self.transport_patcher.start()
 
         # Instead of using MCPClient which doesn't exist, create a mock for MCPServerClient
-        self.client_patcher = patch('packages.core.src.muxi.core.mcp_handler.MCPServerClient')
+        self.client_patcher = patch('muxi.core.mcp.handler.MCPServerClient')
         self.mock_client_class = self.client_patcher.start()
 
         # Set up mocks

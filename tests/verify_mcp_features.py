@@ -28,7 +28,7 @@ sys.path.insert(0, os.path.join(root_dir, "packages/core/src"))
 
 try:
     # Try to import directly from the package
-    from packages.core.src.muxi.core.mcp_handler import (
+    from muxi.core.mcp.handler import (
         MCPTransportFactory,
         HTTPSSETransport,
         CommandLineTransport,
@@ -47,7 +47,7 @@ except ImportError as e:
         import importlib.util
         spec = importlib.util.spec_from_file_location(
             "mcp_handler",
-            os.path.join(root_dir, "packages/core/src/muxi/core/mcp_handler.py")
+            os.path.join(root_dir, "packages/core/muxi/core/mcp/handler.py")
         )
         mcp_handler = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mcp_handler)
