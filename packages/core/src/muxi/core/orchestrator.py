@@ -7,6 +7,8 @@ and memory systems centrally.
 
 import asyncio
 import os
+import secrets
+import string
 from typing import Any, Dict, List, Optional, Union
 
 from loguru import logger
@@ -38,6 +40,8 @@ class Orchestrator:
         auto_extract_user_info: bool = True,
         extraction_model: Optional[BaseModel] = None,
         request_timeout: int = 60,
+        user_api_key: Optional[str] = None,
+        admin_api_key: Optional[str] = None,
     ):
         """
         Initialize the orchestrator with optional centralized memory.
@@ -48,6 +52,8 @@ class Orchestrator:
             auto_extract_user_info: Whether to automatically extract user information.
             extraction_model: Optional model to use for automatic information extraction.
             request_timeout: Default timeout in seconds for MCP server requests
+            user_api_key: Optional API key for user-level access
+            admin_api_key: Optional API key for admin-level access
         """
         self.agents: Dict[str, Agent] = {}
         self.agent_descriptions: Dict[str, str] = {}
@@ -97,6 +103,23 @@ class Orchestrator:
 
         # Set request timeout
         self.request_timeout = request_timeout
+
+        # Set or generate API keys
+        self.user_api_key = user_api_key
+        self.admin_api_key = admin_api_key
+
+        # Generate API keys if not provided
+        if self.user_api_key is None:
+            self.user_api_key = self._generate_api_key("user")
+            self._user_key_auto_generated = True
+        else:
+            self._user_key_auto_generated = False
+
+        if self.admin_api_key is None:
+            self.admin_api_key = self._generate_api_key("admin")
+            self._admin_key_auto_generated = True
+        else:
+            self._admin_key_auto_generated = False
 
     def _initialize_routing_model(self):
         """Initialize the routing model from configuration."""
@@ -604,7 +627,7 @@ class Orchestrator:
         self.default_agent_id = agent_id
         logger.info(f"Set agent '{agent_id}' as default")
 
-    async def run(
+    async def run_agent(
         self, input_text: str, agent_id: Optional[str] = None, use_memory: bool = True
     ) -> str:
         """
@@ -626,6 +649,43 @@ class Orchestrator:
 
         # Run the agent
         return await agent.run(input_text, use_memory=use_memory)
+
+    def run(self, host="0.0.0.0", port=5050, reload=True, mcp=False) -> None:
+        """
+        Start the MUXI server with the current orchestrator.
+
+        This method starts the server and displays API keys if they were auto-generated.
+
+        Args:
+            host: Host to bind the server to
+            port: Port to bind the server to
+            reload: Whether to enable auto-reload for development
+            mcp: Whether to enable MCP server functionality
+        """
+        try:
+            # Import here to avoid circular imports
+            from muxi.server.run import run_server, is_port_in_use
+
+            # Check if port is already in use
+            if is_port_in_use(port):
+                msg = f"Port {port} is already in use. MUXI server cannot start."
+                logger.error(msg)
+                print(f"Error: {msg}")
+                print(f"Please stop any other processes using port {port} and try again.")
+                return
+
+            # Display splash screen
+            if self._user_key_auto_generated or self._admin_key_auto_generated:
+                self.__display_splash_screen_with_api_keys()
+            else:
+                self._display_splash_screen(host, port)
+
+            # Start the server
+            run_server(host=host, port=port, reload=reload, mcp=mcp)
+
+        except Exception as e:
+            logger.error(f"Failed to start MUXI server: {str(e)}")
+            print(f"Error: Failed to start MUXI server: {str(e)}")
 
     async def select_agent_for_message(self, message: str) -> str:
         """
@@ -1053,7 +1113,9 @@ Available agents:
             request_timeout=timeout
         )
 
-    async def list_mcp_tools(self, server_id: Optional[str] = None) -> Dict[str, List[Dict[str, Any]]]:
+    async def list_mcp_tools(
+        self, server_id: Optional[str] = None
+    ) -> Dict[str, List[Dict[str, Any]]]:
         """
         List available tools from MCP servers.
 
@@ -1165,3 +1227,100 @@ Available agents:
                     metadata=metadata,
                     user_id=user_id
                 )
+
+    def _generate_api_key(self, key_type: str) -> str:
+        """
+        Generate a new API key.
+
+        Args:
+            key_type: Type of key to generate ("user" or "admin")
+
+        Returns:
+            A new API key string
+        """
+        # Generate a random string
+        alphabet = string.ascii_letters + string.digits
+        random_part = ''.join(secrets.choice(alphabet) for _ in range(24))
+
+        # Add the appropriate prefix
+        if key_type == "user":
+            return f"sk_muxi_user_{random_part}"
+        else:
+            return f"sk_muxi_admin_{random_part}"
+
+    def _display_splash_screen(self, host: str, port: int, api_keys: bool = False) -> None:
+        """
+        Display the MUXI splash screen.
+
+        Args:
+            host: Host the server is running on
+            port: Port the server is running on
+        """
+        # Get the package version
+        try:
+            from importlib import metadata
+            version = metadata.version("muxi")
+        except (metadata.PackageNotFoundError, ImportError):
+            version = "1.0.0"
+
+        # Calculate padding for the URL display
+        padding = ' ' * (24 - len(host) - len(str(port)))
+
+        last_line = "╰──────────────────────────────────────╯"
+        if api_keys:
+            last_line = "╰─────────────┬────────────────────────╯"
+
+        print(
+            f"""
+╭──────────────────────────────────────╮
+│  ███╗   ███╗ ██╗   ██╗ ██╗  ██╗ ██╗  │
+│  ████╗ ████║ ██║   ██║ ╚██╗██╔╝ ██║  │
+│  ██╔████╔██║ ██║   ██║  ╚███╔╝  ██║  │
+│  ██║╚██╔╝██║ ██║   ██║  ██╔██╗  ██║  │
+│  ██║ ╚═╝ ██║ ╚██████╔╝ ██╔╝ ██╗ ██║  │
+│  ╚═╝     ╚═╝  ╚═════╝  ╚═╝  ╚═╝ ╚═╝  │
+│───────────────┬──────────────────────│
+│  * MUXI Core  │  Version: {version:<10} │
+│───────────────┴──────────────────────│
+│                                      │
+│  Running on:                         │
+│  http://{host}:{port}{padding}│
+│                                      │
+{last_line}
+"""
+        )
+
+    def _display_splash_screen_with_api_keys(self) -> None:
+        """Display auto-generated API keys with a warning message."""
+        # Determine which keys to display
+        if self._user_key_auto_generated:
+            user_key_display = self.user_api_key
+        else:
+            user_key_display = "[user provided]"
+
+        if self._admin_key_auto_generated:
+            admin_key_display = self.admin_api_key
+        else:
+            admin_key_display = "[user provided]"
+
+        # Determine key generation status message
+        if self._user_key_auto_generated and self._admin_key_auto_generated:
+            status = "(auto-generated)"
+        else:
+            status = "(partially auto-generated)"
+
+        print(
+            f"""              │
+╭─────────────╰────────────────────────────────────────────────────────╮
+│                                                                      │
+│  API Keys {status:^40} │
+│                                                                      │
+│   — User:  {user_key_display:<50} │
+│   — Admin: {admin_key_display:<50} │
+│                                                                      │
+│  ⚡ Auto-generating API keys should only be used during development.  │
+│  We recommend to explicitly set your own API keys.                   │
+│                                                                      │
+╰──────────────────────────────────────────────────────────────────────╯
+"""
+        )
