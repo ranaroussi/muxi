@@ -15,11 +15,12 @@ from muxi import muxi
 # Load environment variables
 load_dotenv()
 
+
 async def main():
     # Create a new MUXI instance
     app = muxi(
-        buffer_size=10,           # Context window size
-        buffer_multiplier=10,     # Total capacity = 10 × 10 = 100 messages
+        buffer_size=10,  # Context window size
+        buffer_multiplier=10,  # Total capacity = 10 × 10 = 100 messages
     )
 
     # Add multiple agents with different specializations
@@ -47,6 +48,7 @@ async def main():
     response = await app.chat("Who was Albert Einstein?")
     print(f"Selected Agent: {response.agent_id}")
     print(f"Response: {response.content}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

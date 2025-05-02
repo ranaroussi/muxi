@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 from muxi.core.orchestrator import Orchestrator
 from muxi.core.memory.buffer import BufferMemory
-from muxi.models.providers.openai import OpenAIModel
+from muxi.core.models.providers.openai import OpenAIModel
 
 # Load environment variables from .env file
 load_dotenv()

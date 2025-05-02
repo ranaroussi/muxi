@@ -10,10 +10,10 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
-
 from muxi.core.orchestrator import Orchestrator
-from muxi.models.providers.openai import OpenAIModel
-from muxi.knowledge.base import FileKnowledge
+from muxi.core.models.providers.openai import OpenAIModel
+from muxi.core.knowledge.base import FileKnowledge
+
 
 async def main():
     # Load environment variables
