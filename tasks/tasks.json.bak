@@ -165,12 +165,186 @@
     {
       "id": 13,
       "title": "Implement Unified MUXI API Server with Multi-Protocol Support",
-      "description": "Design and implement the core MUXI API Server that integrates REST API, SSE streaming, MCP protocol, and WebRTC signaling with dual-key authentication system as specified in the PRD.",
-      "details": "Create a unified server architecture that serves as the foundation for all client interactions with MUXI. The implementation should:\n\n1. Support multiple communication protocols:\n   - REST API endpoints for standard request/response interactions\n   - Server-Sent Events (SSE) for real-time data streaming to clients\n   - MUXI Communication Protocol (MCP) for specialized device communication\n   - WebRTC signaling for peer-to-peer connections\n\n2. Implement dual-key authentication system:\n   - User/interface keys for regular client operations\n   - Admin keys with elevated privileges for system management\n   - Key validation and permission enforcement across all protocols\n\n3. Create a modular architecture that:\n   - Uses a shared core for authentication, logging, and security\n   - Maintains protocol-specific handlers that implement the appropriate interfaces\n   - Provides unified error handling and response formatting\n   - Includes comprehensive request logging and monitoring\n\n4. Ensure the server is:\n   - Horizontally scalable to handle increasing load\n   - Configurable via environment variables and config files\n   - Properly documented with API specifications\n   - Containerized for easy deployment\n\nThe implementation should follow the architectural diagrams in the PRD and adhere to the security requirements specified for each protocol type.",
-      "testStrategy": "Testing should verify all aspects of the unified server implementation:\n\n1. Unit Tests:\n   - Test each protocol handler independently\n   - Verify authentication logic for both user and admin keys\n   - Test error handling for each protocol\n\n2. Integration Tests:\n   - Verify cross-protocol functionality\n   - Test authentication across different protocols\n   - Ensure proper resource sharing between protocol handlers\n\n3. Load Testing:\n   - Simulate multiple concurrent connections across protocols\n   - Verify server performance under high load\n   - Test horizontal scaling with multiple server instances\n\n4. Security Testing:\n   - Attempt unauthorized access using invalid keys\n   - Verify proper isolation between user and admin privileges\n   - Test for common vulnerabilities (injection, XSS, etc.)\n\n5. Protocol-Specific Tests:\n   - REST API: Test all endpoints with various inputs\n   - SSE: Verify event streaming and reconnection handling\n   - MCP: Test protocol-specific message formats and responses\n   - WebRTC: Verify signaling functionality with test clients\n\nAll tests should be automated and included in the CI/CD pipeline. Documentation should include examples of using each protocol with the server.",
+      "description": "Design and implement the core MUXI API Server that integrates REST API, SSE streaming, Model Context Protocol (MCP), and WebRTC signaling with authentication leveraging the MUXI service level authentication system as specified in the PRD.",
+      "details": "Create a unified server architecture that serves as the foundation for all client interactions with MUXI. The implementation should:\n\n1. Support multiple communication protocols:\n   - REST API endpoints for standard request/response interactions\n   - Server-Sent Events (SSE) for real-time data streaming to clients, including logging and tracing\n   - Model Context Protocol (MCP) for specialized device communication using FastAPI_MCP\n   - WebRTC signaling for peer-to-peer connections\n\n2. Leverage MUXI service level authentication:\n   - Validate requests against API keys sent to the MUXI service\n   - Implement explicit access level specification for each endpoint using decorators or dependency injection\n   - Enforce permission validation across all protocols\n\n3. Create a modular architecture that:\n   - Uses a shared core for authentication, logging, and security\n   - Maintains protocol-specific handlers that implement the appropriate interfaces\n   - Provides unified error handling and response formatting\n   - Includes comprehensive request logging and monitoring\n   - Assigns explicit operation_id for MCP tool names to each endpoint\n\n4. Ensure the server is:\n   - Horizontally scalable to handle increasing load\n   - Configurable via environment variables and config files\n   - Properly documented with API specifications\n   - Containerized for easy deployment\n\n5. Deployment considerations:\n   - The API server must be initialized with a configurable URI of the MUXI service (defaults to localhost:3000) to allow distributed installation\n   - Documentation must include best practices for production deployment behind reverse proxies like Caddy/Traefik\n\nThe implementation will completely replace the existing API code with NO backward compatibility requirements. All clients will need to migrate to the new API structure. The implementation should follow the architectural diagrams in the PRD and adhere to the security requirements specified for each protocol type.",
+      "testStrategy": "Testing should verify all aspects of the unified server implementation:\n\n1. Unit Tests:\n   - Test each protocol handler independently\n   - Verify authentication logic with MUXI service level authentication\n   - Test access level enforcement via decorators/dependency injection\n   - Test error handling for each protocol\n\n2. Integration Tests:\n   - Verify cross-protocol functionality\n   - Test authentication across different protocols\n   - Ensure proper resource sharing between protocol handlers\n   - Verify FastAPI_MCP integration for Model Context Protocol\n   - Test configuration of MUXI service URI and connection handling\n\n3. Load Testing:\n   - Simulate multiple concurrent connections across protocols\n   - Verify server performance under high load\n   - Test horizontal scaling with multiple server instances\n\n4. Security Testing:\n   - Verify API key validation against MUXI service\n   - Test access level enforcement for different endpoint permissions\n   - Verify proper isolation between different access levels\n   - Test for common vulnerabilities (injection, XSS, etc.)\n\n5. Protocol-Specific Tests:\n   - REST API: Test all endpoints with various inputs and verify operation_id assignments\n   - SSE: Verify event streaming for logging and tracing based on the tracing system PRD\n   - MCP: Test FastAPI_MCP integration with Model Context Protocol\n   - WebRTC: Verify signaling functionality with test clients\n\n6. Deployment Tests:\n   - Verify functionality when deployed behind various reverse proxies (Caddy, Traefik)\n   - Test different MUXI service URI configurations\n   - Validate containerized deployment in various environments\n\nAll tests should be automated and included in the CI/CD pipeline. Documentation should include examples of using each protocol with the server.",
       "status": "pending",
       "dependencies": [],
-      "priority": "high"
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up Core Server Architecture and Project Structure",
+          "description": "Create the foundational server architecture with modular design patterns and establish the project structure for the unified MUXI API Server.",
+          "dependencies": [],
+          "details": "Implementation details:\n1. Initialize a new Node.js/Express.js project with TypeScript support\n2. Set up the folder structure following a modular architecture pattern (controllers, services, middleware, utils, etc.)\n3. Configure environment variables and config file loading\n4. Implement a basic server setup with health check endpoint\n5. Set up logging infrastructure with request ID tracking\n6. Configure error handling middleware with standardized error responses\n7. Implement containerization with Docker (Dockerfile and docker-compose.yml)\n8. Set up CI/CD pipeline configuration\n9. Implement configurable MUXI service URI (default: localhost:3000) through environment variables and config files\n10. Create initialization logic to validate connection to MUXI service on startup\n\nTesting approach:\n- Unit tests for configuration loading\n- Integration test for health check endpoint\n- Verify Docker container builds and runs correctly\n- Test MUXI service URI configuration with different values",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 2,
+          "title": "Implement Authentication Integration with MUXI Service",
+          "description": "Integrate with the MUXI service level authentication system for API key validation and implement explicit access level specification for endpoints.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation details:\n1. Create authentication middleware to validate API keys against the MUXI service\n2. Implement decorators or dependency injection for explicit access level specification\n3. Develop permission enforcement logic based on access levels\n4. Create utilities for handling authentication responses and errors\n5. Implement caching for frequent authentication requests to improve performance\n6. Add rate limiting for authentication attempts\n7. Create testing utilities for simulating different authentication scenarios\n8. Document the authentication flow and access level requirements\n9. Ensure authentication works with configurable MUXI service URI\n10. Implement connection retry and fallback mechanisms for authentication service\n\nTesting approach:\n- Unit tests for authentication middleware\n- Integration tests with mock MUXI service responses\n- Security tests for permission enforcement\n- Performance tests for authentication under load\n- Test authentication with different MUXI service URI configurations\n\n<info added on 2025-05-01T22:22:57.213Z>\nAdditional information:\n\nThe API Server will leverage the existing MUXI service authentication system rather than implementing its own key generation or storage mechanisms. Authentication will be handled through:\n\n1. Integration with MUXI's API key validation endpoints via HTTP client\n2. Implementation of FastAPI-compatible authentication methods:\n   - Function decorators (e.g., `@app.verify_user_key`)\n   - Dependency injection (e.g., `dependencies=[Depends(verify_user_key)]`)\n3. Creation of access level specification utilities that:\n   - Parse MUXI-provided JWT tokens or API key metadata\n   - Extract role/permission information from MUXI authentication responses\n   - Map MUXI permission structures to API Server endpoint requirements\n4. Development of a permission verification layer that:\n   - Validates incoming requests against MUXI-provided API keys\n   - Enforces access control based on endpoint-specific requirements\n   - Handles authentication failures with appropriate error responses\n\nThe authentication flow will maintain a clear separation of concerns, with the API Server acting as a client to the MUXI authentication service rather than managing credentials directly.\n</info added on 2025-05-01T22:22:57.213Z>",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 3,
+          "title": "Develop Core REST API Endpoints",
+          "description": "Implement the core REST API endpoints for standard request/response interactions with proper routing, controllers, and service layers.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implementation details:\n1. Define the REST API routes and controller structure\n2. Implement request validation middleware using a schema validation library\n3. Create controller handlers for each endpoint with proper error handling\n4. Assign explicit operation_id for MCP tool names to each endpoint\n5. Implement access level specification using decorators or dependency injection\n6. Develop service layer for business logic separation\n7. Implement data access layer for persistence operations\n8. Add pagination, filtering, and sorting capabilities for list endpoints\n9. Implement request throttling and rate limiting\n10. Create OpenAPI/Swagger documentation for the REST endpoints\n11. Ensure all endpoints work correctly when deployed behind reverse proxies like Caddy/Traefik\n\nTesting approach:\n- Unit tests for controllers and services\n- Integration tests for each endpoint\n- Verification of operation_id assignments\n- Load tests to verify rate limiting\n- API contract tests using the OpenAPI specification\n- Test endpoints when deployed behind different reverse proxy configurations\n\n<info added on 2025-05-01T22:23:40.725Z>\nAdditional implementation requirements:\n\n1. Ensure every API endpoint has a unique and explicit operation_id parameter that will serve as the MCP tool name. These identifiers should follow the naming convention: `{resource}_{action}` (e.g., `user_create`, `document_update`).\n\n2. The operation_id must be documented in both the code and OpenAPI specification to maintain consistency.\n\n3. This implementation will completely replace the existing API codebase with no backward compatibility considerations. All clients will need to migrate to the new API structure.\n\n4. Create a mapping document that lists all new endpoints with their operation_ids to facilitate client migration.\n\n5. Remove all legacy endpoint handlers and routing configurations during implementation.\n\n6. Implement comprehensive logging for each endpoint that includes the operation_id to aid in monitoring and debugging.\n</info added on 2025-05-01T22:23:40.725Z>",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 4,
+          "title": "Implement Server-Sent Events (SSE) for Logging and Tracing",
+          "description": "Add support for Server-Sent Events to enable real-time logging and tracing data streaming from server to clients based on the tracing system PRD.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Implementation details:\n1. Create an SSE connection handler with proper headers and formatting\n2. Implement client connection tracking and management\n3. Develop event publishing mechanism for logging and tracing events\n4. Integrate with the tracing system as specified in the tracing system PRD\n5. Add authentication middleware specific to SSE connections\n6. Implement connection heartbeats and timeout handling\n7. Create event filtering capabilities based on client subscriptions\n8. Add reconnection support with event IDs and last-event-id header handling\n9. Implement backpressure handling for slow clients\n10. Ensure SSE connections work properly when deployed behind reverse proxies\n\nTesting approach:\n- Unit tests for SSE formatting and event publishing\n- Integration tests with mock clients\n- Verification of tracing system integration\n- Load tests with multiple concurrent connections\n- Reconnection and recovery tests\n- Test SSE functionality when deployed behind different reverse proxy configurations\n\n<info added on 2025-05-01T22:23:19.579Z>\nBased on the PRD requirements, here's additional implementation information for the SSE endpoints:\n\nImplementation of SSE Endpoints:\n\n1. Create dedicated endpoints:\n   - `/api/v1/logs/stream` - For application logs streaming\n   - `/api/v1/traces/stream` - For trace events streaming\n\n2. Endpoint query parameters for filtering:\n   - `level=[debug|info|warn|error]` - Filter logs by severity level\n   - `service=<service-name>` - Filter by originating service\n   - `traceId=<trace-id>` - Filter events belonging to specific trace\n   - `spanId=<span-id>` - Filter events belonging to specific span\n   - `from=<timestamp>` - Filter events after timestamp\n   - `limit=<number>` - Limit number of events per batch\n\n3. Event format structure:\n   ```\n   event: log\n   id: <event-unique-id>\n   data: {\"timestamp\":\"2023-06-15T10:30:45Z\",\"level\":\"info\",\"message\":\"User login successful\",\"service\":\"auth-service\",\"traceId\":\"abc123\"}\n\n   event: trace\n   id: <event-unique-id>\n   data: {\"timestamp\":\"2023-06-15T10:30:45Z\",\"traceId\":\"abc123\",\"spanId\":\"span456\",\"name\":\"db-query\",\"duration\":45,\"status\":\"ok\"}\n   ```\n\n4. Implement buffering strategy:\n   - Buffer up to 1000 most recent events per connection\n   - Implement catch-up mechanism using `Last-Event-ID` header\n   - Use Redis pub/sub for horizontal scaling of SSE connections\n\n5. Rate limiting considerations:\n   - Implement token bucket algorithm (100 events/second per client)\n   - Add response headers for rate limit status\n</info added on 2025-05-01T22:23:19.579Z>",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 5,
+          "title": "Integrate FastAPI_MCP for Model Context Protocol",
+          "description": "Integrate the FastAPI_MCP library to implement the Model Context Protocol (MCP) for specialized device communication.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Implementation details:\n1. Integrate the FastAPI_MCP library into the server architecture\n2. Configure FastAPI_MCP with appropriate settings for the MUXI environment\n3. Map API endpoints to corresponding MCP operations with explicit operation_ids\n4. Integrate authentication with the MUXI service level authentication\n5. Implement access level enforcement for MCP operations\n6. Add protocol versioning support\n7. Create connection state management for stateful operations\n8. Implement protocol-specific error handling and recovery\n9. Ensure MCP functionality works correctly when deployed behind reverse proxies\n\nTesting approach:\n- Unit tests for FastAPI_MCP integration\n- Integration tests with mock devices\n- Protocol compliance tests\n- Authentication and access level enforcement tests\n- Error handling and recovery tests\n- Test MCP functionality when deployed behind different reverse proxy configurations\n\n<info added on 2025-05-01T22:22:37.176Z>\nThe subtask already correctly refers to MCP as \"Model Context Protocol\" in both the title and description. I'll add specific details about the FastAPI_MCP library implementation and operation_id requirements:\n\nImplementation notes:\n- The FastAPI_MCP library provides a standardized way to expose model capabilities as tools through the Model Context Protocol\n- Each API endpoint must be decorated with an explicit `operation_id` that will serve as the MCP tool name in the protocol\n- Example endpoint definition:\n  ```python\n  @app.post(\"/device/command\", operation_id=\"send_device_command\")\n  async def send_command(command: DeviceCommand):\n      # Implementation\n  ```\n- The operation_id must follow MCP naming conventions: lowercase with underscores, descriptive of the operation\n- Implement the required MCP discovery endpoint that returns all available tools and their schemas\n- Ensure all tool schemas are properly documented using Pydantic models for automatic OpenAPI generation\n- Configure FastAPI_MCP to handle both synchronous and asynchronous tool execution patterns\n</info added on 2025-05-01T22:22:37.176Z>",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 6,
+          "title": "Implement WebRTC Signaling Service",
+          "description": "Create the WebRTC signaling service to facilitate peer-to-peer connections between clients with offer/answer exchange and ICE candidate handling.",
+          "dependencies": [
+            2,
+            4
+          ],
+          "details": "Implementation details:\n1. Design the signaling protocol for WebRTC session establishment\n2. Implement offer/answer exchange endpoints\n3. Create ICE candidate exchange mechanism\n4. Develop room/session management for multi-party connections\n5. Add authentication and authorization for signaling operations\n6. Implement connection state tracking and cleanup\n7. Create fallback mechanisms for failed connections\n8. Add metrics collection for connection success rates\n9. Ensure WebRTC signaling works correctly when deployed behind reverse proxies\n\nTesting approach:\n- Unit tests for signaling message handling\n- Integration tests with WebRTC client libraries\n- End-to-end tests for successful peer connections\n- Stress tests with multiple simultaneous connection attempts\n- Test WebRTC signaling when deployed behind different reverse proxy configurations",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 7,
+          "title": "Implement Unified Logging and Monitoring System",
+          "description": "Develop a comprehensive logging and monitoring system across all protocols with request tracking, error reporting, and performance metrics.",
+          "dependencies": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "details": "Implementation details:\n1. Design a unified logging format with consistent fields across protocols\n2. Implement request/response logging for all protocols\n3. Add performance metric collection (response times, throughput, etc.)\n4. Create error aggregation and reporting mechanism\n5. Implement log rotation and archiving\n6. Add distributed tracing support for cross-service requests\n7. Develop monitoring dashboards for key metrics\n8. Implement alerting for critical errors and performance degradation\n9. Ensure logging works correctly with various deployment configurations including reverse proxies\n\nTesting approach:\n- Verify log output format and content\n- Test log rotation under high volume\n- Validate metric collection accuracy\n- Test alerting mechanisms with simulated failures\n- Verify logging functionality when deployed behind different reverse proxy configurations",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 8,
+          "title": "Implement Horizontal Scaling and Load Balancing",
+          "description": "Enhance the server architecture to support horizontal scaling with proper state management, load balancing, and instance coordination.",
+          "dependencies": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "details": "Implementation details:\n1. Refactor stateful components to use external state stores (Redis, etc.)\n2. Implement instance discovery and registration\n3. Add load balancing configuration for different protocols\n4. Create sticky session support for protocols requiring connection persistence\n5. Implement distributed locking for critical operations\n6. Add graceful shutdown handling\n7. Develop auto-scaling configuration based on load metrics\n8. Create deployment templates for orchestration platforms (Kubernetes, etc.)\n9. Ensure proper functionality when deployed behind reverse proxies in a distributed environment\n10. Document configuration requirements for distributed deployment with MUXI service URI\n\nTesting approach:\n- Multi-instance tests for state consistency\n- Load distribution tests\n- Failover and recovery tests\n- Performance tests under scaled conditions\n- Test distributed deployment with various MUXI service URI configurations",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 9,
+          "title": "Develop Comprehensive API Documentation",
+          "description": "Create detailed documentation for all supported protocols, including API references, authentication guides, and example implementations.",
+          "dependencies": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "details": "Implementation details:\n1. Generate OpenAPI/Swagger documentation for REST endpoints with operation_ids\n2. Document Model Context Protocol (MCP) integration with FastAPI_MCP\n3. Develop integration guides for SSE streaming for logging and tracing\n4. Write WebRTC signaling implementation examples\n5. Document authentication flow with MUXI service and access level requirements\n6. Create SDK examples for common programming languages\n7. Implement interactive API explorer\n8. Develop troubleshooting guides and FAQs\n9. Create a migration guide for clients moving from the old API to the new implementation\n10. Document best practices for production deployment behind reverse proxies like Caddy/Traefik\n11. Include configuration examples for different deployment scenarios with MUXI service URI\n\nTesting approach:\n- Validate documentation accuracy against implementation\n- Test example code for functionality\n- Conduct documentation reviews with stakeholders\n- Verify interactive API explorer functionality\n- Test deployment instructions with different reverse proxy configurations",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 10,
+          "title": "Implement End-to-End Testing and Performance Optimization",
+          "description": "Develop comprehensive end-to-end tests across all protocols and optimize server performance for production deployment.",
+          "dependencies": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "details": "Implementation details:\n1. Create end-to-end test suites for each protocol\n2. Implement integration test scenarios across multiple protocols\n3. Develop load testing scripts for performance benchmarking\n4. Profile and optimize critical code paths\n5. Implement caching strategies for frequently accessed data\n6. Optimize database queries and connection pooling\n7. Fine-tune server configuration for production environment\n8. Create performance baseline documentation\n9. Test performance when deployed behind various reverse proxies\n10. Optimize configuration for different deployment scenarios\n\nTesting approach:\n- End-to-end functional tests across all protocols\n- Performance tests under various load conditions\n- Security and penetration testing\n- Regression testing after optimizations\n- Test performance with different reverse proxy configurations and MUXI service URI settings",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 11,
+          "title": "Create Deployment Documentation and Best Practices",
+          "description": "Develop comprehensive documentation for deploying the API server in various production environments, with special focus on reverse proxy configurations and distributed deployment.",
+          "dependencies": [
+            8,
+            9
+          ],
+          "details": "Implementation details:\n1. Document MUXI service URI configuration options and defaults\n2. Create detailed guides for deploying behind Caddy reverse proxy\n3. Create detailed guides for deploying behind Traefik reverse proxy\n4. Document best practices for SSL/TLS termination\n5. Create configuration examples for handling WebSocket and SSE connections through proxies\n6. Document header forwarding requirements for proper client IP and protocol detection\n7. Create deployment checklists for production environments\n8. Document monitoring and logging considerations for proxied deployments\n9. Create troubleshooting guides for common deployment issues\n10. Document performance optimization strategies for different deployment scenarios\n\nTesting approach:\n- Validate all deployment configurations in test environments\n- Test proxy configurations with all supported protocols\n- Verify documentation accuracy through deployment exercises\n- Test troubleshooting procedures against simulated issues",
+          "status": "pending",
+          "parentTaskId": 13
+        },
+        {
+          "id": 12,
+          "title": "Create Deployment Documentation",
+          "description": "Develop comprehensive documentation for deploying the API server in production environments, including best practices for reverse proxy configuration and distributed installation.",
+          "details": "Implementation details:\n1. Document server initialization with MUXI service URI configuration\n2. Create deployment guides for common reverse proxies (Caddy, Traefik, Nginx)\n3. Document security best practices for production deployments\n4. Provide load balancing and high availability configuration examples\n5. Develop monitoring and observability integration guides\n6. Document environment variables and configuration options\n7. Create troubleshooting and performance tuning guide\n\nTesting approach:\n- Verify documentation accuracy by deploying in test environments\n- Review by DevOps specialists\n- Usability testing with deployment scenarios",
+          "status": "pending",
+          "dependencies": [
+            9
+          ],
+          "parentTaskId": 13
+        },
+        {
+          "id": 13,
+          "title": "Implement Distributed Configuration",
+          "description": "Implement configuration system for the API server to support distributed installation with the MUXI service running on different hosts.",
+          "details": "Implementation details:\n1. Create configuration module for API server settings\n2. Implement MUXI service URI configuration (default: localhost:3000)\n3. Add connection parameters (timeout, retry policy, etc.)\n4. Implement TLS/SSL certification configuration for secure communication\n5. Create environment variable support for all configuration options\n6. Implement configuration file support (JSON, YAML, or environment file)\n7. Add validation for configuration parameters\n8. Create dynamic configuration reloading capability\n\nTesting approach:\n- Unit tests for configuration loading and validation\n- Integration tests with MUXI service running on different hosts\n- Performance tests for various connection settings\n- Security tests for TLS/SSL configurations",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "parentTaskId": 13
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Implement MUXI CLI Client",
+      "description": "Develop a command-line interface client that interacts with the MUXI API Server, providing terminal-based access to all MUXI features as specified in the prd-cli-client.md PRD.",
+      "details": "Implement a comprehensive CLI client for MUXI that consumes the API Server endpoints. The implementation should include:\n\n1. Profile-based configuration:\n   - Support for multiple named profiles with separate credentials and settings\n   - Configuration file management in a standard location (e.g., ~/.muxi/config)\n   - Profile switching via command-line options\n\n2. Authentication mechanisms:\n   - Support for API key authentication\n   - Interactive login flow\n   - Token refresh capabilities\n   - Secure credential storage\n\n3. Command structure:\n   - Implement a hierarchical command structure (e.g., muxi [global-options] command [command-options])\n   - Include help documentation for all commands and options\n   - Support for command auto-completion\n\n4. Feature parity with API:\n   - Implement client commands for all API endpoints\n   - Support for all CRUD operations\n   - Proper error handling and user-friendly error messages\n\n5. Output formatting:\n   - Support multiple output formats (JSON, table, etc.)\n   - Colorized terminal output where appropriate\n   - Pagination for large result sets\n\n6. Performance considerations:\n   - Implement request caching where appropriate\n   - Add timeout and retry logic for API calls\n\nThe CLI should be built using a modern CLI framework that supports argument parsing, help generation, and colorized output. Ensure the code is modular and follows the single responsibility principle to make it maintainable and extensible.",
+      "testStrategy": "Testing for the CLI client should include:\n\n1. Unit tests:\n   - Test each command module in isolation with mocked API responses\n   - Verify correct argument parsing and validation\n   - Test error handling for various failure scenarios\n   - Ensure configuration management works as expected\n\n2. Integration tests:\n   - Test against a running API server instance\n   - Verify all commands produce expected results\n   - Test authentication flows including token refresh\n   - Validate proper handling of rate limits and server errors\n\n3. End-to-end tests:\n   - Create test scripts that perform common user workflows\n   - Test profile switching and configuration persistence\n   - Verify output formatting across different commands\n\n4. Manual testing:\n   - Usability testing for command discoverability\n   - Verify help documentation is accurate and helpful\n   - Test on different terminal environments (bash, zsh, PowerShell)\n   - Test on different operating systems (Linux, macOS, Windows)\n\n5. Performance testing:\n   - Measure and optimize command execution time\n   - Test behavior with large data sets\n\nAll tests should be automated where possible and included in the CI/CD pipeline. Document test coverage and any manual testing procedures.",
+      "status": "pending",
+      "dependencies": [
+        13
+      ],
+      "priority": "medium"
     }
   ],
   "metadata": {

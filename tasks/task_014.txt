@@ -1,177 +1,657 @@
 # Task ID: 14
-# Title: Implement Interface-Level User ID Generation System
+# Title: Implement MUXI CLI Client
 # Status: pending
-# Dependencies: None
-# Priority: high
-# Description: Develop a system that generates consistent and meaningful user IDs across all interfaces (REST API, WebSocket, CLI) when explicit user IDs are not provided, as specified in the PRD.
+# Dependencies: 13
+# Priority: medium
+# Description: Develop a command-line interface client that interacts with the MUXI API Server, providing terminal-based access to all MUXI features as specified in the prd-cli-client.md PRD.
 # Details:
-Create a centralized user ID generation service that works across all interfaces:
+Implement a comprehensive CLI client for MUXI that consumes the API Server endpoints. The implementation should follow the 6 distinct phases outlined in the PRD:
 
-1. Implement the core UserIdGenerator service that:
-   - Follows the algorithm specified in the PRD document at .context/prds/prd-interface-user-id.md
-   - Generates deterministic IDs based on available client information (IP, session, device fingerprints, etc.)
-   - Handles collision detection and resolution
-   - Includes appropriate privacy protections and anonymization techniques
+1. Phase 1: Core Infrastructure
+   - Project setup and framework selection
+   - Configuration management with INI-style format
+   - Authentication system with profile support
+   - Base API client implementation
 
-2. Integrate the UserIdGenerator with each interface:
-   - REST API: Extract client information from requests and generate IDs when Authorization header is missing
-   - WebSocket: Generate IDs during connection establishment if not provided
-   - CLI: Use local environment/config information to generate persistent IDs
+2. Phase 2: Basic API Commands
+   - Implement core CRUD operations for all resources
+   - Add permission-based command handling
+   - Implement output formatting system
 
-3. Implement ID persistence and lookup:
-   - Create storage mechanism for mapping generated IDs to client signatures
-   - Ensure generated IDs remain consistent for returning users
-   - Implement appropriate TTL/expiry policies as specified in the PRD
+3. Phase 3: Advanced Features
+   - Interactive modes and wizards
+   - Batch operations
+   - Workflow automation
+   - Memory and knowledge commands
 
-4. Add configuration options:
-   - Enable/disable automatic ID generation
-   - Configure ID format and algorithm parameters
-   - Set security/privacy thresholds
+4. Phase 4: Polish and Documentation
+   - Comprehensive help documentation
+   - Examples and usage guides
+   - Performance optimization
+   - Distribution packaging
 
-5. Ensure proper documentation is added for all interfaces explaining the automatic ID generation behavior.
+5. Phase 5: Enhanced User Experience
+   - Shell completion
+   - Command aliases and shortcuts
+   - Interactive terminal UI
+   - Command suggestions
+
+6. Phase 6: Advanced Integration
+   - Plugin system
+   - CI/CD platform integration
+   - Docker support
+   - Remote execution capabilities
+
+Key implementation features include:
+
+1. Profile-based configuration:
+   - Support for multiple named profiles with separate credentials and settings
+   - INI-style configuration format in a standard location (e.g., ~/.muxi/config)
+   - Profile switching and default profile selection
+
+2. Permission-based command handling:
+   - Different permission levels (admin, user, public)
+   - Visual indicators for command permission requirements
+   - Clear error messages for permission violations
+   - Permission-based filtering of available commands
+
+3. Authentication mechanisms:
+   - API key authentication with scope awareness
+   - Interactive login flow
+   - Token refresh capabilities
+   - Secure credential storage
+
+4. Output formatting:
+   - Multiple output formats (JSON, table, YAML)
+   - Colorized terminal output
+   - Pagination for large result sets
+
+The CLI should be built using a modern CLI framework that supports argument parsing, help generation, and colorized output. Ensure the code is modular and follows the single responsibility principle to make it maintainable and extensible.
 
 # Test Strategy:
-1. Unit Tests:
-   - Test UserIdGenerator with various input combinations
-   - Verify deterministic behavior (same inputs produce same IDs)
-   - Test collision handling
-   - Verify privacy protection mechanisms
+Testing for the CLI client should include:
 
-2. Integration Tests:
-   - For each interface (REST, WebSocket, CLI), verify ID generation when explicit ID not provided
-   - Test persistence of generated IDs across multiple requests from same client
-   - Verify cross-interface consistency (same client should get same ID regardless of interface)
+1. Unit tests:
+   - Test each command module in isolation with mocked API responses
+   - Verify correct argument parsing and validation
+   - Test error handling for various failure scenarios
+   - Ensure configuration management works as expected with the INI-style format
+   - Test permission-based command access controls
 
-3. Security Tests:
-   - Ensure IDs cannot be manipulated or predicted
-   - Verify privacy compliance (no PII in generated IDs)
-   - Test ID generation with proxies/VPNs to ensure proper handling
+2. Integration tests:
+   - Test against a running API server instance
+   - Verify all commands produce expected results
+   - Test authentication flows including token refresh
+   - Validate proper handling of rate limits and server errors
+   - Test permission elevation workflows
 
-4. Performance Tests:
-   - Benchmark ID generation under load
-   - Test concurrent ID generation scenarios
+3. End-to-end tests:
+   - Create test scripts that perform common user workflows
+   - Test profile switching, default profile selection, and configuration persistence
+   - Verify output formatting across different commands
+   - Test permission-based command visibility and access
 
-5. Specific Test Cases:
-   - Anonymous REST API client gets consistent ID across multiple requests
-   - WebSocket reconnection preserves user ID
-   - CLI commands from same environment maintain user context
-   - Client changing IP but with same device fingerprint gets same ID (if configured)
-   - Two different clients don't receive the same generated ID
+4. Manual testing:
+   - Usability testing for command discoverability
+   - Verify help documentation is accurate and helpful
+   - Test on different terminal environments (bash, zsh, PowerShell)
+   - Test on different operating systems (Linux, macOS, Windows)
+   - Validate permission indicators in help text and command listings
+
+5. Performance testing:
+   - Measure and optimize command execution time
+   - Test behavior with large data sets
+   - Benchmark different output formats
+
+6. Phase-specific testing:
+   - Test each phase's features before moving to the next phase
+   - Regression testing when adding new features
+   - Compatibility testing between phases
+
+All tests should be automated where possible and included in the CI/CD pipeline. Document test coverage and any manual testing procedures.
 
 # Subtasks:
-## 1. Create Core UserIdGenerator Interface and Base Implementation [pending]
+## 1. Set up CLI project structure and framework [pending]
 ### Dependencies: None
-### Description: Define the core interface and base implementation for the UserIdGenerator service that will be used across all application interfaces.
+### Description: Initialize the CLI project with a modern CLI framework, establish the basic command structure, and implement the entry point.
 ### Details:
-1. Create a `UserIdGenerator` interface with methods for generating, validating, and looking up user IDs.
-2. Implement a base class that follows the algorithm in the PRD.
-3. Include methods for extracting client information (IP, user agent, device fingerprints).
-4. Implement the deterministic hashing algorithm for generating IDs based on client signatures.
-5. Add unit tests to verify the core ID generation logic works as expected.
-6. Test with various input combinations to ensure consistency and uniqueness.
+Implementation details:
+1. Choose and install a CLI framework (e.g., Click, Typer, or argparse)
+2. Set up the project structure with appropriate modules for commands, config, auth, and utils
+3. Create the main entry point (muxi.py or similar)
+4. Implement the basic command hierarchy skeleton
+5. Set up logging infrastructure
+6. Configure packaging (setup.py, pyproject.toml)
+7. Implement basic error handling framework
 
-## 2. Implement Collision Detection and Resolution Strategy [pending]
+Testing approach:
+- Verify the CLI can be invoked with --help
+- Ensure the command structure is properly registered
+- Test basic error handling
+
+## 2. Implement configuration management system [pending]
 ### Dependencies: 14.1
-### Description: Add collision detection and resolution mechanisms to ensure uniqueness of generated user IDs.
+### Description: Create the configuration management system that supports multiple profiles and secure storage of settings.
 ### Details:
-1. Implement a collision detection system that checks if a generated ID already exists.
-2. Create a resolution strategy that adds incremental suffixes or alternative hashing when collisions occur.
-3. Add performance optimizations to minimize collision checks.
-4. Implement a bloom filter or similar data structure for efficient collision detection.
-5. Add unit tests with forced collisions to verify resolution works correctly.
-6. Benchmark collision resolution performance with large datasets.
+Implementation details:
+1. Create a configuration file structure using INI-style format (similar to AWS CLI)
+2. Implement functions to read/write config from standard location (~/.muxi/config)
+3. Add support for multiple named profiles
+4. Implement secure storage for sensitive information (using keyring or similar)
+5. Create commands for managing profiles (create, list, delete, switch)
+6. Add validation for configuration entries
+7. Implement config initialization for first-time users
+8. Add functionality to set a profile as default during creation
+9. Implement default profile selection logic
 
-## 3. Develop Privacy Protection and Anonymization Features [pending]
-### Dependencies: 14.1
-### Description: Implement privacy protection and anonymization techniques to ensure generated IDs don't expose sensitive user information.
-### Details:
-1. Add data sanitization to remove personally identifiable information before ID generation.
-2. Implement configurable anonymization levels as specified in the PRD.
-3. Create a mechanism to rotate or refresh anonymization salts periodically.
-4. Add privacy compliance checks to ensure generated IDs meet requirements.
-5. Implement unit tests that verify sensitive information isn't leaked in generated IDs.
-6. Create documentation on privacy protections for developers.
+Testing approach:
+- Test creating, reading, updating, and deleting profiles
+- Verify secure storage of credentials
+- Test config validation
+- Ensure proper handling of malformed config files
+- Test default profile setting and selection
 
-## 4. Create Persistent Storage for User ID Mapping [pending]
-### Dependencies: 14.1, 14.2
-### Description: Implement a storage mechanism to persistently map generated IDs to client signatures for consistency across sessions.
-### Details:
-1. Design a database schema for storing user ID mappings.
-2. Implement a repository layer for CRUD operations on ID mappings.
-3. Add TTL/expiry mechanisms as specified in the PRD.
-4. Implement caching for frequently accessed mappings.
-5. Create database migration scripts.
-6. Add integration tests for the storage layer.
-7. Implement cleanup jobs for expired mappings.
+<info added on 2025-05-02T09:39:01.553Z>
+Additional implementation details:
 
-## 5. Integrate UserIdGenerator with REST API Interface [pending]
-### Dependencies: 14.1, 14.3, 14.4
-### Description: Integrate the UserIdGenerator service with the REST API interface to automatically generate IDs when Authorization headers are missing.
-### Details:
-1. Create middleware/interceptor for REST API requests.
-2. Extract client information from HTTP headers and request data.
-3. Check for missing Authorization headers and trigger ID generation.
-4. Add the generated ID to the request context for downstream handlers.
-5. Implement response headers to communicate generated IDs to clients.
-6. Add integration tests for REST API ID generation.
-7. Update API documentation to explain automatic ID generation behavior.
+1. Use the `configparser` Python library to handle INI-style configuration files with sections for each profile
+2. Implement profile creation flow:
+   ```python
+   def create_profile(name, settings):
+       # After collecting profile settings
+       set_as_default = input("Set as default profile? (y/n): ").lower() == 'y'
+       if set_as_default:
+           config['DEFAULT']['current_profile'] = name
+       # Save configuration
+   ```
+3. For default profile handling:
+   - Store the default profile name in a special `[DEFAULT]` section of the config file
+   - When no profile is specified in commands, implement logic to:
+     a. Check for a `--profile` flag first
+     b. If not present, read the default profile from config
+     c. If no default is set, prompt user to create a profile or specify one
+   - Add a `use-profile` command to temporarily switch profiles without changing default
+4. Implement config upgrade path for users migrating from potential earlier formats
+</info added on 2025-05-02T09:39:01.553Z>
 
-## 6. Integrate UserIdGenerator with WebSocket Interface [pending]
-### Dependencies: 14.1, 14.3, 14.4
-### Description: Integrate the UserIdGenerator service with the WebSocket interface to generate IDs during connection establishment.
-### Details:
-1. Modify WebSocket connection handlers to extract client information.
-2. Implement ID generation during the WebSocket handshake process.
-3. Store generated IDs in the WebSocket session context.
-4. Add mechanisms to communicate generated IDs to WebSocket clients.
-5. Create integration tests for WebSocket connections with and without explicit IDs.
-6. Update WebSocket documentation to explain ID generation behavior.
+<info added on 2025-05-02T10:15:08.544Z>
+<info added on 2025-05-03T14:22:45.123Z>
+Configuration Format Specification:
 
-## 7. Integrate UserIdGenerator with CLI Interface [pending]
-### Dependencies: 14.1, 14.3, 14.4
-### Description: Integrate the UserIdGenerator service with the CLI interface to generate persistent IDs based on local environment information.
-### Details:
-1. Implement CLI-specific client information extraction.
-2. Create a local storage mechanism for CLI-generated IDs.
-3. Ensure consistency of IDs across CLI sessions.
-4. Add CLI commands to view and manage generated IDs.
-5. Implement integration tests for CLI ID generation.
-6. Update CLI documentation to explain ID generation and persistence.
+1. The configuration system will use INI-style format (not YAML) similar to AWS CLI, Azure CLI, and other popular command-line tools:
+   ```ini
+   [DEFAULT]
+   current_profile = production
+   
+   [profile development]
+   region = us-west-2
+   output = json
+   
+   [profile production]
+   region = us-east-1
+   output = text
+   ```
 
-## 8. Implement Configuration System for ID Generation [pending]
-### Dependencies: 14.1, 14.5, 14.6, 14.7
-### Description: Create a comprehensive configuration system to control ID generation behavior across all interfaces.
-### Details:
-1. Design a configuration schema for ID generation options.
-2. Implement configuration loading from environment variables, config files, and code.
-3. Add options for enabling/disabling automatic ID generation per interface.
-4. Create configuration for ID format, algorithm parameters, and security thresholds.
-5. Implement runtime configuration updates.
-6. Add validation for configuration values.
-7. Create documentation for all configuration options.
+2. Configuration file structure:
+   - Each profile will be stored in its own section with the prefix "profile " (e.g., "[profile development]")
+   - The [DEFAULT] section will store global settings including the current default profile name
+   - Common settings will be stored directly as key-value pairs within each profile section
+   - Sensitive information will be referenced but stored securely using keyring
 
-## 9. Develop Comprehensive Testing Suite [pending]
-### Dependencies: 14.5, 14.6, 14.7, 14.8
-### Description: Create a comprehensive testing suite to verify the ID generation system works correctly across all interfaces and edge cases.
-### Details:
-1. Implement end-to-end tests covering all interfaces.
-2. Create load tests to verify performance under high concurrency.
-3. Add security tests to verify privacy protections.
-4. Implement tests for edge cases like network failures and partial client information.
-5. Create integration tests with actual databases and caches.
-6. Add tests for configuration changes and their effects.
-7. Implement continuous integration pipeline for automated testing.
+3. Default profile management:
+   - Users can set a profile as default during creation with a simple flag:
+     ```
+     muxi config create-profile development --set-default
+     ```
+   - The default profile can be changed later:
+     ```
+     muxi config set-default-profile production
+     ```
+   - When no profile is specified in commands, the default profile is automatically used
+   - Visual indicators in CLI output will show which profile is currently active
 
-## 10. Create Documentation and Examples [pending]
-### Dependencies: 14.5, 14.6, 14.7, 14.8
-### Description: Develop comprehensive documentation and examples for the user ID generation system.
+4. Profile inheritance can be implemented to allow profiles to extend settings from other profiles, reducing duplication for similar environments.
+</info added on 2025-05-03T14:22:45.123Z>
+</info added on 2025-05-02T10:15:08.544Z>
+
+## 3. Implement authentication mechanisms [pending]
+### Dependencies: 14.2
+### Description: Develop the authentication system including API key auth, interactive login, token refresh, and credential management.
 ### Details:
-1. Create developer documentation explaining the ID generation system architecture.
-2. Write interface-specific guides for REST API, WebSocket, and CLI integration.
-3. Add code examples for common use cases.
-4. Create diagrams illustrating the ID generation flow.
-5. Document configuration options and their effects.
-6. Add troubleshooting guides for common issues.
-7. Create user-facing documentation explaining the privacy implications.
-8. Update the main application documentation to reference the new ID generation system.
+Implementation details:
+1. Implement API key authentication flow
+2. Create interactive login command with username/password
+3. Add token storage and automatic refresh capabilities
+4. Implement session management
+5. Create authentication middleware for commands
+6. Add logout functionality
+7. Implement credential rotation and security features
+
+Testing approach:
+- Test login/logout flows
+- Verify token refresh works correctly
+- Test API key authentication
+- Ensure proper error handling for auth failures
+
+<info added on 2025-05-02T10:02:01.288Z>
+Additional implementation details for authentication mechanisms:
+
+## Profile and Permission Management
+1. Implement profile types with distinct API key scopes:
+   - User profile: Limited access to standard commands
+   - Admin profile: Full access to all commands including administrative functions
+
+2. Permission checking system:
+   - Create a permission matrix mapping commands to required access levels
+   - Implement middleware that validates the API key type against command requirements
+   - Use decorator pattern to mark commands with required permission levels
+
+3. User-friendly error handling:
+   - Implement standardized error responses for permission violations:
+     ```python
+     def permission_denied_handler(command, user_type, required_type):
+         return {
+             "error": "Permission denied",
+             "message": f"The '{command}' command requires {required_type} permissions, but you're authenticated as {user_type}.",
+             "resolution": "Please contact your administrator to request elevated permissions or use an account with appropriate access."
+         }
+     ```
+
+4. Permission elevation workflow:
+   - Implement a request system for users to request temporary elevated permissions
+   - Add audit logging for all permission-related events
+   - Create helper command to show current user's permission level and available commands
+
+5. Graceful degradation:
+   - Commands should check permissions before execution but display helpful context
+   - When listing available commands, visually indicate which ones require elevated permissions
+</info added on 2025-05-02T10:02:01.288Z>
+
+<info added on 2025-05-02T10:15:25.799Z>
+## Enhanced Permission-Based Command Handling
+
+1. Implement dual API key system:
+   - Support for multiple API keys per profile (user key, admin key, or both)
+   - Key storage structure in config:
+     ```json
+     "api_keys": {
+       "user": "uk_123456789abcdef",
+       "admin": "ak_987654321fedcba"
+     }
+     ```
+   - Allow seamless switching between keys with `--key-type` flag
+
+2. User-friendly permission denial:
+   - Implement descriptive error messages with actionable guidance:
+     ```python
+     def handle_permission_error(command_name, required_level):
+         console = Console()
+         console.print(f"[bold red]Permission denied:[/] '{command_name}' requires admin privileges")
+         console.print(f"[yellow]Available options:[/]")
+         console.print("  • Use 'switch --profile admin' if you have admin credentials")
+         console.print("  • Request elevated access from your administrator")
+         console.print("  • Use '--help' to see commands available with your current permissions")
+     ```
+
+3. Visual indicators for privileged commands:
+   - Add permission badges in command listings:
+     ```python
+     def format_command_help(command, user_level):
+         prefix = ""
+         if command.required_level == "admin" and user_level != "admin":
+             prefix = "[red][ADMIN][/red] "
+         elif command.required_level == "admin" and user_level == "admin":
+             prefix = "[green][ADMIN][/green] "
+         return f"{prefix}{command.name}: {command.description}"
+     ```
+   - Color-code commands in help menus based on current permission level
+   - Add `--show-all` flag to help command to display all commands regardless of permission
+
+4. Command availability filtering:
+   - Filter command listings based on current API key type
+   - Implement optional "preview mode" for restricted commands:
+     ```python
+     @permission_required("admin")
+     def sensitive_command(preview=False):
+         if preview:
+             # Show what would happen without executing
+             return show_preview()
+         # Actual implementation
+     ```
+
+5. Permission elevation workflow:
+   - Add temporary permission elevation with time-limited tokens
+   - Implement audit logging for all elevation attempts (successful or failed)
+   - Create secure challenge-response mechanism for elevation requests
+</info added on 2025-05-02T10:15:25.799Z>
+
+## 4. Develop API client and request handling [pending]
+### Dependencies: 14.3
+### Description: Create the core API client that handles requests to the MUXI API Server with proper error handling, retries, and caching.
+### Details:
+Implementation details:
+1. Implement base API client with request/response handling
+2. Add request timeout configuration
+3. Implement retry logic for failed requests
+4. Create request caching system for appropriate endpoints
+5. Add proper error handling and user-friendly error messages
+6. Implement pagination handling for large result sets
+7. Add request/response logging (with sensitive data masking)
+
+Testing approach:
+- Test API client with mock server responses
+- Verify retry logic works correctly
+- Test caching behavior
+- Ensure proper error translation from API errors to user-friendly messages
+
+## 5. Implement basic CRUD commands [pending]
+### Dependencies: 14.4
+### Description: Develop the core set of commands for basic CRUD operations against all primary MUXI resources.
+### Details:
+Implementation details:
+1. Implement resource listing commands (list, get)
+2. Add resource creation commands (create, init)
+3. Implement update/modification commands (update, edit)
+4. Add deletion commands (delete, remove)
+5. Implement search/filter capabilities
+6. Add command-specific help documentation
+7. Ensure consistent command patterns across resources
+
+Testing approach:
+- Test each CRUD operation against mock API
+- Verify command options and arguments work correctly
+- Test help documentation is complete and accurate
+- Ensure proper error handling for each command
+
+<info added on 2025-05-02T10:02:14.719Z>
+Additional implementation details for permission handling:
+
+1. Add permission level indicators to each command:
+   - Implement a permission tagging system (e.g., `[ADMIN]`, `[USER]`, `[PUBLIC]`) in command help text
+   - Create a permissions mapping file that associates each command with required privilege levels
+
+2. Permission visibility in command listings:
+   - Modify the command listing output to include permission indicators (e.g., `muxi resources list [ADMIN]`)
+   - Color-code permission levels in terminal output (red for admin, yellow for authenticated users, green for public)
+
+3. Help documentation enhancements:
+   - Add a "Required Permissions" section to each command's help text
+   - Include a global `--show-permissions` flag to filter commands by permission level
+   - Implement a `muxi permissions list` command to show all available commands grouped by required access level
+
+4. Runtime permission handling:
+   - Add pre-execution permission checks for all commands
+   - Implement clear error messages when permission checks fail (e.g., "This command requires admin privileges")
+   - Create a configuration option to hide commands the user doesn't have permission to execute
+
+5. Testing for permission handling:
+   - Test permission checks with various user roles
+   - Verify correct permission indicators in help text and command listings
+   - Test permission-based filtering of commands
+</info added on 2025-05-02T10:02:14.719Z>
+
+<info added on 2025-05-02T10:15:42.196Z>
+<info added on 2025-05-03T15:30:22.103Z>
+Enhanced permission visibility and user experience implementation:
+
+1. Permission-based command visibility:
+   - Implement a configuration-driven visibility system that dynamically shows/hides commands based on user role
+   - Add a `visibleTo` property in command metadata (values: 'admin', 'user', 'public', or array combinations)
+   - Create middleware that filters command availability in help menus and tab completion
+
+2. Advanced terminal output styling:
+   - Implement consistent color scheme using ANSI color codes: 
+     * Admin commands: bold red (#FF3333)
+     * User commands: amber (#FFBF00)
+     * Public commands: teal (#33CCCC)
+   - Add permission badges with unicode symbols (🔒 for admin, 🔑 for user, 🌐 for public)
+   - Support terminal color configuration via `.muxirc` file for accessibility
+
+3. Progressive disclosure in help documentation:
+   - Implement tiered help text that shows basic usage for all users
+   - Add `--verbose` flag to reveal advanced options requiring higher permissions
+   - Create contextual help that suggests alternative commands when permission checks fail
+
+4. User-friendly permission errors:
+   - Design hierarchical error messages with 3 components:
+     * Clear error headline ("Permission Denied: Admin privileges required")
+     * Explanation of why the action is restricted
+     * Actionable next steps (e.g., "Contact your administrator or try 'muxi resource view' instead")
+   - Add `--simulate` flag for admin-only commands that lets users preview command behavior without execution
+   - Implement error code system for programmatic handling (e.g., E_PERM_ADMIN, E_PERM_USER)
+
+5. Permission elevation workflows:
+   - Add temporary permission elevation via time-limited tokens
+   - Implement audit logging for all permission-related events
+   - Create helper command `muxi permissions request` to formalize elevation requests
+</info added on 2025-05-03T15:30:22.103Z>
+</info added on 2025-05-02T10:15:42.196Z>
+
+## 6. Implement output formatting system [pending]
+### Dependencies: 14.5
+### Description: Create a flexible output formatting system supporting multiple formats (JSON, table, etc.) with colorization and pagination.
+### Details:
+Implementation details:
+1. Implement JSON output formatter
+2. Create table output formatter with column customization
+3. Add YAML output option
+4. Implement colorized terminal output
+5. Add pagination for large result sets
+6. Create quiet/verbose output modes
+7. Implement output filtering options
+
+Testing approach:
+- Test each output format with various data structures
+- Verify pagination works correctly
+- Test colorization in different terminal environments
+- Ensure output is properly formatted for machine consumption (JSON/YAML)
+
+## 7. Implement advanced features and workflows [pending]
+### Dependencies: 14.5, 14.6
+### Description: Develop advanced CLI features including batch operations, interactive modes, and specialized workflows.
+### Details:
+Implementation details:
+1. Implement batch operation commands
+2. Add interactive shell mode
+3. Create workflow automation commands
+4. Implement resource import/export functionality
+5. Implement interactive wizards for complex operations
+6. Add support for command aliases and shortcuts
+
+Testing approach:
+- Test batch operations with various inputs
+- Verify interactive mode functionality
+- Ensure wizards guide users correctly through complex operations
+
+<info added on 2025-05-02T09:39:16.033Z>
+Implementation details:
+1. Implement interactive chat mode with conversation history tracking
+2. Add streaming support for real-time data processing and output
+3. Develop memory commands for storing and retrieving conversation context
+4. Implement knowledge commands for managing knowledge bases and retrieval
+5. Add MCP tool functionality for managing multiple AI providers
+6. Implement environment variable support for configuration management
+
+Testing approach:
+- Test interactive chat mode with multi-turn conversations
+- Verify streaming functionality with large responses
+- Test memory persistence across multiple sessions
+- Validate knowledge commands with various document types
+- Ensure MCP tool correctly manages different AI providers
+- Test environment variable configuration in different contexts
+
+Note: Shell completion functionality has been removed from this subtask as it's now scheduled for a later phase.
+</info added on 2025-05-02T09:39:16.033Z>
+
+<info added on 2025-05-02T10:15:56.895Z>
+<info added on 2025-05-15T14:22:08.123Z>
+Implementation details for streaming support:
+1. Implement event-stream handling for real-time API responses
+2. Add progress indicators for streaming responses (spinner, dots, etc.)
+3. Develop chunked response processing for large outputs
+4. Implement cancellation support during streaming operations
+5. Add colorized streaming output for better readability
+
+Command group implementation details:
+1. Agent commands:
+   - `create-agent`, `list-agents`, `update-agent`, `delete-agent`
+   - Agent configuration validation and schema enforcement
+   - Support for agent templates and presets
+
+2. Chat/Conversation commands:
+   - `chat`, `chat-stream`, `continue` commands with history management
+   - Support for different conversation formats and styles
+   - Implementation of system message templates
+
+3. Memory commands:
+   - `store-memory`, `list-memories`, `get-memory`, `delete-memory`
+   - Memory persistence layer with encryption support
+   - Memory search and filtering capabilities
+
+4. Knowledge commands:
+   - `add-document`, `list-documents`, `delete-document`, `search-knowledge`
+   - Document chunking and processing pipeline
+   - Vector storage integration for semantic search
+
+5. System commands:
+   - `info`, `version`, `status`, `config` commands
+   - Telemetry collection (with opt-out support)
+   - Diagnostic tools for troubleshooting
+
+6. MCP functionality:
+   - Provider management commands
+   - API key rotation and secure storage
+   - Fallback mechanisms between providers
+   - Cost tracking and usage reporting
+
+Testing approach:
+- Test streaming with various network conditions (latency, packet loss)
+- Verify command group interactions and dependencies
+- Test with mock API responses to simulate various provider behaviors
+- Validate error handling during streaming operations
+</info added on 2025-05-15T14:22:08.123Z>
+</info added on 2025-05-02T10:15:56.895Z>
+
+## 8. Create comprehensive documentation and finalize CLI [pending]
+### Dependencies: 14.7
+### Description: Complete the CLI implementation with comprehensive documentation, examples, and final polish.
+### Details:
+Implementation details:
+1. Create man pages for all commands
+2. Add examples to help text
+3. Implement a 'muxi examples' command with common usage patterns
+4. Create user guide documentation
+5. Add version information and update checking
+6. Implement telemetry (with opt-out)
+7. Perform final performance optimizations
+8. Add installation scripts and distribution packages
+9. Implement shell completion support (bash, zsh, PowerShell) as part of enhanced user experience
+
+Testing approach:
+- Verify all documentation is accurate and helpful
+- Test installation process on different platforms
+- Conduct end-to-end testing of complete workflows
+- Perform usability testing with sample users
+- Test shell completion functionality in supported shells
+
+## 9. Implement shell completion and enhanced user experience [pending]
+### Dependencies: 14.8
+### Description: Add shell completion and other user experience enhancements as part of Phase 5 implementation.
+### Details:
+Implementation details:
+1. Add shell completion for bash, zsh, and fish shells
+2. Implement command aliases and shortcuts for common operations
+3. Create an interactive terminal UI mode for enhanced visualization
+4. Add scripting helpers and automation features
+5. Implement configuration wizards for complex operations
+6. Create a command suggestion system for mistyped commands
+
+Testing approach:
+- Test shell completion in different shell environments
+- Verify aliases work correctly and don't conflict
+- Test terminal UI in different terminal emulators
+- Ensure scripting helpers work in various scripting contexts
+- Validate configuration wizards with different user inputs
+
+<info added on 2025-05-02T10:16:14.977Z>
+For shell completion implementation:
+- Bash: Use the `complete` command with custom completion functions that parse the CLI's command structure
+- Zsh: Implement completion using the `_arguments` and `_describe` zsh completion system
+- Fish: Create completion files in the `~/.config/fish/completions/` directory using fish's completion syntax
+
+For command aliases:
+- Create a configuration file (`~/.config/codebase-cli/aliases.yaml`) to store user-defined aliases
+- Implement common default aliases like `cb-init` for initialization, `cb-status` for status checks
+- Add alias management commands: `alias-add`, `alias-remove`, `alias-list`
+
+Terminal UI enhancements:
+- Implement a TUI mode using libraries like blessed, charm, or bubbletea
+- Add interactive components: selectable command menu, progress bars, and status dashboards
+- Include keyboard shortcuts (hjkl navigation, tab completion, ctrl+c to exit)
+- Support mouse interaction where available
+
+Configuration wizards:
+- Create step-by-step wizards for complex operations like project initialization and dependency setup
+- Implement validation for each wizard step with clear error messages
+- Add ability to save wizard configurations as templates for future use
+- Include "quick setup" mode that uses sensible defaults
+
+Command suggestion system:
+- Implement Levenshtein distance algorithm to suggest corrections for mistyped commands
+- Add contextual suggestions based on command history and current project state
+- Create a "did you mean?" prompt for commands that are close to valid commands
+</info added on 2025-05-02T10:16:14.977Z>
+
+## 10. Implement advanced integration features [pending]
+### Dependencies: 14.9
+### Description: Add advanced integration capabilities as part of Phase 6 implementation, including plugin support and CI/CD platform integration.
+### Details:
+Implementation details:
+1. Develop a plugin system for custom commands and extensions
+2. Implement integration with common CI/CD platforms (GitHub Actions, Jenkins, etc.)
+3. Create a Docker-based CLI version for containerized environments
+4. Add advanced telemetry and analytics capabilities with opt-out options
+5. Implement synchronization between multiple CLI instances
+6. Create a remote execution mode for server-based CLI operations
+
+Testing approach:
+- Test plugin loading and execution with sample plugins
+- Verify CI/CD integration with mock pipelines
+- Test Docker-based CLI in different container environments
+- Validate telemetry data collection and opt-out functionality
+- Test synchronization between multiple CLI instances
+- Ensure remote execution works securely across networks
+
+<info added on 2025-05-02T10:16:27.296Z>
+For the plugin system:
+- Implement a plugin registry with versioning support
+- Create a standardized plugin interface with lifecycle hooks (init, execute, cleanup)
+- Support both JavaScript and Python plugins through language-specific adapters
+- Implement plugin dependency resolution and conflict management
+- Add plugin marketplace integration for discovery and installation
+- Include sandboxing for security isolation of third-party plugins
+
+For CI/CD platform integration:
+- Develop platform-specific connectors for GitHub Actions, Jenkins, GitLab CI, CircleCI, and Azure DevOps
+- Implement webhook handlers for automated CLI execution on repository events
+- Create templated CI/CD configuration generators for each supported platform
+- Add pipeline status monitoring and notification capabilities
+- Support secure credential management for CI/CD authentication
+
+For Docker-based CLI:
+- Create multi-stage Dockerfile optimized for minimal image size
+- Implement volume mounting for persistent configuration and cache
+- Support for custom entrypoints and command aliasing
+- Add Kubernetes-specific features for running in cluster environments
+- Include health checks and container lifecycle management
+- Provide docker-compose templates for common usage scenarios
+
+For telemetry and analytics:
+- Implement anonymous usage tracking with unique installation IDs
+- Create dashboards for visualizing command usage patterns
+- Add performance metrics collection for command execution times
+- Implement secure data transmission with encryption
+- Create local caching for offline telemetry collection
+- Provide detailed opt-out controls with granular settings
+</info added on 2025-05-02T10:16:27.296Z>
 
