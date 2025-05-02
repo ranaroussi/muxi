@@ -154,7 +154,7 @@ orchestrator = Orchestrator(user_api_key="your_user_key", admin_api_key="your_ad
 app = muxi(user_api_key="your_user_key", admin_api_key="your_admin_key")
 ```
 
-Upon running, the MUXI API will display the following information:
+Upon running, the MUXI API will display the splash screen:
 
 ```
 ╭──────────────────────────────────────╮
@@ -174,7 +174,7 @@ Upon running, the MUXI API will display the following information:
 ╰──────────────────────────────────────╯
 ```
 
-If keys are not provided during initialization, temporary keys will be auto-generated and the startup message will include the generated API keys:
+If keys are not provided during initialization, temporary keys will be auto-generated and the startup splash screen will include the generated API keys:
 
 ```
 ╭──────────────────────────────────────╮
