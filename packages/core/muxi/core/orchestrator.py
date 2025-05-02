@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Union
 from loguru import logger
 
 from muxi.core.config import config
-from muxi.core.agent import Agent
+from muxi.core.agent import Agent, MCPServer
 from muxi.core.mcp import MCPMessage
 from muxi.core.mcp import MCPService
 from muxi.core.memory.buffer import SmartBufferMemory
@@ -170,7 +170,7 @@ class Orchestrator:
         system_message: Optional[str] = None,
         description: Optional[str] = None,
         set_as_default: bool = False,
-        mcp_server: Optional['MCPServer'] = None,  # noqa: F821
+        mcp_server: Optional[MCPServer] = None,
         request_timeout: Optional[int] = None,
     ) -> Agent:
         """
