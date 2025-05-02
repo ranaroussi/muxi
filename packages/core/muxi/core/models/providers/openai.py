@@ -71,19 +71,27 @@ class OpenAIModel(BaseModel):
         messages: List[Dict[str, Any]],
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
-        **kwargs
+        top_p: Optional[float] = None,
+        frequency_penalty: Optional[float] = None,
+        presence_penalty: Optional[float] = None,
+        stop: Optional[Union[str, List[str]]] = None,
+        **kwargs: Any,
     ) -> str:
         """
-        Generate a chat response from the model.
+        Generate a chat completion.
 
         Args:
-            messages: A list of message objects with role and content
-            temperature: Optional temperature parameter (overrides model default)
-            max_tokens: Optional maximum tokens to generate (overrides model default)
-            **kwargs: Additional model-specific parameters
+            messages: A list of messages in the conversation.
+            temperature: Controls randomness.
+            max_tokens: The maximum number of tokens to generate.
+            top_p: An alternative to sampling with temperature.
+            frequency_penalty: Penalize new tokens based on frequency.
+            presence_penalty: Penalize new tokens based on presence.
+            stop: Sequences where the API will stop generating further tokens.
+            **kwargs: Additional provider-specific parameters.
 
         Returns:
-            The model's response as a string
+            The generated text response.
         """
         try:
             # Create completion parameters
@@ -92,14 +100,28 @@ class OpenAIModel(BaseModel):
                 "messages": messages,
                 "temperature": temperature if temperature is not None else self.temperature,
                 **self.additional_params,
-                **kwargs
             }
 
-            # Add max_tokens if provided
+            # Add optional parameters if provided
             if max_tokens is not None:
                 params["max_tokens"] = max_tokens
             elif self.max_tokens is not None:
                 params["max_tokens"] = self.max_tokens
+
+            if top_p is not None:
+                params["top_p"] = top_p
+
+            if frequency_penalty is not None:
+                params["frequency_penalty"] = frequency_penalty
+
+            if presence_penalty is not None:
+                params["presence_penalty"] = presence_penalty
+
+            if stop is not None:
+                params["stop"] = stop
+
+            # Add any additional kwargs
+            params.update(kwargs)
 
             # Call OpenAI API
             response = await self.client.chat.completions.create(**params)
@@ -118,7 +140,7 @@ class OpenAIModel(BaseModel):
         self,
         texts: List[str],
         model: Optional[str] = None,
-        **kwargs
+        **kwargs: Any
     ) -> List[List[float]]:
         """
         Generate embeddings for a list of texts.
@@ -261,64 +283,3 @@ class OpenAIModel(BaseModel):
         """
         response = await self.client.embeddings.create(model="text-embedding-3-small", input=text)
         return response.data[0].embedding
-
-    async def generate_embeddings(self, texts: List[str], **kwargs: Any) -> List[List[float]]:
-        """
-        Generate embeddings for a list of texts.
-
-        Args:
-            texts: List of texts to generate embeddings for.
-            **kwargs: Additional provider-specific parameters.
-
-        Returns:
-            A list of embeddings, each as a list of floats.
-        """
-        model = kwargs.get("model", "text-embedding-3-small")
-        response = await self.client.embeddings.create(model=model, input=texts)
-        return [item.embedding for item in response.data]
-
-    async def chat(
-        self,
-        messages: List[Dict[str, str]],
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        top_p: Optional[float] = None,
-        frequency_penalty: Optional[float] = None,
-        presence_penalty: Optional[float] = None,
-        stop: Optional[Union[str, List[str]]] = None,
-        **kwargs: Any,
-    ) -> str:
-        """
-        Generate a chat completion.
-
-        Args:
-            messages: A list of messages in the conversation.
-            temperature: Controls randomness.
-            max_tokens: The maximum number of tokens to generate.
-            top_p: An alternative to sampling with temperature.
-            frequency_penalty: Penalize new tokens based on frequency.
-            presence_penalty: Penalize new tokens based on presence.
-            stop: Sequences where the API will stop generating further tokens.
-            **kwargs: Additional provider-specific parameters.
-
-        Returns:
-            The generated text response.
-        """
-        # Use specified parameters or fall back to instance defaults
-        temp = temperature if temperature is not None else self.temperature
-        max_tok = max_tokens if max_tokens is not None else self.max_tokens
-
-        # Use the client without await - the client handles async internally
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=temp,
-            max_tokens=max_tok,
-            top_p=top_p,
-            frequency_penalty=frequency_penalty,
-            presence_penalty=presence_penalty,
-            stop=stop,
-            **kwargs,
-        )
-
-        return response.choices[0].message.content
