@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 
 from muxi.core.orchestrator import Orchestrator
-from muxi.server.memory.buffer import BufferMemory
+from muxi.core.memory.buffer import BufferMemory
 from muxi.models.providers.openai import OpenAIModel
 
 # Load environment variables from .env file
@@ -27,7 +27,10 @@ async def main():
     )
 
     # Create a memory system
-    memory = BufferMemory(max_size=100)
+    memory = BufferMemory(
+        max_size=10,               # Context window size
+        buffer_multiplier=10,      # Total capacity = 10 × 10 = 100 messages
+    )
 
     # Create an orchestrator (manages agents)
     orchestrator = Orchestrator()

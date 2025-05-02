@@ -21,7 +21,10 @@ async def main():
     print("=== Config-based Agent Example ===\n")
 
     # Create the MUXI app
-    app = muxi()
+    app = muxi(
+        buffer_size=10,           # Context window size
+        buffer_multiplier=10,     # Total capacity = 10 × 10 = 100 messages
+    )
 
     # Determine the correct path to the config file
     examples_dir = Path(__file__).parent

@@ -17,7 +17,10 @@ load_dotenv()
 
 async def main():
     # Create a new MUXI instance
-    app = muxi()
+    app = muxi(
+        buffer_size=10,           # Context window size
+        buffer_multiplier=10,     # Total capacity = 10 × 10 = 100 messages
+    )
 
     # Add multiple agents with different specializations
     await app.add_agent("weather", "configs/weather_agent.yaml")

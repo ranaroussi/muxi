@@ -9,7 +9,8 @@
         "temperature": 0.2
     },
     "memory": {
-        "buffer": 15,
+        "buffer_size": 15,
+        "buffer_multiplier": 10,
         "long_term": true
     },
     "mcp_servers": [

@@ -97,6 +97,6 @@ The `configs/` directory contains example configuration files for agents:
 
 These files demonstrate different configuration options for agents, including:
 - Model configuration
-- Memory settings
+- Memory settings (buffer_size, buffer_multiplier)
 - Tool integration
 - MCP server connections

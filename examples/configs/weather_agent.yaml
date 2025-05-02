@@ -9,7 +9,8 @@ model:
   model: gpt-4o
   temperature: 0.7
 memory:
-  buffer: 10
+  buffer_size: 10
+  buffer_multiplier: 10
   long_term: true
 mcp_servers:
 - name: weather
