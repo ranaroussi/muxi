@@ -15,7 +15,7 @@ from loguru import logger
 from muxi.core.agent import Agent
 from muxi.core.orchestrator import Orchestrator
 from muxi.core.models.providers.openai import OpenAIModel
-from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.buffer import BufferMemory
 from muxi.core.memory.long_term import LongTermMemory
 from muxi.core.memory.memobase import Memobase
 from muxi.core.memory.sqlite import SQLiteMemory
@@ -32,7 +32,8 @@ class Muxi:
 
     def __init__(
         self,
-        buffer_memory: Optional[Union[int, SmartBufferMemory]] = None,
+        buffer_size: Optional[Union[int, BufferMemory]] = None,
+        buffer_multiplier: int = 10,
         long_term_memory: Optional[Union[str, bool, LongTermMemory, Memobase]] = None,
         credential_db_connection_string: Optional[str] = None,
         user_api_key: Optional[str] = None,
@@ -42,9 +43,11 @@ class Muxi:
         Initialize the declarative interface.
 
         Args:
-            buffer_memory: Buffer memory configuration
-                - If an integer, specifies the number of messages to keep in the buffer
-                - If a SmartBufferMemory instance, used directly
+            buffer_size: Context window size configuration
+                - If an integer, specifies the number of messages to keep in the context window
+                - If a BufferMemory instance, used directly
+            buffer_multiplier: Multiplier for the buffer capacity (default: 10)
+                - The actual buffer size will be buffer_size * buffer_multiplier
             long_term_memory: Long-term memory configuration
                 - If a string, treated as a file path to an SQLite database
                 - If True, creates a default SQLite database in the current directory
@@ -59,7 +62,8 @@ class Muxi:
 
         # Create memory systems from configurations
         buffer_mem, long_term_mem = self._create_memory_systems({
-            "buffer_memory": buffer_memory,
+            "buffer_memory": buffer_size,
+            "buffer_multiplier": buffer_multiplier,
             "long_term_memory": long_term_memory
         })
 
@@ -76,30 +80,45 @@ class Muxi:
 
     def _create_buffer_memory(
         self,
-        buffer_config: Optional[Union[int, SmartBufferMemory]]
-    ) -> Optional[SmartBufferMemory]:
+        buffer_config: Optional[Union[int, Dict[str, Any], BufferMemory]],
+        buffer_multiplier: int = 10
+    ) -> Optional[BufferMemory]:
         """
-        Create a smart buffer memory object from configuration.
+        Create a buffer memory object from configuration.
 
         Args:
             buffer_config: Buffer memory configuration. Can be:
-                - An integer (buffer size)
-                - A SmartBufferMemory instance
+                - An integer (context window size)
+                - A dictionary with 'window_size' and optional 'buffer_multiplier'
+                - A BufferMemory instance
                 - None (no buffer memory)
+            buffer_multiplier: Multiplier for the buffer capacity (default: 10)
 
         Returns:
-            Configured SmartBufferMemory instance or None.
+            Configured BufferMemory instance or None.
         """
         if buffer_config is None:
             return None
 
         if isinstance(buffer_config, int):
-            # Create buffer memory with specified size
-            # Use default non-vector search mode initially
-            # The model will be set later when an agent is created
-            return SmartBufferMemory(max_size=buffer_config)
+            # Create buffer memory with specified size and multiplier
+            return BufferMemory(
+                max_size=buffer_config,
+                buffer_multiplier=buffer_multiplier
+            )
 
-        # Assume it's already a SmartBufferMemory instance
+        if isinstance(buffer_config, dict):
+            # Extract window_size and buffer_multiplier from dict
+            window_size = buffer_config.get("window_size", 5)
+            config_multiplier = buffer_config.get("buffer_multiplier", buffer_multiplier)
+
+            # Create buffer with specified parameters
+            return BufferMemory(
+                max_size=window_size,
+                buffer_multiplier=config_multiplier
+            )
+
+        # Assume it's already a BufferMemory instance
         return buffer_config
 
     def _create_long_term_memory(
@@ -348,7 +367,11 @@ class Muxi:
         """
         # Create buffer memory
         buffer_config = memory_config.get("buffer_memory")
-        buffer_memory = self._create_buffer_memory(buffer_config)
+        buffer_multiplier = memory_config.get("buffer_multiplier", 10)
+        buffer_memory = self._create_buffer_memory(
+            buffer_config=buffer_config,
+            buffer_multiplier=buffer_multiplier
+        )
 
         # Create long-term memory if enabled
         long_term_config = memory_config.get("long_term_memory")

@@ -113,29 +113,50 @@ class ConfigLoader:
         if "memory" in result:
             memory = result["memory"].copy()
 
+            # Handle the new buffer_size parameter if present (preferred)
+            if "buffer_size" in memory:
+                buffer_size = memory.pop("buffer_size")  # Remove and get the value
+                # Create/update buffer config with the correct structure
+                if isinstance(memory.get("buffer"), dict):
+                    memory["buffer"] = memory.get("buffer")
+                else:
+                    memory["buffer"] = {}
+                memory["buffer"]["enabled"] = True
+                memory["buffer"]["window_size"] = int(buffer_size)
+                if "buffer_multiplier" not in memory["buffer"]:
+                    memory["buffer"]["buffer_multiplier"] = 10  # Default multiplier
+
             # Normalize buffer memory (number -> {enabled: true, window_size: number})
             if "buffer" in memory:
                 if isinstance(memory["buffer"], (int, float)):
                     buffer_size = int(memory["buffer"])
                     memory["buffer"] = {
                         "enabled": True,
-                        "window_size": buffer_size
+                        "window_size": buffer_size,
+                        "buffer_multiplier": 10  # Default multiplier
                     }
                 elif memory["buffer"] is True:
                     memory["buffer"] = {
                         "enabled": True,
-                        "window_size": 5  # Default window size
+                        "window_size": 5,  # Default window size
+                        "buffer_multiplier": 10  # Default multiplier
                     }
                 elif not isinstance(memory["buffer"], dict):
                     memory["buffer"] = {
                         "enabled": bool(memory["buffer"]),
-                        "window_size": 5  # Default window size
+                        "window_size": 5,  # Default window size
+                        "buffer_multiplier": 10  # Default multiplier
                     }
+                elif isinstance(memory["buffer"], dict):
+                    # Set default multiplier if not provided
+                    if "buffer_multiplier" not in memory["buffer"]:
+                        memory["buffer"]["buffer_multiplier"] = 10
             else:
                 # Ensure buffer memory is always available with default settings
                 memory["buffer"] = {
                     "enabled": True,
-                    "window_size": 5  # Default window size
+                    "window_size": 5,  # Default window size
+                    "buffer_multiplier": 10  # Default multiplier
                 }
 
             # Normalize long-term memory (boolean -> {enabled: boolean})
@@ -162,7 +183,8 @@ class ConfigLoader:
             result["memory"] = {
                 "buffer": {
                     "enabled": True,
-                    "window_size": 5  # Default window size
+                    "window_size": 5,  # Default window size
+                    "buffer_multiplier": 10  # Default multiplier
                 },
                 "long_term": {
                     "enabled": False

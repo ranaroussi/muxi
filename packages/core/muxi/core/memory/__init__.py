@@ -5,7 +5,7 @@ This module provides various memory implementations for storing and retrieving i
 """
 
 from muxi.core.memory.base import BaseMemory
-from muxi.core.memory.buffer import SmartBufferMemory as BufferMemory  # Alias for compatibility
+from muxi.core.memory.buffer import BufferMemory  # Now directly imported
 from muxi.core.memory.long_term import LongTermMemory
 from muxi.core.memory.memobase import Memobase
 from muxi.core.memory.sqlite import SQLiteMemory

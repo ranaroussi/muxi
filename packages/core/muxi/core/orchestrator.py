@@ -17,7 +17,7 @@ from muxi.core.config import config
 from muxi.core.agent import Agent, MCPServer
 from muxi.core.mcp import MCPMessage
 from muxi.core.mcp import MCPService
-from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.buffer import BufferMemory
 from muxi.core.memory.long_term import LongTermMemory
 from muxi.core.memory.memobase import Memobase
 from muxi.core.models.base import BaseModel
@@ -35,7 +35,7 @@ class Orchestrator:
 
     def __init__(
         self,
-        buffer_memory: Optional[SmartBufferMemory] = None,
+        buffer_memory: Optional[BufferMemory] = None,
         long_term_memory: Optional[Union[LongTermMemory, Memobase]] = None,
         auto_extract_user_info: bool = True,
         extraction_model: Optional[BaseModel] = None,
@@ -47,7 +47,7 @@ class Orchestrator:
         Initialize the orchestrator with optional centralized memory.
 
         Args:
-            buffer_memory: Optional smart buffer memory for short-term context across all agents.
+            buffer_memory: Optional buffer memory for short-term context across all agents.
             long_term_memory: Optional long-term memory for persistent storage across all agents.
             auto_extract_user_info: Whether to automatically extract user information.
             extraction_model: Optional model to use for automatic information extraction.

@@ -17,7 +17,7 @@ from muxi.core.memory.base import BaseMemory
 from muxi.core.models.base import BaseModel
 
 
-class SmartBufferMemory(BaseMemory):
+class BufferMemory(BaseMemory):
     """
     A smart buffer memory implementation with semantic search capabilities.
 
@@ -29,36 +29,45 @@ class SmartBufferMemory(BaseMemory):
     def __init__(
         self,
         max_size: int = 100,
+        buffer_multiplier: int = 10,
         vector_dimension: int = 1536,
         model: Optional[BaseModel] = None,
         default_score: float = 0.8,
     ):
         """
-        Initialize the smart buffer memory.
+        Initialize the buffer memory.
 
         Args:
-            max_size: The maximum number of messages to store.
+            max_size: The context window size (number of messages to include in immediate context).
+            buffer_multiplier: Multiplier for the actual buffer capacity (default: 10).
+                The actual buffer size will be max_size * buffer_multiplier.
             vector_dimension: Dimension of the embedding vectors.
             model: The language model to use for generating embeddings.
                 If None, the memory will fall back to recency-based retrieval.
             default_score: Default similarity score for recency-based results.
         """
-        self.max_size = max_size
+        self.context_window_size = max_size
+        self.buffer_multiplier = buffer_multiplier
+        self.max_size = max_size * buffer_multiplier
         self.dimension = vector_dimension
         self.model = model
         self.default_score = default_score
 
         # Use deque for ordered storage with automatic cleanup
-        self.buffer = deque(maxlen=max_size)
+        self.buffer = deque(maxlen=self.max_size)
 
         # Initialize FAISS index if we have a model
         self.has_vector_search = model is not None
         if self.has_vector_search:
             self.index = faiss.IndexFlatL2(self.dimension)
             self.embedding_map = {}  # Maps buffer indices to FAISS indices
-            logger.info("Initialized SmartBufferMemory with vector search capabilities")
+            logger.info(f"Initialized BufferMemory with vector search capabilities "
+                        f"(context window: {self.context_window_size}, "
+                        f"total capacity: {self.max_size})")
         else:
-            logger.info("Initialized SmartBufferMemory in recency-only mode (no model provided)")
+            logger.info(f"Initialized BufferMemory in recency-only mode (no model provided) "
+                        f"(context window: {self.context_window_size}, "
+                        f"total capacity: {self.max_size})")
 
     async def add(
         self,
@@ -354,12 +363,10 @@ class SmartBufferMemory(BaseMemory):
         """
         return {
             "total_items": len(self.buffer),
+            "context_window_size": self.context_window_size,
+            "buffer_multiplier": self.buffer_multiplier,
             "max_size": self.max_size,
             "vector_search_enabled": self.has_vector_search,
             "vector_dimension": self.dimension,
             "vector_index_size": self.index.ntotal if self.has_vector_search else 0,
         }
-
-
-# Alias for backward compatibility
-BufferMemory = SmartBufferMemory
