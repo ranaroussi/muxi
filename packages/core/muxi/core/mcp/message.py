@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from loguru import logger
 
-from packages.core.models.base import BaseModel
+from muxi.core.models.base import BaseModel
 
 
 @dataclass

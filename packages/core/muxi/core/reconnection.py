@@ -6,13 +6,12 @@ exponential backoff for services that may experience transient failures.
 """
 
 import asyncio
-import logging
 import random
 import time
 from datetime import datetime
 from typing import Any, Callable, Dict, TypeVar, Union
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 # Type variables
 T = TypeVar('T')  # Return type for retried functions
@@ -177,9 +176,10 @@ async def retry_async(
 
             # If this was the last attempt, don't retry
             if attempt > config.max_retries:
-                logger.warning(
-                    f"Operation failed after {config.max_retries + 1} attempts: {str(e)}"
-                )
+                part1 = f"Operation failed after {config.max_retries + 1} attempts: "
+                part2 = str(e)
+                msg = part1 + part2
+                logger.warning(msg)
                 raise
 
             # Calculate delay

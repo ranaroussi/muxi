@@ -4,16 +4,7 @@ Knowledge base module for MUXI Framework.
 This module provides classes for handling agent-level knowledge.
 """
 
-import os
-import pickle
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-
-import faiss
-import numpy as np
-from loguru import logger
-
-from packages.core.utils import load_document, chunk_text
 
 
 class KnowledgeSource:

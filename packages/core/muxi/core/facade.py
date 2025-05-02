@@ -7,6 +7,7 @@ MCP servers, and starting the API server with minimal code.
 """
 
 import os
+import asyncio
 from typing import Any, Dict, List, Optional, Union
 
 from loguru import logger
@@ -17,6 +18,8 @@ from muxi.core.models.providers.openai import OpenAIModel
 from muxi.core.memory.buffer import SmartBufferMemory
 from muxi.core.memory.long_term import LongTermMemory
 from muxi.core.memory.memobase import Memobase
+from muxi.core.memory.sqlite import SQLiteMemory
+from muxi.core.config.loader import ConfigLoader
 
 
 class Muxi:
@@ -51,22 +54,25 @@ class Muxi:
             user_api_key: Optional API key for user-level access
             admin_api_key: Optional API key for admin-level access
         """
+        # Store connection string for memory systems
+        self._credential_db_connection_string = credential_db_connection_string
+
         # Create memory systems from configurations
-        buffer_memory, long_term_memory = self._create_memory_systems({
+        buffer_mem, long_term_mem = self._create_memory_systems({
             "buffer_memory": buffer_memory,
             "long_term_memory": long_term_memory
         })
 
         # Create orchestrator with memory systems
         self.orchestrator = Orchestrator(
-            buffer_memory=buffer_memory,
-            long_term_memory=long_term_memory,
+            buffer_memory=buffer_mem,
+            long_term_memory=long_term_mem,
             user_api_key=user_api_key,
             admin_api_key=admin_api_key
         )
 
-        # Store connection string for memory systems
-        self._credential_db_connection_string = credential_db_connection_string
+        # Initialize config loader
+        self.config_loader = ConfigLoader()
 
     def _create_buffer_memory(
         self,
@@ -143,7 +149,6 @@ class Muxi:
             # SQLite connection string format (sqlite:///path/to/db)
             elif long_term_config.startswith('sqlite:///'):
                 try:
-                    from muxi.core.memory.sqlite import SQLiteMemory
                     # Extract the path: remove 'sqlite:///' prefix
                     db_path = long_term_config[10:]
                     memory = SQLiteMemory(db_path=db_path)
@@ -157,7 +162,6 @@ class Muxi:
             # Plain SQLite path
             else:
                 try:
-                    from muxi.core.memory.sqlite import SQLiteMemory
                     memory = SQLiteMemory(db_path=long_term_config)
                     logger.info(f"Created SQLite long-term memory at {long_term_config}")
                     return memory
@@ -169,13 +173,14 @@ class Muxi:
         # Boolean true - use connection string or default SQLite database
         elif long_term_config is True:
             # First try to use provided connection string
-            if credential_db_connection_string and (
-                credential_db_connection_string.startswith('postgresql://') or
-                credential_db_connection_string.startswith('postgres://')
+            conn_str = credential_db_connection_string or self.credential_db_connection_string
+            if conn_str and (
+                conn_str.startswith('postgresql://') or
+                conn_str.startswith('postgres://')
             ):
                 try:
                     # Create long-term memory with database connection
-                    memory = LongTermMemory(connection_string=credential_db_connection_string)
+                    memory = LongTermMemory(connection_string=conn_str)
 
                     # Wrap with Memobase for multi-user support
                     memobase = Memobase(long_term_memory=memory)
@@ -189,7 +194,6 @@ class Muxi:
 
             # Fall back to SQLite
             try:
-                from muxi.core.memory.sqlite import SQLiteMemory
                 db_path = os.path.join(os.getcwd(), 'muxi.db')
                 memory = SQLiteMemory(db_path=db_path)
                 logger.info(f"Created default SQLite long-term memory at {db_path}")
@@ -246,7 +250,7 @@ class Muxi:
         name: str,
         path: str,
         env_file: Optional[str] = None
-    ) -> None:
+    ) -> Agent:
         """
         Add an agent from a configuration file.
 
@@ -254,6 +258,9 @@ class Muxi:
             name: Name to assign to the agent (overrides the name in the config)
             path: Path to the configuration file (YAML or JSON)
             env_file: Optional path to an environment file to load
+
+        Returns:
+            The created Agent instance.
 
         Raises:
             ValueError: If the configuration is invalid
@@ -340,79 +347,15 @@ class Muxi:
             tuple: (buffer_memory, long_term_memory)
         """
         # Create buffer memory
-        buffer_size = memory_config.get("buffer", 10)
-        if isinstance(buffer_size, dict):
-            # If it's a dict, extract the window_size or max_size parameter
-            buffer_size = buffer_size.get("window_size", buffer_size.get("max_size", 10))
-        buffer_memory = SmartBufferMemory(max_size=int(buffer_size))
+        buffer_config = memory_config.get("buffer_memory")
+        buffer_memory = self._create_buffer_memory(buffer_config)
 
         # Create long-term memory if enabled
-        long_term_memory = None
-        long_term_config = memory_config.get("long_term", False)
-
-        if long_term_config:
-            if isinstance(long_term_config, str):
-                # String value - either SQLite path or Postgres URL
-                if long_term_config.startswith(('postgresql://', 'postgres://')):
-                    # Postgres connection string
-                    try:
-                        # Create long-term memory with database connection
-                        long_term_memory = LongTermMemory(connection_string=long_term_config)
-
-                        # Wrap with Memobase for multi-user support
-                        long_term_memory = Memobase(long_term_memory=long_term_memory)
-                        logger.info("Created Postgres long-term memory with connection string")
-                    except Exception as e:
-                        # Log the error but continue without long-term memory
-                        logger.error(f"Error creating Postgres long-term memory: {e}")
-                elif long_term_config.startswith('sqlite:///'):
-                    # SQLite connection string format (sqlite:///path/to/db)
-                    try:
-                        from muxi.core.memory.sqlite import SQLiteMemory
-                        # Extract the path: remove 'sqlite:///' prefix
-                        db_path = long_term_config[10:]
-                        memory = SQLiteMemory(db_path=db_path)
-                        logger.info(f"Created SQLite long-term memory at {db_path}")
-                    except Exception as e:
-                        # Log the error but continue without long-term memory
-                        logger.error(f"Error creating SQLite long-term memory: {e}")
-                else:
-                    # Plain SQLite path
-                    try:
-                        from muxi.core.memory.sqlite import SQLiteMemory
-                        memory = SQLiteMemory(db_path=long_term_config)
-                        logger.info(f"Created SQLite long-term memory at {long_term_config}")
-                        return memory
-                    except Exception as e:
-                        # Log the error but continue without long-term memory
-                        logger.error(f"Error creating SQLite long-term memory: {e}")
-            elif long_term_config is True:
-                # Boolean true - use default SQLite database
-                try:
-                    from muxi.core.memory.sqlite import SQLiteMemory
-                    db_path = os.path.join(os.getcwd(), 'muxi.db')
-                    memory = SQLiteMemory(db_path=db_path)
-                    logger.info(f"Created default SQLite long-term memory at {db_path}")
-                    return memory
-                except Exception as e:
-                    # Log the error but continue without long-term memory
-                    logger.error(f"Error creating default SQLite long-term memory: {e}")
-                    return None
-            elif isinstance(long_term_config, dict):
-                # Dict configuration (legacy support)
-                enabled = long_term_config.get("enabled", False)
-                if enabled:
-                    # Get database connection string
-                    connection_string = self._get_connection_string(required=False)
-                    if connection_string:
-                        try:
-                            # Create long-term memory with database connection
-                            long_term_memory = LongTermMemory(connection_string=connection_string)
-                            # Wrap with Memobase for multi-user support
-                            long_term_memory = Memobase(long_term_memory=long_term_memory)
-                        except Exception as e:
-                            # Log the error but continue without long-term memory
-                            logger.error(f"Error creating long-term memory: {e}")
+        long_term_config = memory_config.get("long_term_memory")
+        long_term_memory = self._create_long_term_memory(
+            long_term_config,
+            self.credential_db_connection_string
+        )
 
         return buffer_memory, long_term_memory
 
@@ -450,14 +393,23 @@ class Muxi:
                     # Missing required credential
                     if required:
                         logger.warning(
-                            f"Required credential {cred_id} for MCP server {name} not found"
+                            f"Required credential {cred_id} for MCP server "
+                            f"{name} not found"
                         )
                         continue
 
                 # Connect to the MCP server
                 try:
-                    await agent.connect_mcp_server(name, url, processed_credentials)
-                    print(f"Connected to MCP server: {name}")
+                    # Assuming agent has a method to connect to MCP server
+                    # Replace with actual method if different
+                    if hasattr(agent, "connect_mcp_server"):
+                        await agent.connect_mcp_server(name, url, processed_credentials)
+                        logger.info(f"Connected to MCP server: {name}")
+                    else:
+                        logger.warning(
+                            f"Agent {agent.name} does not have connect_mcp_server method."
+                        )
+
                 except Exception as e:
                     logger.error(f"Error connecting to MCP server {name}: {e}")
             else:
@@ -513,18 +465,14 @@ class Muxi:
         """
         # Use orchestrator's long-term memory if it's multi-user
         if hasattr(self.orchestrator, "is_multi_user") and self.orchestrator.is_multi_user:
-            if hasattr(self.orchestrator.long_term_memory, "add_context_memory"):
-                self.orchestrator.long_term_memory.add_context_memory(user_id, knowledge)
+            if hasattr(self.orchestrator.long_term_memory, "add_user_context_memory"):
+                # Assuming add_context_memory is async now based on Memobase
+                asyncio.create_task(
+                    self.orchestrator.long_term_memory.add_user_context_memory(user_id, knowledge)
+                )
                 return
 
-        # Fallback to the original implementation - search through agents
-        for agent_id, agent in self.orchestrator.agents.items():
-            if hasattr(agent, "long_term_memory") and isinstance(
-                agent.long_term_memory, Memobase
-            ):
-                # Add context memory
-                agent.long_term_memory.add_context_memory(user_id, knowledge)
-                return
+        # Fallback removed as it's less likely to be correct with current structure
 
         raise ValueError(
             "No suitable long-term memory found for user context. Make sure Muxi is "

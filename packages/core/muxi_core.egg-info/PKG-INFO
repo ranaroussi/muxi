@@ -1,0 +1,17 @@
+Metadata-Version: 2.2
+Name: muxi-core
+Version: 0.1.0
+Summary: MUXI Core Framework
+Author: Ran Aroussi
+Author-email: ran@aroussi.com
+Requires-Python: >=3.8
+Requires-Dist: loguru
+Requires-Dist: pydantic
+Requires-Dist: openai>=1.0.0
+Requires-Dist: faiss-cpu
+Requires-Dist: numpy>=1.20.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

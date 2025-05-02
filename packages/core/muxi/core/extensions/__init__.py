@@ -4,9 +4,15 @@ Extensions for the MUXI Framework.
 This module provides extension points for adding functionality to the framework.
 """
 
-# Import any extensions that should be available by default
+# Dynamically populate __all__ based on available extensions
+__all__ = []
+
 try:
-    from packages.core.extensions.sqlite_vec import SQLiteVecExtension
-    __all__ = ["SQLiteVecExtension"]
+    # Import specifically to check availability and add to __all__
+    from .sqlite_vec import SQLiteVecExtension
+    __all__.append("SQLiteVecExtension")
+    # Optionally, delete the import if not needed elsewhere in this file
+    # del SQLiteVecExtension
 except ImportError:
-    __all__ = []
+    # SQLiteVecExtension is optional
+    pass

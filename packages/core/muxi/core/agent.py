@@ -11,7 +11,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from muxi.core.mcp import MCPMessage, ToolParser, MCPService
 from muxi.core.models.base import BaseModel
-from muxi.core.knowledge.base import KnowledgeSource
 
 
 # Simple class to represent an MCP server
@@ -56,7 +55,6 @@ class Agent:
         agent_id: Optional[str] = None,
         name: Optional[str] = None,
         mcp_server: Optional[MCPServer] = None,
-        knowledge_sources: Optional[List[KnowledgeSource]] = None,
         request_timeout: Optional[int] = None,
     ):
         """
@@ -69,7 +67,6 @@ class Agent:
             agent_id: Optional unique ID for the agent. If None, generates a UUID.
             name: Optional name for the agent (e.g., "Customer Service Bot").
             mcp_server: Optional MCP server for tool calling and external integrations.
-            knowledge_sources: Optional list of knowledge sources to augment the agent.
             request_timeout: Optional timeout in seconds for MCP requests
                 (default: use orchestrator's timeout).
         """
@@ -96,9 +93,6 @@ class Agent:
             self.request_timeout = orchestrator.request_timeout
         else:
             self.request_timeout = 60  # Default fallback
-
-        # Set up knowledge sources
-        self.knowledge_sources = knowledge_sources or []
 
         # Set up MCP service access
         self._mcp_service = MCPService.get_instance()

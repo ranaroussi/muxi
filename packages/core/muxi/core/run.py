@@ -4,11 +4,11 @@ Run functionality for the MUXI core.
 This module contains the core functionality for starting and running the MUXI servers.
 """
 
-import logging
 import socket
+from loguru import logger
 
 # Configure logging
-logger = logging.getLogger("run")
+# logger = logging.getLogger("run") # Removed - loguru handles this
 
 
 def is_port_in_use(port):

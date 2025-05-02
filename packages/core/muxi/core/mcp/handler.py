@@ -11,7 +11,6 @@ Note on MCP SDK: The MCP Python SDK (from the mcp package) is now available on P
 """
 
 import json
-import logging
 import uuid
 from typing import Any, Dict, List, Optional, Callable, AsyncGenerator
 import asyncio
@@ -20,7 +19,7 @@ import time
 from datetime import datetime
 from mcp import JSONRPCRequest
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class MCPError(Exception):

@@ -1,0 +1,5 @@
+loguru
+pydantic
+openai>=1.0.0
+faiss-cpu
+numpy>=1.20.0

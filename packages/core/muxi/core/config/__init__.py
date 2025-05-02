@@ -4,11 +4,11 @@ Configuration for the MUXI Framework.
 This module provides configuration settings for the MUXI Framework.
 """
 
-from packages.core.config.database import DatabaseConfig, database_config
-from packages.core.config.loader import ConfigLoader
-from packages.core.config.memory import MemoryConfig, memory_config
-from packages.core.config.model import ModelConfig, model_config
-from packages.core.config.routing import RoutingConfig, routing_config
+from muxi.core.config.database import DatabaseConfig, database_config
+from muxi.core.config.loader import ConfigLoader
+from muxi.core.config.memory import MemoryConfig, memory_config
+from muxi.core.config.model import ModelConfig, model_config
+from muxi.core.config.routing import RoutingConfig, routing_config
 
 from pydantic import BaseModel, Field
 

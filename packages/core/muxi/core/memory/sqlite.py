@@ -16,8 +16,8 @@ from typing import (
 import numpy as np
 from loguru import logger
 
-from packages.core.memory.base import BaseMemory
-from packages.core.extensions import SQLiteVecExtension
+from muxi.core.memory.base import BaseMemory
+from muxi.core.extensions import SQLiteVecExtension
 
 
 class SQLiteMemory(BaseMemory):

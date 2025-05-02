@@ -10,7 +10,7 @@ import json
 import time
 from typing import Any, Dict, List, Optional, Union
 
-from packages.core.memory.long_term import LongTermMemory
+from muxi.core.memory.long_term import LongTermMemory
 
 
 class Memobase:

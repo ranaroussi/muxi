@@ -6,13 +6,12 @@ automatic reconnection capabilities.
 """
 
 import asyncio
-import logging
 from typing import Any, Dict, List, Optional
 
-from packages.core.mcp.handler import MCPHandler, MCPConnectionError
-from packages.core.reconnection import RetryConfiguration, with_retries
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+from muxi.core.mcp.handler import MCPHandler, MCPConnectionError
+from muxi.core.reconnection import RetryConfiguration, with_retries
 
 
 class ReconnectingMCPHandler(MCPHandler):

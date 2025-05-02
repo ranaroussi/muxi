@@ -13,8 +13,9 @@ from sqlalchemy import Column, DateTime, String, Text, create_engine, desc, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-from packages.core.config import config
-from packages.core.utils.id_generator import get_default_nanoid
+from muxi.core.config import config
+from muxi.core.utils.id_generator import get_default_nanoid
+from muxi.core.models.base import BaseModel
 
 # Create SQLAlchemy Base
 Base = declarative_base()
@@ -58,6 +59,7 @@ class LongTermMemory:
         connection_string: Optional[str] = None,
         dimension: int = config.memory.vector_dimension,
         default_collection: str = "default",
+        embedding_provider: Optional[BaseModel] = None
     ):
         """
         Initialize the long-term memory.
@@ -67,10 +69,12 @@ class LongTermMemory:
                 will be loaded from the configuration.
             dimension: The dimension of the vectors to store.
             default_collection: The default collection to use.
+            embedding_provider: The embedding provider to use.
         """
         self.dimension = dimension
         self.default_collection = default_collection
         self.connection_string = connection_string or config.database.connection_string
+        self.embedding_provider = embedding_provider
 
         # Create engine and session
         self.engine = create_engine(self.connection_string)

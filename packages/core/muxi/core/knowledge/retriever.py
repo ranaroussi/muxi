@@ -6,7 +6,7 @@ This module provides a retriever class for getting knowledge from various source
 
 from typing import Any, Dict, List, Optional
 
-from packages.core.knowledge.base import KnowledgeHandler, KnowledgeSource
+from muxi.core.knowledge.base import KnowledgeHandler, KnowledgeSource
 
 
 class Retriever:

@@ -11,8 +11,8 @@ from typing import Any, Dict, List, Optional, Union
 from loguru import logger
 from openai import AsyncOpenAI, APIError
 
-from packages.core.models.base import BaseModel
-from packages.core.mcp import MCPMessage, MCPToolCall
+from muxi.core.models.base import BaseModel
+from muxi.core.mcp import MCPMessage, MCPToolCall
 
 
 class OpenAIModel(BaseModel):

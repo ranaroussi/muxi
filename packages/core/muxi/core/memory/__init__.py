@@ -4,13 +4,12 @@ Memory module for MUXI Framework.
 This module provides various memory implementations for storing and retrieving information.
 """
 
-from packages.core.memory.base import BaseMemory
-from packages.core.memory.buffer import BufferMemory
-from packages.core.memory.long_term import LongTermMemory
-from packages.core.memory.memobase import Memobase
-from packages.core.memory.sqlite import SQLiteMemory
-from packages.core.memory.vector import VectorMemory
-from packages.core.memory.context_memory import ContextMemory
+from muxi.core.memory.base import BaseMemory
+from muxi.core.memory.buffer import SmartBufferMemory as BufferMemory  # Alias for compatibility
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
+from muxi.core.memory.sqlite import SQLiteMemory
+from muxi.core.memory.context_memory import ContextMemory
 
 __all__ = [
     "BaseMemory",
@@ -18,6 +17,6 @@ __all__ = [
     "LongTermMemory",
     "Memobase",
     "SQLiteMemory",
-    "VectorMemory",
+    # "VectorMemory",  # Removed
     "ContextMemory",
 ]

@@ -5,15 +5,11 @@ This module provides the MCPService class for interacting with MCP servers.
 """
 
 import asyncio
-import json
-from typing import Any, Dict, List, Optional, Union
-import uuid
+from typing import Any, Dict, Optional
 
-import aiohttp
 from loguru import logger
 
-from packages.core.mcp.message import MCPMessage
-from packages.core.models.base import BaseModel
+from muxi.core.models.base import BaseModel
 
 
 class MCPService:
@@ -39,6 +35,18 @@ class MCPService:
 
         # Dictionary of registered MCP handlers
         self.mcp_handlers = {}
+
+        # Dictionary to store handler instances
+        self.handlers = {}
+
+        # Dictionary to store connection details
+        self.connections = {}
+
+        # Dictionary to store locks for each handler
+        self.locks = {}
+
+        # Dictionary to store discovered tools
+        self.tool_registry = {}
 
     async def register_server(
         self,
@@ -74,26 +82,6 @@ class MCPService:
         }
         return server_id
 
-    async def list_tools(
-        self, server_id: Optional[str] = None
-    ) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        List available tools from MCP servers.
-
-        Args:
-            server_id: Optional server ID to filter by
-
-        Returns:
-            Dictionary of server IDs to lists of tools
-        """
-        # This is just a placeholder implementation
-        logger.info("Listing MCP tools")
-
-        if server_id and server_id in self.servers:
-            return {server_id: []}
-
-        return {server_id: [] for server_id in self.servers}
-
     async def register_mcp_server(
         self,
         server_id: str,
@@ -123,6 +111,9 @@ class MCPService:
         # Initialize the handler
         async with self.locks[server_id]:
             try:
+                # Import MCPHandler here to avoid circular imports
+                from muxi.core.mcp.handler import MCPHandler
+
                 # Create and initialize the MCP handler
                 handler = MCPHandler(model=model)
 
@@ -206,7 +197,7 @@ class MCPService:
             try:
                 # Use request timeout from parameters,
                 # or fall back to the one saved during server registration
-                default_timeout = self.connections[server_id].get("request_timeout", 60)  # noqa: E501
+                default_timeout = self.connections[server_id].get("request_timeout", 60)
                 timeout = request_timeout if request_timeout is not None else default_timeout
 
                 # Check if we need to temporarily modify the timeout
@@ -237,58 +228,6 @@ class MCPService:
                 # Restore the original timeout if we changed it
                 if restore_timeout and server_name in handler.active_connections:
                     handler.active_connections[server_name].request_timeout = original_timeout
-
-    async def list_tools(self, server_id: Optional[str] = None) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        List available tools from MCP servers.
-
-        Args:
-            server_id: Optional server ID to list tools from a specific server
-
-        Returns:
-            Dictionary mapping server IDs to lists of available tools
-        """
-        result = {}
-
-        if server_id:
-            # List tools from specific server
-            if server_id not in self.handlers:
-                raise ValueError(f"Unknown MCP server: {server_id}")
-
-            handler = self.handlers[server_id]
-            server_name = self.connections[server_id]["server_name"]
-
-            try:
-                tools = await handler.list_tools(server_name)
-                result[server_id] = tools
-
-                # Update the tool registry
-                self.tool_registry[server_id] = {
-                    tool.get("name", f"unknown_{i}"): tool
-                    for i, tool in enumerate(tools)
-                }
-            except Exception as e:
-                logger.error(f"Error listing tools from server {server_id}: {str(e)}")
-                result[server_id] = []
-
-        else:
-            # List tools from all servers
-            for sid, handler in self.handlers.items():
-                server_name = self.connections[sid]["server_name"]
-                try:
-                    tools = await handler.list_tools(server_name)
-                    result[sid] = tools
-
-                    # Update the tool registry
-                    self.tool_registry[sid] = {
-                        tool.get("name", f"unknown_{i}"): tool
-                        for i, tool in enumerate(tools)
-                    }
-                except Exception as e:
-                    logger.error(f"Error listing tools from server {sid}: {str(e)}")
-                    result[sid] = []
-
-        return result
 
     async def disconnect_server(self, server_id: str) -> bool:
         """
