@@ -124,7 +124,7 @@ Key architectural components:
 1. **Core Package**: Contains the essential framework components including Agent, Orchestrator, Memory systems, and MCP implementation. The orchestrator now centralizes memory management and API key handling.
 
 2. **Memory Systems**: Implemented in `packages/core/muxi/core/memory/`:
-   - SmartBufferMemory with FAISS-backed vector search (buffer.py)
+   - BufferMemory with FAISS-backed vector search (buffer.py)
    - Long-term memory with vector database support (long_term.py)
    - Multi-user memory partitioning (memobase.py)
    - Vector database integrations for SQLite and PostgreSQL

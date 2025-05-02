@@ -142,7 +142,8 @@ load_dotenv()
 
 # Initialize MUXI with memory configuration
 app = muxi(
-  buffer_memory=10,  # Sets buffer window size to 10
+  buffer_size=10,          # Sets context window size to 10 messages
+  buffer_multiplier=10,    # Sets total buffer capacity to 10 × 10 = 100 messages
   long_term_memory="postgresql://user:pass@localhost/db",  # Enables long-term memory
   config_file="configs/muxi_config.yaml"  # Load agent configurations from file
 )

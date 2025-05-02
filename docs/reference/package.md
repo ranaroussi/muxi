@@ -167,7 +167,7 @@ MUXI uses a consistent import structure across all packages:
 # Core imports
 from muxi.core.agent import Agent
 from muxi.core.orchestrator import Orchestrator
-from muxi.core.memory.buffer import SmartBufferMemory
+from muxi.core.memory.buffer import BufferMemory
 from muxi.core.memory.long_term import LongTermMemory
 from muxi.core.mcp.service import MCPService
 from muxi.core.models.providers.openai import OpenAIModel

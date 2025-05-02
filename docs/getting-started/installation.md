@@ -66,6 +66,7 @@ Create a basic configuration file for your application:
 orchestrator:
   memory:
     buffer_size: 10
+    buffer_multiplier: 10
     long_term:
       type: "sqlite"
       connection_string: "memory.db"
