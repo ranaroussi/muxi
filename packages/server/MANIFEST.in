@@ -1,2 +1,0 @@
-recursive-include ../../extensions *
-recursive-include src/muxi/extensions *
