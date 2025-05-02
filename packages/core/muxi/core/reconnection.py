@@ -163,7 +163,8 @@ async def retry_async(
     # Try the operation with retries
     last_exception = None
 
-    for attempt in range(1, config.max_retries + 2):  # +2 because range is exclusive and we want the initial try
+    for attempt in range(1, config.max_retries + 2):
+        # ^ +2 because range is exclusive and we want the initial try
         stats.record_attempt()
 
         try:

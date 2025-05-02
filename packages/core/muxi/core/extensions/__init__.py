@@ -11,8 +11,7 @@ try:
     # Import specifically to check availability and add to __all__
     from .sqlite_vec import SQLiteVecExtension
     __all__.append("SQLiteVecExtension")
-    # Optionally, delete the import if not needed elsewhere in this file
-    # del SQLiteVecExtension
+    del SQLiteVecExtension
 except ImportError:
     # SQLiteVecExtension is optional
     pass
