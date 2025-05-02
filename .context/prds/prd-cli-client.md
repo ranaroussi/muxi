@@ -63,7 +63,7 @@ The CLI will use an INI-style configuration file similar to AWS CLI and MySQL cl
 default_profile = local
 output_format = text
 color = true
-telemetry = 0 # 0 = off, 1 = on (default)
+;telemetry = 0 ; 0 = off, 1 = on (default)
 
 [profile local]
 host = http://localhost:8000
