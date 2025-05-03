@@ -223,11 +223,16 @@ Based on prd-a2a.md specifications:
 
 ### 7. LLM Providers
 
-- [x] Implement OpenAI LLM provider
-- [ ] Implement Anthropic LLM provider
-- [ ] Implement Gemini LLM provider
-- [ ] Implement Grok LLM provider
-- [ ] Add support for local models (e.g., Llama, Mistral, DeepSeek)
+- [x] OpenAI
+- [ ] Anthropic
+- [ ] Gemini/VertexAI (Google)
+- [ ] xAI
+- [ ] Azure OpenAI
+- [ ] HuggingFace
+- [ ] Openrouter
+- [ ] Local models (via Ollama)
+- [ ] Amazon Nova
+- [ ] NVIDIA
 - [ ] Create a model router for fallback and cost optimization
 
 ### 8. Deployment & Package Distribution
