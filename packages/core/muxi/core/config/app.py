@@ -38,7 +38,8 @@ class AppConfig(BaseModel):
     system_message: str = Field(
         default_factory=lambda: os.getenv(
             "SYSTEM_MESSAGE",
-            "You are a helpful AI assistant. Use the available tools to assist the user with their tasks.",
+            "You are a helpful AI assistant. "
+            "Use the available tools to assist the user with their tasks.",
         )
     )
 
