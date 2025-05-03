@@ -2,168 +2,218 @@
 │    BufferMemory      │
 ├──────────────────────┤
 │ - messages: List     │      ┌──────────────────┐
-│ - buffer_size: int   │◄────►│      Message     │
-│ - summarizer: Opt    │      ├──────────────────┤
-└──────────┬───────────┘      │ - role: str      │
-           │                  │ - content: str   │
-           ▼                  │ - timestamp: dt  │
-┌──────────────────────┐      │ - metadata: Dict │
-│   MemorySummarizer   │      └──────────────────┘
+│ - max_size: int      │◄────►│      Message     │
+│ - buffer_multiplier: int│    ├──────────────────┤
+│ - summarizer: Opt    │      │ - role: str      │
+└──────────┬───────────┘      │ - content: str   │
+           │                  │ - timestamp: dt  │
+           ▼                  │ - metadata: Dict │
+┌──────────────────────┐      └──────────────────┘
+│   MemorySummarizer   │
 └──────────────────────┘
-</code></pre></div></div> <p>The core components include:</p> <ul> <li><strong>Message Store</strong>: An ordered list of messages with role (user/assistant), content, timestamp, and optional metadata</li> <li><strong>Size Management</strong>: Fixed-size buffer window with automatic truncation</li> <li><strong>Summarization</strong>: Optional component that creates memory summaries when the buffer overflows</li> <li><strong>Serialization</strong>: Methods for converting to/from JSON for persistence</li> </ul> <h2 id="implementation-details"> <a href="#implementation-details" class="anchor-heading" aria-labelledby="implementation-details"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Implementation Details </h2> <h3 id="buffer-management"> <a href="#buffer-management" class="anchor-heading" aria-labelledby="buffer-management"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Buffer Management </h3> <p>Buffer Memory manages a fixed window of messages using a queue-like structure:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">muxi.core.memory.buffer</span> <span class="kn">import</span> <span class="n">BufferMemory</span>
+</code></pre></div></div> <p>The core components include:</p> <ul> <li><strong>Message Store</strong>: An ordered list of messages with role (user/assistant), content, timestamp, and optional metadata</li> <li><strong>Size Management</strong>: Fixed-size buffer window with automatic truncation and total buffer capacity determined by buffer_multiplier</li> <li><strong>Vector Search</strong>: FAISS-backed vector similarity search for semantic retrieval</li> <li><strong>Hybrid Retrieval</strong>: Combines semantic relevance with recency bias for optimal context retrieval</li> <li><strong>Summarization</strong>: Optional component that creates memory summaries when the buffer overflows</li> <li><strong>Serialization</strong>: Methods for converting to/from JSON for persistence</li> </ul> <h2 id="implementation-details"> <a href="#implementation-details" class="anchor-heading" aria-labelledby="implementation-details"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Implementation Details </h2> <h3 id="buffer-management"> <a href="#buffer-management" class="anchor-heading" aria-labelledby="buffer-management"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Buffer Management </h3> <p>Buffer Memory manages a fixed window of messages with a configurable total capacity:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">muxi.core.memory.buffer</span> <span class="kn">import</span> <span class="n">BufferMemory</span>
+<span class="kn">from</span> <span class="nn">muxi.core.models.providers.openai</span> <span class="kn">import</span> <span class="n">OpenAIModel</span>
 
-<span class="c1"># Create a buffer with size 5
-</span><span class="nb">buffer</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="c1"># Create embedding model for vector search
+</span><span class="n">embedding_model</span> <span class="o">=</span> <span class="n">OpenAIModel</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"text-embedding-ada-002"</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s">"your_api_key"</span><span class="p">)</span>
+
+<span class="c1"># Create a buffer with context window size 5 and total capacity of 50 messages
+</span><span class="nb">buffer</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span>
+    <span class="n">max_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>                <span class="c1"># Context window size
+</span>    <span class="n">buffer_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>      <span class="c1"># Total capacity = 5 × 10 = 50 messages
+</span>    <span class="n">model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">,</span>     <span class="c1"># Model for generating embeddings
+</span>    <span class="n">vector_dimension</span><span class="o">=</span><span class="mi">1536</span><span class="p">,</span>     <span class="c1"># Dimension for OpenAI embeddings
+</span>    <span class="n">recency_bias</span><span class="o">=</span><span class="mf">0.3</span>           <span class="c1"># Balance between semantic (0.7) and recency (0.3)
+</span><span class="p">)</span>
 
 <span class="c1"># Add messages
-</span><span class="nb">buffer</span><span class="p">.</span><span class="n">add_message</span><span class="p">(</span><span class="s">"user"</span><span class="p">,</span> <span class="s">"Hello, my name is Alice."</span><span class="p">)</span>
-<span class="nb">buffer</span><span class="p">.</span><span class="n">add_message</span><span class="p">(</span><span class="s">"assistant"</span><span class="p">,</span> <span class="s">"Hello Alice! How can I help you today?"</span><span class="p">)</span>
+</span><span class="nb">buffer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">"user"</span><span class="p">,</span> <span class="s">"Hello, my name is Alice."</span><span class="p">)</span>
+<span class="nb">buffer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">"assistant"</span><span class="p">,</span> <span class="s">"Hello Alice! How can I help you today?"</span><span class="p">)</span>
 
-<span class="c1"># When buffer exceeds capacity, oldest messages are removed
-</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="nb">buffer</span><span class="p">.</span><span class="n">add_message</span><span class="p">(</span><span class="s">"user"</span><span class="p">,</span> <span class="sa">f</span><span class="s">"Message </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+<span class="c1"># When buffer exceeds capacity, oldest messages are removed from the total buffer
+</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">60</span><span class="p">):</span>
+    <span class="nb">buffer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">"user"</span><span class="p">,</span> <span class="sa">f</span><span class="s">"Message </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
 
-<span class="c1"># Buffer now contains only the 5 most recent messages
-</span></code></pre></div></div> <p>The implementation uses a list with maintenance operations when new messages are added:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">add_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="s">"""Add a message to the buffer."""</span>
-    <span class="n">message</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s">"role"</span><span class="p">:</span> <span class="n">role</span><span class="p">,</span>
+<span class="c1"># Buffer now contains only the most recent 50 messages in the total buffer
+# But when searching for context, only the most recent 5 messages would be returned for recency-only search
+</span></code></pre></div></div> <p>The implementation uses FAISS for vector similarity search:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="s">"""Add an item to the buffer."""</span>
+    <span class="c1"># Create buffer item
+</span>    <span class="n">buffer_item</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s">"content"</span><span class="p">:</span> <span class="n">content</span><span class="p">,</span>
-        <span class="s">"timestamp"</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="n">datetime</span><span class="p">.</span><span class="n">now</span><span class="p">().</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="s">"timestamp"</span><span class="p">:</span> <span class="n">time</span><span class="p">.</span><span class="n">time</span><span class="p">(),</span>
+        <span class="s">"metadata"</span><span class="p">:</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="n">metadata</span><span class="p">:</span>
-        <span class="n">message</span><span class="p">[</span><span class="s">"metadata"</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
+    <span class="c1"># Add to buffer
+</span>    <span class="bp">self</span><span class="p">.</span><span class="nb">buffer</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">buffer_item</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="p">.</span><span class="n">messages</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="c1"># Generate and store vector if we have a model
+</span>    <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">has_vector_search</span> <span class="ow">and</span> <span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vector</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">embed</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">vectors</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">buffer_to_index</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="nb">buffer</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">vectors</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">index_to_buffer</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">vectors</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="nb">buffer</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
-    <span class="c1"># Maintain buffer size
-</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">messages</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">.</span><span class="n">buffer_size</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">summarizer</span><span class="p">:</span>
-            <span class="c1"># Create summary of oldest messages
-</span>            <span class="n">to_summarize</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">messages</span><span class="p">[:(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">messages</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">buffer_size</span><span class="p">)]</span>
-            <span class="n">summary</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">summarizer</span><span class="p">.</span><span class="n">summarize</span><span class="p">(</span><span class="n">to_summarize</span><span class="p">)</span>
-            <span class="bp">self</span><span class="p">.</span><span class="n">summary</span> <span class="o">=</span> <span class="n">summary</span>
+            <span class="c1"># Update FAISS index
+</span>            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">vectors</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="p">.</span><span class="n">rebuild_every</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">_rebuild_index</span><span class="p">()</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Error generating vector for buffer item: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
 
-        <span class="c1"># Remove oldest messages
-</span>        <span class="bp">self</span><span class="p">.</span><span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">buffer_size</span><span class="p">):]</span>
-</code></pre></div></div> <h3 id="automatic-summarization"> <a href="#automatic-summarization" class="anchor-heading" aria-labelledby="automatic-summarization"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Automatic Summarization </h3> <p>When messages exceed the buffer size, the oldest messages can be automatically summarized (if a summarizer is configured):</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">muxi.core.memory.buffer</span> <span class="kn">import</span> <span class="n">BufferMemory</span><span class="p">,</span> <span class="n">MemorySummarizer</span>
-<span class="kn">from</span> <span class="nn">muxi.core.models.openai</span> <span class="kn">import</span> <span class="n">OpenAIModel</span>
+    <span class="c1"># Maintain buffer size limit
+</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="nb">buffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">.</span><span class="n">max_size</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">buffer_multiplier</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">_trim_buffer</span><span class="p">()</span>
+</code></pre></div></div> <h3 id="hybrid-retrieval"> <a href="#hybrid-retrieval" class="anchor-heading" aria-labelledby="hybrid-retrieval"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Hybrid Retrieval </h3> <p>The search method combines semantic relevance with recency bias:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="k">def</span> <span class="nf">search</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">filter_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="n">query_vector</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="n">recency_bias</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+    <span class="s">"""Search the buffer for relevant items."""</span>
+    <span class="c1"># If we don't have vector search capability, return most recent messages
+</span>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">has_vector_search</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">_recency_search</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="n">filter_metadata</span><span class="p">)</span>
 
-<span class="c1"># Create summarizer with a model
-</span><span class="n">summarizer</span> <span class="o">=</span> <span class="n">MemorySummarizer</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="n">OpenAIModel</span><span class="p">(</span><span class="s">"gpt-3.5-turbo"</span><span class="p">)</span>
-<span class="p">)</span>
+    <span class="c1"># Generate embedding for query if not provided
+</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">query_vector</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">query_vector</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">embed</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Error generating query vector: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">_recency_search</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="n">filter_metadata</span><span class="p">)</span>
 
-<span class="c1"># Create buffer with summarizer
+    <span class="c1"># Perform vector search
+</span>    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Convert to numpy array
+</span>        <span class="n">query_np</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span><span class="n">query_vector</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="c1"># Search the index
+</span>        <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">index</span><span class="p">.</span><span class="n">search</span><span class="p">(</span><span class="n">query_np</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">vectors</span><span class="p">),</span> <span class="n">limit</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># Process results with hybrid scoring
+</span>        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># FAISS returns -1 for empty slots
+</span>                <span class="k">continue</span>
+
+            <span class="c1"># Get buffer index
+</span>            <span class="n">buffer_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">index_to_buffer</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">buffer_idx</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">buffer_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="nb">buffer</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">buffer_item</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="nb">buffer</span><span class="p">[</span><span class="n">buffer_idx</span><span class="p">]</span>
+
+            <span class="c1"># Filter by metadata if needed
+</span>            <span class="k">if</span> <span class="n">filter_metadata</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">.</span><span class="n">_matches_metadata</span><span class="p">(</span><span class="n">buffer_item</span><span class="p">,</span> <span class="n">filter_metadata</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Calculate combined score (semantic + recency)
+</span>            <span class="n">semantic_score</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">distances</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">recency_score</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">buffer_idx</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="nb">buffer</span><span class="p">))</span>
+            <span class="n">combined_score</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">recency_bias</span><span class="p">)</span> <span class="o">*</span> <span class="n">semantic_score</span> <span class="o">+</span> <span class="n">recency_bias</span> <span class="o">*</span> <span class="n">recency_score</span>
+
+            <span class="c1"># Add to results
+</span>            <span class="n">results</span><span class="p">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="o">**</span><span class="n">buffer_item</span><span class="p">,</span>
+                <span class="s">"score"</span><span class="p">:</span> <span class="n">combined_score</span>
+            <span class="p">})</span>
+
+        <span class="c1"># Sort by combined score and limit
+</span>        <span class="n">results</span><span class="p">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s">"score"</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
+
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="p">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s">"Error in vector search: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">_recency_search</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="n">filter_metadata</span><span class="p">)</span>
+</code></pre></div></div> <h3 id="context-window-vs-total-buffer-size"> <a href="#context-window-vs-total-buffer-size" class="anchor-heading" aria-labelledby="context-window-vs-total-buffer-size"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Context Window vs. Total Buffer Size </h3> <p>BufferMemory introduces two distinct parameters related to size:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">max_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>               <span class="c1"># Context window size
+</span>    <span class="n">buffer_multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>       <span class="c1"># Multiplier for total capacity
+</span>    <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="c1"># Model for embeddings
+</span>    <span class="n">vector_dimension</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1536</span><span class="p">,</span>      <span class="c1"># Dimension for vectors
+</span>    <span class="c1"># ... other parameters
+</span><span class="p">)</span>
+</code></pre></div></div> <ul> <li><code class="language-plaintext highlighter-rouge">max_size</code>: Defines the context window size - the number of recent messages included when retrieving by recency</li> <li><code class="language-plaintext highlighter-rouge">buffer_multiplier</code>: Multiplies the context window size to determine the total buffer capacity</li> <li>Total buffer capacity = max_size × buffer_multiplier (default: 10 × 10 = 100)</li> </ul> <p>This design addresses the need to have a larger storage capacity for vector similarity search while still maintaining a smaller, focused context window for pure recency-based retrieval.</p> <h3 id="user-specific-partitioning"> <a href="#user-specific-partitioning" class="anchor-heading" aria-labelledby="user-specific-partitioning"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> User-Specific Partitioning </h3> <p>BufferMemory supports user-specific partitioning through metadata filtering:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Create buffer
 </span><span class="nb">buffer</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span>
-    <span class="n">buffer_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">summarizer</span><span class="o">=</span><span class="n">summarizer</span>
+    <span class="n">max_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">buffer_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">embedding_model</span>
 <span class="p">)</span>
-
-<span class="c1"># When buffer overflows, oldest messages are summarized
-</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="nb">buffer</span><span class="p">.</span><span class="n">add_message</span><span class="p">(</span><span class="s">"user"</span><span class="p">,</span> <span class="sa">f</span><span class="s">"Message </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="nb">buffer</span><span class="p">.</span><span class="n">summary</span><span class="p">)</span>  <span class="c1"># Contains summary of oldest messages
-</span></code></pre></div></div> <p>The summarizer uses an LLM to create concise summaries:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="s">"""Summarize a list of messages."""</span>
-    <span class="n">prompt</span> <span class="o">=</span> <span class="s">"Summarize the following conversation concisely, focusing on key facts and important information:</span><span class="se">\n\n</span><span class="s">"</span>
-
-    <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
-        <span class="n">prompt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s">"</span><span class="si">{</span><span class="n">msg</span><span class="p">[</span><span class="s">'role'</span><span class="p">].</span><span class="n">title</span><span class="p">()</span><span class="si">}</span><span class="s">: </span><span class="si">{</span><span class="n">msg</span><span class="p">[</span><span class="s">'content'</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s">"</span>
-
-    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">response</span>
-</code></pre></div></div> <h3 id="accessing-messages"> <a href="#accessing-messages" class="anchor-heading" aria-labelledby="accessing-messages"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Accessing Messages </h3> <p>The buffer provides methods to access and format messages:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Get all messages
-</span><span class="n">all_messages</span> <span class="o">=</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">get_messages</span><span class="p">()</span>
-
-<span class="c1"># Get messages formatted for LLM consumption
-</span><span class="n">formatted_messages</span> <span class="o">=</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">get_formatted_messages</span><span class="p">()</span>
-
-<span class="c1"># Get messages with summary (if available)
-</span><span class="n">context_messages</span> <span class="o">=</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">get_context</span><span class="p">()</span>
-</code></pre></div></div> <p>The formatting logic ensures messages are in the expected format for LLM APIs:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_formatted_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-    <span class="s">"""Get messages formatted for LLM consumption."""</span>
-    <span class="n">formatted</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Add summary if available
-</span>    <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">summary</span><span class="p">:</span>
-        <span class="n">formatted</span><span class="p">.</span><span class="n">append</span><span class="p">({</span>
-            <span class="s">"role"</span><span class="p">:</span> <span class="s">"system"</span><span class="p">,</span>
-            <span class="s">"content"</span><span class="p">:</span> <span class="sa">f</span><span class="s">"Previous conversation summary: </span><span class="si">{</span><span class="bp">self</span><span class="p">.</span><span class="n">summary</span><span class="si">}</span><span class="s">"</span>
-        <span class="p">})</span>
-
-    <span class="c1"># Add current messages
-</span>    <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">messages</span><span class="p">:</span>
-        <span class="n">formatted</span><span class="p">.</span><span class="n">append</span><span class="p">({</span>
-            <span class="s">"role"</span><span class="p">:</span> <span class="n">msg</span><span class="p">[</span><span class="s">"role"</span><span class="p">],</span>
-            <span class="s">"content"</span><span class="p">:</span> <span class="n">msg</span><span class="p">[</span><span class="s">"content"</span><span class="p">]</span>
-        <span class="p">})</span>
-
-    <span class="k">return</span> <span class="n">formatted</span>
-</code></pre></div></div> <h3 id="user-specific-partitioning"> <a href="#user-specific-partitioning" class="anchor-heading" aria-labelledby="user-specific-partitioning"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> User-Specific Partitioning </h3> <p>Buffer Memory supports user-specific partitioning:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Create buffer
-</span><span class="nb">buffer</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
 <span class="c1"># Add messages for different users
-</span><span class="nb">buffer</span><span class="p">.</span><span class="n">add_message</span><span class="p">(</span><span class="s">"user"</span><span class="p">,</span> <span class="s">"I'm Alice"</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user1"</span><span class="p">})</span>
-<span class="nb">buffer</span><span class="p">.</span><span class="n">add_message</span><span class="p">(</span><span class="s">"assistant"</span><span class="p">,</span> <span class="s">"Hello Alice!"</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user1"</span><span class="p">})</span>
-
-<span class="nb">buffer</span><span class="p">.</span><span class="n">add_message</span><span class="p">(</span><span class="s">"user"</span><span class="p">,</span> <span class="s">"I'm Bob"</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user2"</span><span class="p">})</span>
-<span class="nb">buffer</span><span class="p">.</span><span class="n">add_message</span><span class="p">(</span><span class="s">"assistant"</span><span class="p">,</span> <span class="s">"Hello Bob!"</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user2"</span><span class="p">})</span>
+</span><span class="k">await</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s">"I'm Alice"</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user1"</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="k">await</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s">"I'm Bob"</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user2"</span><span class="p">}</span>
+<span class="p">)</span>
 
 <span class="c1"># Get messages for a specific user
-</span><span class="n">alice_messages</span> <span class="o">=</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">get_messages</span><span class="p">(</span><span class="n">filter_metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user1"</span><span class="p">})</span>
-<span class="n">bob_messages</span> <span class="o">=</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">get_messages</span><span class="p">(</span><span class="n">filter_metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user2"</span><span class="p">})</span>
-</code></pre></div></div> <p>The filtering mechanism checks message metadata:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-    <span class="s">"""Get messages, optionally filtering by metadata."""</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">filter_metadata</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">messages</span>
-
-    <span class="k">return</span> <span class="p">[</span>
-        <span class="n">msg</span> <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">.</span><span class="n">messages</span>
-        <span class="k">if</span> <span class="s">"metadata"</span> <span class="ow">in</span> <span class="n">msg</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="n">msg</span><span class="p">[</span><span class="s">"metadata"</span><span class="p">].</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">filter_metadata</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">)</span>
-    <span class="p">]</span>
-</code></pre></div></div> <h3 id="serialization-and-persistence"> <a href="#serialization-and-persistence" class="anchor-heading" aria-labelledby="serialization-and-persistence"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Serialization and Persistence </h3> <p>Buffer Memory can be serialized to JSON for persistence:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Serialize to JSON
-</span><span class="n">json_data</span> <span class="o">=</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">to_json</span><span class="p">()</span>
-
-<span class="c1"># Load from JSON
-</span><span class="n">new_buffer</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">json_data</span><span class="p">)</span>
-</code></pre></div></div> <p>The implementation handles conversion to and from JSON:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="s">"""Serialize the buffer to JSON."""</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s">"messages"</span><span class="p">:</span> <span class="bp">self</span><span class="p">.</span><span class="n">messages</span><span class="p">,</span>
-        <span class="s">"buffer_size"</span><span class="p">:</span> <span class="bp">self</span><span class="p">.</span><span class="n">buffer_size</span><span class="p">,</span>
-        <span class="s">"summary"</span><span class="p">:</span> <span class="bp">self</span><span class="p">.</span><span class="n">summary</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-<span class="o">@</span><span class="nb">classmethod</span>
-<span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">json_data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">"BufferMemory"</span><span class="p">:</span>
-    <span class="s">"""Create a buffer from JSON."""</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_data</span><span class="p">)</span>
-    <span class="nb">buffer</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s">"buffer_size"</span><span class="p">])</span>
-    <span class="nb">buffer</span><span class="p">.</span><span class="n">messages</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">"messages"</span><span class="p">]</span>
-    <span class="nb">buffer</span><span class="p">.</span><span class="n">summary</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"summary"</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">buffer</span>
-</code></pre></div></div> <h2 id="performance-considerations"> <a href="#performance-considerations" class="anchor-heading" aria-labelledby="performance-considerations"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Performance Considerations </h2> <p>The Buffer Memory system is designed for efficiency:</p> <ul> <li><strong>Time Complexity</strong>: O(1) for common operations like adding messages and retrieving context</li> <li><strong>Space Complexity</strong>: O(n) where n is the buffer size</li> <li><strong>Memory Usage</strong>: Configurable through buffer_size parameter</li> </ul> <p>For larger buffer sizes, consider these factors:</p> <ul> <li><strong>Context Window Limits</strong>: LLMs have context window limits, so very large buffers may not be fully usable</li> <li><strong>Summarization Cost</strong>: Frequent summarization increases API costs</li> <li><strong>Retrieval Efficiency</strong>: Smaller buffers with good summarization often outperform larger raw buffers</li> </ul> <h2 id="integration-with-agents"> <a href="#integration-with-agents" class="anchor-heading" aria-labelledby="integration-with-agents"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Integration with Agents </h2> <p>Agents automatically integrate with Buffer Memory:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">muxi.core.agent</span> <span class="kn">import</span> <span class="n">Agent</span>
-<span class="kn">from</span> <span class="nn">muxi.core.models.openai</span> <span class="kn">import</span> <span class="n">OpenAIModel</span>
+</span><span class="n">alice_messages</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">search</span><span class="p">(</span>
+    <span class="s">"alice"</span><span class="p">,</span>
+    <span class="n">filter_metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user1"</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="n">bob_messages</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">buffer</span><span class="p">.</span><span class="n">search</span><span class="p">(</span>
+    <span class="s">"bob"</span><span class="p">,</span>
+    <span class="n">filter_metadata</span><span class="o">=</span><span class="p">{</span><span class="s">"user_id"</span><span class="p">:</span> <span class="s">"user2"</span><span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div></div> <h2 id="performance-considerations"> <a href="#performance-considerations" class="anchor-heading" aria-labelledby="performance-considerations"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Performance Considerations </h2> <p>The BufferMemory system is designed for efficiency, balancing performance and accuracy:</p> <ul> <li><strong>Vector Search</strong>: Uses FAISS for efficient vector similarity search</li> <li><strong>Hybrid Scoring</strong>: Combines semantic relevance with recency for optimal results</li> <li><strong>Graceful Degradation</strong>: Falls back to recency-only search when needed</li> <li><strong>Thread Safety</strong>: All operations are thread-safe for concurrent access</li> </ul> <p>For optimal performance, consider these factors:</p> <ul> <li><strong>Context Window Size</strong>: Set <code class="language-plaintext highlighter-rouge">max_size</code> based on your LLM’s context window limitations</li> <li><strong>Buffer Multiplier</strong>: Adjust <code class="language-plaintext highlighter-rouge">buffer_multiplier</code> based on memory constraints and retrieval needs</li> <li><strong>Recency Bias</strong>: Tune <code class="language-plaintext highlighter-rouge">recency_bias</code> for your specific use case: <ul> <li>Higher values (0.5-0.7) for conversation-heavy applications</li> <li>Lower values (0.1-0.3) for knowledge-heavy applications</li> </ul> </li> </ul> <h2 id="integration-with-agents"> <a href="#integration-with-agents" class="anchor-heading" aria-labelledby="integration-with-agents"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Integration with Agents </h2> <p>Agents automatically integrate with BufferMemory:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">muxi.core.agent</span> <span class="kn">import</span> <span class="n">Agent</span>
+<span class="kn">from</span> <span class="nn">muxi.core.models.providers.openai</span> <span class="kn">import</span> <span class="n">OpenAIModel</span>
 <span class="kn">from</span> <span class="nn">muxi.core.memory.buffer</span> <span class="kn">import</span> <span class="n">BufferMemory</span>
+<span class="kn">from</span> <span class="nn">muxi.core.orchestrator</span> <span class="kn">import</span> <span class="n">Orchestrator</span>
 
-<span class="c1"># Create buffer
-</span><span class="nb">buffer</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="c1"># Create buffer memory
+</span><span class="nb">buffer</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span>
+    <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>               <span class="c1"># Context window size
+</span>    <span class="n">buffer_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>      <span class="c1"># Total capacity = 10 × 10 = 100
+</span>    <span class="n">model</span><span class="o">=</span><span class="n">OpenAIModel</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"text-embedding-ada-002"</span><span class="p">)</span>
+<span class="p">)</span>
 
-<span class="c1"># Create agent with buffer
+<span class="c1"># Create orchestrator with buffer memory
+</span><span class="n">orchestrator</span> <span class="o">=</span> <span class="n">Orchestrator</span><span class="p">(</span><span class="n">buffer_memory</span><span class="o">=</span><span class="nb">buffer</span><span class="p">)</span>
+
+<span class="c1"># Create agent that will use orchestrator's memory
 </span><span class="n">agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s">"assistant"</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="n">OpenAIModel</span><span class="p">(</span><span class="s">"gpt-4"</span><span class="p">),</span>
     <span class="n">system_message</span><span class="o">=</span><span class="s">"You are a helpful assistant."</span><span class="p">,</span>
-    <span class="n">buffer_memory</span><span class="o">=</span><span class="nb">buffer</span>
+    <span class="n">orchestrator</span><span class="o">=</span><span class="n">orchestrator</span>
 <span class="p">)</span>
 
 <span class="c1"># Each chat interaction automatically uses and updates the buffer
 </span><span class="n">agent</span><span class="p">.</span><span class="n">chat</span><span class="p">(</span><span class="s">"Hello, my name is Charlie."</span><span class="p">)</span>
 <span class="n">agent</span><span class="p">.</span><span class="n">chat</span><span class="p">(</span><span class="s">"What's my name?"</span><span class="p">)</span>  <span class="c1"># Will include "Charlie" in response
-</span></code></pre></div></div> <h2 id="best-practices"> <a href="#best-practices" class="anchor-heading" aria-labelledby="best-practices"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Best Practices </h2> <ul> <li><strong>Size Configuration</strong>: Set buffer_size based on your application’s needs: <ul> <li>Short, factual exchanges: 3-5 messages</li> <li>Complex conversations: 8-12 messages</li> <li>Technical discussions: 10-15 messages</li> </ul> </li> <li> <p><strong>Summarization</strong>: Enable summarization for longer conversations to maintain context while controlling token usage</p> </li> <li> <p><strong>Metadata Usage</strong>: Use metadata to track important message attributes (user_id, session_id, etc.)</p> </li> <li><strong>User Partitioning</strong>: For multi-user scenarios, filter messages by user_id metadata</li> </ul> <h2 id="related-topics"> <a href="#related-topics" class="anchor-heading" aria-labelledby="related-topics"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Related Topics </h2> <ul> <li><a href="../long-term">Long-Term Memory</a> - Persistent memory storage</li> <li><a href="../memobase">Multi-User Memory (Memobase)</a> - User-specific memory partitioning</li> <li><a href="../domain-knowledge">Domain Knowledge</a> - Structured knowledge integration</li> </ul> </main> <hr> <footer> <p><a href="#top" id="back-to-top">Back to top</a></p> <p class="text-small text-grey-dk-100 mb-0">Copyright &copy; 2025 Ran Aroussi.<br>Licensed under Creative's Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0) license.</p> </footer> </div> </div> <div class="search-overlay"></div> </div> <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.6/dist/mermaid.min.js"></script> <script> var config = {} ; mermaid.initialize(config); window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid')); </script> </body> </html>
+</span></code></pre></div></div> <h2 id="configuration-examples"> <a href="#configuration-examples" class="anchor-heading" aria-labelledby="configuration-examples"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Configuration Examples </h2> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Different configurations for different use cases
+</span>
+<span class="c1"># For high-recall in knowledge-intensive applications
+</span><span class="n">buffer_high_recall</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span>
+    <span class="n">max_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">buffer_multiplier</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>    <span class="c1"># Larger multiplier (300 total messages)
+</span>    <span class="n">recency_bias</span><span class="o">=</span><span class="mf">0.1</span>         <span class="c1"># Strong preference for semantic similarity
+</span><span class="p">)</span>
+
+<span class="c1"># For conversational applications with immediate context
+</span><span class="n">buffer_conversational</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span>
+    <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">buffer_multiplier</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>     <span class="c1"># Smaller multiplier (50 total messages)
+</span>    <span class="n">recency_bias</span><span class="o">=</span><span class="mf">0.6</span>         <span class="c1"># Strong preference for recency
+</span><span class="p">)</span>
+
+<span class="c1"># For balanced general-purpose use
+</span><span class="n">buffer_balanced</span> <span class="o">=</span> <span class="n">BufferMemory</span><span class="p">(</span>
+    <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">buffer_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>    <span class="c1"># Default multiplier (100 total messages)
+</span>    <span class="n">recency_bias</span><span class="o">=</span><span class="mf">0.3</span>         <span class="c1"># Balanced semantic/recency priority
+</span><span class="p">)</span>
+</code></pre></div></div> <h2 id="best-practices"> <a href="#best-practices" class="anchor-heading" aria-labelledby="best-practices"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Best Practices </h2> <ul> <li><strong>Size Configuration</strong>: <ul> <li>Set <code class="language-plaintext highlighter-rouge">max_size</code> based on your LLM’s ideal context window: <ul> <li>Short, factual exchanges: 3-5 messages</li> <li>Complex conversations: 8-12 messages</li> <li>Technical discussions: 10-15 messages</li> </ul> </li> <li>Set <code class="language-plaintext highlighter-rouge">buffer_multiplier</code> based on how much history you want to maintain: <ul> <li>Limited memory needs: 5-8× multiplier</li> <li>Standard applications: 10× multiplier (default)</li> <li>Knowledge-heavy applications: 15-20× multiplier</li> </ul> </li> </ul> </li> <li><strong>Recency Bias</strong>: <ul> <li>Human conversations: <code class="language-plaintext highlighter-rouge">recency_bias=0.5</code> (more recency)</li> <li>Factual queries: <code class="language-plaintext highlighter-rouge">recency_bias=0.2</code> (more semantic)</li> <li>Default <code class="language-plaintext highlighter-rouge">recency_bias=0.3</code> works well for general use</li> </ul> </li> <li><strong>Metadata Usage</strong>: Use metadata to track important message attributes (user_id, session_id, etc.)</li> </ul> <h2 id="related-topics"> <a href="#related-topics" class="anchor-heading" aria-labelledby="related-topics"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Related Topics </h2> <ul> <li><a href="../long-term">Long-Term Memory</a> - Persistent memory storage</li> <li><a href="../memobase">Multi-User Memory (Memobase)</a> - User-specific memory partitioning</li> <li><a href="../domain-knowledge">Domain Knowledge</a> - Structured knowledge integration</li> </ul> </main> <hr> <footer> <p><a href="#top" id="back-to-top">Back to top</a></p> <p class="text-small text-grey-dk-100 mb-0">Copyright &copy; 2025 Ran Aroussi.<br>Licensed under Creative's Commons Attribution-NonCommercial-NoDerivatives 4.0 (CC BY-NC-ND 4.0) license.</p> </footer> </div> </div> <div class="search-overlay"></div> </div> <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.6/dist/mermaid.min.js"></script> <script> var config = {} ; mermaid.initialize(config); window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid')); </script> </body> </html>

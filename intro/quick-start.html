@@ -78,7 +78,8 @@
 
 <span class="c1"># Initialize MUXI with memory configuration
 </span><span class="n">app</span> <span class="o">=</span> <span class="n">muxi</span><span class="p">(</span>
-  <span class="n">buffer_memory</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>  <span class="c1"># Sets buffer window size to 10
+  <span class="n">buffer_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>          <span class="c1"># Sets context window size to 10 messages
+</span>  <span class="n">buffer_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>    <span class="c1"># Sets total buffer capacity to 10 × 10 = 100 messages
 </span>  <span class="n">long_term_memory</span><span class="o">=</span><span class="s">"postgresql://user:pass@localhost/db"</span><span class="p">,</span>  <span class="c1"># Enables long-term memory
 </span>  <span class="n">config_file</span><span class="o">=</span><span class="s">"configs/muxi_config.yaml"</span>  <span class="c1"># Load agent configurations from file
 </span><span class="p">)</span>
