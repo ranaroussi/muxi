@@ -309,16 +309,10 @@ Transform agents into omni agents capable of handling various media types:
   - [ ] Design WebSocket protocol for audio streaming
   - [ ] Implement real-time audio processing
 
-### 11. Language-Specific SDKs
-
-Focus on TypeScript/JavaScript SDK first:
+### 11. TypeScript/JavaScript SDKs
 
 - [ ] TypeScript/JavaScript SDK
-  - [ ] REST API client with full endpoint coverage
-  - [ ] WebSocket client implementation
-  - [ ] MCP server protocol implementation for JavaScript tools
-  - [ ] Comprehensive examples and documentation
-  - [ ] NPM package distribution
+
 
 ### 12. Memory System Enhancements
 
@@ -346,27 +340,21 @@ Building on the new FAISS-backed smart buffer memory:
 - [ ] Example projects showcasing API usage
 - [ ] Generate API documentation with Fumadocs
 
-### 14. Additional Language SDKs
+### 14. Additional SDKs
 
 After completing TypeScript/JavaScript SDK:
 
-- [ ] Go SDK
-  - [ ] API client library
-  - [ ] MCP server implementation helpers
-  - [ ] Utilities for agent configuration
-
-- [ ] Other Language SDKs
-  - [ ] Java/Kotlin SDK
-  - [ ] Rust SDK
-  - [ ] C#/.NET SDK
-  - [ ] PHP SDK
-  - [ ] Ruby SDK (optional)
-
-- [ ] SDK Development Tools
-  - [ ] API client generators from OpenAPI spec
-  - [ ] Shared test suite for SDK validations
-  - [ ] Consistent interface definitions across languages
-  - [ ] Version syncing mechanisms with core framework
+- [ ] Language-specific SDKs
+  - [ ] PHP
+  - [ ] Go
+  - [ ] Java/Kotlin
+  - [ ] Rust
+  - [ ] C#/.NET
+  - [ ] Ruby
+- [ ] Platform-specific SDKs
+  - [ ] iOS Swift
+  - [ ] Android Kotlin
+  - [ ] Dart
 
 ### 15. Security Enhancements
 
