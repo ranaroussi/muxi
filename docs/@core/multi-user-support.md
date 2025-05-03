@@ -514,7 +514,7 @@ async def get_current_user(api_key: str = Depends(api_key_header)):
             headers={"WWW-Authenticate": "API-Key"},
         )
     # In a real app, look up user_id based on API key
-    # For this example, we extract it from the key itself
+    # For this example, I extract it from the key itself
     user_id = api_key.split("_")[1]  # Assumes format like "apikey_user123"
     return user_id
 

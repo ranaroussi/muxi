@@ -5,7 +5,7 @@
 MUXI Framework is a powerful platform for building AI agents with memory, MCP server integration, and real-time communication capabilities. It provides a solid foundation for creating advanced AI applications through a unified architecture that integrates multiple interfaces.
 
 > [!WARNING]
-> This project is a work in progress and is not yet ready for production use. We're actively developing the framework and adding new features. Please refer to the [roadmap](docs/roadmap.md) for information about the current state of the project and where it's headed.
+> This project is a work in progress and is not yet ready for production use. I'm actively developing the framework and adding new features. Please refer to the [roadmap](docs/roadmap.md) for information about the current state of the project and where it's headed.
 
 ## Features
 
@@ -472,7 +472,7 @@ results = await orchestrator.search_memory(
 # Adjust recency bias for different use cases
 # For human conversations (favor recent)
 results = await orchestrator.search_memory(
-    "What did we just talk about?",
+    "What did I just talk about?",
     recency_bias=0.7,             # Higher value favors recency
     k=5
 )
@@ -726,7 +726,7 @@ The MUXI Framework development is focused on the following priorities:
 12. **Multi-Modal Capabilities** - Adding support for document, image, and audio processing
 13. **Security Enhancements** - Implementing advanced security features for enterprise-grade deployments
 
-The [roadmap](docs/roadmap.md) file provides more detailed information about the roadmap.
+The [roadmap](docs/roadmap.md) file provides more detailed information about the project roadmap.
 
 ## License
 
@@ -742,7 +742,7 @@ When the project reaches version 1.0, it will switch to a more permissive open-s
 
 ## Contributing
 
-**Contributions are welcome!** Please read our [Contributing Guide](docs/contributing.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
+**Contributions are welcome!** Please read my [Contributing Guide](docs/contributing.md) for details on the code of conduct, development setup, and the process for submitting pull requests.
 
 ## Acknowledgements
 

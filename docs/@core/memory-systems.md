@@ -212,7 +212,7 @@ await long_term_memory.add(
 ```python
 # Basic semantic search
 results = await long_term_memory.search(
-    query="What compliance requirements do we have?",
+    query="What compliance requirements do I have?",
     limit=5
 )
 
@@ -513,7 +513,7 @@ Memory automatically enhances agent conversations:
 ```python
 # Chat with memory enhancement
 response = await orchestrator.chat(
-    message="What were we discussing about the design?",
+    message="What was I discussing about the design?",
     agent_id="designer",
     user_id="user_123",
     enhance_with_memory=True  # Add relevant memory to context

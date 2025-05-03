@@ -162,7 +162,7 @@ Agents automatically use the orchestrator's memory systems:
 ```python
 # Access relevant memories
 memories = await agent.get_relevant_memories(
-    query="What did we discuss about project timelines?",
+    query="What did I discuss about project timelines?",
     limit=5
 )
 

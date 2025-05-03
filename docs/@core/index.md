@@ -19,7 +19,7 @@ This documentation covers the core components, features, and usage patterns of t
 
 ## Getting Started
 
-If you're new to Muxi, we recommend starting with the [Overview](overview.md) to understand the core architecture, followed by the [Quickstart](quickstart.md) guide to set up your first Muxi application.
+If you're new to Muxi, I recommend starting with the [Overview](overview.md) to understand the core architecture, followed by the [Quickstart](quickstart.md) guide to set up your first Muxi application.
 
 ## Key Concepts
 
@@ -186,4 +186,4 @@ For questions, issues, or feedback, please:
 - Search for known issues
 - Contact the development team
 
-We're continuously improving Muxi Core and welcome your feedback and contributions!
+I'm continuously improving Muxi Core and welcome your feedback and contributions!
