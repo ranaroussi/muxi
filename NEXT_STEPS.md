@@ -235,6 +235,10 @@ Based on prd-a2a.md specifications:
 - [ ] NVIDIA
 - [ ] Create a model router for fallback and cost optimization
 
+> [!TIP]
+> Create `muxi-llm` package as a unified interface for various LLMs (inspired by litellm)
+
+
 ### 8. Deployment & Package Distribution
 
 - [ ] Docker containerization
