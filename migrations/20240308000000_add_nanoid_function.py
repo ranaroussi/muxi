@@ -84,9 +84,6 @@ def up() -> str:
         END
         $$;
 
-        -- Add a comment to the function
-        COMMENT ON FUNCTION nanoid(int, text) IS 'Generates a Nano ID of the specified size using the given alphabet';
-
         -- Verify the function is created
         DO $$
         BEGIN
