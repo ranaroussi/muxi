@@ -12,12 +12,12 @@ from loguru import logger
 
 from muxi.core.agent import Agent
 from muxi.core.orchestrator import Orchestrator
-from muxi.models.providers.openai import OpenAIModel
-from muxi.server.memory.buffer import BufferMemory
-from muxi.server.memory.long_term import LongTermMemory
-from muxi.server.memory.memobase import Memobase
-from muxi.config_loader import ConfigLoader
-from .credential_manager import CredentialManager
+from muxi.core.models.providers.openai import OpenAIModel
+from muxi.core.memory.buffer import BufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
+from muxi.core.config.loader import ConfigLoader
+from muxi.core.credential_manager import CredentialManager
 
 
 class Muxi:
@@ -134,7 +134,7 @@ class Muxi:
             # SQLite connection string format (sqlite:///path/to/db)
             elif long_term_config.startswith('sqlite:///'):
                 try:
-                    from muxi.server.memory.sqlite import SQLiteMemory
+                    from muxi.core.memory.sqlite import SQLiteMemory
                     # Extract the path: remove 'sqlite:///' prefix
                     db_path = long_term_config[10:]
                     memory = SQLiteMemory(db_path=db_path)
@@ -148,7 +148,7 @@ class Muxi:
             # Plain SQLite path
             else:
                 try:
-                    from muxi.server.memory.sqlite import SQLiteMemory
+                    from muxi.core.memory.sqlite import SQLiteMemory
                     memory = SQLiteMemory(db_path=long_term_config)
                     logger.info(f"Created SQLite long-term memory at {long_term_config}")
                     return memory
@@ -160,7 +160,7 @@ class Muxi:
         # Boolean true - use default SQLite database
         elif long_term_config is True:
             try:
-                from muxi.server.memory.sqlite import SQLiteMemory
+                from muxi.core.memory.sqlite import SQLiteMemory
                 db_path = os.path.join(os.getcwd(), 'muxi.db')
                 memory = SQLiteMemory(db_path=db_path)
                 logger.info(f"Created default SQLite long-term memory at {db_path}")

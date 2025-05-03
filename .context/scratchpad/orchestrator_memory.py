@@ -10,12 +10,12 @@ from typing import Any, Dict, List, Optional, Union
 
 from loguru import logger
 
-from muxi.server.config import config
+from muxi.core.config import config
 from muxi.core.agent import Agent
 from muxi.core.mcp import MCPMessage
-from muxi.server.memory.buffer import BufferMemory
-from muxi.server.memory.long_term import LongTermMemory
-from muxi.server.memory.memobase import Memobase
+from muxi.core.memory.buffer import BufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
 from muxi.models.base import BaseModel
 from muxi.models.providers.openai import OpenAIModel
 

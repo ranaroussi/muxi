@@ -13,9 +13,9 @@ from typing import Any, Dict, List, Optional, Union
 from loguru import logger
 
 from muxi.core.mcp import MCPMessage
-from muxi.server.memory.buffer import BufferMemory
-from muxi.server.memory.long_term import LongTermMemory
-from muxi.server.memory.memobase import Memobase
+from muxi.core.memory.buffer import BufferMemory
+from muxi.core.memory.long_term import LongTermMemory
+from muxi.core.memory.memobase import Memobase
 from muxi.models.base import BaseModel
 from muxi.knowledge.base import KnowledgeSource
 from muxi.utils.id_generator import get_default_nanoid
