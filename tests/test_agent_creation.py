@@ -10,7 +10,7 @@ import os
 import yaml
 import json
 from dotenv import load_dotenv
-from muxi.models.providers.openai import OpenAIModel
+from muxi.core.models.providers.openai import OpenAIModel
 from muxi.core.agent import Agent
 from muxi.core.orchestrator import Orchestrator
 
@@ -36,7 +36,8 @@ model:
   model: gpt-4o-mini
   temperature: 0.2
 memory:
-  buffer: 5
+  buffer_size: 5
+  buffer_multiplier: 10
   long_term: false
 mcp_servers:
 - name: weather_api
@@ -62,7 +63,8 @@ mcp_servers:
         "temperature": 0.2
     },
     "memory": {
-        "buffer": 5,
+        "buffer_size": 5,
+        "buffer_multiplier": 10,
         "long_term": false
     },
     "mcp_servers": [

@@ -5,13 +5,13 @@ This test module verifies the reconnection capabilities of the
 ReconnectingMCPHandler with various failure scenarios.
 """
 
-import unittest
 import asyncio
 import logging
-from unittest.mock import MagicMock, AsyncMock, patch
+import unittest
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from muxi.core.mcp_handler import MCPConnectionError
-from muxi.core.reconnect_mcp_handler import ReconnectingMCPHandler
+from muxi.core.mcp.handler import MCPConnectionError
+from muxi.core.mcp.reconnect_handler import ReconnectingMCPHandler
 from muxi.core.reconnection import RetryConfiguration
 
 # Set up logging
@@ -30,17 +30,14 @@ class TestReconnection(unittest.TestCase):
             initial_delay=0.1,
             max_delay=0.5,
             backoff_factor=2.0,
-            jitter=False  # Disable jitter for predictable tests
+            jitter=False,  # Disable jitter for predictable tests
         )
 
         # Create mock model
         self.mock_model = MagicMock()
 
         # Create the reconnecting handler with server info dictionary
-        self.handler = ReconnectingMCPHandler(
-            model=self.mock_model,
-            retry_config=self.retry_config
-        )
+        self.handler = ReconnectingMCPHandler(model=self.mock_model, retry_config=self.retry_config)
 
         # Add server_info dictionary to the handler (missing in the class)
         self.handler.server_info = {}
@@ -53,7 +50,7 @@ class TestReconnection(unittest.TestCase):
         """Clean up after tests."""
         if self.transport_factory_patch:
             self.transport_factory_patch.stop()
-        if hasattr(self, 'list_tools_original') and self.list_tools_original:
+        if hasattr(self, "list_tools_original") and self.list_tools_original:
             self.list_tools_original.stop()
 
     def _setup_transport_mock(self, failure_pattern=None):
@@ -131,16 +128,14 @@ class TestReconnection(unittest.TestCase):
             self.transport_factory_patch.stop()
 
         self.transport_factory_patch = patch(
-            'muxi.core.mcp_handler.MCPTransportFactory',
-            transport_factory_mock
+            "muxi.core.mcp.handler.MCPTransportFactory", transport_factory_mock
         )
         self.transport_factory_patch.start()
 
         # Patch MCPHandler.list_tools to properly handle refresh parameter
         # We need to check if this method expects refresh parameter
         self.list_tools_original = patch(
-            'muxi.core.mcp_handler.MCPHandler.list_tools',
-            new=self._mock_list_tools
+            "muxi.core.mcp.handler.MCPHandler.list_tools", new=self._mock_list_tools
         )
         self.list_tools_original.start()
 
@@ -164,23 +159,17 @@ class TestReconnection(unittest.TestCase):
             "url": "http://localhost:8080",
             "command": None,
             "credentials": None,
-            "request_timeout": 60.0
+            "request_timeout": 60.0,
         }
 
         # Attempt to connect
-        result = await self.handler.connect_server(
-            name="test_server",
-            url="http://localhost:8080"
-        )
+        result = await self.handler.connect_server(name="test_server", url="http://localhost:8080")
 
         # Verify connection was successful
         self.assertTrue(result)
 
         # Check that we had the expected number of operations
-        self.assertEqual(
-            self.transport_mock.connect.call_count,
-            failure_pattern.count(False) + 1
-        )
+        self.assertEqual(self.transport_mock.connect.call_count, failure_pattern.count(False) + 1)
 
     async def _test_execute_tool_with_reconnection(self, server_connected=True):
         """
@@ -197,15 +186,12 @@ class TestReconnection(unittest.TestCase):
             "url": "http://localhost:8080",
             "command": None,
             "credentials": None,
-            "request_timeout": 60.0
+            "request_timeout": 60.0,
         }
 
         # Connect to the server
         if server_connected:
-            await self.handler.connect_server(
-                name="test_server",
-                url="http://localhost:8080"
-            )
+            await self.handler.connect_server(name="test_server", url="http://localhost:8080")
 
             # Reset the call counts
             self.connect_call_count = 0
@@ -223,9 +209,7 @@ class TestReconnection(unittest.TestCase):
             # For the test_execute_tool_when_disconnected test,
             # just verify the method doesn't raise an exception
             result = await self.handler.execute_tool(
-                server_name="test_server",
-                tool_name="test_tool",
-                params={"param1": "value1"}
+                server_name="test_server", tool_name="test_tool", params={"param1": "value1"}
             )
 
             # Verify basic result structure
@@ -255,14 +239,13 @@ class TestReconnection(unittest.TestCase):
             "url": "http://localhost:8080",
             "command": None,
             "credentials": None,
-            "request_timeout": 60.0
+            "request_timeout": 60.0,
         }
 
         with self.assertRaises(MCPConnectionError):
-            asyncio.run(self.handler.connect_server(
-                name="test_server",
-                url="http://localhost:8080"
-            ))
+            asyncio.run(
+                self.handler.connect_server(name="test_server", url="http://localhost:8080")
+            )
 
     def test_execute_tool_with_reconnection(self):
         """Test executing a tool with reconnection on failure."""
@@ -282,14 +265,11 @@ class TestReconnection(unittest.TestCase):
             "url": "http://localhost:8080",
             "command": None,
             "credentials": None,
-            "request_timeout": 60.0
+            "request_timeout": 60.0,
         }
 
         # Connect to the server
-        asyncio.run(self.handler.connect_server(
-            name="test_server",
-            url="http://localhost:8080"
-        ))
+        asyncio.run(self.handler.connect_server(name="test_server", url="http://localhost:8080"))
 
         # Reset counters
         self.connect_call_count = 0
@@ -316,13 +296,10 @@ class TestReconnection(unittest.TestCase):
             "url": "http://localhost:8080",
             "command": None,
             "credentials": None,
-            "request_timeout": 60.0
+            "request_timeout": 60.0,
         }
 
-        asyncio.run(self.handler.connect_server(
-            name="test_server",
-            url="http://localhost:8080"
-        ))
+        asyncio.run(self.handler.connect_server(name="test_server", url="http://localhost:8080"))
 
         # Get retry stats
         stats = self.handler.get_retry_stats()

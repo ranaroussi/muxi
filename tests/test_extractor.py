@@ -4,11 +4,12 @@ Unit tests for the MemoryExtractor module.
 This module contains tests for the MemoryExtractor class in the MUXI Framework.
 """
 
-import unittest
-from unittest.mock import MagicMock, AsyncMock
 import asyncio
+import unittest
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from muxi.server.memory.extractor import MemoryExtractor
+from muxi.core.memory.extractor import MemoryExtractor
+
 from tests.utils.async_test import async_test
 
 
@@ -24,7 +25,8 @@ class TestMemoryExtractor(unittest.TestCase):
 
         # Create a mock model that returns extraction results
         self.mock_model = MagicMock()
-        self.mock_model.generate = AsyncMock(return_value="""
+        self.mock_model.generate = AsyncMock(
+            return_value="""
         {
             "extracted_info": [
                 {
@@ -41,21 +43,24 @@ class TestMemoryExtractor(unittest.TestCase):
                 }
             ]
         }
-        """)
+        """
+        )
 
         # Create the extractor with mock dependencies
         self.extractor = MemoryExtractor(
             orchestrator=self.mock_orchestrator,
             extraction_model=self.mock_model,
             confidence_threshold=0.7,
-            auto_extract=True
+            auto_extract=True,
         )
 
         # Mock the internal methods to focus on testing the process flow
-        self.extractor._extract_user_information = AsyncMock(return_value={
-            "name": {"value": "John Doe", "confidence": 0.9, "importance": 0.8},
-            "occupation": {"value": "Software Engineer", "confidence": 0.85, "importance": 0.7}
-        })
+        self.extractor._extract_user_information = AsyncMock(
+            return_value={
+                "name": {"value": "John Doe", "confidence": 0.9, "importance": 0.8},
+                "occupation": {"value": "Software Engineer", "confidence": 0.85, "importance": 0.7},
+            }
+        )
         self.extractor._process_extraction_results = AsyncMock()
 
     @async_test
@@ -67,10 +72,7 @@ class TestMemoryExtractor(unittest.TestCase):
 
         # Execute
         await self.extractor.process_conversation_turn(
-            user_message=user_message,
-            agent_response=agent_response,
-            user_id=123,
-            message_count=1
+            user_message=user_message, agent_response=agent_response, user_id=123, message_count=1
         )
 
         # Verify
@@ -89,7 +91,7 @@ class TestMemoryExtractor(unittest.TestCase):
             user_message=user_message,
             agent_response=agent_response,
             user_id=0,  # Anonymous user ID
-            message_count=1
+            message_count=1,
         )
 
         # Verify
@@ -111,10 +113,7 @@ class TestMemoryExtractor(unittest.TestCase):
 
         # Try to process for opted-out user
         await self.extractor.process_conversation_turn(
-            user_message="Hello",
-            agent_response="Hi",
-            user_id=user_id,
-            message_count=1
+            user_message="Hello", agent_response="Hi", user_id=user_id, message_count=1
         )
 
         # Verify extraction was skipped
@@ -145,16 +144,13 @@ class TestMemoryExtractor(unittest.TestCase):
         # Prepare mock extraction results
         extracted_data = {
             "location": {"value": "Seattle", "confidence": 0.9, "importance": 0.8},
-            "hobby": {"value": "hiking", "confidence": 0.85, "importance": 0.7}
+            "hobby": {"value": "hiking", "confidence": 0.85, "importance": 0.7},
         }
         self.extractor._extract_user_information = AsyncMock(return_value=extracted_data)
 
         # Execute
         await self.extractor.process_conversation_turn(
-            user_message=user_message,
-            agent_response=agent_response,
-            user_id=123,
-            message_count=3
+            user_message=user_message, agent_response=agent_response, user_id=123, message_count=3
         )
 
         # Verify
@@ -174,11 +170,12 @@ class TestOrchestratorExtraction(unittest.TestCase):
 
         # Create a mock orchestrator with the mock extractor
         from muxi.core.orchestrator import Orchestrator
+
         self.orchestrator = Orchestrator(
             buffer_memory=MagicMock(),
             long_term_memory=MagicMock(),
             auto_extract_user_info=True,
-            extraction_model=MagicMock()
+            extraction_model=MagicMock(),
         )
         self.orchestrator.memory_extractor = self.mock_memory_extractor
         self.orchestrator.is_multi_user = True
@@ -197,7 +194,7 @@ class TestOrchestratorExtraction(unittest.TestCase):
             user_message=user_message,
             agent_response=agent_response,
             user_id=user_id,
-            agent_id=agent_id
+            agent_id=agent_id,
         )
 
         # Allow any background tasks to complete
@@ -209,7 +206,7 @@ class TestOrchestratorExtraction(unittest.TestCase):
             user_message=user_message,
             agent_response=agent_response,
             user_id=user_id,
-            message_count=1
+            message_count=1,
         )
 
     @async_test
@@ -226,7 +223,7 @@ class TestOrchestratorExtraction(unittest.TestCase):
             user_message=user_message,
             agent_response=agent_response,
             user_id=user_id,
-            agent_id=agent_id
+            agent_id=agent_id,
         )
 
         # Allow any background tasks to complete
@@ -251,7 +248,7 @@ class TestOrchestratorExtraction(unittest.TestCase):
             agent_response=agent_response,
             user_id=user_id,
             agent_id=agent_id,
-            extraction_model=custom_model
+            extraction_model=custom_model,
         )
 
         # Allow any background tasks to complete
@@ -276,7 +273,7 @@ class TestOrchestratorExtraction(unittest.TestCase):
             user_message=user_message,
             agent_response=agent_response,
             user_id=user_id,
-            agent_id=agent_id
+            agent_id=agent_id,
         )
 
         # Allow any background tasks to complete
@@ -294,28 +291,39 @@ class TestAgentExtraction(unittest.TestCase):
         # Create mock model and orchestrator
         self.mock_model = MagicMock()
         self.mock_model.generate = AsyncMock(return_value="Test response")
+        self.mock_model.chat = AsyncMock(return_value="Test response")
 
         self.mock_orchestrator = MagicMock()
         self.mock_orchestrator.handle_user_information_extraction = AsyncMock()
         self.mock_orchestrator.add_to_buffer_memory = MagicMock()
         self.mock_orchestrator.add_to_long_term_memory = AsyncMock()
         self.mock_orchestrator.get_user_context_memory = AsyncMock(return_value={})
+        self.mock_orchestrator.add_message_to_memory = AsyncMock()
 
-        # Create mock MCP handler
-        self.mock_mcp_handler = MagicMock()
-        self.mock_mcp_handler.process_message = AsyncMock(
-            return_value=MagicMock(content="Test response")
-        )
+        # Create mock MCP server
+        from muxi.core.agent import MCPServer
+        self.mock_mcp_server = MagicMock(spec=MCPServer)
+        self.mock_mcp_server.name = "test_server"
+        self.mock_mcp_server.url = "http://localhost:8000"
 
         # Create the agent with mock components
         from muxi.core.agent import Agent
-        self.agent = Agent(
-            model=self.mock_model,
-            orchestrator=self.mock_orchestrator,
-            system_message="Test system message",
-            is_multi_user=True,
-            mcp_handler=self.mock_mcp_handler
-        )
+
+        # Replace the _mcp_service instance to avoid making real calls
+        with patch('muxi.core.mcp.service.MCPService.get_instance') as mock_get_instance:
+            mock_service = MagicMock()
+            mock_service.invoke_tool = AsyncMock(return_value={"result": "Test result"})
+            mock_get_instance.return_value = mock_service
+
+            self.agent = Agent(
+                model=self.mock_model,
+                orchestrator=self.mock_orchestrator,
+                system_message="Test system message",
+                mcp_server=self.mock_mcp_server,
+            )
+
+            # Store the mock service for assertions
+            self.mock_mcp_service = mock_service
 
     @async_test
     async def test_agent_delegates_extraction(self):
@@ -335,7 +343,7 @@ class TestAgentExtraction(unittest.TestCase):
             user_message=user_message,
             agent_response="Test response",
             user_id=user_id,
-            agent_id=self.agent.agent_id
+            agent_id=self.agent.agent_id,
         )
 
     @async_test
@@ -364,9 +372,8 @@ class TestAgentExtraction(unittest.TestCase):
         # Mock the orchestrator's handle_user_information_extraction method
         self.mock_orchestrator.handle_user_information_extraction.reset_mock()
 
-        # Set up a custom mock response for the MCP handler
-        response_mock = MagicMock(content="Custom model response")
-        self.mock_mcp_handler.process_message.return_value = response_mock
+        # Set up the model to return a custom response
+        self.mock_model.chat.return_value = "Custom model response"
 
         # Execute
         await self.agent.process_message(user_message, user_id=user_id)
@@ -379,7 +386,7 @@ class TestAgentExtraction(unittest.TestCase):
             user_message=user_message,
             agent_response="Custom model response",
             user_id=user_id,
-            agent_id=self.agent.agent_id
+            agent_id=self.agent.agent_id,
         )
 
 

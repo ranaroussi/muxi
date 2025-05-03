@@ -562,7 +562,7 @@ class TestMCPHandler(unittest.IsolatedAsyncioTestCase):
         self.handler = MCPHandler(model=self.mock_model)
 
         # Set up client patch
-        self.client_patcher = patch('packages.core.src.muxi.core.mcp_handler.MCPServerClient')
+        self.client_patcher = patch('muxi.core.mcp.handler.MCPServerClient')
         self.mock_client_class = self.client_patcher.start()
         self.mock_client = MagicMock()
         self.mock_client.connect = AsyncMock(return_value=True)

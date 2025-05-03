@@ -1,8 +1,8 @@
 
 {
     "name": "finance_assistant",
-    "description": "Expert in financial analysis, investment strategies, market trends and personal finance advice.",
-    "system_message": "You are a finance assistant. You provide analysis and advice on financial matters.",
+    "description": "Expert in financial analysis and investment strategies.",
+    "system_message": "You are a finance assistant.",
     "model": {
         "provider": "openai",
         "api_key": "${OPENAI_API_KEY}",
@@ -10,10 +10,22 @@
         "temperature": 0.2
     },
     "memory": {
-        "buffer": 5,
+        "buffer_size": 5,
+        "buffer_multiplier": 10,
         "long_term": false
     },
-    "tools": [
-        "enable_calculator"
+    "mcp_servers": [
+        {
+            "name": "stock_api",
+            "url": "http://localhost:5002",
+            "credentials": [
+                {
+                    "id": "stock_api_key",
+                    "param_name": "api_key",
+                    "required": true,
+                    "env_fallback": "STOCK_API_KEY"
+                }
+            ]
+        }
     ]
 }
