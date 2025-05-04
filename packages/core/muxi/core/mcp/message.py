@@ -1,365 +1,269 @@
-"""
-Model Context Protocol (MCP) implementation.
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        MCP Message Models - JSON-RPC Message Definitions
+# Description:  Message models for the Model Control Protocol (MCP)
+# Role:         Provides Pydantic models for all MCP message types
+# Usage:        Used for serializing and validating MCP messages
+# Author:       Muxi Framework Team
+#
+# The MCP Message module provides Pydantic models that define the structure
+# of messages used in the Model Control Protocol. These models ensure proper
+# validation, serialization, and type safety for all MCP communications.
+#
+# Key components:
+#
+# 1. JSON-RPC Base Models
+#    - Core models for JSON-RPC 2.0 messaging
+#    - Request, response, and error structures
+#    - Specification-compliant validation
+#
+# 2. MCP-Specific Message Types
+#    - Tool call request and response models
+#    - Function invocation structures
+#    - Parameter validation
+#
+# 3. Type Definitions
+#    - Common type structures used across messages
+#    - Type-safe parameter modeling
+#    - Rich data validation
+#
+# These models ensure that all messages created and processed within
+# the MCP system adhere to the JSON-RPC 2.0 specification and the MCP
+# extensions, providing type safety and validation.
+# =============================================================================
 
-This module provides functionality for communicating with language models using the
-Model Context Protocol (MCP) as defined at https://modelcontextprotocol.io/.
-"""
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
-from typing import Any, Callable, Dict, List, Optional, Union
-from dataclasses import dataclass
-
-from loguru import logger
-
-from muxi.core.models.base import BaseModel
+from pydantic import BaseModel, Field
 
 
-@dataclass
-class MCPToolCall:
-    """Tool call information for MCP messages."""
-
-    tool_name: str
-    tool_id: str
-    tool_args: Dict[str, Any]
-
-
-class MCPMessage:
+class ErrorCodes(int, Enum):
     """
-    Represents a message in the Model Context Protocol.
+    Standard JSON-RPC 2.0 error codes plus MCP-specific extension codes.
+
+    This enum defines the error codes used in JSON-RPC 2.0 responses with errors.
+    It includes both standard codes from the JSON-RPC specification and MCP-specific
+    extension codes for more granular error reporting.
     """
+    # Standard JSON-RPC 2.0 error codes
+    PARSE_ERROR = -32700           # Invalid JSON was received
+    INVALID_REQUEST = -32600       # The JSON sent is not a valid Request object
+    METHOD_NOT_FOUND = -32601      # The method does not exist / is not available
+    INVALID_PARAMS = -32602        # Invalid method parameter(s)
+    INTERNAL_ERROR = -32603        # Internal JSON-RPC error
 
-    def __init__(
-        self,
-        role: str,
-        content: Union[str, Dict[str, Any], None],
-        name: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None,
-        tool_calls: Optional[List[MCPToolCall]] = None,
-        tool_call_id: Optional[str] = None,
-        agent_id: Optional[str] = None,
-    ):
-        """
-        Initialize an MCP message.
-
-        Args:
-            role: The role of the message sender (e.g., "user", "assistant",
-                "system", "tool").
-            content: The content of the message. Can be a string or a
-                structured object.
-            name: Optional name for the sender (used for tools).
-            context: Optional context information for the message.
-            tool_calls: Optional list of tool calls in the message.
-            tool_call_id: Optional ID of the tool call this message responds to.
-            agent_id: Optional ID of the agent that generated this response.
-        """
-        self.role = role
-        self.content = content
-        self.name = name
-        self.context = context or {}
-        self.tool_calls = tool_calls or []
-        self.tool_call_id = tool_call_id
-        self.agent_id = agent_id
-
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert the message to a dictionary representation.
-
-        Returns:
-            A dictionary representation of the message.
-        """
-        message = {"role": self.role, "content": self.content}
-
-        if self.name:
-            message["name"] = self.name
-
-        if self.context:
-            message["context"] = self.context
-
-        if self.agent_id:
-            message["agent_id"] = self.agent_id
-
-        return message
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "MCPMessage":
-        """
-        Create a message from a dictionary representation.
-
-        Args:
-            data: The dictionary representation of the message.
-
-        Returns:
-            An MCPMessage instance.
-        """
-        return cls(
-            role=data["role"],
-            content=data["content"],
-            name=data.get("name"),
-            context=data.get("context", {}),
-            tool_calls=[MCPToolCall(**tool_call) for tool_call in data.get("tool_calls", [])],
-            tool_call_id=data.get("tool_call_id"),
-            agent_id=data.get("agent_id"),
-        )
+    # MCP extension error codes
+    TOOL_NOT_FOUND = -32000        # The requested tool was not found
+    TOOL_EXECUTION_ERROR = -32001  # Error during tool execution
+    UNAUTHORIZED = -32002          # Client not authorized to use the tool
+    RATE_LIMITED = -32003          # Request was rate limited
+    BAD_CREDENTIALS = -32004       # Invalid or missing credentials
+    TIMEOUT = -32005               # Operation timed out
+    CANCELLED = -32006             # Operation was cancelled
 
 
-class MCPContext:
+class JSONRPCError(BaseModel):
     """
-    Represents the context for an MCP interaction.
+    Error object for JSON-RPC 2.0 responses.
+
+    This model defines the structure of error objects in JSON-RPC 2.0
+    responses, following the specification. It includes required code
+    and message fields, plus an optional data field for additional
+    error details.
     """
+    code: int = Field(..., description="Error code")
+    message: str = Field(..., description="Error message")
+    data: Optional[Any] = Field(None, description="Additional error data")
 
-    def __init__(
-        self,
-        messages: Optional[List[MCPMessage]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        tools: Optional[List[Dict[str, Any]]] = None,
-    ):
-        """
-        Initialize an MCP context.
 
-        Args:
-            messages: The conversation history.
-            metadata: Additional metadata for the context.
-            tools: Available tools for the LLM to use.
-        """
-        self.messages = messages or []
-        self.metadata = metadata or {}
-        self.tools = tools or []
+class JSONRPCBaseRequest(BaseModel):
+    """
+    Base class for all JSON-RPC 2.0 requests.
 
-    def add_message(self, message: MCPMessage) -> None:
-        """
-        Add a message to the context.
+    This model defines the common structure for all JSON-RPC 2.0 requests,
+    including the JSON-RPC version, method name, and request ID. It serves
+    as the foundation for more specific request types.
+    """
+    jsonrpc: str = Field("2.0", description="JSON-RPC version (always '2.0')")
+    method: str = Field(..., description="Method to be invoked")
+    id: Union[str, int] = Field(..., description="Request identifier")
 
-        Args:
-            message: The message to add.
-        """
-        self.messages.append(message)
 
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert the context to a dictionary representation.
+class JSONRPCRequest(JSONRPCBaseRequest):
+    """
+    Complete JSON-RPC 2.0 request with params.
 
-        Returns:
-            A dictionary representation of the context.
-        """
-        return {
-            "messages": [m.to_dict() for m in self.messages],
-            "metadata": self.metadata,
-            "tools": self.tools,
+    This model extends the base request model to include the params field,
+    which contains the parameters for the requested method. The params field
+    can be any valid JSON structure, typically an object or array.
+    """
+    params: Optional[Dict[str, Any]] = Field(None, description="Method parameters")
+
+
+class JSONRPCBaseResponse(BaseModel):
+    """
+    Base class for all JSON-RPC 2.0 responses.
+
+    This model defines the common structure for all JSON-RPC 2.0 responses,
+    including the JSON-RPC version and the response ID (which must match
+    the ID from the corresponding request).
+    """
+    jsonrpc: str = Field("2.0", description="JSON-RPC version (always '2.0')")
+    id: Union[str, int, None] = Field(..., description="Request identifier")
+
+
+class JSONRPCSuccessResponse(JSONRPCBaseResponse):
+    """
+    Successful JSON-RPC 2.0 response with result.
+
+    This model represents successful JSON-RPC 2.0 responses, which include
+    a result field containing the return value of the invoked method. The
+    structure of the result field depends on the specific method called.
+    """
+    result: Any = Field(..., description="Method execution result")
+
+
+class JSONRPCErrorResponse(JSONRPCBaseResponse):
+    """
+    Error JSON-RPC 2.0 response with error object.
+
+    This model represents JSON-RPC 2.0 responses that indicate an error
+    occurred during method invocation. It includes an error object that
+    provides details about what went wrong.
+    """
+    error: JSONRPCError = Field(..., description="Error object")
+
+
+JSONRPCResponse = Union[JSONRPCSuccessResponse, JSONRPCErrorResponse]
+
+
+class FunctionCallModel(BaseModel):
+    """
+    Model representing a function/tool call.
+
+    This model defines the structure of a function or tool call within the MCP
+    system, including the name of the function and its parameters. It's used
+    to represent both agent-generated function calls and their results.
+    """
+    name: str = Field(..., description="Function/tool name")
+    parameters: Dict[str, Any] = Field(..., description="Function/tool parameters")
+    output: Optional[Any] = Field(None, description="Function/tool output (when available)")
+
+    class Config:
+        """Pydantic configuration for the model."""
+        schema_extra = {
+            "example": {
+                "name": "get_weather",
+                "parameters": {
+                    "location": "New York",
+                    "unit": "celsius",
+                    "include_forecast": True
+                },
+                "output": {
+                    "temperature": 22,
+                    "conditions": "Partly cloudy",
+                    "humidity": 65
+                }
+            }
         }
 
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "MCPContext":
-        """
-        Create a context from a dictionary representation.
 
-        Args:
-            data: The dictionary representation of the context.
-
-        Returns:
-            An MCPContext instance.
-        """
-        messages = [MCPMessage.from_dict(m) for m in data.get("messages", [])]
-
-        return cls(
-            messages=messages, metadata=data.get("metadata", {}), tools=data.get("tools", [])
-        )
-
-
-class MCPHandler:
+class ContentItem(BaseModel):
     """
-    Handles communication with LLMs using the Model Context Protocol.
+    Model representing a single content item in a message.
+
+    This model defines the structure of a content item within a message,
+    which can be either text content or a tool/function call. It supports
+    the LLM multi-modal content format.
     """
+    type: str = Field(..., description="Content type ('text' or 'tool_calls')")
+    text: Optional[str] = Field(None, description="Text content (when type='text')")
+    tool_calls: Optional[List[FunctionCallModel]] = Field(
+        None, description="Tool calls (when type='tool_calls')")
 
-    def __init__(self, model: BaseModel, tool_handlers: Optional[Dict[str, Callable]] = None):
+    def model_dump(self, **kwargs):
         """
-        Initialize an MCP handler.
+        Convert model to dictionary with custom handling.
 
-        Args:
-            model: The language model to use for generating responses.
-            tool_handlers: A dictionary mapping tool names to handler
-                functions.
-        """
-        self.model = model
-        self.tool_handlers = tool_handlers or {}
-        self.context = MCPContext()
-        self.last_tool_results = []
-
-    def set_system_message(self, system_message: str) -> None:
-        """
-        Set the system message for the MCP handler.
-
-        Args:
-            system_message: The system message to set
-        """
-        # Clear existing system messages
-        self.context.messages = [m for m in self.context.messages if m.role != "system"]
-
-        # Add new system message
-        self.context.add_message(MCPMessage(role="system", content=system_message))
-
-    def add_message(self, message: MCPMessage) -> None:
-        """
-        Add a message to the context.
-
-        Args:
-            message: The message to add
-        """
-        self.context.add_message(message)
-
-    async def process_message(
-        self, message: MCPMessage, context: Optional[MCPContext] = None
-    ) -> MCPMessage:
-        """
-        Process a message and generate a response.
-
-        Args:
-            message: The message to process.
-            context: Optional context to use. If None, the handler's context
-                will be used.
+        This method provides a custom serialization for ContentItem objects,
+        which ensures proper translation between the Pydantic model and the
+        format expected by the JSON-RPC protocol.
 
         Returns:
-            The response message.
+            Dict[str, Any]: Dictionary representation of the content item
         """
-        # Use provided context or the handler's context
-        ctx = context or self.context
+        if kwargs.get('mode') == 'json':
+            # For JSON output
+            return {
+                "type": self.type,
+                **({"text": self.text} if self.text is not None else {}),
+                **({"tool_calls": [tc.model_dump(mode='json') for tc in self.tool_calls
+                                   ]} if self.tool_calls is not None else {})
+            }
+        return {
+            "type": self.type,
+            **({"text": self.text} if self.text is not None else {}),
+            **({"tool_calls": [tc.model_dump() for tc in self.tool_calls
+                               ]} if self.tool_calls is not None else {})
+        }
 
-        # Add message to context
-        ctx.add_message(message)
 
-        # Convert context to a format suitable for the language model
-        model_messages = self._context_to_model_messages(ctx)
+class Message(BaseModel):
+    """
+    Model representing a complete message with mixed content.
 
-        # Generate a response
-        response_content = await self.model.chat(model_messages)
+    This model defines the structure of a complete message within the MCP
+    system, which includes a role (user, assistant, etc.) and content that
+    can be either a simple string or a list of content items supporting
+    multi-modal content.
+    """
+    role: str = Field(..., description="Message role (user, assistant, system, etc.)")
+    content: Union[str, List[ContentItem]] = Field(
+        ..., description="Message content (text or content items)")
 
-        # Create a response message
-        response = MCPMessage(
-            role="assistant",
-            content=response_content,
-        )
-
-        # Add response to context
-        ctx.add_message(response)
-
-        return response
-
-    async def process_tool_call(
-        self, tool_name: str, tool_input: Dict[str, Any], context: Optional[MCPContext] = None
-    ) -> MCPMessage:
+    def model_dump(self, **kwargs):
         """
-        Process a tool call and generate a response.
+        Convert model to dictionary with custom handling.
 
-        Args:
-            tool_name: The name of the tool to call.
-            tool_input: The input to the tool.
-            context: Optional context to use. If None, the handler's context
-                will be used.
+        This method provides a custom serialization for Message objects,
+        with special handling for the content field to ensure proper
+        translation to the expected format.
 
         Returns:
-            The response message.
+            Dict[str, Any]: Dictionary representation of the message
         """
-        # Use provided context or the handler's context
-        ctx = context or self.context
-
-        # Create a tool call message
-        tool_call_message = MCPMessage(
-            role="function",
-            content="",
-            name=tool_name,
-            context={"input": tool_input}
-        )
-
-        # Add the tool call message to the context
-        ctx.add_message(tool_call_message)
-
-        # Check if we have a handler for this tool
-        if tool_name not in self.tool_handlers:
-            error_message = f"No handler for tool: {tool_name}"
-            logger.error(error_message)
-
-            # Create an error response
-            response = MCPMessage(response=f"Error: {error_message}")
-
-            # Add the response to the context
-            ctx.add_message(response)
-
-            return response
-
-        try:
-            # Call the tool handler
-            handler = self.tool_handlers[tool_name]
-            result = await handler(tool_input)
-
-            # Create a response message
-            response = MCPMessage(
-                role="assistant",
-                content=result,
-            )
-
-            # Add the response to the context
-            ctx.add_message(response)
-
-            return response
-        except Exception as e:
-            error_message = f"Error calling tool {tool_name}: {str(e)}"
-            logger.error(error_message)
-
-            # Create an error response
-            response = MCPMessage(response=f"Error: {error_message}")
-
-            # Add the response to the context
-            ctx.add_message(response)
-
-            return response
-
-    def _context_to_model_messages(self, context: MCPContext) -> List[Dict[str, str]]:
-        """
-        Convert an MCP context to a format suitable for the language model.
-
-        Args:
-            context: The MCP context to convert.
-
-        Returns:
-            A list of messages in the format expected by the language model.
-        """
-        model_messages = []
-
-        for message in context.messages:
-            model_message = {
-                "role": message.role,
-                "content": message.content,
+        if isinstance(self.content, str):
+            return {
+                "role": self.role,
+                "content": self.content
+            }
+        else:
+            return {
+                "role": self.role,
+                "content": [item.model_dump(mode='json') for item in self.content]
             }
 
-            if message.name:
-                model_message["name"] = message.name
 
-            if message.context:
-                model_message["context"] = message.context
+class MCPToolCallRequest(JSONRPCRequest):
+    """
+    Model for an MCP tool call request.
 
-            model_messages.append(model_message)
+    This model represents a JSON-RPC request specifically for invoking
+    a tool in the MCP system. It ensures the request follows both the
+    JSON-RPC 2.0 specification and the MCP extensions for tool calls.
+    """
+    # Method is the tool name in MCP
+    params: Dict[str, Any] = Field(..., description="Tool parameters")
 
-        return model_messages
 
-    def register_tool_handler(self, tool_name: str, handler: Callable) -> None:
-        """
-        Register a handler for a tool.
+class MCPToolCallResponse(JSONRPCSuccessResponse):
+    """
+    Model for an MCP tool call response.
 
-        Args:
-            tool_name: The name of the tool.
-            handler: The handler function for the tool.
-        """
-        self.tool_handlers[tool_name] = handler
-
-    def clear_context(self) -> None:
-        """
-        Clear the context.
-        """
-        self.context = MCPContext()
-
-    def set_context(self, context: MCPContext) -> None:
-        """
-        Set the context.
-
-        Args:
-            context: The context to set.
-        """
-        self.context = context
+    This model represents a JSON-RPC response specifically for the result
+    of a tool call in the MCP system. It ensures the response follows both
+    the JSON-RPC 2.0 specification and the MCP extensions for tool calls.
+    """
+    result: Any = Field(..., description="Tool execution result")

@@ -1,9 +1,34 @@
-"""
-Enhanced MCPHandler with reconnection support.
-
-This module provides an extended MCPHandler implementation with
-automatic reconnection capabilities.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Reconnecting MCP Handler - Robust MCP Connectivity
+# Description:  MCP Handler with automatic connection recovery capabilities
+# Role:         Provides resilient tool execution with automatic reconnection
+# Usage:        Used when reliability for MCP connections is required
+# Author:       Muxi Framework Team
+#
+# The Reconnecting MCP Handler extends the standard MCP Handler with automatic
+# reconnection capabilities for enhanced resilience. Key features include:
+#
+# 1. Automatic Recovery
+#    - Transparent reconnection on connection failures
+#    - Configurable retry policies with exponential backoff
+#    - Graceful degradation on persistent failures
+#
+# 2. Connection Management
+#    - Automatic reconnection before tool execution
+#    - Connection state tracking
+#    - Comprehensive retry statistics
+#
+# 3. Fault Tolerance
+#    - Server failure handling
+#    - Network interruption recovery
+#    - Request timeout management
+#
+# This implementation is designed for production environments where network
+# reliability is critical, providing a robust interface for MCP tool execution
+# that can recover from transient connectivity issues.
+# =============================================================================
 
 import asyncio
 from typing import Any, Dict, List, Optional
@@ -19,7 +44,8 @@ class ReconnectingMCPHandler(MCPHandler):
     Enhanced MCPHandler with reconnection support.
 
     This class extends the standard MCPHandler with automatic reconnection
-    capabilities using exponential backoff.
+    capabilities using exponential backoff. It transparently handles connection
+    failures and retries operations without requiring client code changes.
     """
 
     def __init__(self, model, retry_config: Optional[RetryConfiguration] = None):
@@ -32,11 +58,7 @@ class ReconnectingMCPHandler(MCPHandler):
         """
         super().__init__(model=model)
         self.retry_config = retry_config or RetryConfiguration(
-            max_retries=3,
-            initial_delay=1.0,
-            max_delay=30.0,
-            backoff_factor=2.0,
-            jitter=True
+            max_retries=3, initial_delay=1.0, max_delay=30.0, backoff_factor=2.0, jitter=True
         )
         self._reconnection_in_progress = {}
 
@@ -46,10 +68,14 @@ class ReconnectingMCPHandler(MCPHandler):
         url: Optional[str] = None,
         command: Optional[str] = None,
         credentials: Optional[Dict[str, Any]] = None,
-        request_timeout: float = 60.0
+        request_timeout: float = 60.0,
     ) -> bool:
         """
         Connect to an MCP server with automatic reconnection support.
+
+        This method enhances the standard connect_server method with retry
+        capabilities, automatically attempting to reconnect if the initial
+        connection fails.
 
         Args:
             name: Unique identifier for the server
@@ -73,10 +99,7 @@ class ReconnectingMCPHandler(MCPHandler):
 
         server_url = url or command
 
-        log_msg = (
-            f"Connecting to MCP server {name} at {server_url} "
-            f"with reconnection support"
-        )
+        log_msg = f"Connecting to MCP server {name} at {server_url} " f"with reconnection support"
         logger.info(log_msg)
 
         # Use the retry mechanism for connection
@@ -90,13 +113,11 @@ class ReconnectingMCPHandler(MCPHandler):
                 url=url,
                 command=command,
                 credentials=credentials,
-                request_timeout=request_timeout
+                request_timeout=request_timeout,
             )
             return result
         except MCPConnectionError as e:
-            error_msg = (
-                f"Failed to connect to MCP server {name} after retries: {str(e)}"
-            )
+            error_msg = f"Failed to connect to MCP server {name} after retries: {str(e)}"
             logger.error(error_msg)
             raise
 
@@ -106,10 +127,14 @@ class ReconnectingMCPHandler(MCPHandler):
         url: Optional[str] = None,
         command: Optional[str] = None,
         credentials: Optional[Dict[str, Any]] = None,
-        request_timeout: float = 60.0
+        request_timeout: float = 60.0,
     ) -> bool:
         """
         Implementation of server connection used by the retry mechanism.
+
+        This internal method is called by the retry mechanism to attempt
+        connection to the server. It directly delegates to the parent class's
+        connect_server method.
 
         Args:
             name: Unique identifier for the server
@@ -129,7 +154,7 @@ class ReconnectingMCPHandler(MCPHandler):
             url=url,
             command=command,
             credentials=credentials,
-            request_timeout=request_timeout
+            request_timeout=request_timeout,
         )
 
     async def execute_tool(
@@ -137,10 +162,14 @@ class ReconnectingMCPHandler(MCPHandler):
         server_name: str,
         tool_name: str,
         params: Dict[str, Any],
-        cancellation_token: Any = None
+        cancellation_token: Any = None,
     ) -> Dict[str, Any]:
         """
         Execute a tool with automatic retry on connection errors.
+
+        This method enhances the standard execute_tool method with automatic
+        reconnection and retry capabilities, ensuring that transient connection
+        issues don't cause tool execution failures.
 
         Args:
             server_name: Name of the server to execute the tool on
@@ -173,7 +202,7 @@ class ReconnectingMCPHandler(MCPHandler):
                 server_name=server_name,
                 tool_name=tool_name,
                 params=params,
-                cancellation_token=cancellation_token
+                cancellation_token=cancellation_token,
             )
             return result
         except MCPConnectionError as e:
@@ -191,6 +220,10 @@ class ReconnectingMCPHandler(MCPHandler):
         """
         Implementation of tool execution used by the retry mechanism.
 
+        This internal method is called by the retry mechanism to attempt
+        execution of a tool. It includes automatic reconnection logic if
+        the server is disconnected.
+
         Args:
             server_name: Name of the server to use
             tool_name: Name of the tool to execute
@@ -206,8 +239,10 @@ class ReconnectingMCPHandler(MCPHandler):
             MCPTimeoutError: If the request timed out
         """
         # Check if we need to reconnect
-        if (server_name not in self.active_connections or
-                not self.active_connections[server_name].connected):
+        if (
+            server_name not in self.active_connections
+            or not self.active_connections[server_name].connected
+        ):
             if server_name not in self._reconnection_in_progress:
                 self._reconnection_in_progress[server_name] = True
                 try:
@@ -230,7 +265,7 @@ class ReconnectingMCPHandler(MCPHandler):
                         url=url,
                         command=command,
                         credentials=credentials,
-                        request_timeout=request_timeout
+                        request_timeout=request_timeout,
                     )
                     logger.info(f"Successfully reconnected to server {server_name}")
                 finally:
@@ -239,18 +274,19 @@ class ReconnectingMCPHandler(MCPHandler):
                 # Another reconnection is in progress, wait for it
                 for _ in range(10):  # Wait for up to ~1 second
                     reconnection_done = (
-                        server_name not in self._reconnection_in_progress or
-                        not self._reconnection_in_progress[server_name]
+                        server_name not in self._reconnection_in_progress
+                        or not self._reconnection_in_progress[server_name]
                     )
                     if reconnection_done:
                         break
                     await asyncio.sleep(0.1)
 
-                if (server_name not in self.active_connections or
-                        not self.active_connections[server_name].connected):
+                if (
+                    server_name not in self.active_connections
+                    or not self.active_connections[server_name].connected
+                ):
                     error_msg = (
-                        f"Server {server_name} is not connected "
-                        f"after reconnection attempt"
+                        f"Server {server_name} is not connected " f"after reconnection attempt"
                     )
                     raise MCPConnectionError(error_msg)
 
@@ -260,6 +296,10 @@ class ReconnectingMCPHandler(MCPHandler):
     async def list_tools(self, refresh: bool = False) -> List[Dict[str, Any]]:
         """
         List available tools with retry support.
+
+        This method enhances the standard list_tools method with automatic
+        retry capabilities, ensuring that tool discovery succeeds even with
+        transient connection issues.
 
         Args:
             refresh: Whether to refresh the tool list from servers
@@ -273,7 +313,7 @@ class ReconnectingMCPHandler(MCPHandler):
                 super().list_tools,
                 retry_config=self.retry_config,
                 retry_exceptions=MCPConnectionError,
-                refresh=refresh
+                refresh=refresh,
             )
             return result
         except MCPConnectionError as e:
@@ -285,8 +325,12 @@ class ReconnectingMCPHandler(MCPHandler):
         """
         Get retry statistics.
 
+        This method provides diagnostic information about retry operations
+        and reconnection status, useful for monitoring and debugging.
+
         Returns:
-            Dictionary with retry statistics
+            Dictionary with retry statistics including retry configuration
+            and current reconnection status
         """
         stats = {
             "retry_config": {
@@ -294,12 +338,13 @@ class ReconnectingMCPHandler(MCPHandler):
                 "initial_delay": self.retry_config.initial_delay,
                 "max_delay": self.retry_config.max_delay,
                 "backoff_factor": self.retry_config.backoff_factor,
-                "jitter": self.retry_config.jitter
+                "jitter": self.retry_config.jitter,
             },
             "reconnection_in_progress": list(
-                server_id for server_id, in_progress in self._reconnection_in_progress.items()
+                server_id
+                for server_id, in_progress in self._reconnection_in_progress.items()
                 if in_progress
-            )
+            ),
         }
 
         connection_stats = self.get_connection_stats()

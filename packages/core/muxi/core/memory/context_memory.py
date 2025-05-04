@@ -1,120 +1,127 @@
-"""
-Context Memory for User-Specific Information
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Context Memory - Window-Based Memory System
+# Description:  Simple context window memory system for conversation history
+# Role:         Provides basic memory for storing recent conversation context
+# Usage:        Used for maintaining recency-based conversational context
+# Author:       Muxi Framework Team
+#
+# The Context Memory module provides a simple, recency-based memory system
+# for the Muxi Framework. It implements a sliding window approach to maintain
+# the most recent conversation history without the complexity of vector
+# embeddings or semantic search.
+#
+# Key features include:
+#
+# 1. Simple Window Memory
+#    - Fixed-size memory window based on message count
+#    - FIFO (First In, First Out) message management
+#    - No vector storage or embeddings required
+#
+# 2. Metadata Support
+#    - Associate metadata with each stored message
+#    - Filter retrieval based on metadata criteria
+#
+# 3. Lightweight Implementation
+#    - Efficient storage with minimal overhead
+#    - No external dependencies required
+#    - Fast retrieval operations
+#
+# This memory implementation is suitable for simple agents where
+# semantic search isn't needed, or as a fallback when embeddings
+# aren't available.
+# =============================================================================
 
-This module provides a class for managing user-specific context memory
-in the MUXI Framework. It allows storing and retrieving personal information
-and preferences for individual users to enable personalization.
-"""
+from collections import deque
+from typing import Any, Dict, List, Optional
 
-import json
-from typing import Any, Dict, List, Optional, Union
+from .base import BaseMemory
 
 
-class ContextMemory:
+class ContextMemory(BaseMemory):
     """
-    Context Memory for user-specific information and preferences.
+    Simple context window memory implementation for conversation history.
 
-    This class provides methods for managing structured information about users
-    that can enhance agent responses with personalization.
+    This implementation maintains a fixed-size sliding window of the most recent
+    messages. It provides a simple FIFO (First In, First Out) approach to memory
+    management, where older messages are dropped when the window size is exceeded.
+
+    Unlike more sophisticated memory implementations, ContextMemory doesn't use
+    vector embeddings or semantic search, making it lightweight but limited to
+    recency-based recall.
     """
 
-    def __init__(self):
-        """Initialize the context memory."""
-        self.knowledge = {}
-
-    def add(self, data: Dict[str, Any]) -> None:
+    def __init__(self, max_size: int = 10):
         """
-        Add knowledge to the context memory.
+        Initialize a new context window memory.
 
         Args:
-            data: Dictionary containing knowledge items
+            max_size: Maximum number of items to keep in the memory window.
+                When this limit is reached, older items are removed to make
+                room for new ones. Default is 10 messages.
         """
-        self.knowledge.update(data)
+        self.max_size = max_size
+        self.buffer = deque(maxlen=max_size)
 
-    def add_from_file(self, filepath: str, format: str = "auto") -> None:
+    async def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> None:
         """
-        Add knowledge from a file.
+        Add content to the context memory.
+
+        Adds a new item to the memory window, along with optional metadata.
+        If the window is full, the oldest item will be removed.
 
         Args:
-            filepath: Path to the file containing knowledge
-            format: Format of the file - "auto", "json", "txt"
-
-        Raises:
-            ValueError: If the file format is not supported or the file cannot be parsed
+            content: The text content to add to memory.
+            metadata: Optional key-value pairs for filtering and context.
+                Common metadata includes timestamps, message types, and
+                user/session identifiers.
         """
-        # Determine format if auto
-        if format == "auto":
-            if filepath.endswith(".json"):
-                format = "json"
-            elif filepath.endswith(".txt"):
-                format = "txt"
-            else:
-                raise ValueError(f"Cannot automatically determine format for file: {filepath}")
+        self.buffer.append({"content": content, "metadata": metadata or {}})
 
-        # Parse file based on format
-        if format == "json":
-            try:
-                with open(filepath, 'r') as f:
-                    data = json.load(f)
-                    self.add(data)
-            except (json.JSONDecodeError, FileNotFoundError) as e:
-                raise ValueError(f"Failed to load JSON file: {e}")
-        elif format == "txt":
-            try:
-                with open(filepath, 'r') as f:
-                    content = f.read()
-                    # Simple key-value parsing: "key: value"
-                    for line in content.split("\n"):
-                        line = line.strip()
-                        if line and ": " in line:
-                            key, value = line.split(": ", 1)
-                            self.knowledge[key.strip()] = value.strip()
-            except FileNotFoundError as e:
-                raise ValueError(f"Failed to load text file: {e}")
-        else:
-            raise ValueError(f"Unsupported format: {format}")
-
-    def get(self, key: Optional[str] = None) -> Union[Dict[str, Any], Any, None]:
+    async def search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """
-        Get knowledge from the context memory.
+        Retrieve the most recent items from context memory.
+
+        This implementation doesn't perform actual search - it simply returns
+        the most recent items in the memory window, up to the specified limit.
+        No semantic matching or relevance scoring is performed.
 
         Args:
-            key: Optional key to retrieve specific knowledge. If None, returns all knowledge.
+            query: Ignored in this implementation since no semantic search is performed.
+            limit: Maximum number of results to return, starting from most recent.
+                Default is 5 items.
 
         Returns:
-            The requested knowledge or None if not found
+            A list of dictionaries containing the content and metadata of the
+            most recent items, ordered from newest to oldest.
         """
-        if key is None:
-            return self.knowledge
-        return self.knowledge.get(key)
+        # Return the most recent 'limit' items
+        return list(reversed([item for item in list(self.buffer)[-limit:]]))
 
-    def query(self, question: str) -> Dict[str, Any]:
+    def clear(self) -> None:
         """
-        Query the context memory with a natural language question.
+        Clear all items from the context memory.
 
-        This is a simple implementation that returns all knowledge.
-        In a more advanced implementation, this would use semantic search.
+        Removes all content from the memory window, effectively resetting
+        the memory to an empty state.
+        """
+        self.buffer.clear()
 
-        Args:
-            question: The question to answer
+    def get_all(self) -> List[Dict[str, Any]]:
+        """
+        Get all items currently in the context memory.
 
         Returns:
-            Dictionary of relevant knowledge items
+            A list of all items in the memory window, ordered from oldest to newest.
         """
-        # Simple implementation - return all knowledge
-        # In a real implementation, this would use semantic search
-        return self.knowledge
+        return list(self.buffer)
 
-    def clear(self, keys: Optional[List[str]] = None) -> None:
+    def get_size(self) -> int:
         """
-        Clear knowledge from the context memory.
+        Get the current number of items in the context memory.
 
-        Args:
-            keys: Optional list of keys to clear. If None, clears all knowledge.
+        Returns:
+            The current number of items stored in the memory window.
         """
-        if keys is None:
-            self.knowledge = {}
-        else:
-            for key in keys:
-                if key in self.knowledge:
-                    del self.knowledge[key]
+        return len(self.buffer)

@@ -1,8 +1,63 @@
-"""
-Knowledge handler module for MUXI Framework.
-
-This module provides the KnowledgeHandler class for managing knowledge sources.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Knowledge Handler - External Knowledge Management
+# Description:  Core system for managing and accessing agent knowledge sources
+# Role:         Provides vector storage and retrieval of knowledge for agents
+# Usage:        Used to augment agent responses with external information
+# Author:       Muxi Framework Team
+#
+# The Knowledge Handler provides a comprehensive system for managing and accessing
+# external knowledge sources for agents. It combines:
+#
+# 1. Vector Storage
+#    - Efficient storage of document embeddings
+#    - FAISS index for fast similarity search
+#    - Persistence with file caching
+#
+# 2. Document Management
+#    - Loading and chunking of documents
+#    - Tracking of document metadata and sources
+#    - Modification time detection for intelligent reindexing
+#
+# 3. Search Capabilities
+#    - Semantic search using vector similarity
+#    - Configurable relevance threshold
+#    - Metadata filtering options
+#
+# The KnowledgeHandler is typically used to:
+# - Process documents and file-based knowledge
+# - Generate and store vector embeddings
+# - Provide agents with relevant information based on queries
+# - Ground agent responses in factual information
+#
+# This implementation focuses on file-based knowledge with vector search,
+# making it ideal for cases where agents need access to domain-specific
+# documentation, product information, or other textual resources.
+#
+# Example usage:
+#
+#   # Initialize with an agent ID
+#   handler = KnowledgeHandler(
+#       agent_id="support_agent",
+#       embedding_dimension=1536
+#   )
+#
+#   # Add documents to knowledge base
+#   knowledge_source = FileKnowledge(
+#       "product_docs",
+#       "docs/product_manual.pdf",
+#       "Product documentation"
+#   )
+#   await handler.add_file(knowledge_source, model.get_embedding)
+#
+#   # Search for relevant information
+#   results = await handler.search(
+#       query="How do I reset my password?",
+#       generate_embedding_fn=model.get_embedding,
+#       top_k=3
+#   )
+# =============================================================================
 
 import os
 import pickle
@@ -18,28 +73,47 @@ from muxi.core.knowledge.base import FileKnowledge
 
 class KnowledgeHandler:
     """
-    Handles knowledge for agents with embedding and retrieval capabilities.
+    Handles knowledge for agents with vector embedding and retrieval capabilities.
+
+    The KnowledgeHandler provides a system for storing, organizing, and retrieving
+    external knowledge for agents. It uses vector embeddings to enable semantic search,
+    allowing agents to find information that's contextually relevant to user queries.
+
+    Key features include:
+    - File processing and document management
+    - Vector embeddings for semantic search
+    - Persistent caching of embeddings for performance
+    - Metadata tracking for source attribution
     """
 
     def __init__(
         self,
         agent_id_or_sources,
         embedding_dimension: int = 1536,
-        cache_dir: str = ".cache/knowledge_embeddings"
+        cache_dir: str = ".cache/knowledge_embeddings",
     ):
         """
         Initialize the knowledge handler.
 
+        The handler can be initialized either with an agent ID (for agent-specific
+        knowledge) or with a list of knowledge sources (for backward compatibility).
+
         Args:
-            agent_id_or_sources: Either the agent ID (string) or a list of knowledge sources
-            embedding_dimension: Dimension of the embedding vectors
-            cache_dir: Directory to store cached embeddings, relative to application root
+            agent_id_or_sources: Either the agent ID (string) or a list of knowledge
+                sources. If a list is provided, a random UUID will be generated as
+                the agent ID.
+            embedding_dimension: Dimension of the embedding vectors. Default is 1536,
+                which matches OpenAI's text-embedding-3-small model.
+            cache_dir: Directory to store cached embeddings, relative to application
+                root. This enables persisting embeddings between runs for better
+                performance.
         """
         # Handle initializing with knowledge sources (backward compatibility)
         if isinstance(agent_id_or_sources, list):
             knowledge_sources = agent_id_or_sources
             # Generate a random ID for the agent
             import uuid
+
             self.agent_id = str(uuid.uuid4())
 
             # Store knowledge sources for later initialization
@@ -65,13 +139,22 @@ class KnowledgeHandler:
         self._load_cached_embeddings()
 
     def _load_cached_embeddings(self) -> bool:
-        """Load cached embeddings if they exist and are valid"""
+        """
+        Load cached embeddings if they exist and are valid.
+
+        This internal method attempts to load previously saved FAISS index and
+        document metadata from disk. If the cached data is valid and consistent,
+        it's used, avoiding the need to regenerate embeddings.
+
+        Returns:
+            bool: True if cached embeddings were successfully loaded, False otherwise
+        """
         try:
             if os.path.exists(self.embedding_file) and os.path.exists(self.metadata_file):
-                with open(self.embedding_file, 'rb') as f:
+                with open(self.embedding_file, "rb") as f:
                     self.index = pickle.load(f)
 
-                with open(self.metadata_file, 'rb') as f:
+                with open(self.metadata_file, "rb") as f:
                     self.documents = pickle.load(f)
 
                 # Validate that index and documents are consistent
@@ -91,32 +174,42 @@ class KnowledgeHandler:
             return False
 
     def _save_embeddings(self) -> None:
-        """Save embeddings and metadata to disk"""
+        """
+        Save embeddings and metadata to disk for persistence.
+
+        This internal method serializes the FAISS index and document metadata
+        to disk, enabling them to be loaded in future sessions. This improves
+        performance by avoiding the need to regenerate embeddings every time.
+        """
         try:
-            with open(self.embedding_file, 'wb') as f:
+            with open(self.embedding_file, "wb") as f:
                 pickle.dump(self.index, f)
 
-            with open(self.metadata_file, 'wb') as f:
+            with open(self.metadata_file, "wb") as f:
                 pickle.dump(self.documents, f)
 
             logger.info(f"Saved embeddings for agent {self.agent_id}")
         except Exception as e:
             logger.error(f"Error saving embeddings: {e}")
 
-    async def add_file(
-        self,
-        knowledge_source: FileKnowledge,
-        generate_embeddings_fn
-    ) -> int:
+    async def add_file(self, knowledge_source: FileKnowledge, generate_embeddings_fn) -> int:
         """
         Add a file to the knowledge base.
 
+        This method processes a file from a knowledge source, chunks its content,
+        generates embeddings, and adds them to the vector index for future retrieval.
+        It tracks modification times to avoid reprocessing unchanged files.
+
         Args:
-            knowledge_source: The knowledge source to add
-            generate_embeddings_fn: Function to generate embeddings
+            knowledge_source: The knowledge source containing the file to process.
+                This should be a FileKnowledge instance with path and description.
+            generate_embeddings_fn: Function to generate embeddings for the text chunks.
+                This should be a callable that takes a list of strings and returns
+                a list of embedding vectors.
 
         Returns:
-            Number of chunks added to the index
+            int: Number of chunks added to the index. Zero indicates the file was
+                already processed and hasn't changed, or an error occurred.
         """
         file_path = knowledge_source.path
         description = knowledge_source.description
@@ -148,7 +241,7 @@ class KnowledgeHandler:
             embeddings = await generate_embeddings_fn(chunks)
 
             # Convert to numpy array for FAISS
-            embeddings_np = np.array(embeddings).astype('float32')
+            embeddings_np = np.array(embeddings).astype("float32")
 
             # Add to FAISS index
             self.index.add(embeddings_np)
@@ -156,13 +249,15 @@ class KnowledgeHandler:
             # Add modification time to metadata
             start_idx = len(self.documents)
             for i, chunk in enumerate(chunks):
-                self.documents.append({
-                    "content": chunk,
-                    "source": file_path,
-                    "description": description,
-                    "mtime": file_mtime,
-                    "index": start_idx + i
-                })
+                self.documents.append(
+                    {
+                        "content": chunk,
+                        "source": file_path,
+                        "description": description,
+                        "mtime": file_mtime,
+                        "index": start_idx + i,
+                    }
+                )
 
             # Save updated embeddings
             self._save_embeddings()
@@ -178,11 +273,16 @@ class KnowledgeHandler:
         """
         Remove a file from the knowledge base.
 
+        This method removes all chunks associated with a specific file from the
+        knowledge base. Due to limitations in FAISS, this actually rebuilds the
+        metadata structure but leaves the vectors in place, marking them as
+        unavailable for future searches.
+
         Args:
-            file_path: Path to the file to remove
+            file_path: Path to the file to remove from the knowledge base
 
         Returns:
-            True if the file was removed, False otherwise
+            bool: True if the file was found and removed, False otherwise
         """
         # Find indices of documents to remove
         indices_to_remove = []
@@ -219,23 +319,29 @@ class KnowledgeHandler:
         return True
 
     async def search(
-        self,
-        query: str,
-        generate_embedding_fn,
-        top_k: int = 5,
-        threshold: float = 0.0
+        self, query: str, generate_embedding_fn, top_k: int = 5, threshold: float = 0.0
     ) -> List[Dict[str, Any]]:
         """
         Search the knowledge base for relevant information.
 
+        This method performs a semantic search using vector similarity to find
+        content chunks that are contextually relevant to the query. It converts
+        the query to an embedding vector and searches for similar vectors in the index.
+
         Args:
-            query: The query to search for
-            generate_embedding_fn: Function to generate the query embedding
-            top_k: Maximum number of results to return
-            threshold: Minimum relevance score (0-1) to include a result
+            query: The search query text to find relevant information for
+            generate_embedding_fn: Function to generate the embedding for the query.
+                This should be a callable that takes a string and returns an embedding vector.
+            top_k: Maximum number of results to return, ranked by relevance
+            threshold: Minimum relevance score (0-1) to include a result in the output.
+                Higher values return only more relevant results, potentially fewer than top_k.
 
         Returns:
-            List of relevant documents
+            List of relevant documents, each containing:
+            - content: The text content from the knowledge base
+            - source: The file path or identifier where this content came from
+            - description: Human-readable description of the source
+            - relevance: Similarity score (0-1) indicating relevance to the query
         """
         if not self.index or self.index.ntotal == 0:
             logger.warning("Knowledge base is empty")
@@ -245,7 +351,7 @@ class KnowledgeHandler:
             # Generate query embedding
             query_embedding = await generate_embedding_fn(query)
             # Convert to numpy array and ensure proper shape
-            query_np = np.array([query_embedding]).astype('float32')
+            query_np = np.array([query_embedding]).astype("float32")
 
             # Search FAISS index
             distances, indices = self.index.search(query_np, min(top_k, self.index.ntotal))
@@ -265,12 +371,14 @@ class KnowledgeHandler:
                     continue  # Skip if below threshold
 
                 doc = self.documents[idx]
-                results.append({
-                    "content": doc.get("content", ""),
-                    "source": doc.get("source", ""),
-                    "description": doc.get("description", ""),
-                    "relevance": similarity
-                })
+                results.append(
+                    {
+                        "content": doc.get("content", ""),
+                        "source": doc.get("source", ""),
+                        "description": doc.get("description", ""),
+                        "relevance": similarity,
+                    }
+                )
 
             return results
 
@@ -280,10 +388,13 @@ class KnowledgeHandler:
 
     def get_sources(self) -> List[str]:
         """
-        Get a list of knowledge sources.
+        Get a list of all knowledge sources in the knowledge base.
+
+        This method returns a list of unique file paths that have been added to
+        the knowledge base, useful for managing and tracking knowledge sources.
 
         Returns:
-            List of file paths in the knowledge base
+            List[str]: List of file paths in the knowledge base
         """
         # Extract unique source paths
         sources = set()

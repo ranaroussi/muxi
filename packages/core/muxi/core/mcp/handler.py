@@ -1,14 +1,62 @@
-"""
-Model Context Protocol (MCP) handler implementation.
-
-This module provides functionality for communicating with MCP servers using the
-official ModelContextProtocol Python SDK.
-
-Note on MCP SDK: The MCP Python SDK (from the mcp package) is now available on PyPI:
-- pip install mcp>=1.4.1
-- Main components include client, server, and transport functionality
-- HTTP+SSE transport is our primary focus for now
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        MCP Handler - Model Control Protocol Implementation
+# Description:  Core implementation of the Model Control Protocol (MCP)
+# Role:         Enables agents to interact with external tools and services
+# Usage:        Used by Orchestrator to connect agents with external tools
+# Author:       Muxi Framework Team
+#
+# The MCP Handler provides a robust implementation of the Model Control Protocol,
+# enabling agents to communicate with external tools and services. It includes:
+#
+# 1. Transport Layer
+#    - HTTP+SSE transport for web-based MCP servers
+#    - Command-line transport for local tools
+#    - Abstract interface for custom transport implementations
+#
+# 2. Connection Management
+#    - Secure establishment of MCP server connections
+#    - Session tracking and maintenance
+#    - Error handling and recovery
+#
+# 3. Request/Response Cycle
+#    - Formatting and sending MCP messages
+#    - Processing tool responses
+#    - Handling asynchronous operations
+#
+# 4. Error Handling
+#    - Specialized error types for different failure modes
+#    - Graceful degradation on connection issues
+#    - Detailed logging for troubleshooting
+#
+# The MCP implementation enables agents to:
+# - Discover and use external tools dynamically
+# - Execute complex operations beyond LLM capabilities
+# - Interact with real-world systems and data sources
+# - Maintain persistent connections to tool servers
+#
+# This module implements the official Model Context Protocol specification,
+# using the MCP Python SDK for transport and message handling.
+#
+# Example usage:
+#
+#   # Create handler with model for extracting tool calls
+#   handler = MCPHandler(model=openai_model)
+#
+#   # Connect to an MCP server
+#   await handler.connect_server(
+#       name="file_tools",
+#       url="http://localhost:8080/api/mcp"
+#   )
+#
+#   # Execute a tool
+#   result = await handler.execute_tool(
+#       server_name="file_tools",
+#       tool_name="read_file",
+#       params={"path": "config.json"}
+#   )
+# =============================================================================
 
 import json
 import uuid
@@ -23,58 +71,122 @@ from loguru import logger
 
 
 class MCPError(Exception):
-    """Base exception class for MCP-related errors."""
+    """
+    Base exception class for MCP-related errors.
+
+    This serves as the parent class for all MCP-specific exceptions,
+    providing a consistent interface for error handling and propagation.
+    """
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+        """
+        Initialize an MCP error.
+
+        Args:
+            message: Human-readable error message describing what went wrong
+            details: Optional dictionary with additional error context and details
+        """
         self.message = message
         self.details = details or {}
         super().__init__(f"{message}" + (f": {json.dumps(details)}" if details else ""))
 
 
 class MCPConnectionError(MCPError):
-    """Exception raised for connection-related errors."""
+    """
+    Exception raised for connection-related errors.
+
+    This exception indicates issues establishing or maintaining a connection
+    to an MCP server, such as network failures, authentication problems,
+    or server unavailability.
+    """
     pass
 
 
 class MCPRequestError(MCPError):
-    """Exception raised for errors when making requests to MCP servers."""
+    """
+    Exception raised for errors when making requests to MCP servers.
+
+    This exception indicates issues with specific requests, such as
+    invalid parameters, missing permissions, or server-side errors
+    during tool execution.
+    """
     pass
 
 
 class MCPTimeoutError(MCPError):
-    """Exception raised when MCP operations time out."""
+    """
+    Exception raised when MCP operations time out.
+
+    This exception indicates that a request to an MCP server took
+    longer than the specified timeout period, which could be due to
+    network issues, server overload, or long-running operations.
+    """
     pass
 
 
 class MCPCancelledError(MCPError):
-    """Exception raised when an MCP operation is cancelled."""
+    """
+    Exception raised when an MCP operation is cancelled.
+
+    This exception indicates that an operation was intentionally
+    cancelled, typically by user action or as part of cleanup during
+    error handling or shutdown.
+    """
     pass
 
 
 class CancellationToken:
-    """A token that can be used to cancel async operations."""
+    """
+    A token that can be used to cancel async operations.
+
+    This class provides a mechanism for cancelling asynchronous operations,
+    such as MCP requests, by registering tasks that should be cancelled
+    when the token is cancelled.
+    """
 
     def __init__(self):
+        """Initialize a new cancellation token in the non-cancelled state."""
         self.cancelled = False
         self._tasks = set()
 
     def cancel(self):
-        """Mark the token as cancelled and cancel all registered tasks."""
+        """
+        Mark the token as cancelled and cancel all registered tasks.
+
+        This method cancels all asyncio tasks that have been registered
+        with this token, allowing for coordinated cancellation of related
+        operations.
+        """
         self.cancelled = True
         for task in self._tasks:
             if not task.done():
                 task.cancel()
 
     def register(self, task):
-        """Register a task to be cancelled when this token is cancelled."""
+        """
+        Register a task to be cancelled when this token is cancelled.
+
+        Args:
+            task: The asyncio task to register for cancellation
+        """
         self._tasks.add(task)
 
     def unregister(self, task):
-        """Unregister a task."""
+        """
+        Unregister a task so it won't be cancelled with this token.
+
+        Args:
+            task: The asyncio task to unregister
+        """
         if task in self._tasks:
             self._tasks.remove(task)
 
     def throw_if_cancelled(self):
-        """Throw an exception if this token has been cancelled."""
+        """
+        Throw an exception if this token has been cancelled.
+
+        Raises:
+            MCPCancelledError: If this token has been cancelled
+        """
         if self.cancelled:
             raise MCPCancelledError("Operation was cancelled", {
                 "timestamp": datetime.now().isoformat()
@@ -82,30 +194,73 @@ class CancellationToken:
 
 
 class BaseTransport:
-    """Base class for all MCP transport implementations."""
+    """
+    Base class for all MCP transport implementations.
+
+    This abstract class defines the interface that all transport implementations
+    must follow, providing a consistent way to connect to different types of
+    MCP servers regardless of the underlying transport mechanism.
+    """
 
     async def connect(self) -> bool:
-        """Connect to the MCP server."""
+        """
+        Connect to the MCP server.
+
+        Returns:
+            bool: True if connected successfully
+
+        Raises:
+            NotImplementedError: Subclasses must implement this method
+        """
         raise NotImplementedError("Subclasses must implement connect()")
 
     async def send_request(self, request_obj: Any) -> Dict[str, Any]:
-        """Send a request to the MCP server."""
+        """
+        Send a request to the MCP server.
+
+        Args:
+            request_obj: The request object to send
+
+        Returns:
+            Dict: The response from the server
+
+        Raises:
+            NotImplementedError: Subclasses must implement this method
+        """
         raise NotImplementedError("Subclasses must implement send_request()")
 
     async def disconnect(self) -> bool:
-        """Disconnect from the MCP server."""
+        """
+        Disconnect from the MCP server.
+
+        Returns:
+            bool: True if disconnected successfully
+
+        Raises:
+            NotImplementedError: Subclasses must implement this method
+        """
         raise NotImplementedError("Subclasses must implement disconnect()")
 
 
 class HTTPSSETransport(BaseTransport):
-    """HTTP+SSE transport for MCP servers."""
+    """
+    HTTP+SSE transport for MCP servers.
+
+    This transport implementation uses HTTP with Server-Sent Events (SSE)
+    for communicating with MCP servers, following the official MCP specification.
+    It handles connection establishment, message exchange, and connection
+    management.
+    """
 
     def __init__(self, url: str, request_timeout: int = 60):
-        """Initialize with server URL.
+        """
+        Initialize with server URL.
 
         Args:
-            url: Base URL of the MCP server
-            request_timeout: Timeout for requests in seconds
+            url: Base URL of the MCP server. Can be either the main server URL
+                or a specific SSE endpoint URL.
+            request_timeout: Timeout for requests in seconds. Controls how long
+                to wait for responses before raising a timeout error.
         """
         self.base_url = url
         self.sse_url = url if '/sse' in url else f"{url.rstrip('/')}/sse"
@@ -119,7 +274,22 @@ class HTTPSSETransport(BaseTransport):
         self.last_activity = None
 
     async def connect(self) -> bool:
-        """Connect to the MCP server."""
+        """
+        Connect to the MCP server using HTTP+SSE protocol.
+
+        Establishes a connection to the MCP server by:
+        1. Connecting to the SSE endpoint
+        2. Receiving the message endpoint information
+        3. Extracting the session ID for future requests
+
+        Returns:
+            bool: True if connected successfully
+
+        Raises:
+            MCPConnectionError: If connection fails
+            MCPTimeoutError: If connection times out
+            MCPCancelledError: If connection is cancelled
+        """
         try:
             # Initialize SSE connection with proper headers
             headers = {
@@ -252,7 +422,24 @@ class HTTPSSETransport(BaseTransport):
             callback: Optional[Callable] = None,
             cancellation_token: Optional[CancellationToken] = None
     ) -> AsyncGenerator:
-        """Listen for SSE events."""
+        """
+        Listen for SSE events from the server.
+
+        This method provides an async generator that yields SSE event lines
+        as they are received from the server, allowing for real-time event
+        processing.
+
+        Args:
+            callback: Optional callback function to call for each event line
+            cancellation_token: Optional token for cancelling the listening operation
+
+        Yields:
+            str: Each line of SSE events from the server
+
+        Raises:
+            MCPConnectionError: If there are issues with the SSE connection
+            MCPCancelledError: If the operation is cancelled
+        """
         if not self.sse_connection:
             logger.error("Cannot listen for events: No SSE connection")
             return
@@ -287,14 +474,26 @@ class HTTPSSETransport(BaseTransport):
             request_obj: Any,
             cancellation_token: Optional[CancellationToken] = None
     ) -> Dict[str, Any]:
-        """Send request to the server.
+        """
+        Send request to the MCP server.
+
+        Sends a request to the message endpoint of the MCP server and processes
+        the response, handling different response types and status codes according
+        to the MCP specification.
 
         Args:
             request_obj: A request object with model_dump() method or a dictionary
-            cancellation_token: Optional token to cancel the operation
+                containing the request details.
+            cancellation_token: Optional token to cancel the operation if needed.
 
         Returns:
-            Dict containing the response or status information
+            Dict containing the response or status information.
+
+        Raises:
+            MCPConnectionError: If not connected to the server
+            MCPRequestError: If the request fails
+            MCPTimeoutError: If the request times out
+            MCPCancelledError: If the operation is cancelled
         """
         if not self.message_url or not self.session_id:
             raise MCPConnectionError("Not connected to MCP server", {
@@ -420,7 +619,18 @@ class HTTPSSETransport(BaseTransport):
             raise MCPRequestError("Error sending request", error_details) from e
 
     async def disconnect(self) -> bool:
-        """Disconnect from MCP server."""
+        """
+        Disconnect from MCP server.
+
+        Properly closes the SSE connection and HTTP client to ensure
+        clean disconnection from the MCP server.
+
+        Returns:
+            bool: True if disconnected successfully
+
+        Raises:
+            MCPConnectionError: If there are issues during disconnection
+        """
         try:
             if self.sse_connection:
                 await self.sse_connection.aclose()
@@ -439,7 +649,16 @@ class HTTPSSETransport(BaseTransport):
             raise MCPConnectionError("Error disconnecting from MCP server", error_details) from e
 
     def get_connection_stats(self) -> Dict[str, Any]:
-        """Get statistics about this connection."""
+        """
+        Get statistics about this connection.
+
+        Returns information about the connection status, timing, and activity,
+        useful for monitoring and debugging.
+
+        Returns:
+            Dict with connection statistics including status, URLs,
+            timing information, and activity metrics
+        """
         stats = {
             "connected": self.connected,
             "type": "http",
@@ -460,13 +679,22 @@ class HTTPSSETransport(BaseTransport):
 
 
 class CommandLineTransport(BaseTransport):
-    """Command-line transport for MCP servers."""
+    """
+    Command-line transport for MCP servers.
+
+    This transport implementation launches MCP servers as local processes
+    and communicates with them via standard input/output. It's useful for
+    running local tool servers that don't require HTTP communication.
+    """
 
     def __init__(self, command: str):
-        """Initialize with command to start the server.
+        """
+        Initialize with command to start the server.
 
         Args:
-            command: Command to start the server process
+            command: Shell command to start the server process. This should
+                launch an executable that implements the MCP protocol over
+                standard input/output.
         """
         self.command = command
         self.process = None
@@ -478,7 +706,19 @@ class CommandLineTransport(BaseTransport):
         self.session_id = str(uuid.uuid4())  # Generate a unique session ID
 
     async def connect(self) -> bool:
-        """Start the server process and establish connection."""
+        """
+        Start the server process and establish connection.
+
+        Launches the MCP server as a subprocess and sets up communication
+        channels via standard input/output.
+
+        Returns:
+            bool: True if the server was started successfully
+
+        Raises:
+            MCPConnectionError: If the server process cannot be started
+            MCPCancelledError: If the operation is cancelled
+        """
         try:
             logger.info(f"Starting MCP server process: {self.command}")
             start_time = time.time()
@@ -536,14 +776,24 @@ class CommandLineTransport(BaseTransport):
             request_obj: Any,
             cancellation_token: Optional[CancellationToken] = None
     ) -> Dict[str, Any]:
-        """Send a request to the MCP server process.
+        """
+        Send a request to the MCP server process.
+
+        Sends a request to the MCP server via standard input and reads the
+        response from standard output, following the MCP JSON-RPC protocol.
 
         Args:
             request_obj: A request object with model_dump() method or a dictionary
-            cancellation_token: Optional token to cancel the operation
+                containing the request details.
+            cancellation_token: Optional token to cancel the operation if needed.
 
         Returns:
-            Dict containing the response
+            Dict containing the response from the server.
+
+        Raises:
+            MCPConnectionError: If not connected to the server
+            MCPRequestError: If the request fails
+            MCPCancelledError: If the operation is cancelled
         """
         if not self.connected or not self.stdin or not self.stdout:
             raise MCPConnectionError("Not connected to MCP server process", {
@@ -641,7 +891,18 @@ class CommandLineTransport(BaseTransport):
             ) from e
 
     async def disconnect(self) -> bool:
-        """Terminate the server process."""
+        """
+        Terminate the server process.
+
+        Properly shuts down the MCP server process by closing stdin and
+        terminating the process if necessary.
+
+        Returns:
+            bool: True if the server process was terminated successfully
+
+        Raises:
+            MCPConnectionError: If there are issues during termination
+        """
         try:
             if self.process:
                 # Close stdin to signal end of input
@@ -686,7 +947,16 @@ class CommandLineTransport(BaseTransport):
             ) from e
 
     def get_connection_stats(self) -> Dict[str, Any]:
-        """Get statistics about this connection."""
+        """
+        Get statistics about this connection.
+
+        Returns information about the server process, connection timing, and
+        activity, useful for monitoring and debugging.
+
+        Returns:
+            Dict with connection statistics including process details,
+            timing information, and activity metrics
+        """
         stats = {
             "connected": self.connected,
             "type": "command",

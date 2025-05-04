@@ -1,6 +1,33 @@
-"""
-Long-term memory implementation using PostgreSQL with pgvector.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Long-Term Memory - PostgreSQL Vector Database
+# Description:  Persistent vector memory implementation using PostgreSQL
+# Role:         Provides durable semantic memory storage with pgvector
+# Usage:        Used for permanent storage of agent knowledge and conversations
+# Author:       Muxi Framework Team
+#
+# The Long-Term Memory module provides a durable, scalable memory system using
+# PostgreSQL with the pgvector extension. This implementation enables:
+#
+# 1. Vector Similarity Search
+#    - Efficient storage and retrieval of embeddings
+#    - Support for semantic similarity searching
+#    - Integration with any embedding model
+#
+# 2. Structured Data Organization
+#    - Collection-based storage hierarchy
+#    - Rich metadata filtering capabilities
+#    - Flexible query parameters
+#
+# 3. Enterprise-Ready Persistence
+#    - Transactional storage guarantees
+#    - Indexing for performance at scale
+#    - Backup and recovery support
+#
+# This implementation is suitable for production deployments where durability,
+# scalability, and performance are important requirements.
+# =============================================================================
 
 import time
 from datetime import datetime
@@ -22,7 +49,12 @@ Base = declarative_base()
 
 
 class Memory(Base):
-    """Memory table for storing vector embeddings and metadata."""
+    """
+    Memory table for storing vector embeddings and metadata.
+
+    This SQLAlchemy model defines the structure for storing memories in the database,
+    including vector embeddings, text content, metadata, and organizational information.
+    """
 
     __tablename__ = "memories"
 
@@ -36,7 +68,12 @@ class Memory(Base):
 
 
 class Collection(Base):
-    """Collection table for organizing memories."""
+    """
+    Collection table for organizing memories.
+
+    This SQLAlchemy model defines the structure for organizing memories into
+    collections, allowing logical grouping of related memories.
+    """
 
     __tablename__ = "collections"
 
@@ -50,8 +87,11 @@ class Collection(Base):
 class LongTermMemory:
     """
     Long-term memory implementation using PostgreSQL with pgvector.
+
     This class provides a persistent vector database for storing and retrieving
-    information based on semantic similarity.
+    information based on semantic similarity. It offers a comprehensive solution
+    for durable, scalable memory storage with rich filtering capabilities and
+    collection-based organization.
     """
 
     def __init__(
@@ -59,7 +99,7 @@ class LongTermMemory:
         connection_string: Optional[str] = None,
         dimension: int = config.memory.vector_dimension,
         default_collection: str = "default",
-        embedding_provider: Optional[BaseModel] = None
+        embedding_provider: Optional[BaseModel] = None,
     ):
         """
         Initialize the long-term memory.
@@ -87,7 +127,12 @@ class LongTermMemory:
         self._create_default_collection()
 
     def _create_tables(self) -> None:
-        """Create database tables if they don't exist."""
+        """
+        Create database tables if they don't exist.
+
+        This method initializes the database schema, ensuring the pgvector
+        extension is loaded and all required tables are created.
+        """
         try:
             # Create extension if it doesn't exist
             with self.engine.connect() as conn:
@@ -102,7 +147,12 @@ class LongTermMemory:
             raise
 
     def _create_default_collection(self) -> None:
-        """Create the default collection if it doesn't exist."""
+        """
+        Create the default collection if it doesn't exist.
+
+        This method ensures that the default collection is available for
+        storing memories even if no explicit collection is specified.
+        """
         with self.Session() as session:
             # Check if default collection exists
             collection = session.query(Collection).filter_by(name=self.default_collection).first()
@@ -124,6 +174,10 @@ class LongTermMemory:
     ) -> str:
         """
         Add content to long-term memory.
+
+        This method stores new content in the long-term memory system with
+        optional metadata and pre-computed embedding. If no embedding is
+        provided, one will be generated using the embedding provider.
 
         Args:
             content: The text content to store.
@@ -154,6 +208,9 @@ class LongTermMemory:
     ) -> str:
         """
         Internal method to add a memory to the database.
+
+        This is a synchronous implementation that directly interacts with
+        the database to add a new memory entry.
 
         Args:
             text: The text content to store.
@@ -200,6 +257,9 @@ class LongTermMemory:
         """
         Ensure that a collection exists, creating it if necessary.
 
+        This method checks if a collection exists and creates it if it
+        doesn't, ensuring that memories can always be stored properly.
+
         Args:
             session: The database session.
             collection_name: The name of the collection.
@@ -223,6 +283,10 @@ class LongTermMemory:
     ) -> List[Dict[str, Any]]:
         """
         Search for memories similar to the query.
+
+        This method performs a semantic similarity search for memories
+        matching the query, with support for metadata filtering and
+        collection-specific searching.
 
         Args:
             query: The text query to search for.
@@ -268,6 +332,10 @@ class LongTermMemory:
     ) -> List[Tuple[float, Dict[str, Any]]]:
         """
         Internal method to search for similar embeddings in the database.
+
+        This is a synchronous implementation that directly interacts with
+        the database to perform vector similarity search with optional
+        metadata filtering.
 
         Args:
             query_embedding: The vector embedding to search for.
@@ -328,6 +396,9 @@ class LongTermMemory:
         """
         Retrieve a specific memory by ID.
 
+        This method fetches a single memory entry by its unique identifier,
+        returning all associated data including content, embedding, and metadata.
+
         Args:
             memory_id: The ID of the memory to retrieve.
 
@@ -359,6 +430,9 @@ class LongTermMemory:
     ) -> bool:
         """
         Update an existing memory.
+
+        This method allows partial updates to a memory entry, modifying
+        only the fields that are provided while leaving others unchanged.
 
         Args:
             memory_id: The ID of the memory to update.
@@ -396,6 +470,8 @@ class LongTermMemory:
         """
         Delete a memory by ID.
 
+        This method permanently removes a memory entry from the database.
+
         Args:
             memory_id: The ID of the memory to delete.
 
@@ -415,6 +491,10 @@ class LongTermMemory:
     def list_collections(self) -> List[Dict[str, Any]]:
         """
         List all collections.
+
+        This method returns information about all available collections
+        in the long-term memory system, useful for browsing available
+        data organization structures.
 
         Returns:
             A list of dictionaries containing collection information.
@@ -436,6 +516,9 @@ class LongTermMemory:
     def create_collection(self, name: str, description: Optional[str] = None) -> str:
         """
         Create a new collection.
+
+        This method creates a new organizational collection for storing
+        related memories together.
 
         Args:
             name: The name of the collection.
@@ -462,6 +545,9 @@ class LongTermMemory:
     def delete_collection(self, name: str, delete_memories: bool = False) -> bool:
         """
         Delete a collection.
+
+        This method removes a collection and either deletes its memories
+        or moves them to the default collection.
 
         Args:
             name: The name of the collection to delete.
@@ -500,6 +586,9 @@ class LongTermMemory:
     ) -> List[Dict[str, Any]]:
         """
         Get the most recent memories.
+
+        This method retrieves the most recently created memories from a
+        specified collection, ordered by creation date.
 
         Args:
             limit: The maximum number of memories to return.

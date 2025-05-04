@@ -1,9 +1,35 @@
-"""
-MemoryExtractor: Automatic user information extraction for MUXI Framework.
-
-This module provides the MemoryExtractor class that analyzes conversations
-to automatically extract important user information and store it in context memory.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Memory Extractor - Automatic Information Extraction
+# Description:  System for automatically extracting and storing user information
+# Role:         Analyzes conversations to build persistent user context
+# Usage:        Used by Orchestrator to maintain user knowledge over time
+# Author:       Muxi Framework Team
+#
+# The Memory Extractor module provides an intelligent system for automatically
+# extracting important information about users from conversations. It:
+#
+# 1. Conversation Analysis
+#    - Processes user messages and agent responses
+#    - Identifies key facts, preferences, and details about users
+#    - Assigns confidence and importance scores to extracted information
+#
+# 2. Privacy-Focused Design
+#    - Built-in sensitivity detection for PII and sensitive data
+#    - Configurable opt-out/opt-in mechanisms
+#    - User data purging capabilities
+#    - Data retention policies
+#
+# 3. Intelligent Information Management
+#    - Automatic conflict resolution with existing knowledge
+#    - Timestamped information tracking
+#    - Metadata for information provenance
+#    - Confidence-based storage decisions
+#
+# This system enables agents to build context about users over time without
+# explicit memory commands, creating a more natural and personalized experience.
+# =============================================================================
 
 import json
 import time
@@ -17,7 +43,8 @@ class MemoryExtractor:
 
     The MemoryExtractor analyzes conversation history, identifies key facts
     about users, scores their importance and confidence, and updates the
-    user's context memory.
+    user's context memory. It includes privacy protections and configurable
+    extraction policies.
     """
 
     def __init__(
@@ -61,19 +88,27 @@ class MemoryExtractor:
 
         # Add default privacy settings
         self._sensitive_key_patterns = {
-            "password", "social_security", "ssn", "credit_card", "bank_account",
-            "passport", "license", "secret", "private", "confidential"
+            "password",
+            "social_security",
+            "ssn",
+            "credit_card",
+            "bank_account",
+            "passport",
+            "license",
+            "secret",
+            "private",
+            "confidential",
         }
 
     async def process_conversation_turn(
-        self,
-        user_message,
-        agent_response,
-        user_id,
-        message_count=1
+        self, user_message, agent_response, user_id, message_count=1
     ):
         """
         Process a conversation turn and extract information if needed.
+
+        This method analyzes a single user-agent interaction to extract
+        relevant user information, applying all configured filters and
+        extraction policies.
 
         Args:
             user_message: The message from the user
@@ -117,6 +152,9 @@ class MemoryExtractor:
         """
         Add a user to the opt-out list, preventing future extraction.
 
+        This method allows users to opt out of automatic information
+        extraction for privacy reasons.
+
         Args:
             user_id: The user ID to opt out
 
@@ -133,6 +171,9 @@ class MemoryExtractor:
         """
         Remove a user from the opt-out list, enabling future extraction.
 
+        This method allows users who previously opted out to opt back in
+        to automatic information extraction.
+
         Args:
             user_id: The user ID to opt in
 
@@ -148,6 +189,10 @@ class MemoryExtractor:
     async def purge_user_data(self, user_id: int) -> bool:
         """
         Purge all automatically extracted data for a user.
+
+        This method removes all information that was automatically extracted
+        for a user, while preserving manually added information. This supports
+        privacy requirements like data deletion requests.
 
         Args:
             user_id: The user ID to purge data for
@@ -172,8 +217,7 @@ class MemoryExtractor:
         # Clear these specific keys
         if to_delete:
             return await self.orchestrator.clear_user_context_memory(
-                user_id=user_id,
-                keys=to_delete
+                user_id=user_id, keys=to_delete
             )
 
         return True
@@ -182,11 +226,14 @@ class MemoryExtractor:
         """
         Extract user information using the specified LLM.
 
+        This method sends the conversation to an LLM with a specialized
+        prompt to extract structured information about the user.
+
         Args:
             conversation: The conversation text to analyze
 
         Returns:
-            A dictionary of extracted information
+            A dictionary of extracted information with confidence scores
         """
         # Use the specified extraction model if available, otherwise use orchestrator's default
         model = self.extraction_model or self.orchestrator.default_model
@@ -210,6 +257,10 @@ class MemoryExtractor:
     def _create_extraction_prompt(self, conversation):
         """
         Create an optimized prompt for information extraction.
+
+        This method builds a carefully designed prompt that instructs
+        the LLM how to extract information while respecting privacy
+        and providing structured output with confidence scores.
 
         Args:
             conversation: The conversation text to analyze
@@ -236,17 +287,15 @@ class MemoryExtractor:
             "Format your response as a JSON object with the following structure:\n"
             "{\n"
             '  "extracted_info": [\n'
-            '    {\n'
+            "    {\n"
             '      "key": "category name",\n'
             '      "value": "the extracted information",\n'
             '      "confidence": 0.95,\n'
             '      "importance": 0.8\n'
-            '    },\n'
-            '    ...\n'
-            '  ]\n'
-            "}\n\n"
-            + privacy_guidelines
-            + f"Conversation:\n{conversation}\n\n"
+            "    },\n"
+            "    ...\n"
+            "  ]\n"
+            "}\n\n" + privacy_guidelines + f"Conversation:\n{conversation}\n\n"
             "If there is no relevant information to extract, return an empty array for "
             "extracted_info."
         )
@@ -254,6 +303,10 @@ class MemoryExtractor:
     async def _process_extraction_results(self, extraction_results, user_id):
         """
         Process extraction results and update context memory.
+
+        This method analyzes the extraction results, applies confidence
+        thresholds, checks for sensitive information, handles conflicts
+        with existing knowledge, and stores the validated information.
 
         Args:
             extraction_results: Dictionary of extracted information
@@ -292,7 +345,7 @@ class MemoryExtractor:
                 "importance": importance,
                 "source": "automatic_extraction",
                 "timestamp": time.time(),
-                "confidence": item["confidence"]
+                "confidence": item["confidence"],
             }
 
         # Store updates in context memory if any exist
@@ -301,12 +354,16 @@ class MemoryExtractor:
                 user_id=user_id,
                 knowledge=knowledge_updates,
                 source="automatic_extraction",
-                importance=0.85  # Default importance for automatic extraction
+                importance=0.85,  # Default importance for automatic extraction
             )
 
     def _is_sensitive_information(self, key: str, value: Any) -> bool:
         """
         Check if the information appears to be sensitive.
+
+        This method applies privacy rules to detect potentially sensitive
+        information that shouldn't be automatically stored, including
+        PII, financial data, and security information.
 
         Args:
             key: The category key
@@ -325,18 +382,18 @@ class MemoryExtractor:
         # Check for common sensitive value patterns
         if isinstance(value, str):
             # Credit card pattern (sequence of digits)
-            if len(value.replace(' ', '').replace('-', '')) >= 15:
-                digits_only = ''.join(c for c in value if c.isdigit())
+            if len(value.replace(" ", "").replace("-", "")) >= 15:
+                digits_only = "".join(c for c in value if c.isdigit())
                 if len(digits_only) >= 15:
                     return True
 
             # Check for email addresses if not in allowed keys
-            if '@' in value and '.' in value and key_lower not in {'email', 'contact'}:
+            if "@" in value and "." in value and key_lower not in {"email", "contact"}:
                 return True
 
             # Phone number pattern if not in allowed keys
-            if len(''.join(c for c in value if c.isdigit())) >= 10:
-                if key_lower not in {'phone', 'contact', 'mobile'}:
+            if len("".join(c for c in value if c.isdigit())) >= 10:
+                if key_lower not in {"phone", "contact", "mobile"}:
                     return True
 
         return False
@@ -344,6 +401,9 @@ class MemoryExtractor:
     def _should_update_existing(self, key, new_value, existing_value, importance):
         """
         Determine if existing information should be updated.
+
+        This method implements the conflict resolution strategy when
+        newly extracted information conflicts with existing knowledge.
 
         Args:
             key: The key/category of the information
@@ -368,6 +428,10 @@ class MemoryExtractor:
         """
         Parse extraction results from text if JSON parsing fails.
 
+        This method provides a fallback mechanism when the LLM response
+        isn't valid JSON, attempting to extract structured information
+        from free-text format.
+
         Args:
             text: The raw text response from the LLM
 
@@ -375,7 +439,7 @@ class MemoryExtractor:
             A dictionary with extracted_info field
         """
         # Implement fallback parsing logic for when the LLM doesn't return valid JSON
-        lines = text.strip().split('\n')
+        lines = text.strip().split("\n")
         extracted_info = []
 
         current_item = {}

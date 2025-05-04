@@ -1,8 +1,34 @@
-"""
-MCP Service for the MUXI Framework.
-
-This module provides the MCPService class for interacting with MCP servers.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        MCP Service - Tool Provider Registry and Orchestration
+# Description:  Central service for managing MCP server connections and tools
+# Role:         Coordinates access to external tools across the framework
+# Usage:        Used to register, access, and manage MCP tool providers
+# Author:       Muxi Framework Team
+#
+# The MCP Service provides a central registry and access point for interacting
+# with MCP (Model Control Protocol) servers and their tools. Key features include:
+#
+# 1. Server Connection Management
+#    - Registration of HTTP and command-line MCP servers
+#    - Credential and authentication handling
+#    - Connection lifecycle management
+#
+# 2. Tool Registry and Discovery
+#    - Automatic tool discovery from connected servers
+#    - Centralized tool registry and documentation
+#    - Tool capability querying
+#
+# 3. Managed Tool Execution
+#    - Transparent request routing to appropriate servers
+#    - Timeout and cancellation support
+#    - Error handling and reconnection logic
+#
+# This service acts as the core coordinator for all external tool interactions
+# in the framework, providing a unified interface regardless of where tools
+# are actually implemented or hosted.
+# =============================================================================
 
 import asyncio
 from typing import Any, Dict, Optional
@@ -16,20 +42,36 @@ class MCPService:
     """
     Service for interacting with MCP servers.
 
-    This class provides methods for registering MCP servers and calling tools.
+    This class provides methods for registering, managing, and interacting with
+    MCP servers. It maintains a registry of available servers and their tools,
+    and provides a unified interface for invoking tools regardless of which
+    server hosts them.
     """
 
     _instance = None
 
     @classmethod
     def get_instance(cls):
-        """Get or create the singleton instance."""
+        """
+        Get or create the singleton instance.
+
+        This method implements the singleton pattern, ensuring that only one
+        instance of the MCPService exists in the application.
+
+        Returns:
+            The singleton MCPService instance
+        """
         if cls._instance is None:
             cls._instance = MCPService()
         return cls._instance
 
     def __init__(self):
-        """Initialize the MCP service."""
+        """
+        Initialize the MCP service.
+
+        Sets up the internal data structures for tracking servers, handlers,
+        connections, and tools.
+        """
         # Dictionary of registered servers
         self.servers = {}
 
@@ -60,6 +102,10 @@ class MCPService:
         """
         Register an MCP server.
 
+        This is a simple registration method that records server details without
+        actually establishing a connection. Use register_mcp_server for full
+        connection establishment.
+
         Args:
             server_id: Unique identifier for the server
             url: URL of the server
@@ -89,10 +135,14 @@ class MCPService:
         command: Optional[str] = None,
         credentials: Optional[Dict[str, Any]] = None,
         model: Optional[BaseModel] = None,
-        request_timeout: int = 60
+        request_timeout: int = 60,
     ) -> str:
         """
         Register an MCP server with the service.
+
+        This method establishes an actual connection to the MCP server and
+        discovers available tools. It handles both HTTP/SSE and command-line
+        based MCP servers.
 
         Args:
             server_id: Unique identifier for the MCP server
@@ -104,6 +154,9 @@ class MCPService:
 
         Returns:
             The server_id of the registered server
+
+        Raises:
+            Exception: If the server registration fails
         """
         # Create lock for this handler
         self.locks[server_id] = asyncio.Lock()
@@ -127,7 +180,7 @@ class MCPService:
                     url=url,
                     command=command,
                     credentials=credentials,
-                    request_timeout=request_timeout  # Pass the timeout parameter
+                    request_timeout=request_timeout,  # Pass the timeout parameter
                 )
 
                 # Store the handler
@@ -138,19 +191,16 @@ class MCPService:
                     "command": command,
                     "credentials": credentials,
                     "server_name": server_name,
-                    "request_timeout": request_timeout
+                    "request_timeout": request_timeout,
                 }
 
                 # Discover available tools
                 try:
                     tools = await handler.list_tools(server_name)
                     self.tool_registry[server_id] = {
-                        tool.get("name", f"unknown_{i}"): tool
-                        for i, tool in enumerate(tools)
+                        tool.get("name", f"unknown_{i}"): tool for i, tool in enumerate(tools)
                     }
-                    logger.info(
-                        f"Discovered {len(tools)} tools from MCP server: {server_id}"
-                    )
+                    logger.info(f"Discovered {len(tools)} tools from MCP server: {server_id}")
                 except Exception as e:
                     logger.warning(
                         f"Unable to discover tools from MCP server {server_id}: {str(e)}"
@@ -172,10 +222,14 @@ class MCPService:
         server_id: str,
         tool_name: str,
         parameters: Dict[str, Any],
-        request_timeout: Optional[int] = None
+        request_timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Invoke a tool on an MCP server.
+
+        This method executes a tool on the specified MCP server with the given
+        parameters, handling locking to prevent concurrent issues and managing
+        timeouts.
 
         Args:
             server_id: The ID of the server to use
@@ -184,7 +238,10 @@ class MCPService:
             request_timeout: Optional timeout override for this specific request
 
         Returns:
-            The result of the tool invocation
+            The result of the tool invocation as a dictionary with status and result
+
+        Raises:
+            ValueError: If the server ID is not valid
         """
         if server_id not in self.handlers:
             raise ValueError(f"Unknown MCP server: {server_id}")
@@ -204,7 +261,7 @@ class MCPService:
                 restore_timeout = False
                 original_timeout = None
 
-                if (request_timeout is not None and server_name in handler.active_connections):
+                if request_timeout is not None and server_name in handler.active_connections:
                     client = handler.active_connections[server_name]
                     if client.request_timeout != request_timeout:
                         # Store original timeout to restore later
@@ -217,7 +274,7 @@ class MCPService:
                     server_name=server_name,
                     tool_name=tool_name,
                     params=parameters,
-                    cancellation_token=None
+                    cancellation_token=None,
                 )
                 return {"result": result, "status": "success"}
 
@@ -233,11 +290,14 @@ class MCPService:
         """
         Disconnect from an MCP server.
 
+        This method closes the connection to an MCP server and cleans up
+        all associated resources and registry entries.
+
         Args:
             server_id: The ID of the server to disconnect
 
         Returns:
-            True if disconnection was successful
+            True if disconnection was successful, False otherwise
         """
         if server_id not in self.handlers:
             return False

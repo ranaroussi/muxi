@@ -1,10 +1,41 @@
-"""
-Configuration Loader for MUXI Framework
-
-This module provides utilities for loading and processing configuration files
-for the MUXI Framework. It supports YAML and JSON formats, and handles
-environment variable substitution.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Configuration Loader - External Config Processing
+# Description:  Utilities for loading and processing configuration files
+# Role:         Provides configuration loading from YAML/JSON files
+# Usage:        Used to load agent configurations from external files
+# Author:       Muxi Framework Team
+#
+# The Configuration Loader module provides utilities for loading and processing
+# external configuration files for the Muxi Framework. It supports YAML and JSON
+# formats, handles environment variable substitution, and normalizes configuration
+# structures to ensure consistent format.
+#
+# Key features include:
+#
+# 1. File Loading
+#    - Support for YAML and JSON formats
+#    - Path resolution and error handling
+#    - Format auto-detection based on file extension
+#
+# 2. Environment Variable Processing
+#    - Replace ${ENV_VAR} patterns with actual environment values
+#    - Allows for deployment-specific configuration without code changes
+#
+# 3. Configuration Normalization
+#    - Converts simplified config formats to standardized structure
+#    - Ensures backward compatibility with older config formats
+#    - Provides sensible defaults for missing values
+#
+# Example usage:
+#
+#   from muxi.core.config.loader import ConfigLoader
+#
+#   # Load and process a configuration file
+#   loader = ConfigLoader()
+#   config = loader.load_and_process("path/to/config.yaml")
+# =============================================================================
 
 import os
 import re
@@ -14,22 +45,34 @@ from typing import Any, Dict
 
 
 class ConfigLoader:
-    """Load and process configuration files for MUXI Framework."""
+    """
+    Load and process configuration files for the Muxi Framework.
+
+    This class provides utilities for loading configuration files in YAML or JSON
+    format, processing environment variables within those configurations, and
+    normalizing the configuration structure to ensure consistency across the
+    framework.
+    """
 
     @staticmethod
     def load(path: str) -> Dict[str, Any]:
         """
         Load a configuration file from the given path.
 
+        This method detects the file format based on extension and loads the
+        configuration using the appropriate parser. It supports YAML (.yaml, .yml)
+        and JSON (.json) formats.
+
         Args:
             path: Path to the configuration file (YAML or JSON)
 
         Returns:
-            Dict[str, Any]: The loaded configuration
+            Dict[str, Any]: The loaded configuration as a dictionary
 
         Raises:
             ValueError: If the file format is not supported
             FileNotFoundError: If the file does not exist
+            ImportError: If PyYAML is required but not installed
         """
         file_path = Path(path)
 
@@ -64,18 +107,21 @@ class ConfigLoader:
         Process environment variables in the configuration.
 
         Replaces ${ENV_VAR} patterns in string values with the corresponding
-        environment variable values.
+        environment variable values. This allows for environment-specific
+        configuration without changing the config files.
 
         Args:
-            config: The configuration dictionary
+            config: The configuration dictionary to process
 
         Returns:
-            Dict[str, Any]: The processed configuration
+            Dict[str, Any]: The processed configuration with environment
+            variables replaced with their values
         """
+
         def replace_env_vars(obj: Any) -> Any:
             if isinstance(obj, str):
                 # Find all ${ENV_VAR} patterns
-                env_vars = re.findall(r'\${([^}]+)}', obj)
+                env_vars = re.findall(r"\${([^}]+)}", obj)
                 result = obj
 
                 # Replace each pattern with the environment variable value
@@ -96,15 +142,18 @@ class ConfigLoader:
     @staticmethod
     def normalize_config(config: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Normalize configuration to standard format.
+        Normalize configuration to a standard format.
 
-        This converts simplified memory configuration to the standard format.
+        This method converts different simplified memory configuration formats
+        to the standard structure expected by the framework. It ensures backward
+        compatibility with older configuration formats and provides defaults
+        for missing values.
 
         Args:
-            config: The configuration dictionary
+            config: The configuration dictionary to normalize
 
         Returns:
-            Dict[str, Any]: Normalized configuration
+            Dict[str, Any]: Normalized configuration with standardized structure
         """
         # Create a copy to avoid modifying the original
         result = config.copy()
@@ -133,19 +182,19 @@ class ConfigLoader:
                     memory["buffer"] = {
                         "enabled": True,
                         "window_size": buffer_size,
-                        "buffer_multiplier": 10  # Default multiplier
+                        "buffer_multiplier": 10,  # Default multiplier
                     }
                 elif memory["buffer"] is True:
                     memory["buffer"] = {
                         "enabled": True,
                         "window_size": 5,  # Default window size
-                        "buffer_multiplier": 10  # Default multiplier
+                        "buffer_multiplier": 10,  # Default multiplier
                     }
                 elif not isinstance(memory["buffer"], dict):
                     memory["buffer"] = {
                         "enabled": bool(memory["buffer"]),
                         "window_size": 5,  # Default window size
-                        "buffer_multiplier": 10  # Default multiplier
+                        "buffer_multiplier": 10,  # Default multiplier
                     }
                 elif isinstance(memory["buffer"], dict):
                     # Set default multiplier if not provided
@@ -156,25 +205,19 @@ class ConfigLoader:
                 memory["buffer"] = {
                     "enabled": True,
                     "window_size": 5,  # Default window size
-                    "buffer_multiplier": 10  # Default multiplier
+                    "buffer_multiplier": 10,  # Default multiplier
                 }
 
             # Normalize long-term memory (boolean -> {enabled: boolean})
             if "long_term" in memory:
                 if isinstance(memory["long_term"], bool):
                     enabled = memory["long_term"]
-                    memory["long_term"] = {
-                        "enabled": enabled
-                    }
+                    memory["long_term"] = {"enabled": enabled}
                 elif not isinstance(memory["long_term"], dict):
-                    memory["long_term"] = {
-                        "enabled": bool(memory["long_term"])
-                    }
+                    memory["long_term"] = {"enabled": bool(memory["long_term"])}
             else:
                 # Default to disabled long-term memory
-                memory["long_term"] = {
-                    "enabled": False
-                }
+                memory["long_term"] = {"enabled": False}
 
             # Update memory in the result
             result["memory"] = memory
@@ -184,11 +227,9 @@ class ConfigLoader:
                 "buffer": {
                     "enabled": True,
                     "window_size": 5,  # Default window size
-                    "buffer_multiplier": 10  # Default multiplier
+                    "buffer_multiplier": 10,  # Default multiplier
                 },
-                "long_term": {
-                    "enabled": False
-                }
+                "long_term": {"enabled": False},
             }
 
         return result
@@ -198,11 +239,14 @@ class ConfigLoader:
         """
         Validate the configuration.
 
+        Checks that the configuration has required fields and that their values
+        are of the expected types. Raises ValueError if validation fails.
+
         Args:
-            config: The configuration dictionary
+            config: The configuration dictionary to validate
 
         Raises:
-            ValueError: If the configuration is invalid
+            ValueError: If the configuration is invalid or missing required fields
         """
         # Required fields
         if not config.get("name"):
@@ -257,6 +301,13 @@ class ConfigLoader:
     def load_and_process(self, path: str) -> Dict[str, Any]:
         """
         Load, validate, and process a configuration file.
+
+        This is the main method for loading configuration files, providing
+        a complete workflow that:
+        1. Loads the file
+        2. Processes environment variables
+        3. Normalizes the configuration structure
+        4. Validates the resulting configuration
 
         Args:
             path: Path to the configuration file

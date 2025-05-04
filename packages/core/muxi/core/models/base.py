@@ -1,9 +1,46 @@
-"""
-Base language model interface that defines the contract for all language model providers.
-
-This module contains the BaseModel abstract base class that all language model
-provider implementations must inherit from.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Base Language Model Interface
+# Description:  Abstract base class and interfaces for all language model providers
+# Role:         Defines the contract that all model implementations must follow
+# Usage:        Extended by specific model providers like OpenAI, Claude, etc.
+# Author:       Muxi Framework Team
+#
+# The base.py module provides the foundation for language model interactions in the
+# Muxi framework. It defines:
+#
+# 1. ModelResponse Class
+#    - Standardized response format for all language models
+#    - Handles both text and structured content
+#    - Includes metadata for extended information
+#
+# 2. BaseModel Abstract Class
+#    - Defines the required interface for all model implementations
+#    - Ensures consistent behavior across different model providers
+#    - Includes methods for chat, embedding, and text generation
+#
+# Any model implementation (like OpenAI, Claude, etc.) must inherit from BaseModel
+# and implement all its abstract methods. This ensures that models can be used
+# interchangeably throughout the framework.
+#
+# Typical usage pattern:
+#
+#   # Creating a model instance (implementation-specific)
+#   model = OpenAIModel(api_key="sk-...", model="gpt-4o")
+#
+#   # Using the model with standard interface
+#   response = await model.chat([
+#       {"role": "system", "content": "You are a helpful assistant"},
+#       {"role": "user", "content": "Hello, world!"}
+#   ])
+#
+#   # Generating embeddings
+#   embedding = await model.embed("Text to embed")
+#
+# The BaseModel doesn't provide actual implementations but establishes
+# the contract that all model implementations must follow.
+# =============================================================================
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
@@ -21,7 +58,7 @@ class ModelResponse:
         self,
         content: Union[str, Dict[str, Any]],
         role: str = "assistant",
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize a model response.
@@ -114,7 +151,7 @@ class BaseModel(ABC):
         prompt: str,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> str:
         """
         Generate text from the model with a simple prompt.
@@ -131,8 +168,5 @@ class BaseModel(ABC):
         # Default implementation just wraps the prompt in a message and calls chat()
         messages = [{"role": "user", "content": prompt}]
         return await self.chat(
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            **kwargs
+            messages=messages, temperature=temperature, max_tokens=max_tokens, **kwargs
         )

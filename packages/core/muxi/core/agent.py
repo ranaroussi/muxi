@@ -1,9 +1,44 @@
-"""
-Updated Agent implementation that uses the orchestrator's memory.
-
-This module provides the Agent class, which utilizes memory systems
-managed by its parent orchestrator.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Agent - AI Agent Implementation
+# Description:  Core implementation of AI agents with memory and tool use
+# Role:         Primary interface for language model interactions
+# Usage:        Created and managed by the Orchestrator to process user messages
+# Author:       Muxi Framework Team
+#
+# The Agent class is a fundamental component in the Muxi framework that:
+#
+# 1. Handles Direct Interactions
+#    - Processes user messages and generates responses
+#    - Maintains conversation context for coherent exchanges
+#    - Integrates with memory systems for contextual awareness
+#
+# 2. Tool Integration
+#    - Connects to external tools via MCP (Model Control Protocol)
+#    - Parses and processes tool calls from language model responses
+#    - Manages tool invocation and result incorporation
+#
+# 3. Memory Usage
+#    - Delegates memory storage to the orchestrator
+#    - Retrieves relevant context from memory systems
+#    - Works with orchestrator for information extraction
+#
+# Agents are typically created and managed by the Orchestrator:
+#
+# Programmatic creation:
+#   agent = orchestrator.create_agent(
+#       agent_id="assistant",
+#       model=model,
+#       system_message="You are a helpful assistant."
+#   )
+#
+# Direct usage:
+#   response = await agent.process_message("Hello, how can you help me?")
+#
+# This file defines both the Agent class and the supporting MCPServer class
+# for external tool integration.
+# =============================================================================
 
 import datetime
 import uuid
@@ -15,23 +50,31 @@ from muxi.core.models.base import BaseModel
 
 # Simple class to represent an MCP server
 class MCPServer:
-    """Represents a connected MCP server."""
+    """
+    Represents a connected MCP server.
+
+    This class encapsulates the configuration for connecting to an external MCP
+    (Model Control Protocol) server that provides tool functionality to agents.
+    """
 
     def __init__(
         self,
         name: str,
         url: str,
         credentials: Optional[Dict[str, Any]] = None,
-        request_timeout: int = 60
+        request_timeout: int = 60,
     ):
         """
-        Initialize an MCP server.
+        Initialize an MCP server configuration.
 
         Args:
-            name: The name of the server
-            url: The URL of the server
-            credentials: Optional credentials for authentication
-            request_timeout: Timeout in seconds for requests to this server
+            name: The name of the server. Used for human-readable identification
+                and generating the server_id.
+            url: The URL of the server. Endpoint where MCP requests will be sent.
+            credentials: Optional credentials for authentication with the server.
+                Format depends on the server's requirements.
+            request_timeout: Timeout in seconds for requests to this server.
+                Controls how long to wait before considering a request failed.
         """
         self.name = name
         self.url = url
@@ -44,7 +87,9 @@ class Agent:
     """
     An agent that interacts with users and tools.
 
-    Uses its orchestrator's memory for context retention and retrieval.
+    The Agent class manages interactions between users and language models,
+    using its orchestrator's memory systems for context retention and retrieval.
+    It can process messages, invoke tools via MCP, and maintain conversation state.
     """
 
     def __init__(
@@ -61,14 +106,20 @@ class Agent:
         Initialize the agent with a model, orchestrator, and optional parameters.
 
         Args:
-            model: The language model for the agent to use.
-            orchestrator: The orchestrator that manages this agent.
-            system_message: Optional system message to set the agent's behavior.
+            model: The language model for the agent to use. This model handles
+                the core intelligence of the agent.
+            orchestrator: The orchestrator that manages this agent. Provides
+                access to memory systems and coordinates multi-agent systems.
+            system_message: Optional system message to set the agent's behavior
+                and persona. Defines the agent's role and capabilities.
             agent_id: Optional unique ID for the agent. If None, generates a UUID.
+                Used for identification in memory systems and routing.
             name: Optional name for the agent (e.g., "Customer Service Bot").
+                Used for display purposes.
             mcp_server: Optional MCP server for tool calling and external integrations.
-            request_timeout: Optional timeout in seconds for MCP requests
-                (default: use orchestrator's timeout).
+                Enables the agent to use external tools.
+            request_timeout: Optional timeout in seconds for MCP requests.
+                Defaults to orchestrator's timeout if not specified.
         """
         self.model = model
         self.orchestrator = orchestrator
@@ -89,7 +140,7 @@ class Agent:
         # Set request timeout (use orchestrator's if not specified)
         if request_timeout is not None:
             self.request_timeout = request_timeout
-        elif hasattr(orchestrator, 'request_timeout'):
+        elif hasattr(orchestrator, "request_timeout"):
             self.request_timeout = orchestrator.request_timeout
         else:
             self.request_timeout = 60  # Default fallback
@@ -104,10 +155,11 @@ class Agent:
 
     def get_mcp_service(self) -> MCPService:
         """
-        Get the centralized MCP service.
+        Get the centralized MCP service for tool integrations.
 
         Returns:
-            The MCP service instance
+            The MCPService instance used by this agent for connecting to
+            and interacting with external tools.
         """
         return self._mcp_service
 
@@ -115,14 +167,24 @@ class Agent:
         self, message: Union[str, MCPMessage], user_id: Optional[int] = None
     ) -> MCPMessage:
         """
-        Process a message from the user.
+        Process a message from the user and generate a response.
+
+        This method handles:
+        1. Converting input to MCPMessage format
+        2. Adding the message to memory via the orchestrator
+        3. Updating conversation context
+        4. Processing the message with the model
+        5. Handling any tool calls in the response
+        6. Storing the response in memory
 
         Args:
-            message: The message from the user (string or MCPMessage).
-            user_id: Optional user ID for multi-user support.
+            message: The message from the user, either as a string or an MCPMessage.
+                Contains the content to be processed by the agent.
+            user_id: Optional user ID for multi-user support. Used for memory
+                isolation and user-specific context.
 
         Returns:
-            The agent's response as an MCPMessage.
+            The agent's response as an MCPMessage, possibly including tool call results.
         """
         # Convert string message to MCPMessage if needed
         if isinstance(message, str):
@@ -140,7 +202,7 @@ class Agent:
                 role="user",
                 timestamp=timestamp,
                 agent_id=self.agent_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
         # Add message to conversation context
@@ -164,7 +226,7 @@ class Agent:
                     result = await self.invoke_tool(
                         server_id=server_id,
                         tool_name=tool_call.tool_name,
-                        parameters=tool_call.parameters
+                        parameters=tool_call.parameters,
                     )
 
                     # Store the result with the tool call
@@ -181,7 +243,7 @@ class Agent:
                 tool_info = {
                     "role": "function",
                     "name": tool_call.tool_name,
-                    "content": str(tool_call.result)
+                    "content": str(tool_call.result),
                 }
                 self._messages.append(tool_info)
         else:
@@ -202,7 +264,7 @@ class Agent:
                 role="assistant",
                 timestamp=timestamp,
                 agent_id=self.agent_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
         # User information extraction is handled by the orchestrator
@@ -217,21 +279,27 @@ class Agent:
                 user_message=content,
                 agent_response=response.content,
                 user_id=user_id,
-                agent_id=self.agent_id
+                agent_id=self.agent_id,
             )
 
         return response
 
     async def run(self, input_text: str, use_memory: bool = True) -> str:
         """
-        Run the agent with the given input text.
+        Run the agent with the given input text and return a text response.
+
+        This is a simplified interface that handles:
+        1. Retrieving relevant context from memory (if use_memory=True)
+        2. Processing the input with context
+        3. Returning just the text content of the response
 
         Args:
-            input_text: The input text to process.
-            use_memory: Whether to use memory for context.
+            input_text: The input text to process. The user's message or query.
+            use_memory: Whether to use memory for context enhancement. When True,
+                relevant memories will be retrieved and included in the prompt.
 
         Returns:
-            The agent's response text.
+            The agent's response as a plain text string.
         """
         # Initialize context
         context = ""
@@ -253,46 +321,50 @@ class Agent:
 
     async def get_relevant_memories(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """
-        Get relevant memories for a user query.
+        Get relevant memories for a user query from the orchestrator's memory systems.
 
         Args:
-            query: The user query to find relevant memories for.
-            limit: Maximum number of memories to retrieve.
+            query: The user query to find relevant memories for. Used for semantic
+                search to find related context.
+            limit: Maximum number of memories to retrieve. Controls the amount of
+                context included.
 
         Returns:
-            A list of relevant memories.
+            A list of relevant memories, each as a dictionary with metadata.
+            Returns an empty list if memory retrieval is not available.
         """
         if not self.orchestrator or not hasattr(self.orchestrator, "search_buffer_memory"):
             return []
 
         memories = self.orchestrator.search_buffer_memory(
-            query=query,
-            limit=limit,
-            agent_id=self.agent_id
+            query=query, limit=limit, agent_id=self.agent_id
         )
 
         return memories
 
     async def invoke_tool(
-        self,
-        server_id: str,
-        tool_name: str,
-        parameters: Dict[str, Any]
+        self, server_id: str, tool_name: str, parameters: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Invoke a tool on a connected MCP server.
 
+        This method sends a tool call to an external MCP server and returns the result.
+        It handles the communication details and error handling.
+
         Args:
-            server_id: The server ID to send the tool call to
-            tool_name: The name of the tool to call
-            parameters: The parameters to pass to the tool
+            server_id: The server ID to send the tool call to. Identifies which
+                MCP server should handle the request.
+            tool_name: The name of the tool to call. Must match a tool provided
+                by the target MCP server.
+            parameters: The parameters to pass to the tool. Must match the
+                expected parameters for the specified tool.
 
         Returns:
-            The result of the tool call
+            The result of the tool call as a dictionary.
 
         Raises:
             ValueError: If server_id is not valid
-            Exception: Any error from the MCP service
+            Exception: Any error from the MCP service during tool invocation
         """
         if not server_id:
             raise ValueError("Invalid server_id provided")
@@ -301,5 +373,5 @@ class Agent:
             server_id=server_id,
             tool_name=tool_name,
             parameters=parameters,
-            request_timeout=self.request_timeout
+            request_timeout=self.request_timeout,
         )

@@ -1,10 +1,50 @@
-"""
-MUXI Framework Facade with Orchestrator-Level Memory
-
-This module provides a simplified interface for interacting with the MUXI Framework.
-It allows creating and managing agents through configuration files, setting up
-MCP servers, and starting the API server with minimal code.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Muxi - Simplified Framework Facade
+# Description:  High-level interface for the Muxi Framework
+# Role:         Entry point for declarative usage of the framework
+# Usage:        Primary way to use Muxi with configuration files
+# Author:       Muxi Framework Team
+#
+# The Muxi facade is the main entry point for using the framework in a
+# declarative, configuration-driven way. It provides:
+#
+# 1. Simplified Initialization
+#    - Creates memory systems from configuration
+#    - Sets up orchestrator with memory integration
+#    - Handles environment variable integration
+#
+# 2. Configuration-Based Agent Creation
+#    - Creates agents from YAML/JSON configurations
+#    - Connects MCP servers based on configuration
+#    - Manages model creation and initialization
+#
+# 3. Easy Server Operation
+#    - Provides methods to start the API server
+#    - Handles authentication setup
+#    - Configures multi-user support
+#
+# 4. Memory Management
+#    - Creates appropriate memory systems based on configuration
+#    - Supports various storage backends (SQLite, PostgreSQL)
+#    - Enables context memory for user profiles
+#
+# This facade is typically used as the main entry point in applications:
+#
+#   from muxi import muxi
+#
+#   app = muxi(
+#       buffer_size=10,
+#       long_term="sqlite:///data/memory.db"
+#   )
+#
+#   app.add_agent("assistant", "configs/assistant.yaml")
+#   app.run(host="0.0.0.0", port=5050)
+#
+# This file contains the Muxi class implementation that provides the
+# configuration-driven interface to the framework's components.
+# =============================================================================
 
 import os
 import asyncio
@@ -28,6 +68,8 @@ class Muxi:
 
     This class provides a simplified interface for creating and managing agents,
     setting up MCP servers, and starting the API server with minimal code.
+    It handles the complexity of initializing framework components based on
+    declarative configuration.
     """
 
     def __init__(
@@ -37,19 +79,23 @@ class Muxi:
         long_term_memory: Optional[Union[str, bool, LongTermMemory, Memobase]] = None,
         credential_db_connection_string: Optional[str] = None,
         user_api_key: Optional[str] = None,
-        admin_api_key: Optional[str] = None
+        admin_api_key: Optional[str] = None,
     ):
         """
-        Initialize the declarative interface.
+        Initialize the declarative interface for Muxi Framework.
+
+        Creates memory systems and an orchestrator based on the provided configuration.
+        This constructor handles the various ways memory can be specified, creating
+        appropriate memory systems based on the input types.
 
         Args:
             buffer_size: Context window size configuration
-                - If an integer, specifies the number of messages to keep in the context window
+                - If an integer, specifies the number of messages to keep in the window
                 - If a BufferMemory instance, used directly
             buffer_multiplier: Multiplier for the buffer capacity (default: 10)
                 - The actual buffer size will be buffer_size * buffer_multiplier
             long_term_memory: Long-term memory configuration
-                - If a string, treated as a file path to an SQLite database
+                - If a string, treated as a connection string or file path
                 - If True, creates a default SQLite database in the current directory
                 - If an instance of LongTermMemory or Memobase, used directly
             credential_db_connection_string: Connection string for the credential database
@@ -61,18 +107,20 @@ class Muxi:
         self._credential_db_connection_string = credential_db_connection_string
 
         # Create memory systems from configurations
-        buffer_mem, long_term_mem = self._create_memory_systems({
-            "buffer_memory": buffer_size,
-            "buffer_multiplier": buffer_multiplier,
-            "long_term_memory": long_term_memory
-        })
+        buffer_mem, long_term_mem = self._create_memory_systems(
+            {
+                "buffer_memory": buffer_size,
+                "buffer_multiplier": buffer_multiplier,
+                "long_term_memory": long_term_memory,
+            }
+        )
 
         # Create orchestrator with memory systems
         self.orchestrator = Orchestrator(
             buffer_memory=buffer_mem,
             long_term_memory=long_term_mem,
             user_api_key=user_api_key,
-            admin_api_key=admin_api_key
+            admin_api_key=admin_api_key,
         )
 
         # Initialize config loader
@@ -81,10 +129,14 @@ class Muxi:
     def _create_buffer_memory(
         self,
         buffer_config: Optional[Union[int, Dict[str, Any], BufferMemory]],
-        buffer_multiplier: int = 10
+        buffer_multiplier: int = 10,
     ) -> Optional[BufferMemory]:
         """
         Create a buffer memory object from configuration.
+
+        This internal method handles various ways buffer memory can be specified
+        and creates the appropriate BufferMemory instance. It supports direct
+        instance passing, integer sizes, or dictionary configurations.
 
         Args:
             buffer_config: Buffer memory configuration. Can be:
@@ -95,17 +147,14 @@ class Muxi:
             buffer_multiplier: Multiplier for the buffer capacity (default: 10)
 
         Returns:
-            Configured BufferMemory instance or None.
+            Configured BufferMemory instance or None if buffer_config is None.
         """
         if buffer_config is None:
             return None
 
         if isinstance(buffer_config, int):
             # Create buffer memory with specified size and multiplier
-            return BufferMemory(
-                max_size=buffer_config,
-                buffer_multiplier=buffer_multiplier
-            )
+            return BufferMemory(max_size=buffer_config, buffer_multiplier=buffer_multiplier)
 
         if isinstance(buffer_config, dict):
             # Extract window_size and buffer_multiplier from dict
@@ -113,10 +162,7 @@ class Muxi:
             config_multiplier = buffer_config.get("buffer_multiplier", buffer_multiplier)
 
             # Create buffer with specified parameters
-            return BufferMemory(
-                max_size=window_size,
-                buffer_multiplier=config_multiplier
-            )
+            return BufferMemory(max_size=window_size, buffer_multiplier=config_multiplier)
 
         # Assume it's already a BufferMemory instance
         return buffer_config
@@ -124,10 +170,14 @@ class Muxi:
     def _create_long_term_memory(
         self,
         long_term_config: Optional[Union[str, bool, LongTermMemory, Memobase]],
-        credential_db_connection_string: Optional[str] = None
+        credential_db_connection_string: Optional[str] = None,
     ) -> Optional[Union[LongTermMemory, Memobase]]:
         """
         Create a long-term memory object from configuration.
+
+        This internal method handles various ways long-term memory can be specified
+        and creates the appropriate memory instance. It supports direct instance
+        passing, connection strings, boolean flags, or paths to SQLite databases.
 
         Args:
             long_term_config: Long-term memory configuration. Can be:
@@ -139,7 +189,7 @@ class Muxi:
                 long_term_config doesn't specify one.
 
         Returns:
-            Configured memory instance or None.
+            Configured memory instance or None if long_term_config is None or invalid.
         """
         if long_term_config is None:
             return None
@@ -151,7 +201,7 @@ class Muxi:
         # Handle string connection specifications
         if isinstance(long_term_config, str):
             # Postgres connection string
-            if long_term_config.startswith(('postgresql://', 'postgres://')):
+            if long_term_config.startswith(("postgresql://", "postgres://")):
                 try:
                     # Create long-term memory with database connection
                     memory = LongTermMemory(connection_string=long_term_config)
@@ -166,7 +216,7 @@ class Muxi:
                     return None
 
             # SQLite connection string format (sqlite:///path/to/db)
-            elif long_term_config.startswith('sqlite:///'):
+            elif long_term_config.startswith("sqlite:///"):
                 try:
                     # Extract the path: remove 'sqlite:///' prefix
                     db_path = long_term_config[10:]
@@ -194,8 +244,7 @@ class Muxi:
             # First try to use provided connection string
             conn_str = credential_db_connection_string or self.credential_db_connection_string
             if conn_str and (
-                conn_str.startswith('postgresql://') or
-                conn_str.startswith('postgres://')
+                conn_str.startswith("postgresql://") or conn_str.startswith("postgres://")
             ):
                 try:
                     # Create long-term memory with database connection
@@ -213,7 +262,7 @@ class Muxi:
 
             # Fall back to SQLite
             try:
-                db_path = os.path.join(os.getcwd(), 'muxi.db')
+                db_path = os.path.join(os.getcwd(), "muxi.db")
                 memory = SQLiteMemory(db_path=db_path)
                 logger.info(f"Created default SQLite long-term memory at {db_path}")
                 return memory
@@ -231,8 +280,11 @@ class Muxi:
         """
         Get the credential database connection string, fetching from environment if not set.
 
+        Tries to load the connection string from the POSTGRES_DATABASE_URL environment
+        variable if it hasn't been explicitly provided during initialization.
+
         Returns:
-            Optional[str]: Credential database connection string if available
+            Optional[str]: Credential database connection string if available, None otherwise.
         """
         if self._credential_db_connection_string is None:
             # Try to load from environment if not already set
@@ -245,13 +297,14 @@ class Muxi:
         Get the database connection string for operations that may require it.
 
         Args:
-            required: Whether the connection string is required
+            required: Whether the connection string is required. If True and no
+                connection string is available, raises an exception.
 
         Returns:
-            Optional[str]: Database connection string
+            Optional[str]: Database connection string if available.
 
         Raises:
-            ValueError: If required is True and no connection string is available
+            ValueError: If required is True and no connection string is available.
         """
         connection_string = self.credential_db_connection_string
 
@@ -264,30 +317,33 @@ class Muxi:
 
         return connection_string
 
-    async def add_agent(
-        self,
-        name: str,
-        path: str,
-        env_file: Optional[str] = None
-    ) -> Agent:
+    async def add_agent(self, name: str, path: str, env_file: Optional[str] = None) -> Agent:
         """
         Add an agent from a configuration file.
 
+        This method loads agent configuration from a YAML or JSON file, creates the
+        specified model, and registers the agent with the orchestrator. It also
+        handles connecting MCP servers if specified in the configuration.
+
         Args:
-            name: Name to assign to the agent (overrides the name in the config)
-            path: Path to the configuration file (YAML or JSON)
-            env_file: Optional path to an environment file to load
+            name: Name to assign to the agent (overrides the name in the config).
+                This will be used as the agent_id for routing and reference.
+            path: Path to the configuration file (YAML or JSON) containing agent
+                configuration including model settings and system message.
+            env_file: Optional path to an environment file to load variables from
+                before processing the configuration.
 
         Returns:
             The created Agent instance.
 
         Raises:
-            ValueError: If the configuration is invalid
-            FileNotFoundError: If the configuration file does not exist
+            ValueError: If the configuration is invalid.
+            FileNotFoundError: If the configuration file does not exist.
         """
         # Load environment file if provided
         if env_file:
             from dotenv import load_dotenv
+
             load_dotenv(env_file)
 
         # Load and process the configuration
@@ -308,18 +364,18 @@ class Muxi:
             agent_id=name,
             model=model,
             system_message=config.get("system_message", ""),
-            description=description
+            description=description,
         )
 
         # If we have buffer memory and it doesn't have a model set,
         # set the model to enable vector search capabilities
-        if (self.orchestrator.buffer_memory and
-                hasattr(self.orchestrator.buffer_memory, "model") and
-                self.orchestrator.buffer_memory.model is None):
+        if (
+            self.orchestrator.buffer_memory
+            and hasattr(self.orchestrator.buffer_memory, "model")
+            and self.orchestrator.buffer_memory.model is None
+        ):
             self.orchestrator.buffer_memory.model = model
-            logger.info(
-                f"Enabled vector search in buffer memory using {model.__class__.__name__}"
-            )
+            logger.info(f"Enabled vector search in buffer memory using {model.__class__.__name__}")
 
         # Connect MCP servers if specified
         mcp_servers = config.get("mcp_servers", [])
@@ -332,14 +388,19 @@ class Muxi:
         """
         Create a model from the configuration.
 
+        This internal method creates a language model instance based on the
+        provided configuration. Currently supports OpenAI models, with potential
+        for expansion to other providers.
+
         Args:
-            model_config: Model configuration dictionary
+            model_config: Model configuration dictionary containing provider name,
+                API key, model name, and other provider-specific parameters.
 
         Returns:
-            The model instance
+            The model instance ready for use with agents.
 
         Raises:
-            ValueError: If the model provider is not supported
+            ValueError: If the model provider is not supported.
         """
         provider = model_config.get("provider", "openai").lower()
 
@@ -347,37 +408,37 @@ class Muxi:
             return OpenAIModel(
                 api_key=model_config.get("api_key"),
                 model=model_config.get("model", "gpt-4o"),
-                temperature=model_config.get("temperature", 0.7)
+                temperature=model_config.get("temperature", 0.7),
             )
         else:
             raise ValueError(f"Unsupported model provider: {provider}")
 
-    def _create_memory_systems(
-        self,
-        memory_config: Dict[str, Any]
-    ) -> tuple:
+    def _create_memory_systems(self, memory_config: Dict[str, Any]) -> tuple:
         """
         Create memory systems from the configuration.
 
+        This internal method handles the creation of both buffer memory and
+        long-term memory systems based on the provided configuration.
+
         Args:
-            memory_config: Memory configuration dictionary
+            memory_config: Memory configuration dictionary with keys for
+                buffer_memory, buffer_multiplier, and long_term_memory.
 
         Returns:
-            tuple: (buffer_memory, long_term_memory)
+            tuple: (buffer_memory, long_term_memory) - instances of the
+                appropriate memory systems or None if not configured.
         """
         # Create buffer memory
         buffer_config = memory_config.get("buffer_memory")
         buffer_multiplier = memory_config.get("buffer_multiplier", 10)
         buffer_memory = self._create_buffer_memory(
-            buffer_config=buffer_config,
-            buffer_multiplier=buffer_multiplier
+            buffer_config=buffer_config, buffer_multiplier=buffer_multiplier
         )
 
         # Create long-term memory if enabled
         long_term_config = memory_config.get("long_term_memory")
         long_term_memory = self._create_long_term_memory(
-            long_term_config,
-            self.credential_db_connection_string
+            long_term_config, self.credential_db_connection_string
         )
 
         return buffer_memory, long_term_memory
@@ -386,9 +447,14 @@ class Muxi:
         """
         Connect MCP servers to an agent.
 
+        This internal method processes MCP server configurations and connects them
+        to the specified agent, handling credential resolution from environment
+        variables if needed.
+
         Args:
-            agent: The agent to connect MCP servers to
-            mcp_servers: List of MCP server configurations
+            agent: The agent to connect MCP servers to.
+            mcp_servers: List of MCP server configurations, each containing name,
+                URL, and optional credential information.
         """
         for server in mcp_servers:
             name = server.get("name")
@@ -407,6 +473,7 @@ class Muxi:
                     env_var = cred.get("env_fallback")
                     if env_var:
                         import os
+
                         value = os.getenv(env_var)
 
                         if value:
@@ -416,8 +483,7 @@ class Muxi:
                     # Missing required credential
                     if required:
                         logger.warning(
-                            f"Required credential {cred_id} for MCP server "
-                            f"{name} not found"
+                            f"Required credential {cred_id} for MCP server " f"{name} not found"
                         )
                         continue
 
@@ -439,27 +505,27 @@ class Muxi:
                 logger.warning(f"Invalid MCP server configuration: {server}")
 
     async def chat(
-        self,
-        agent_name: Optional[str] = None,
-        message: str = "",
-        user_id: Optional[str] = None
+        self, agent_name: Optional[str] = None, message: str = "", user_id: Optional[str] = None
     ) -> str:
         """
         Send a message to an agent and get a response.
 
+        This is the primary method for interacting with agents through the facade.
+        It handles message routing, processing, and response extraction.
+
         Args:
-            agent_name: Optional name of the agent to use (if None, will select automatically)
-            message: The message to send
-            user_id: Optional user ID for multi-user support
+            agent_name: Optional name of the agent to use. If None, the orchestrator
+                will select the most appropriate agent for the message.
+            message: The message to send to the agent.
+            user_id: Optional user ID for multi-user support. Enables user-specific
+                memory and context.
 
         Returns:
-            The agent's response as a string
+            The agent's response as a string, extracted from the MCPMessage.
         """
         # Process the message through the orchestrator
         response = await self.orchestrator.chat(
-            agent_name=agent_name,
-            message=message,
-            user_id=user_id
+            agent_name=agent_name, message=message, user_id=user_id
         )
 
         # Return just the text response (content could be a string or dict)
@@ -471,20 +537,21 @@ class Muxi:
             # Fallback to string representation
             return str(response.content)
 
-    def add_user_context_memory(
-        self,
-        user_id: int,
-        knowledge: Dict[str, Any]
-    ) -> None:
+    def add_user_context_memory(self, user_id: int, knowledge: Dict[str, Any]) -> None:
         """
         Add context memory for a specific user.
 
+        This method stores structured information about a user that can be used
+        to personalize agent responses. Requires a multi-user memory system.
+
         Args:
-            user_id: User ID to associate the knowledge with
-            knowledge: Knowledge to add (any serializable object)
+            user_id: User ID to associate the knowledge with. Used to identify
+                the specific user in multi-user environments.
+            knowledge: Knowledge to add (any serializable dictionary). Typically
+                contains user preferences, facts, and other contextual information.
 
         Raises:
-            ValueError: If orchestrator doesn't have multi-user memory
+            ValueError: If orchestrator doesn't have multi-user memory support.
         """
         # Use orchestrator's long-term memory if it's multi-user
         if hasattr(self.orchestrator, "is_multi_user") and self.orchestrator.is_multi_user:
@@ -502,19 +569,17 @@ class Muxi:
             "initialized with a Memobase-compatible memory (PostgreSQL connection)."
         )
 
-    def start_server(
-        self,
-        host: str = "0.0.0.0",
-        port: int = 5000,
-        **kwargs
-    ) -> None:
+    def start_server(self, host: str = "0.0.0.0", port: int = 5000, **kwargs) -> None:
         """
         Start the API server.
 
+        This method starts the MUXI API server with the specified host and port.
+        It delegates to the run_server function from muxi.core.run.
+
         Args:
-            host: Host to bind to
-            port: Port to bind to
-            **kwargs: Additional arguments to pass to the API server
+            host: Host address to bind to. Default "0.0.0.0" binds to all interfaces.
+            port: Port number to bind to.
+            **kwargs: Additional arguments to pass to the API server.
         """
         # Import here to avoid circular imports
         from muxi.core.run import run_server
@@ -526,7 +591,8 @@ class Muxi:
         """
         Start the MUXI server with the current configuration.
 
-        This method displays a splash screen and shows API keys if they were auto-generated.
+        This method is a convenient shorthand for starting the server through
+        the orchestrator, which handles displaying a splash screen and API keys.
 
         Args:
             **kwargs: Additional arguments to pass to the server
@@ -542,11 +608,13 @@ class Muxi:
         """
         Get an agent by ID.
 
+        This method retrieves a specific agent from the orchestrator.
+
         Args:
             agent_id: The ID of the agent to get.
 
         Returns:
-            The requested agent.
+            The requested agent instance.
 
         Raises:
             ValueError: If no agent with the given ID exists.

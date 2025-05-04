@@ -1,17 +1,40 @@
-"""
-SQLite-based long-term memory implementation.
-
-This module provides a long-term memory system using SQLite with the sqlite-vec
-extension for vector similarity search.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        SQLite Memory - Local Vector Database
+# Description:  Lightweight vector database using SQLite for memory storage
+# Role:         Provides local-first vector storage with minimal dependencies
+# Usage:        Used when PostgreSQL is unavailable or for edge deployments
+# Author:       Muxi Framework Team
+#
+# The SQLite Memory module provides a lightweight implementation of vector-based
+# memory storage using SQLite with the sqlite-vec extension. Key features include:
+#
+# 1. Local-First Vector Storage
+#    - No external database requirements
+#    - Efficient storage in a single SQLite file
+#    - Vector operations via the sqlite-vec extension
+#
+# 2. Compatibility with Core Memory APIs
+#    - Implements the BaseMemory interface
+#    - Similar API to LongTermMemory
+#    - Collection-based organization
+#
+# 3. Lightweight Deployment
+#    - Minimal dependencies
+#    - Suitable for edge devices
+#    - Self-contained database file
+#
+# This implementation provides a balance between the features of a full vector
+# database and the simplicity of local file storage, making it ideal for
+# smaller deployments or environments where PostgreSQL is not available.
+# =============================================================================
 
 import json
 import os
 import sqlite3
 import time
-from typing import (
-    Any, Dict, List, Optional, Tuple, Union
-)
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from loguru import logger
@@ -26,7 +49,8 @@ class SQLiteMemory(BaseMemory):
 
     This class provides a persistent vector database using SQLite with the
     sqlite-vec extension for storing and retrieving information based on
-    semantic similarity.
+    semantic similarity. It offers a lightweight alternative to the PostgreSQL-
+    based LongTermMemory with similar capabilities.
     """
 
     def __init__(
@@ -34,7 +58,7 @@ class SQLiteMemory(BaseMemory):
         db_path: str,
         dimension: int = 1536,
         default_collection: str = "default",
-        extensions_dir: str = "extensions"
+        extensions_dir: str = "extensions",
     ):
         """
         Initialize SQLite-based long-term memory.
@@ -58,7 +82,19 @@ class SQLiteMemory(BaseMemory):
         self.conn = self._init_database()
 
     def _init_database(self) -> sqlite3.Connection:
-        """Initialize the SQLite database with required tables."""
+        """
+        Initialize the SQLite database with required tables.
+
+        This method sets up the SQLite database, loads the sqlite-vec
+        extension, and creates the necessary tables for storing memories
+        and collections.
+
+        Returns:
+            A configured SQLite connection ready for use
+
+        Raises:
+            ImportError: If the sqlite-vec extension is not available
+        """
         conn = sqlite3.connect(self.db_path)
 
         # Load sqlite-vec extension using the extension system
@@ -72,7 +108,8 @@ class SQLiteMemory(BaseMemory):
             )
 
         # Create tables
-        conn.execute("""
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS collections (
                 id TEXT PRIMARY KEY,
                 name TEXT UNIQUE NOT NULL,
@@ -80,9 +117,11 @@ class SQLiteMemory(BaseMemory):
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
-        conn.execute("""
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS memories (
                 id TEXT PRIMARY KEY,
                 collection TEXT NOT NULL,
@@ -93,34 +132,40 @@ class SQLiteMemory(BaseMemory):
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (collection) REFERENCES collections(name)
             )
-        """)
+        """
+        )
 
         # Create default collection if it doesn't exist
         conn.execute(
-            "INSERT OR IGNORE INTO collections "
-            "(id, name, description) VALUES (?, ?, ?)",
-            (
-                self._generate_id(),
-                self.default_collection,
-                "Default collection for memories"
-            )
+            "INSERT OR IGNORE INTO collections " "(id, name, description) VALUES (?, ?, ?)",
+            (self._generate_id(), self.default_collection, "Default collection for memories"),
         )
 
         conn.commit()
         return conn
 
     def _generate_id(self, size: int = 21) -> str:
-        """Generate a unique ID for memories and collections."""
+        """
+        Generate a unique ID for memories and collections.
+
+        This method creates a unique nanoid for database records.
+
+        Args:
+            size: The character length of the generated ID
+
+        Returns:
+            A unique string identifier
+        """
         import nanoid
+
         return nanoid.generate(size=size)
 
-    async def add(
-        self,
-        content: str,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> None:
+    async def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> None:
         """
         Add content to memory.
+
+        This method stores new content in memory, generating an embedding
+        if an embedding provider is available.
 
         Args:
             content: The text content to store
@@ -144,10 +189,13 @@ class SQLiteMemory(BaseMemory):
         text: str,
         embedding: Union[List[float], np.ndarray],
         metadata: Dict[str, Any] = None,
-        collection: Optional[str] = None
+        collection: Optional[str] = None,
     ) -> str:
         """
         Internal method to add a memory to the database.
+
+        This synchronous method handles the actual storage of memory
+        in the SQLite database with proper type handling.
 
         Args:
             text: The text content to store
@@ -175,25 +223,18 @@ class SQLiteMemory(BaseMemory):
             (id, collection, text, embedding, metadata)
             VALUES (?, ?, ?, ?, ?)
             """,
-            (
-                memory_id,
-                collection,
-                text,
-                embedding,
-                metadata and json.dumps(metadata)
-            )
+            (memory_id, collection, text, embedding, metadata and json.dumps(metadata)),
         )
         self.conn.commit()
 
         return memory_id
 
-    async def search(
-        self,
-        query: str,
-        limit: int = 5
-    ) -> List[Dict[str, Any]]:
+    async def search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         """
         Search for similar content in memory.
+
+        This method performs a semantic similarity search for content matching
+        the query, using the embedding provider to generate query embeddings.
 
         Args:
             query: The text query to search for
@@ -214,11 +255,13 @@ class SQLiteMemory(BaseMemory):
         # Format results
         formatted_results = []
         for score, memory in results:
-            formatted_results.append({
-                "content": memory["text"],
-                "metadata": memory["metadata"] if "metadata" in memory else {},
-                "score": score
-            })
+            formatted_results.append(
+                {
+                    "content": memory["text"],
+                    "metadata": memory["metadata"] if "metadata" in memory else {},
+                    "score": score,
+                }
+            )
 
         return formatted_results
 
@@ -226,10 +269,13 @@ class SQLiteMemory(BaseMemory):
         self,
         query_embedding: Union[List[float], np.ndarray],
         k: int = 5,
-        collection: Optional[str] = None
+        collection: Optional[str] = None,
     ) -> List[Tuple[float, Dict[str, Any]]]:
         """
         Internal method to search for similar content.
+
+        This synchronous method performs the actual vector similarity search
+        in the SQLite database using cosine distance.
 
         Args:
             query_embedding: The query embedding vector
@@ -259,12 +305,7 @@ class SQLiteMemory(BaseMemory):
 
         # Execute search
         cursor = self.conn.execute(
-            query,
-            (
-                query_embedding,
-                collection or self.default_collection,
-                k
-            )
+            query, (query_embedding, collection or self.default_collection, k)
         )
 
         # Format results
@@ -273,21 +314,25 @@ class SQLiteMemory(BaseMemory):
             metadata = json.loads(row[2]) if row[2] else {}
             # Convert distance to similarity score (1 - distance)
             similarity = 1.0 - float(row[4])
-            results.append((
-                similarity,  # similarity score (1 - cosine distance)
-                {
-                    "id": row[0],
-                    "text": row[1],
-                    "metadata": metadata,
-                    "created_at": row[3],
-                }
-            ))
+            results.append(
+                (
+                    similarity,  # similarity score (1 - cosine distance)
+                    {
+                        "id": row[0],
+                        "text": row[1],
+                        "metadata": metadata,
+                        "created_at": row[3],
+                    },
+                )
+            )
 
         return results
 
     def get(self, memory_id: str) -> Optional[Dict[str, Any]]:
         """
         Retrieve a specific memory by ID.
+
+        This method fetches a single memory entry by its unique identifier.
 
         Args:
             memory_id: The ID of the memory to retrieve
@@ -296,8 +341,7 @@ class SQLiteMemory(BaseMemory):
             The memory object if found, otherwise None
         """
         cursor = self.conn.execute(
-            "SELECT id, text, metadata, created_at FROM memories WHERE id = ?",
-            (memory_id,)
+            "SELECT id, text, metadata, created_at FROM memories WHERE id = ?", (memory_id,)
         )
 
         row = cursor.fetchone()
@@ -308,16 +352,17 @@ class SQLiteMemory(BaseMemory):
             "id": row[0],
             "text": row[1],
             "metadata": json.loads(row[2]) if row[2] else {},
-            "created_at": row[3]
+            "created_at": row[3],
         }
 
     def get_recent_memories(
-        self,
-        limit: int = 10,
-        collection: Optional[str] = None
+        self, limit: int = 10, collection: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Get the most recent memories.
+
+        This method retrieves the most recently created memories from a
+        specified collection, ordered by creation date.
 
         Args:
             limit: Maximum number of memories to return
@@ -335,7 +380,7 @@ class SQLiteMemory(BaseMemory):
             ORDER BY created_at DESC
             LIMIT ?
             """,
-            (collection or self.default_collection, limit)
+            (collection or self.default_collection, limit),
         )
 
         # Parse results
@@ -344,19 +389,24 @@ class SQLiteMemory(BaseMemory):
                 "id": row[0],
                 "text": row[1],
                 "metadata": json.loads(row[2]) if row[2] else {},
-                "created_at": row[3]
+                "created_at": row[3],
             }
             for row in cursor.fetchall()
         ]
 
         # Log the result order for debugging
         if results:
-            orders = [m.get('metadata', {}).get('order') for m in results]
+            orders = [m.get("metadata", {}).get("order") for m in results]
             logger.debug(f"Recent memories order: {orders}")
 
         return results
 
     def __del__(self):
-        """Clean up database connection."""
-        if hasattr(self, 'conn'):
+        """
+        Clean up database connection.
+
+        This method ensures the database connection is properly closed
+        when the object is garbage collected.
+        """
+        if hasattr(self, "conn"):
             self.conn.close()

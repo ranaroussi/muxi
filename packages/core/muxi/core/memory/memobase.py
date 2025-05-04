@@ -1,9 +1,33 @@
-"""
-Memobase: Multi-user memory system for MUXI Framework.
-
-This module provides a centralized memory manager that supports multiple users
-with PostgreSQL/PGVector for memory storage.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        Memobase - Multi-User Memory Management System
+# Description:  User-aware memory system for storing and retrieving information
+# Role:         Provides user-specific context and knowledge management
+# Usage:        Used by Orchestrator to maintain separate memory for each user
+# Author:       Muxi Framework Team
+#
+# The Memobase module provides a sophisticated memory management system that
+# maintains separate memory contexts for different users. Key features include:
+#
+# 1. User-Centric Memory Organization
+#    - One memory collection per user
+#    - Automatic metadata filtering by user_id
+#    - Anonymous user support with fallback behaviors
+#
+# 2. Context Memory Management
+#    - User-specific knowledge storage
+#    - Structured knowledge representation
+#    - Import/export capabilities for user context
+#
+# 3. Integration with Vector Storage
+#    - Built on top of LongTermMemory for persistent storage
+#    - Provides user-specific abstraction over vector database
+#    - Supports all search capabilities with user-context awareness
+#
+# This system enables applications to maintain separate memory contexts for
+# different users while providing a unified interface for memory operations.
+# =============================================================================
 
 import asyncio
 import json
@@ -19,7 +43,9 @@ class Memobase:
     storage with user context awareness.
 
     Memobase allows agents to maintain separate memory contexts for different
-    users while providing a unified interface for memory operations.
+    users while providing a unified interface for memory operations. It handles
+    anonymous users gracefully and provides specialized functionality for
+    managing user context memory.
     """
 
     # Constants for context memory
@@ -48,6 +74,10 @@ class Memobase:
     ) -> int:
         """
         Add content to memory for a specific user.
+
+        This method stores information in a user-specific memory collection,
+        automatically handling the appropriate collection naming and metadata
+        tagging.
 
         Args:
             content: The content to add to memory.
@@ -110,6 +140,10 @@ class Memobase:
     ) -> List[Dict[str, Any]]:
         """
         Search for similar content in memory for a specific user.
+
+        This method performs a semantic search within a user's memory collection,
+        applying appropriate filters to ensure only the user's memories are
+        returned.
 
         Args:
             query: The text query to search for.
@@ -174,6 +208,9 @@ class Memobase:
         """
         Delete a specific memory entry.
 
+        This method removes a specific memory entry from a user's collection,
+        with appropriate handling for anonymous users.
+
         Args:
             memory_id: The ID of the memory to delete.
             user_id: The user ID associated with this memory. If None, uses the
@@ -200,6 +237,9 @@ class Memobase:
     def clear_user_memory(self, user_id: Optional[int] = None) -> None:
         """
         Clear memory for a specific user by recreating their collection.
+
+        This method deletes all memories associated with a user by dropping
+        and recreating their collection.
 
         Args:
             user_id: The user ID to clear memory for. If None, uses the
@@ -233,6 +273,9 @@ class Memobase:
     ) -> List[Dict[str, Any]]:
         """
         Get recent memories for a specific user.
+
+        This method retrieves the most recent memories for a user, with
+        options for pagination and sorting.
 
         Args:
             user_id: The user ID to get memories for. If None, uses the
@@ -279,6 +322,10 @@ class Memobase:
         """
         Add or update context memory about a user.
 
+        This method stores persistent information about a user that should be
+        accessible across conversations, such as preferences, profile information,
+        or other user-specific context.
+
         Args:
             user_id: The user's ID. If None, uses the default user.
             knowledge: Dictionary of knowledge items where keys are knowledge
@@ -306,8 +353,7 @@ class Memobase:
             self.long_term_memory._ensure_collection_exists(None, collection_name)
         except Exception:
             self.long_term_memory.create_collection(
-                collection_name,
-                f"Context memory for user {user_id}"
+                collection_name, f"Context memory for user {user_id}"
             )
 
         # Process each knowledge item
@@ -350,6 +396,9 @@ class Memobase:
     ) -> Dict[str, Any]:
         """
         Retrieve context memory about a user.
+
+        This method fetches persistent user information that has been previously
+        stored with add_user_context_memory, optionally filtering to specific keys.
 
         Args:
             user_id: The user's ID. If None, uses the default user.
@@ -422,8 +471,9 @@ class Memobase:
                 # Try to parse JSON values
                 try:
                     # Check if it's a JSON object or array
-                    if (value_str.startswith("{") and value_str.endswith("}")) or \
-                       (value_str.startswith("[") and value_str.endswith("]")):
+                    if (value_str.startswith("{") and value_str.endswith("}")) or (
+                        value_str.startswith("[") and value_str.endswith("]")
+                    ):
                         value = json.loads(value_str)
                     else:
                         value = value_str
@@ -444,6 +494,9 @@ class Memobase:
     ) -> List[str]:
         """
         Import context memory from a file or data structure.
+
+        This method provides a convenient way to bulk-import user knowledge
+        from external sources like files or structured data objects.
 
         Args:
             data_source: Path to file or data structure containing knowledge.
@@ -468,7 +521,7 @@ class Memobase:
         # Load data based on format
         if format == "json" and isinstance(data_source, str):
             try:
-                with open(data_source, 'r') as f:
+                with open(data_source, "r") as f:
                     data = json.load(f)
             except (json.JSONDecodeError, FileNotFoundError) as e:
                 raise ValueError(f"Failed to load JSON file: {e}")
@@ -492,6 +545,9 @@ class Memobase:
     ) -> bool:
         """
         Clear context memory for a specific user.
+
+        This method removes persistent user information, either all of it
+        or just specific keys, supporting data deletion requirements.
 
         Args:
             user_id: The user's ID. If None, uses the default user.
@@ -540,8 +596,7 @@ class Memobase:
             try:
                 self.long_term_memory.delete_collection(collection_name)
                 self.long_term_memory.create_collection(
-                    collection_name,
-                    f"Context memory for user {user_id}"
+                    collection_name, f"Context memory for user {user_id}"
                 )
                 return True
             except Exception:
@@ -559,6 +614,10 @@ class Memobase:
     ) -> int:
         """
         Update a specific key in user context memory.
+
+        This method provides a convenient way to update a single piece of
+        user information by first removing any existing values for the key
+        and then adding the new value.
 
         Args:
             user_id: The user's ID. If None, uses the default user.

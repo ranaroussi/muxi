@@ -1,9 +1,58 @@
-"""
-SQLite Vector Extension
-
-This module provides the SQLiteVecExtension class for loading the
-sqlite-vec extension for vector similarity search in SQLite databases.
-"""
+# =============================================================================
+# FRONTMATTER
+# =============================================================================
+# Title:        SQLite Vector Extension - Vector Operations for SQLite
+# Description:  Extension for enabling vector similarity search in SQLite
+# Role:         Provides vector operations capabilities in local SQLite databases
+# Usage:        Used by vector storage components requiring local-first operation
+# Author:       Muxi Framework Team
+#
+# The SQLiteVecExtension provides seamless integration with the sqlite-vec
+# extension for SQLite, enabling efficient vector operations in SQLite databases.
+# This is essential for local-first vector storage and semantic search without
+# requiring external vector database services. Key features include:
+#
+# 1. Cross-Platform Support
+#    - Detects and loads the appropriate extension for the current platform
+#    - Supports major operating systems (macOS, Windows, Linux)
+#    - Handles both x86_64 and ARM64 architectures
+#
+# 2. Graceful Fallbacks
+#    - Tries multiple extension loading strategies
+#    - Falls back to Python package if native extension not found
+#    - Provides clear error messages for troubleshooting
+#
+# 3. Database Integration
+#    - Configures SQLite connections for vector operations
+#    - Enables cosine distance, L2 distance, and other vector functions
+#    - Simplifies using vector operations in SQLite queries
+#
+# This extension is particularly valuable for:
+# - Edge computing scenarios requiring local vector search
+# - Privacy-sensitive applications that need to avoid remote vector DBs
+# - Embedded systems with limited connectivity
+# - Development and testing environments
+#
+# Example usage:
+#
+#   # Configure a SQLite connection with vector capabilities
+#   conn = sqlite3.connect("my_database.db")
+#   SQLiteVecExtension.load_extension(conn)
+#
+#   # Create a table with vector column
+#   conn.execute('''
+#       CREATE TABLE IF NOT EXISTS items (
+#           id TEXT PRIMARY KEY,
+#           embedding BLOB
+#       )
+#   ''')
+#
+#   # Query using vector similarity
+#   conn.execute('''
+#       SELECT id, vec_distance_cosine(embedding, ?) as score
+#       FROM items ORDER BY score ASC LIMIT 5
+#   ''', (query_vector,))
+# =============================================================================
 
 import os
 import platform
@@ -16,21 +65,32 @@ from muxi.core.extensions.base import Extension
 
 @Extension.register
 class SQLiteVecExtension(Extension):
-    """SQLite Vector extension for vector operations in SQLite.
-
-    This extension enables vector operations in SQLite, which is used by MUXI
-    for local-first vector storage and semantic search.
     """
+    SQLite Vector extension for vector operations in SQLite.
+
+    This extension enables vector similarity search operations in SQLite databases,
+    which is used by Muxi for local-first vector storage and semantic search without
+    requiring external vector database services.
+    """
+
     name = "sqlite-vec"
     _is_initialized = False
     _init_path = None
 
     @classmethod
     def _get_platform_extension_path(cls):
-        """Get the platform-specific extension path.
+        """
+        Get the platform-specific extension path for SQLite vector extension.
+
+        Determines the correct extension file path based on the current operating system
+        and machine architecture (x86_64 or ARM64). The extension file has different
+        formats (.so, .dll, .dylib) depending on the platform.
 
         Returns:
-            Path to the platform-specific extension file
+            str: Path to the platform-specific extension file
+
+        Raises:
+            ImportError: If the current architecture or operating system is not supported
         """
         # Get machine architecture
         machine = platform.machine().lower()
@@ -72,16 +132,23 @@ class SQLiteVecExtension(Extension):
 
     @classmethod
     def init(cls, path: str = None, **kwargs):
-        """Initialize the SQLite Vector extension.
+        """
+        Initialize the SQLite Vector extension.
+
+        This method prepares the extension for use, setting up the necessary paths and
+        initialization parameters. It does not actually load the extension into any
+        specific connection - use load_extension() for that.
 
         Args:
-            path: Optional explicit path to the SQLite Vector extension library (.so, .dll, .dylib)
+            path: Optional explicit path to the SQLite Vector extension library (.so, .dll, .dylib).
+                If not provided, a platform-specific path will be determined automatically.
+            **kwargs: Additional parameters for extension initialization (not currently used)
 
         Returns:
-            True if initialized successfully, False otherwise
+            bool: True if initialized successfully, False otherwise
 
         Raises:
-            ImportError: If the extension cannot be loaded
+            ImportError: If the extension cannot be located or is incompatible
         """
         if cls._is_initialized:
             logger.info("SQLite Vector extension already initialized")
@@ -106,13 +173,19 @@ class SQLiteVecExtension(Extension):
 
     @classmethod
     def load_extension(cls, conn: sqlite3.Connection):
-        """Load the SQLite Vector extension into a SQLite connection.
+        """
+        Load the SQLite Vector extension into a SQLite connection.
+
+        This method attempts to load the extension using several strategies:
+        1. Use the path provided during initialization (if available)
+        2. Try the platform-specific path
+        3. Fall back to the Python package if available
 
         Args:
             conn: The SQLite connection to load the extension into
 
         Raises:
-            ImportError: If the extension cannot be loaded
+            ImportError: If the extension cannot be loaded using any available method
         """
         conn.enable_load_extension(True)
 
@@ -146,6 +219,7 @@ class SQLiteVecExtension(Extension):
         # Otherwise try to use the Python package
         try:
             import sqlite_vec
+
             sqlite_vec.load(conn)
             logger.info("Loaded SQLite Vector extension using Python package")
             return
@@ -159,13 +233,17 @@ class SQLiteVecExtension(Extension):
 
     @classmethod
     def configure_database(cls, conn: sqlite3.Connection):
-        """Configure a SQLite database connection to use the Vector extension.
+        """
+        Configure a SQLite database connection to use the Vector extension.
+
+        Convenience method that loads the extension and returns the configured connection,
+        enabling method chaining for cleaner setup code.
 
         Args:
             conn: The SQLite connection to configure
 
         Returns:
-            The configured connection
+            sqlite3.Connection: The configured connection with vector capabilities enabled
         """
         cls.load_extension(conn)
         return conn
