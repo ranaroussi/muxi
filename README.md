@@ -97,10 +97,6 @@ The software is licensed under the **Creative Commons Attribution-NonCommercial-
 
 When the project reaches version 1.0, it will switch to a more permissive open-source license that permits unrestricted use for non-commercial use cases and extensive use for commercial use cases.
 
-## Contributing
-
-**Contributions are welcome!** Please read our [Contributing Guide](docs/contributing.md) for details on our code of conduct, development setup, and the process for submitting pull requests.
-
 ## Acknowledgements
 
 The many open-source projects that make this framework possible ❤️
