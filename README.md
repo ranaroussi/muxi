@@ -1,6 +1,6 @@
 <img src="icon.svg" width="64" alt="MUXI.ai logo" />
 
-# MUXI.ai
+# MUXI
 
 [📚 Read the whitepaper](WHITEPAPER.md) &nbsp;│&nbsp; [⭐️ Star this repo](https://github.com/ranaroussi/muxi/stargazers)
 
