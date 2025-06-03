@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/ranaroussi-muxi-badge.png)](https://mseep.ai/app/ranaroussi-muxi)
+
 <img src="icon.svg" width="64" alt="MUXI.ai logo" />
 
 # MUXI
